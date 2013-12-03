@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# dummy script for flashing
+
+sleep 10
+
+if [ "$1" == "1500" ]
+then
+	echo "chyba nastala, vybuchne to"
+	echo "vyhori to, zoskratovalo sa to"
+	exit 1
+fi
+
+exit 0

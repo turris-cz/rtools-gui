@@ -144,12 +144,12 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="flashStep">
+     <widget class="QWidget" name="stepTwo">
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
         <widget class="QLabel" name="label_15">
          <property name="text">
-          <string>&lt;h1&gt;Flashování&lt;/h1&gt;</string>
+          <string>&lt;h1&gt;Krok 2&lt;/h1&gt;</string>
          </property>
         </widget>
        </item>
@@ -186,7 +186,7 @@ Vel exercitationem animi in accusantium voluptatem ea qui consequatur. Nisi expl
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="stepTwo">
+     <widget class="QWidget" name="stepThree">
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QLabel" name="label_6">
@@ -197,7 +197,7 @@ Vel exercitationem animi in accusantium voluptatem ea qui consequatur. Nisi expl
           </sizepolicy>
          </property>
          <property name="text">
-          <string>&lt;h1&gt;Krok 2&lt;/h2&gt;</string>
+          <string>&lt;h1&gt;Krok 3&lt;/h2&gt;</string>
          </property>
         </widget>
        </item>
@@ -220,31 +220,26 @@ Quia modi rerum asperiores sapiente odio et maiores. Quo sed rem repudiandae nos
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0">
-         <item>
-          <widget class="QPushButton" name="twoToErr">
-           <property name="text">
-            <string>Chyba</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="twoToThree">
-           <property name="text">
-            <string>V pořádku</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QProgressBar" name="progressBar_2">
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+         <property name="value">
+          <number>-1</number>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="stepThree">
+     <widget class="QWidget" name="stepFour">
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="QLabel" name="label_9">
          <property name="text">
-          <string>&lt;h1&gt;Krok 3&lt;/h1&gt;</string>
+          <string>&lt;h1&gt;Krok 4&lt;/h1&gt;</string>
          </property>
         </widget>
        </item>
@@ -257,7 +252,7 @@ Quia modi rerum asperiores sapiente odio et maiores. Quo sed rem repudiandae nos
           </sizepolicy>
          </property>
          <property name="text">
-          <string>A ted udelejte zas to a to. Ducimus assumenda est quia. Aliquid ducimus quia aspernatur qui inventore dicta. Aut ullam ad a. Et magnam ab qui quas odit. Aperiam eos sed quibusdam non non minus unde quidem.
+          <string>Ducimus assumenda est quia. Aliquid ducimus quia aspernatur qui inventore dicta. Aut ullam ad a. Et magnam ab qui quas odit. Aperiam eos sed quibusdam non non minus unde quidem.
 
 Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem quidem a itaque aliquid. Laudantium maiores dolorem soluta dolorum. Officiis sint sapiente veniam magnam. Inventore et est voluptatem error.</string>
          </property>
@@ -267,22 +262,17 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QPushButton" name="threeToErr">
-           <property name="text">
-            <string>Posralo se to</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="threeToFinal">
-           <property name="text">
-            <string>V pořádku</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <widget class="QProgressBar" name="progressBar_3">
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -291,7 +281,7 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
        <item>
         <widget class="QLabel" name="label_11">
          <property name="text">
-          <string>&lt;h1&gt;Naprogramovano&lt;/h1&gt;</string>
+          <string>&lt;h1&gt;Naprogramováno&lt;/h1&gt;</string>
          </property>
         </widget>
        </item>
