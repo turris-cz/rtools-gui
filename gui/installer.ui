@@ -76,12 +76,12 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="stepOne">
+     <widget class="QWidget" name="stepScan">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:xx-large; font-weight:600;&quot;&gt;Krok 1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;h1&gt;Scan&lt;/h1&gt;</string>
          </property>
         </widget>
        </item>
@@ -94,7 +94,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Est molestias voluptas corporis et magnam quo ut quo. Deserunt id qui veniam ut. Soluta natus veniam itaque. Labore occaecati assumenda itaque consequatur id voluptas. Aut assumenda iste voluptatum dolore. Quia minima tempora aliquam cum aut.</string>
+          <string>Sejměte čárový kód nalepený na LAN konektoru desky routeru TURRIS.</string>
          </property>
          <property name="textFormat">
           <enum>Qt::PlainText</enum>
@@ -109,7 +109,7 @@
          <item>
           <widget class="QLabel" name="label_4">
            <property name="text">
-            <string>Načtěte čárový kód</string>
+            <string>Čárový kód</string>
            </property>
           </widget>
          </item>
@@ -136,7 +136,7 @@
          <item>
           <widget class="QPushButton" name="oneToTwo">
            <property name="text">
-            <string>Spustit flashování</string>
+            <string>Spustit programovnání</string>
            </property>
           </widget>
          </item>
@@ -144,12 +144,12 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="stepTwo">
+     <widget class="QWidget" name="stepOne">
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
         <widget class="QLabel" name="label_15">
          <property name="text">
-          <string>&lt;h1&gt;Krok 2&lt;/h1&gt;</string>
+          <string>&lt;h1&gt;I2C Programování&lt;/h1&gt;</string>
          </property>
         </widget>
        </item>
@@ -186,7 +186,7 @@ Vel exercitationem animi in accusantium voluptatem ea qui consequatur. Nisi expl
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="stepThree">
+     <widget class="QWidget" name="stepTwo">
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QLabel" name="label_6">
@@ -197,7 +197,7 @@ Vel exercitationem animi in accusantium voluptatem ea qui consequatur. Nisi expl
           </sizepolicy>
          </property>
          <property name="text">
-          <string>&lt;h1&gt;Krok 3&lt;/h2&gt;</string>
+          <string>&lt;h1&gt;CPLD Programování&lt;/h1&gt;</string>
          </property>
         </widget>
        </item>
@@ -234,12 +234,12 @@ Quia modi rerum asperiores sapiente odio et maiores. Quo sed rem repudiandae nos
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="stepFour">
+     <widget class="QWidget" name="stepThree">
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="QLabel" name="label_9">
          <property name="text">
-          <string>&lt;h1&gt;Krok 4&lt;/h1&gt;</string>
+          <string>&lt;h1&gt;FLASH Programování&lt;/h1&gt;</string>
          </property>
         </widget>
        </item>
@@ -327,7 +327,58 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="errorPage">
+     <widget class="QWidget" name="checkCableErrorPage">
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>&lt;h1&gt;Chyba&lt;/h1&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="tmpErrMsg">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Zkontrolujte připojení kabelů.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton">
+           <property name="text">
+            <string>Zkusit znovu</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="finalErrorPage">
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <widget class="QLabel" name="label_13">

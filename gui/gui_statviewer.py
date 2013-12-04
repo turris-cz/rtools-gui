@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'formstatview.ui'
+# Form implementation generated from reading ui file 'statviewer.ui'
 #
-# Created: Thu Nov 14 17:19:44 2013
-#      by: PyQt4 UI code generator 4.10
+# Created: Wed Dec  4 13:08:58 2013
+#      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -61,6 +61,7 @@ class Ui_StatusChecker(object):
         self.outBox.setSizePolicy(sizePolicy)
         self.outBox.setText(_fromUtf8(""))
         self.outBox.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.outBox.setWordWrap(True)
         self.outBox.setObjectName(_fromUtf8("outBox"))
         self.verticalLayout.addWidget(self.outBox)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
