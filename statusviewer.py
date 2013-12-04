@@ -11,8 +11,8 @@ import sys
 from router import Router, DbError, DoesNotExist
 
 # gui related stuff
-import uiresources
 from PyQt4 import QtGui, QtCore, QtSql
+from gui import uiresources
 from gui.gui_statviewer import Ui_StatusChecker
 
 # database
