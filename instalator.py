@@ -15,7 +15,7 @@ from tempfile import mkstemp
 # gui related stuff
 import uiresources
 from PyQt4 import QtGui, QtCore, QtSql
-from gui import Ui_Installer
+from gui.gui_installer import Ui_Installer
 
 # router object
 from router import Router, DbError

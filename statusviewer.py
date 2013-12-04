@@ -13,7 +13,7 @@ from router import Router, DbError, DoesNotExist
 # gui related stuff
 import uiresources
 from PyQt4 import QtGui, QtCore, QtSql
-from statusgui import Ui_StatusChecker
+from gui.gui_statviewer import Ui_StatusChecker
 
 # database
 DB_HOST = 'localhost'
