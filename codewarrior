@@ -3,5 +3,15 @@
 # dummy script for flashing
 
 sleep 10
+exit 1
+
+if [ -f ~/turcodewar ]
+then
+    rm -f ~/turcodewar
+else
+    echo "zlyhalo to, posralo sa"
+    touch ~/turcodewar
+    exit 1
+fi
 
 exit 0

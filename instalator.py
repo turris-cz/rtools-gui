@@ -46,12 +46,30 @@ logger.root.addHandler(fh)
 # code
 
 
+def serialNumberValidator(sn):
+    # serial number must be integer
+    try:
+        sn = int(sn)
+    except ValueError:
+        return False
+    
+    # it cannot be negative
+    if sn < 0:
+        return False
+    
+    # it must be divisible by 11 or 503316xx (test serie)
+    if sn % 11 != 0 and sn / 100 != 503316:
+        return False
+    
+    return True
+
+
 class FlashingWorker(QtCore.QObject):
     """Flashing Worker which run given commands and returns the status of the
     flashing process.
     """
     
-    # tuple (int code, str msg) code 0 - ok, 1 - error which leads to the 'error' page, 2 - error which shows the modal dialog
+    # tuple (int code, str msg) code 0 - ok, 1 - router already flashed / error, chceck cables, 2 - final error
     flashFinished = QtCore.pyqtSignal(tuple)
     
     def __init__(self):
@@ -64,43 +82,56 @@ class FlashingWorker(QtCore.QObject):
         p = subprocess.Popen(cmdWithArgs, stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
         retCode = p.wait()
-        stdOut = p.stdout.read() # TODO handle the case of big outputs in a better way
+        stdOut = p.stdout.read().strip() # TODO handle the case of big outputs in a better way
         return (retCode, stdOut if len(stdOut) < 1001 else (stdOut[:1000] + "... output truncated"))
     
     @QtCore.pyqtSlot('QString')
     def addNewRouter(self, routerId):
         return_code = 0
         err_msg = ""
+        dbErr = False
         
         try:
             self.router = Router(str(routerId)) # create new or fetch info about old
             if self.router.status != self.router.STATUS_START or self.router.error:
-                return_code = 2
+                return_code = 1
                 err_msg = u"Tento router už byl naflashován, vezměte další."
         except DbError, e:
             return_code = 2
             err_msg = e.message
+            dbErr = True
         
-        self.flashFinished.emit((return_code, err_msg))
+        self.flashFinished.emit((return_code, err_msg, dbErr))
     
     @QtCore.pyqtSlot()
     def flashStepOne(self):
         logger.debug("[FLASHWORKER] starting first step (routerId=%s)" % self.router.id)
         p_return = self.runCmd((STEP_ONE_CMD, self.router.id))
+        
         return_code = 0
         err_msg = ""
+        
         if p_return[0] == 0:
-            logger.info("[FLASHWORKER] second step successful (routerId=%s)" % self.router.id)
+            logger.info("[FLASHWORKER] I2C step successful (routerId=%s)" % self.router.id)
             self.router.status = self.router.STATUS_I2C
-        else:
-            logger.warning("[FLASHWORKER] second step failed (routerId=%s)" % self.router.id)
+            self.router.error = ""
+        elif self.router.secondChance['I2C'] and not p_return[1].split("\n", 1)[0].endswith("OK"):
+            # if a user has a second chance (will check the cables,...) and first thing hasn't
+            # passed (is not 'something... OK')
+            logger.warning("[FLASHWORKER] I2C step failed, check the cables (routerId=%s)" % self.router.id)
+            self.router.secondChance['I2C'] = False
             self.router.error = p_return[1]
             return_code = 1
+            err_msg = u"Flashování I2C zlyhalo, zkontrolujte připojené kabely."
+        else:
+            logger.warning("[FLASHWORKER] I2C step failed definitely (routerId=%s)" % self.router.id)
+            self.router.error = p_return[1]
+            return_code = 2
             err_msg = u"Flashování I2C zlyhalo."
         
-        self.router.save() # TODO handle db error
+        dbErr = not self.router.save()
         
-        self.flashFinished.emit((return_code, err_msg))
+        self.flashFinished.emit((return_code, err_msg, dbErr))
     
     @QtCore.pyqtSlot()
     def flashStepTwo(self):
@@ -122,21 +153,28 @@ class FlashingWorker(QtCore.QObject):
         return_code = 0
         err_msg = ""
         if log_content.endswith("Operation: successful."):
-            logger.info("[FLASHWORKER] second step successful (routerId=%s)" % self.router.id)
+            logger.info("[FLASHWORKER] CPLD step successful (routerId=%s)" % self.router.id)
             self.router.status = self.router.STATUS_CPLD
-        else:
-            logger.warning("[FLASHWORKER] second step failed (routerId=%s)" % self.router.id)
+            self.router.error = ""
+        elif self.router.secondChance['CPLD']:
+            logger.warning("[FLASHWORKER] CPLD step failed, check the cables (routerId=%s)" % self.router.id)
+            self.router.secondChance['CPLD'] = False
             self.router.error = log_content
             return_code = 1
+            err_msg = u"Flashování CPLD zlyhalo, zkontrolujte připojené kabely."
+        else:
+            logger.warning("[FLASHWORKER] CPLD step failed definitely (routerId=%s)" % self.router.id)
+            self.router.error = log_content
+            return_code = 2
             err_msg = u"Flashování CPLD zlyhalo."
         
         # close and delete the log file
         os.close(tmpf_fd)
         os.remove(tmpf_path)
         
-        self.router.save() # TODO handle db error
+        dbErr = not self.router.save()
         
-        self.flashFinished.emit((return_code, err_msg))
+        self.flashFinished.emit((return_code, err_msg, dbErr))
     
     @QtCore.pyqtSlot()
     def flashStepThree(self):
@@ -146,18 +184,26 @@ class FlashingWorker(QtCore.QObject):
         return_code = 0
         err_msg = ""
         if p_return[0] == 0:
-            logger.info("[FLASHWORKER] third step successful (routerId=%s)" % self.router.id)
+            logger.info("[FLASHWORKER] FLASH step successful (routerId=%s)" % self.router.id)
             self.router.status = self.router.STATUS_FINISHED
-        else:
-            logger.warning("[FLASHWORKER] third step failed (routerId=%s)" % self.router.id)
+            self.router.error = ""
+        elif self.router.secondChance['FLASH']:
+            logger.warning("[FLASHWORKER] FLASH step failed, check the cables (routerId=%s)" % self.router.id)
+            self.router.secondChance['FLASH'] = False
             self.router.error = "Flashing exited with return status %d\n" % p_return[0] + \
                                 "stdout + stderr:\n" + p_return[1]
             return_code = 1
+            err_msg = u"Flashování Flash pamětí zlyhalo, zkontrolujte připojené kabely."
+        else:
+            logger.warning("[FLASHWORKER] FLASH step failed definitely (routerId=%s)" % self.router.id)
+            self.router.error = "Flashing exited with return status %d\n" % p_return[0] + \
+                                "stdout + stderr:\n" + p_return[1]
+            return_code = 2
             err_msg = u"Flashování NAND a NOR zlyhalo."
         
-        self.router.save() # TODO handle db error
+        dbErr = not self.router.save()
         
-        self.flashFinished.emit((return_code, err_msg))
+        self.flashFinished.emit((return_code, err_msg, dbErr))
 
 
 class Installer(QtGui.QWidget, Ui_Installer):
@@ -168,6 +214,17 @@ class Installer(QtGui.QWidget, Ui_Installer):
     flashStepTwoSig = QtCore.pyqtSignal()
     flashStepThreeSig = QtCore.pyqtSignal()
     
+    STEPS = {
+        'START': 0,
+        'SCAN': 1,
+        'I2C': 2,
+        'CPLD': 3,
+        'FLASH': 4,
+        'SUCCESS': 5,
+        'CHCKCABLE': 6,
+        'ERROR': 7
+    }
+        
     def __init__(self):
         super(Installer, self).__init__()
         
@@ -178,10 +235,11 @@ class Installer(QtGui.QWidget, Ui_Installer):
         self.blockClose = False
         
         # buttons event listeners
-        self.startToOne.clicked.connect(self.moveToNext)
-        self.oneToTwo.clicked.connect(self.moveToNext)
-        self.finalToStart.clicked.connect(self.moveToNext)
-        self.errToStart.clicked.connect(self.moveToNext)
+        self.startToScan.clicked.connect(self.simpleMoveToScan)
+        self.scanToOne.clicked.connect(self.launchProgramming)
+        self.finalToScan.clicked.connect(self.simpleMoveToScan)
+        self.chckToStepX.clicked.connect(self.userHasCheckedCables)
+        self.errToScan.clicked.connect(self.simpleMoveToScan)
         
         # start a second thread which will do the flashing
         self.flashWorker = FlashingWorker()
@@ -202,73 +260,105 @@ class Installer(QtGui.QWidget, Ui_Installer):
         self.db.setUserName(DB_USER)
         self.db.setPassword(DB_PASS)
         self.db.setDatabaseName(DB_DBNAME)
+        
+        self.flashingStage = 0 # we start at zero, (start page)
     
     @QtCore.pyqtSlot()
+    def simpleMoveToScan(self):
+        """switch to the Scan page when clicked on a button"""
+        self.lineEdit.clear()
+        self.lineEdit.setFocus()
+        self.scanToOne.setEnabled(True)
+        self.stackedWidget.setCurrentIndex(self.STEPS['SCAN'])
+    
+    @QtCore.pyqtSlot()
+    def launchProgramming(self):
+        """do the check of scanned id, take it, add to db, and start flashing"""
+        barCode = self.lineEdit.text()
+        err = False
+        if barCode.isEmpty():
+            self.modalMessage(u"Musíte naskenovat čárový kód.")
+            self.simpleMoveToScan()
+            return
+        
+        if not serialNumberValidator(barCode):
+            self.modalMessage(u"Neplatný čárový kód, naskenujte ho znovu.")
+            self.simpleMoveToScan()
+            return
+        
+        # two possibilities, this id is/is not in the db
+        self.scanToOne.setEnabled(False)
+        self.blockClose = True
+        self.newRouterAddSig.emit(barCode)
+    
     @QtCore.pyqtSlot(tuple)
     def moveToNext(self, flash_result = None):
-        i = self.stackedWidget.currentIndex()
-        # if going to step 1, clear the lineEdit
-        if i == 0:
-            self.lineEdit.clear()
-            self.lineEdit.setFocus()
-            self.oneToTwo.setEnabled(True)
-            i = 1
-        elif i == 1:
-            if flash_result:
-                # called from flashThread
-                if flash_result[0] == 0:
-                    i = 2
-                    self.flashStepOneSig.emit()
-                else:
-                    self.blockClose = False
-                    self.oneToTwo.setEnabled(True)
-                    self.modalMessage(flash_result[1])
-                    self.lineEdit.clear()
-                    self.lineEdit.setFocus()
-                    return
-            else:
-                # clicked on the button and barcode scanned
-                routerId = self.barCodeVerify()
-                if routerId < 0:
-                    self.lineEdit.clear()
-                    self.lineEdit.setFocus()
-                    return
-                # two possibilities, this id is/is not in the db
-                self.oneToTwo.setEnabled(False)
-                self.blockClose = True
-                self.newRouterAddSig.emit(str(routerId))
-        elif i == 2:
-            if flash_result[0] == 0:
-                i = 3
-                self.flashStepTwoSig.emit()
-            else: # flash_result[0] == 1
-                i = 6
-                # TODO show flash_result[1] on errorPage
-        elif i == 3:
-            if flash_result[0] == 0:
-                i = 4
-                self.flashStepThreeSig.emit()
-            else: # flash_result[0] == 1
-                i = 6 # error page
-                # TODO show flash_result[1] on errorPage
-        elif i == 4:
-            if flash_result[0] == 0:
-                i = 5
-            else:
-                i = 6
-                # TODO show flash_result[1] on errorPage
-        else:
-            # go to the start screen
-            i = 0
+        """slot for signals from flashWorker in flashThread"""
         
-        if i > 4:
+        i = self.stackedWidget.currentIndex()
+        
+        if i == self.STEPS['SCAN']:
+            if flash_result[0] == 0:
+                i = self.STEPS['I2C']
+                self.flashingStage = i
+                self.flashStepOneSig.emit()
+            else:
+                # if not db error, but router already exists clear the field
+                if not flash_result[2]:
+                    self.lineEdit.clear()
+                self.blockClose = False
+                self.scanToOne.setEnabled(True)
+                self.modalMessage(flash_result[1])
+                self.lineEdit.setFocus()
+                return
+        elif i == self.STEPS['I2C']:
+            if flash_result[0] == 0:
+                i = self.STEPS['CPLD']
+                self.flashingStage = i
+                self.flashStepTwoSig.emit()
+            elif flash_result[0] == 1:
+                self.tmpErrMsg.setText(flash_result[1])
+                i = self.STEPS['CHCKCABLE']
+            else:
+                i = self.STEPS['ERROR']
+        elif i == self.STEPS['CPLD']:
+            if flash_result[0] == 0:
+                i = self.STEPS['FLASH']
+                self.flashingStage = i
+                self.flashStepThreeSig.emit()
+            elif flash_result[0] == 1:
+                self.tmpErrMsg.setText(flash_result[1])
+                i = self.STEPS['CHCKCABLE']
+            else:
+                i = self.STEPS['ERROR']
+        elif i == self.STEPS['FLASH']:
+            if flash_result[0] == 0:
+                self.flashingStage = 0
+                i = self.STEPS['SUCCESS']
+            elif flash_result[0] == 1:
+                self.tmpErrMsg.setText(flash_result[1])
+                i = self.STEPS['CHCKCABLE']
+            else:
+                i = self.STEPS['ERROR']
+        
+        if i in (self.STEPS['SUCCESS'], self.STEPS['ERROR']):
             # unblock the possibility to close the app
             self.blockClose = False
         
         # change the stackedWidget index
         self.stackedWidget.setCurrentIndex(i)
-        
         logger.debug("[MAIN] switching to the step %d (step 6 is error page)" % i)
+    
+    @QtCore.pyqtSlot()
+    def userHasCheckedCables(self):
+        # change the stackedWidget to self.flashingStage and emmit the corresponding signal
+        self.stackedWidget.setCurrentIndex(self.flashingStage)
+        if self.flashingStage == self.STEPS['I2C']:
+            self.flashStepOneSig.emit()
+        elif self.flashingStage == self.STEPS['CPLD']:
+            self.flashStepTwoSig.emit()
+        elif self.flashingStage == self.STEPS['FLASH']:
+            self.flashStepThreeSig.emit()
     
     def closeEvent(self, event):
         if self.blockClose:
@@ -281,20 +371,6 @@ class Installer(QtGui.QWidget, Ui_Installer):
             self.db.close()
         self.flashThread.quit()
         event.accept()
-    
-    def barCodeVerify(self):
-        """barCodeVerify() -> long
-        Return integer representation of scanned code or less than zero if the code is invalid.
-        """
-        barCodeNum = self.lineEdit.text()
-        if barCodeNum.isEmpty():
-            self.modalMessage(u"Musíte naskenovat čárový kód.")
-            return -1
-        num, conv = barCodeNum.toLong()
-        if not conv:
-            self.modalMessage(u"Neplatný čárový kód, naskenujte ho znovu.")
-            return -2
-        return num
     
     def modalMessage(self, msg):
         mBox = QtGui.QMessageBox(self)

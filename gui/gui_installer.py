@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'instalator.ui'
+# Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Dec  4 13:07:01 2013
+# Created: Wed Dec  4 14:22:24 2013
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -53,9 +53,9 @@ class Ui_Installer(object):
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.startToOne = QtGui.QPushButton(self.startPage)
-        self.startToOne.setObjectName(_fromUtf8("startToOne"))
-        self.horizontalLayout.addWidget(self.startToOne)
+        self.startToScan = QtGui.QPushButton(self.startPage)
+        self.startToScan.setObjectName(_fromUtf8("startToScan"))
+        self.horizontalLayout.addWidget(self.startToScan)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.stackedWidget.addWidget(self.startPage)
         self.stepScan = QtGui.QWidget()
@@ -88,9 +88,9 @@ class Ui_Installer(object):
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem1)
-        self.oneToTwo = QtGui.QPushButton(self.stepScan)
-        self.oneToTwo.setObjectName(_fromUtf8("oneToTwo"))
-        self.horizontalLayout_3.addWidget(self.oneToTwo)
+        self.scanToOne = QtGui.QPushButton(self.stepScan)
+        self.scanToOne.setObjectName(_fromUtf8("scanToOne"))
+        self.horizontalLayout_3.addWidget(self.scanToOne)
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
         self.stackedWidget.addWidget(self.stepScan)
         self.stepOne = QtGui.QWidget()
@@ -187,9 +187,9 @@ class Ui_Installer(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem2)
-        self.finalToStart = QtGui.QPushButton(self.stepFinal)
-        self.finalToStart.setObjectName(_fromUtf8("finalToStart"))
-        self.horizontalLayout_7.addWidget(self.finalToStart)
+        self.finalToScan = QtGui.QPushButton(self.stepFinal)
+        self.finalToScan.setObjectName(_fromUtf8("finalToScan"))
+        self.horizontalLayout_7.addWidget(self.finalToScan)
         self.verticalLayout_7.addLayout(self.horizontalLayout_7)
         self.stackedWidget.addWidget(self.stepFinal)
         self.checkCableErrorPage = QtGui.QWidget()
@@ -212,9 +212,9 @@ class Ui_Installer(object):
         self.horizontalLayout_4.setObjectName(_fromUtf8("horizontalLayout_4"))
         spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem3)
-        self.pushButton = QtGui.QPushButton(self.checkCableErrorPage)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.horizontalLayout_4.addWidget(self.pushButton)
+        self.chckToStepX = QtGui.QPushButton(self.checkCableErrorPage)
+        self.chckToStepX.setObjectName(_fromUtf8("chckToStepX"))
+        self.horizontalLayout_4.addWidget(self.chckToStepX)
         self.verticalLayout_9.addLayout(self.horizontalLayout_4)
         self.stackedWidget.addWidget(self.checkCableErrorPage)
         self.finalErrorPage = QtGui.QWidget()
@@ -237,9 +237,9 @@ class Ui_Installer(object):
         self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
         spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem4)
-        self.errToStart = QtGui.QPushButton(self.finalErrorPage)
-        self.errToStart.setObjectName(_fromUtf8("errToStart"))
-        self.horizontalLayout_6.addWidget(self.errToStart)
+        self.errToScan = QtGui.QPushButton(self.finalErrorPage)
+        self.errToScan.setObjectName(_fromUtf8("errToScan"))
+        self.horizontalLayout_6.addWidget(self.errToScan)
         self.verticalLayout_5.addLayout(self.horizontalLayout_6)
         self.stackedWidget.addWidget(self.finalErrorPage)
         self.verticalLayout.addWidget(self.stackedWidget)
@@ -254,11 +254,11 @@ class Ui_Installer(object):
         Installer.setWindowTitle(_translate("Installer", "Instalátor", None))
         self.label_2.setText(_translate("Installer", "<html><head/><body><p><span style=\" font-size:xx-large; font-weight:600;\">Začínáme</span></p></body></html>", None))
         self.label_8.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Připravte se psychicky na těžý úkol. Před začátkem běžte koupit basu piva, protože počas práce přijde žízeň.</li><li style=\" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Vezměte jeden router.</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zapojte všechny kabely.</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Oveřte, ze jsou kabely zapojené správně.</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Klikněte na tlačítko &quot;Pokračovat&quot;<br/></li></ul></body></html>", None))
-        self.startToOne.setText(_translate("Installer", "Pokračovat", None))
+        self.startToScan.setText(_translate("Installer", "Pokračovat", None))
         self.label_3.setText(_translate("Installer", "<h1>Scan</h1>", None))
         self.label_5.setText(_translate("Installer", "Sejměte čárový kód nalepený na LAN konektoru desky routeru TURRIS.", None))
         self.label_4.setText(_translate("Installer", "Čárový kód", None))
-        self.oneToTwo.setText(_translate("Installer", "Spustit programovnání", None))
+        self.scanToOne.setText(_translate("Installer", "Spustit programovnání", None))
         self.label_15.setText(_translate("Installer", "<h1>I2C Programování</h1>", None))
         self.label_16.setText(_translate("Installer", "Praesentium molestiae sed molestias modi et impedit earum. Sint nihil sed amet dolor est eos et. Occaecati voluptatem eum autem aut voluptate.\n"
 "\n"
@@ -273,12 +273,12 @@ class Ui_Installer(object):
 "Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem quidem a itaque aliquid. Laudantium maiores dolorem soluta dolorum. Officiis sint sapiente veniam magnam. Inventore et est voluptatem error.", None))
         self.label_11.setText(_translate("Installer", "<h1>Naprogramováno</h1>", None))
         self.label_12.setText(_translate("Installer", "Router byl úspěšně naprogramován, otevřte šampanské a jděte to zapít, pak se vraťte, odpojte tento router a pokračujte s dalším.", None))
-        self.finalToStart.setText(_translate("Installer", "Další router", None))
+        self.finalToScan.setText(_translate("Installer", "Další router", None))
         self.label_17.setText(_translate("Installer", "<h1>Chyba</h1>", None))
         self.tmpErrMsg.setText(_translate("Installer", "Zkontrolujte připojení kabelů.", None))
-        self.pushButton.setText(_translate("Installer", "Zkusit znovu", None))
+        self.chckToStepX.setText(_translate("Installer", "Zkusit znovu", None))
         self.label_13.setText(_translate("Installer", "<h1>Chyba</h1>", None))
         self.label_14.setText(_translate("Installer", "Vezměte router, odpojte kabely, otevřte okno a hoďte router z okna. Pak pokračujte dalším.", None))
-        self.errToStart.setText(_translate("Installer", "Další router", None))
+        self.errToScan.setText(_translate("Installer", "Další router", None))
         self.label.setText(_translate("Installer", "Turris firmware flasher", None))
 

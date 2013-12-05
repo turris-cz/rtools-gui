@@ -25,36 +25,62 @@ class Router(object):
     STATUS_CPLD = 2
     STATUS_FINISHED = 3
     
-    def __init__(self, id, readonly=False):
-        """Fetch the info about a router from db and if doesn't exist and readonly=False,
-        create the new router and initialize it with default values"""
+    def __init__(self, routerId):
+        """Fetch the info about a router from db and if doesn't exist,
+        raise DoesNotExist error"""
         
-        self.id = id # string
+        self.id = routerId # string
+        self.attempt = 0 # int
         self.status = Router.STATUS_START # int
         self.error = "" # string / text in db
+        # second chance for flashing steps (if the user can check the cables)
+        self.secondChance = {'I2C': True, 'CPLD': True, 'FLASH': True}
         
         # we use the default (and only) database, open it now if closed
         self.query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
+    
+    @classmethod
+    def fetchFromDb(cls, routerId, attempt = -1):
+        # attempt -1 means the last one
+        routerId = str(routerId)
         
-        if self.query.exec_("SELECT * FROM routers WHERE id='%s';" % self.id):
-            if self.query.size() == 0:
-                if readonly:
-                    raise DoesNotExist()
-                
-                # no record, add
-                if self.query.exec_("INSERT INTO routers VALUES ('%s', '%d', '');" %
-                                    (self.id, self.status)):
-                    logger.debug("[DB] succesfully added new router (routerId=%s)" % self.id)
-                else:
-                    # TODO handle duplicate key error
-                    logger.warning("[DB] failed to add new router (routerId=%s)" % self.id)
-                    raise DbError(CONN_ERR_MSG)
+        if attempt == -1:
+            subquery = "(SELECT max(attempt) FROM routers WHERE id = '%s')" % routerId
+        else:
+            subquery = "'%d'" % attempt
+        
+        query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
+        if query.exec_("SELECT * FROM routers WHERE id = '%s' AND attempt = %s;"
+                       % (routerId, subquery)):
+            if query.size() == 0:
+                raise DoesNotExist()
             else:
-                # TODO do this better using name of column
-                self.query.next()
-                self.status = self.query.value(1).toInt()[0]
-                self.error = self.query.value(2).toString()
+                query.next()
+                rec = query.record()
                 
+                router = cls(routerId)
+                router.attempt = rec.value('attempt').toInt()[0]
+                router.status = rec.value('status').toInt()[0]
+                router.error = str(rec.value('error').toString())
+                return router
+        else:
+            raise DbError(CONN_ERR_MSG)
+    
+    @classmethod
+    def createNewRouter(cls, routerId):
+        routerId = str(routerId)
+        query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
+        if query.exec_("INSERT INTO routers (id) VALUES ('%s');" % routerId):
+            return cls(routerId)
+        else:
+            raise DbError(CONN_ERR_MSG)
+    
+    def nextAttempt(self):
+        if self.query.exec_("INSERT INTO routers (id, attempt) VALUES ('%s', '%d');"
+                            % (self.id, self.attempt + 1)):
+            router = Router(self.id)
+            router.attempt = self.attempt + 1
+            return router
         else:
             raise DbError(CONN_ERR_MSG)
     

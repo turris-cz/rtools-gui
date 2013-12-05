@@ -66,7 +66,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="startToOne">
+          <widget class="QPushButton" name="startToScan">
            <property name="text">
             <string>Pokračovat</string>
            </property>
@@ -134,7 +134,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="oneToTwo">
+          <widget class="QPushButton" name="scanToOne">
            <property name="text">
             <string>Spustit programovnání</string>
            </property>
@@ -317,7 +317,7 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="finalToStart">
+          <widget class="QPushButton" name="finalToScan">
            <property name="text">
             <string>Další router</string>
            </property>
@@ -368,7 +368,7 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="chckToStepX">
            <property name="text">
             <string>Zkusit znovu</string>
            </property>
@@ -419,7 +419,7 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="errToStart">
+          <widget class="QPushButton" name="errToScan">
            <property name="text">
             <string>Další router</string>
            </property>
