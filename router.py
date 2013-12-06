@@ -15,6 +15,10 @@ class DoesNotExist(IOError):
     pass
 
 
+class DuplicateKey(IOError):
+    pass
+
+
 class DbError(IOError):
     pass
 
@@ -71,24 +75,37 @@ class Router(object):
         routerId = str(routerId)
         query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
         if query.exec_("INSERT INTO routers (id) VALUES ('%s');" % routerId):
+            logger.debug("[DB] succesfully added router record (routerId=%s)" % routerId)
             return cls(routerId)
+        elif str(query.lastError().text()).startswith("ERROR:  duplicate key"):
+            raise DuplicateKey()
         else:
             raise DbError(CONN_ERR_MSG)
     
-    def nextAttempt(self):
-        if self.query.exec_("INSERT INTO routers (id, attempt) VALUES ('%s', '%d');"
-                            % (self.id, self.attempt + 1)):
-            router = Router(self.id)
-            router.attempt = self.attempt + 1
+    @classmethod
+    def nextAttempt(cls, routerId):
+        routerId = str(routerId)
+        query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
+        if query.exec_("INSERT INTO routers (id, attempt) "
+                       "SELECT '%(id)s' AS \"id\", max(attempt) + 1 AS \"attempt\" "
+                       "FROM routers WHERE id = '%(id)s' RETURNING attempt;"
+                       % {'id': routerId}):
+            logger.debug("[DB] succesfully added router record (routerId=%s)" % routerId)
+            router = cls(routerId)
+            query.next()
+            router.attempt = query.record().value('attempt').toInt()[0]
             return router
+        elif str(query.lastError().text()).startswith("ERROR:  null value"):
+            raise DoesNotExist()
         else:
             raise DbError(CONN_ERR_MSG)
     
     def save(self):
         # TODO be more precise, if no record with given id,...
         # and be consistent - raise a DbError if failure
-        if self.query.exec_("UPDATE routers SET status='%d', error='%s' WHERE id='%s';" %
-                            (self.status, self.error, self.id)):
+        if self.query.exec_("UPDATE routers SET status='%d', error='%s' "
+                            "WHERE id='%s' AND attempt = '%d';"
+                            % (self.status, self.error, self.id, self.attempt)):
             logger.debug("[DB] succesfully updated router record (routerId=%s)" % self.id)
             return True
         else:

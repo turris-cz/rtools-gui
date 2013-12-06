@@ -18,7 +18,7 @@ from gui import uiresources
 from gui.gui_installer import Ui_Installer
 
 # router object
-from router import Router, DbError
+from router import Router, DbError, DuplicateKey, DoesNotExist
 
 # settings
 STEP_ONE_CMD = "/home/palko/Projects/router/instalator/i2cflasher"
@@ -85,17 +85,29 @@ class FlashingWorker(QtCore.QObject):
         stdOut = p.stdout.read().strip() # TODO handle the case of big outputs in a better way
         return (retCode, stdOut if len(stdOut) < 1001 else (stdOut[:1000] + "... output truncated"))
     
-    @QtCore.pyqtSlot('QString')
-    def addNewRouter(self, routerId):
+    @QtCore.pyqtSlot('QString', bool)
+    def addNewRouter(self, routerId, nextAttempt):
         return_code = 0
         err_msg = ""
         dbErr = False
         
+        routerId = str(routerId)
         try:
-            self.router = Router(str(routerId)) # create new or fetch info about old
-            if self.router.status != self.router.STATUS_START or self.router.error:
-                return_code = 1
-                err_msg = u"Tento router už byl naflashován, vezměte další."
+            if nextAttempt:
+                self.router = Router.nextAttempt(str(routerId)) # add next attempt to flash
+            else:
+                self.router = Router.createNewRouter(str(routerId)) # try to create new router
+        except DuplicateKey:
+            return_code = 1
+            err_msg = u"O tomto routeru je v databázi záznam, že už byl naflashován, " \
+                      u"přejete si to zkusit znovu?"
+        except DoesNotExist:
+            logger.critical("[FLASHWORKER] adding new flash attempt to db failed, "
+                            "no router with this id (routerId=%s). This should never "
+                            "happen. It is a bug in this application."
+                            % routerId)
+            return_code = 2
+            err_msg = u"Vyskytla se chyba, která by se nikdy neměla. Prosím, restartujte program."
         except DbError, e:
             return_code = 2
             err_msg = e.message
@@ -209,7 +221,7 @@ class FlashingWorker(QtCore.QObject):
 class Installer(QtGui.QWidget, Ui_Installer):
     """Installer GUI application for flashing the Turris routers"""
     
-    newRouterAddSig = QtCore.pyqtSignal('QString')
+    newRouterAddSig = QtCore.pyqtSignal('QString', bool)
     flashStepOneSig = QtCore.pyqtSignal()
     flashStepTwoSig = QtCore.pyqtSignal()
     flashStepThreeSig = QtCore.pyqtSignal()
@@ -289,7 +301,7 @@ class Installer(QtGui.QWidget, Ui_Installer):
         # two possibilities, this id is/is not in the db
         self.scanToOne.setEnabled(False)
         self.blockClose = True
-        self.newRouterAddSig.emit(barCode)
+        self.newRouterAddSig.emit(barCode, False)
     
     @QtCore.pyqtSlot(tuple)
     def moveToNext(self, flash_result = None):
@@ -302,10 +314,22 @@ class Installer(QtGui.QWidget, Ui_Installer):
                 i = self.STEPS['I2C']
                 self.flashingStage = i
                 self.flashStepOneSig.emit()
-            else:
-                # if not db error, but router already exists clear the field
-                if not flash_result[2]:
+            elif flash_result[0] == 1:
+                if QtGui.QMessageBox.question(self, 'Router existuje', flash_result[1],
+                        buttons=QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
+                        defaultButton=QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Ok:
+                    # start another attempt to flash the router
+                    barCode = self.lineEdit.text()
+                    self.newRouterAddSig.emit(barCode, True)
+                else:
+                    # continue with other router
+                    self.blockClose = False
+                    self.scanToOne.setEnabled(True)
                     self.lineEdit.clear()
+                    self.lineEdit.setFocus()
+                return
+            else:
+                # db error
                 self.blockClose = False
                 self.scanToOne.setEnabled(True)
                 self.modalMessage(flash_result[1])
@@ -373,10 +397,11 @@ class Installer(QtGui.QWidget, Ui_Installer):
         event.accept()
     
     def modalMessage(self, msg):
+        # FIXME refactor using QMessageBox.information
         mBox = QtGui.QMessageBox(self)
         mBox.setWindowTitle(u"Chyba")
         mBox.setText(msg)
-        # StandardButtons=QtGui.QMessageBox.Ok)
+        # StandardButtons=QtGui.QMessageBox.Ok
         mBox.show()
         return mBox.exec_()
 

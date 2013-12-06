@@ -52,7 +52,7 @@ class StatusViewer(QtGui.QWidget, Ui_StatusChecker):
             if conv:
                 router = None
                 try:
-                    router = Router(str(num), readonly=True)
+                    router = Router.fetchFromDb(str(num))
                 except DoesNotExist:
                     statusMsg = u"Router s id %s neexistuje." % str(num)
                 except DbError, e:
