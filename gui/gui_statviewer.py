@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'statviewer.ui'
 #
-# Created: Wed Dec  4 13:08:58 2013
+# Created: Fri Dec  6 16:51:54 2013
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -68,9 +68,9 @@ class Ui_StatusChecker(object):
         self.horizontalLayout_3.setObjectName(_fromUtf8("horizontalLayout_3"))
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem1)
-        self.pushButton_2 = QtGui.QPushButton(StatusChecker)
-        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.horizontalLayout_3.addWidget(self.pushButton_2)
+        self.allRoutersListButton = QtGui.QPushButton(StatusChecker)
+        self.allRoutersListButton.setObjectName(_fromUtf8("allRoutersListButton"))
+        self.horizontalLayout_3.addWidget(self.allRoutersListButton)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
 
         self.retranslateUi(StatusChecker)
@@ -83,5 +83,5 @@ class Ui_StatusChecker(object):
 "Když chcete zobrazit kompletní log všech routrů, klikněte na tlačítko \"Log všech routrů\".", None))
         self.label_2.setText(_translate("StatusChecker", "Router id", None))
         self.pushButton.setText(_translate("StatusChecker", "Ukázat status", None))
-        self.pushButton_2.setText(_translate("StatusChecker", "Log všech routrů", None))
+        self.allRoutersListButton.setText(_translate("StatusChecker", "Log všech routrů", None))
 

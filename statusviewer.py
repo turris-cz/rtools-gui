@@ -34,6 +34,8 @@ class StatusViewer(QtGui.QWidget, Ui_StatusChecker):
         icon.addPixmap(QtGui.QPixmap(QtCore.QString.fromUtf8(":/favicon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
         self.pushButton.clicked.connect(self.showStatus)
+        # TODO list of all routers, for the moment, disable as it is not implemented
+        self.allRoutersListButton.setEnabled(False)
         
         # create a database connection, but do not open it, until necessary
         self.db = QtSql.QSqlDatabase.addDatabase("QPSQL")

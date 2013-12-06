@@ -105,7 +105,7 @@ Když chcete zobrazit kompletní log všech routrů, klikněte na tlačítko &qu
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="allRoutersListButton">
        <property name="text">
         <string>Log všech routrů</string>
        </property>
