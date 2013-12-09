@@ -3,7 +3,6 @@
 # dummy script for flashing
 
 sleep 10
-exit 1
 
 if [ -f ~/turcodewar ]
 then
