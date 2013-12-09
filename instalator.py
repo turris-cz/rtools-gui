@@ -195,8 +195,8 @@ class FlashingWorker(QtCore.QObject):
     @QtCore.pyqtSlot()
     def flashStepThree(self):
         logger.debug("[FLASHWORKER] starting third step (routerId=%s)" % self.router.id)
-        p_return = self.runCmd((STEP_THREE_CMD,))
-    
+        p_return = self.runCmd(("/bin/bash", STEP_THREE_CMD))
+        
         return_code = 0
         err_msg = ""
         if p_return[0] == 0:
