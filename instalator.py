@@ -24,10 +24,10 @@ from router import Router, DbError, DuplicateKey, DoesNotExist
 from router_tests import TESTLIST
 
 # settings
-STEP_ONE_CMD = "/home/palko/Projects/router/instalator/i2cflasher"
-STEP_TWO_CMD = "/home/palko/Projects/router/instalator/lattice mock/lattice"
+STEP_ONE_CMD = "/home/palko/Projects/router/instalator/mock/i2cflasher"
+STEP_TWO_CMD = "/home/palko/Projects/router/instalator/mock/lattice"
 STEP_TWO_INFILE = "/home/palko/neexistujucialejetojedno"
-STEP_THREE_CMD = "/home/palko/Projects/router/instalator/codewarrior"
+STEP_THREE_CMD = "/home/palko/Projects/router/instalator/mock/codewarrior"
 
 # database
 DB_HOST = 'localhost'
