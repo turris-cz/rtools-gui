@@ -20,6 +20,9 @@ from gui.gui_installer import Ui_Installer
 # router object
 from router import Router, DbError, DuplicateKey, DoesNotExist
 
+# tests
+from router_tests import TESTLIST
+
 # settings
 STEP_ONE_CMD = "/home/palko/Projects/router/instalator/i2cflasher"
 STEP_TWO_CMD = "/home/palko/Projects/router/instalator/lattice mock/lattice"
@@ -71,6 +74,7 @@ class FlashingWorker(QtCore.QObject):
     
     # tuple (int code, str msg) code 0 - ok, 1 - router already flashed / error, chceck cables, 2 - final error
     flashFinished = QtCore.pyqtSignal(tuple)
+    testFinished = QtCore.pyqtSignal(int)
     
     def __init__(self):
         super(FlashingWorker, self).__init__()
@@ -99,7 +103,7 @@ class FlashingWorker(QtCore.QObject):
                 self.router = Router.createNewRouter(str(routerId)) # try to create new router
         except DuplicateKey:
             return_code = 1
-            err_msg = u"O tomto routeru je v databázi záznam, že už byl naflashován, " \
+            err_msg = u"O tomhle routeru je v databázi záznam, že už byl naflashován, " \
                       u"přejete si to zkusit znovu?"
         except DoesNotExist:
             logger.critical("[FLASHWORKER] adding new flash attempt to db failed, "
@@ -216,6 +220,25 @@ class FlashingWorker(QtCore.QObject):
         dbErr = not self.router.save()
         
         self.flashFinished.emit((return_code, err_msg, dbErr))
+    
+    @QtCore.pyqtSlot()
+    def executeTest(self):
+        logger.debug("[TESTING] Executing test %d on the router with routerId=%s"
+                % (self.router.currentTest, self.router.id))
+        
+        # run the test
+        p_return = self.runCmd(TESTLIST[self.router.currentTest]['cmd'])
+        
+        # save to db the test result p_return[0]
+        self.router.saveTestResult(p_return[0])
+        
+        self.router.currentTest += 1
+        if self.router.currentTest >= len(TESTLIST):
+            nextTest = -1
+        else:
+            nextTest = self.router.currentTest
+        
+        self.testFinished.emit(nextTest)
 
 
 class Installer(QtGui.QWidget, Ui_Installer):
@@ -225,6 +248,7 @@ class Installer(QtGui.QWidget, Ui_Installer):
     flashStepOneSig = QtCore.pyqtSignal()
     flashStepTwoSig = QtCore.pyqtSignal()
     flashStepThreeSig = QtCore.pyqtSignal()
+    runTestSig = QtCore.pyqtSignal()
     
     STEPS = {
         'START': 0,
@@ -234,7 +258,10 @@ class Installer(QtGui.QWidget, Ui_Installer):
         'FLASH': 4,
         'SUCCESS': 5,
         'CHCKCABLE': 6,
-        'ERROR': 7
+        'ERROR': 7,
+        'TESTPREPARE': 8,
+        'TESTEXEC': 9,
+        'FINISH': 10
     }
         
     def __init__(self):
@@ -249,9 +276,11 @@ class Installer(QtGui.QWidget, Ui_Installer):
         # buttons event listeners
         self.startToScan.clicked.connect(self.simpleMoveToScan)
         self.scanToOne.clicked.connect(self.launchProgramming)
-        self.finalToScan.clicked.connect(self.simpleMoveToScan)
+        self.finalToTest.clicked.connect(self.toNextTest)
         self.chckToStepX.clicked.connect(self.userHasCheckedCables)
         self.errToScan.clicked.connect(self.simpleMoveToScan)
+        self.prepTestToRunTest.clicked.connect(self.startPreparedTest)
+        self.endToScan.clicked.connect(self.simpleMoveToScan)
         
         # start a second thread which will do the flashing
         self.flashWorker = FlashingWorker()
@@ -261,7 +290,9 @@ class Installer(QtGui.QWidget, Ui_Installer):
         self.flashStepOneSig.connect(self.flashWorker.flashStepOne)
         self.flashStepTwoSig.connect(self.flashWorker.flashStepTwo)
         self.flashStepThreeSig.connect(self.flashWorker.flashStepThree)
+        self.runTestSig.connect(self.flashWorker.executeTest)
         self.flashWorker.flashFinished.connect(self.moveToNext)
+        self.flashWorker.testFinished.connect(self.toNextTest)
         
         self.flashWorker.moveToThread(self.flashThread)
         self.flashThread.start()
@@ -383,6 +414,25 @@ class Installer(QtGui.QWidget, Ui_Installer):
             self.flashStepTwoSig.emit()
         elif self.flashingStage == self.STEPS['FLASH']:
             self.flashStepThreeSig.emit()
+    
+    @QtCore.pyqtSlot()
+    @QtCore.pyqtSlot(int)
+    def toNextTest(self, testNum = 0):
+        """current test finished, show given test instructions or "theEnd"
+        page if testNum = -1"""
+        
+        if testNum < 0:
+            nextPage = self.STEPS['FINISH']
+        else:
+            nextPage = self.STEPS['TESTPREPARE']
+            self.testInstructions.setText(TESTLIST[testNum]['desc'])
+        
+        self.stackedWidget.setCurrentIndex(nextPage)
+    
+    @QtCore.pyqtSlot()
+    def startPreparedTest(self):
+        self.runTestSig.emit()
+        self.stackedWidget.setCurrentIndex(self.STEPS['TESTEXEC'])
     
     def closeEvent(self, event):
         if self.blockClose:

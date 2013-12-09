@@ -294,7 +294,7 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Router byl úspěšně naprogramován, otevřte šampanské a jděte to zapít, pak se vraťte, odpojte tento router a pokračujte s dalším.</string>
+          <string>Router byl úspěšně naprogramován, otevřte šampanské a jděte to zapít, pak se vraťte, odpojte tento router a pokračujte s testováním.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -317,9 +317,9 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="finalToScan">
+          <widget class="QPushButton" name="finalToTest">
            <property name="text">
-            <string>Další router</string>
+            <string>Testovat router</string>
            </property>
           </widget>
          </item>
@@ -420,6 +420,150 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
          </item>
          <item>
           <widget class="QPushButton" name="errToScan">
+           <property name="text">
+            <string>Další router</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="testingInfo">
+      <layout class="QVBoxLayout" name="verticalLayout_10">
+       <item>
+        <widget class="QLabel" name="label_18">
+         <property name="text">
+          <string>&lt;h1&gt;Testování&lt;/h1&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="testInstructions">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Zapojte kabel do lan 1 portu. Placeat sit omnis sunt sunt quis animi aut ipsa. Reiciendis deleniti est quae quas quibusdam nisi et rerum. Modi iusto et deserunt et minima dicta ab. Et voluptatibus iusto vitae molestiae ipsam quod quo sint. Omnis dolor atque consequuntur ut. Et magnam rerum sapiente assumenda repudiandae architecto possimus nobis.
+
+Ut quisquam quia autem nihil veniam eos. Aut occaecati quia pariatur ipsa voluptatem numquam et labore. Sint aut quo maxime eum accusantium est non saepe. Perspiciatis placeat esse odio qui unde. Quod quos et autem laboriosam deleniti.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="prepTestToRunTest">
+           <property name="text">
+            <string>Spustit test</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="testingProgress">
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>&lt;h1&gt;Testování&lt;/h1&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_21">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Probíhá testování, prosím vyčkejte chvilku.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QProgressBar" name="progressBar_4">
+         <property name="minimum">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+         <property name="value">
+          <number>-1</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="theEnd">
+      <layout class="QVBoxLayout" name="verticalLayout_12">
+       <item>
+        <widget class="QLabel" name="label_22">
+         <property name="text">
+          <string>&lt;h1&gt;Konec&lt;/h1&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_23">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Router byl naflashován a zkontrolován.</string>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <spacer name="horizontalSpacer_7">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="endToScan">
            <property name="text">
             <string>Další router</string>
            </property>
