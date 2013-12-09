@@ -117,17 +117,27 @@ class Router(object):
             logger.debug("[DB] succesfully updated router record (routerId=%s)" % self.id)
             return True
         else:
-            logger.debug("[DB] router record update failed (routerId=%s)" % self.id)
-            # FIXME do this better, inform the user about db failure
-            # save to file
-            try:
-                with open(fdblog, "a") as fh:
-                    fh.write(str(datetime.now()) + "\n" + sqlquery + "\n\n")
-            except Exception:
-                pass
+            logger.warning("[DB] router record update failed (routerId=%s)" % self.id)
+            self.saveFailedDbQuery(sqlquery)
             return False
     
     def saveTestResult(self, testResult):
-        # sqlquery = "UPDATE routers SET tests=''
-        print "ukladam do db, ze router %s, test %d skoncil s kodom %d" % (self.id, self.currentTest, testResult)
-
+        sqlquery = "INSERT INTO tests (id, attempt, testid, testresult) " \
+                   "VALUES ('%s', '%d', '%d', '%d');" \
+                   % (self.id, self.attempt, self.currentTest, testResult)
+        if self.query.exec_(sqlquery):
+            logger.debug("[DB] router test record inserted successfully (routerId=%s)" % self.id)
+            return True
+        else:
+            logger.warning("[DB] router test record insertion failed (routerId=%s)" % self.id)
+            self.saveFailedDbQuery(sqlquery)
+            return False
+    
+    def saveFailedDbQuery(self, sqlQuery):
+        # FIXME do this better, inform the user about db failure
+        # save to file
+        try:
+            with open(fdblog, "a") as fh:
+                fh.write(str(datetime.now()) + "\n" + sqlQuery + "\n\n")
+        except Exception:
+            pass
