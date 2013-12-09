@@ -1,8 +1,10 @@
+# coding=utf-8
+
 # this file defines tests which are run after successful flashing
 # it is a tuple of tests, each of which contains description for
 # a person executing the tests and second is a shell script
 
-TESTS = (
+TESTLIST = (
 {
     "desc":
         u"První test, instrukce.",
