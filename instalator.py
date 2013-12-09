@@ -28,6 +28,7 @@ STEP_ONE_CMD = "/home/palko/Projects/router/instalator/mock/i2cflasher"
 STEP_TWO_CMD = "/home/palko/Projects/router/instalator/mock/lattice"
 STEP_TWO_INFILE = "/home/palko/neexistujucialejetojedno"
 STEP_THREE_CMD = "/home/palko/Projects/router/instalator/mock/codewarrior"
+STEP_THREE_LOGFILE = "/home/palko/Projects/router/instalator/mock/session.log"
 
 # database
 DB_HOST = 'localhost'
@@ -40,7 +41,9 @@ LOGLEVEL = logging.NOTSET # log everyting
 
 logger = logging.getLogger('installer')
 logger.root.setLevel(LOGLEVEL)
-fh = logging.FileHandler("flasher.log")
+logfile = os.path.join(os.path.split(os.path.abspath(__file__))[0],
+                   "logdir/flasher.log")
+fh = logging.FileHandler(logfile)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 fh.setFormatter(formatter)
 logger.root.addHandler(fh)
@@ -199,23 +202,36 @@ class FlashingWorker(QtCore.QObject):
         
         return_code = 0
         err_msg = ""
-        if p_return[0] == 0:
+        
+        try:
+            with open(STEP_THREE_LOGFILE, "r") as fh:
+                logtext = fh.read()
+        except IOError:
+            logger.critical("[FLASHWORKER] Could not read codewarrior session.log, application error")
+            logtext = "Error"
+            # TODO maybe close the application now
+        
+        cableDisconnected = logtext.find("Cable disconnected") >= 0
+        if cableDisconnected and self.router.secondChance['FLASH']:
+            # cable disconnected,
+            logger.warning("[FLASHWORKER] FLASH step failed, check the cables (routerId=%s)" % self.router.id)
+            self.router.secondChance['FLASH'] = False
+            self.router.error = "Flashing exited with 'Cable disconnected' in session.log\n"
+                                # TODO copy session.log
+            
+            return_code = 1
+            err_msg = u"Flashování Flash pamětí zlyhalo, zkontrolujte připojené kabely."
+        elif logtext.find("Error") >= 0 or (cableDisconnected and not self.router.secondChance['FLASH']):
+            logger.warning("[FLASHWORKER] FLASH step failed definitely (routerId=%s)" % self.router.id)
+            self.router.error = "Flashing exited with 'Error' in session.log"
+                                # TODO copy session.log
+            return_code = 2
+            err_msg = u"Flashování NAND a NOR zlyhalo."
+        else:
+            # TODO is there a Diagnose Succeeded string?
             logger.info("[FLASHWORKER] FLASH step successful (routerId=%s)" % self.router.id)
             self.router.status = self.router.STATUS_FINISHED
             self.router.error = ""
-        elif self.router.secondChance['FLASH']:
-            logger.warning("[FLASHWORKER] FLASH step failed, check the cables (routerId=%s)" % self.router.id)
-            self.router.secondChance['FLASH'] = False
-            self.router.error = "Flashing exited with return status %d\n" % p_return[0] + \
-                                "stdout + stderr:\n" + p_return[1]
-            return_code = 1
-            err_msg = u"Flashování Flash pamětí zlyhalo, zkontrolujte připojené kabely."
-        else:
-            logger.warning("[FLASHWORKER] FLASH step failed definitely (routerId=%s)" % self.router.id)
-            self.router.error = "Flashing exited with return status %d\n" % p_return[0] + \
-                                "stdout + stderr:\n" + p_return[1]
-            return_code = 2
-            err_msg = u"Flashování NAND a NOR zlyhalo."
         
         dbErr = not self.router.save()
         
