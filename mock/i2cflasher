@@ -1,25 +1,5 @@
 #!/bin/bash
 
 # dummy script for flashing
-
-sleep 10
-
-if [ "$1" == "1500" ]
-then
-    echo "prva vec... OK"
-    echo "druha vec... FAILED"
-	echo "chyba nastala, vybuchne to"
-	echo "vyhori to, zoskratovalo sa to"
-	exit 1
-fi
-
-if [ -f ~/tursec ]
-then
-    rm -f ~/tursec
-else
-    echo "zlyhalo to, posralo sa"
-    touch ~/tursec
-    exit 1
-fi
-
-exit 0
+echo "sme v i2c"
+sleep 2

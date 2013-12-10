@@ -2,30 +2,22 @@
 
 # dummy script for flashing
 
-if [ -f ~/turlat ]
-then
-    rm -f ~/turlat
-    binfiledir=`dirname "$0"`
-    exec "$binfiledir/lattice-bin" "$@"
-else
-    while [ $# -gt 0 ]
-    do
-        if [ "$1" = "-logfile" ]
-        then
-            INFILE="$2"
-            break
-        fi
-        shift
-    done
-    if [ "$INFILE" ]
+echo "sme v lattice"
+
+while [ $# -gt 0 ]
+do
+    if [ "$1" = "-logfile" ]
     then
-        echo "Operation: Failed" > "$INFILE"
-    else
-        echo "missing logfile"
+        INFILE="$2"
+        break
     fi
-    sleep 10
-    touch ~/turlat
-    exit 0
+    shift
+done
+if [ "$INFILE" ]
+then
+    echo "Operation: successful." > "$INFILE"
+else
+    echo "missing logfile"
 fi
 
-exit 0
+sleep 2

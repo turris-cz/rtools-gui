@@ -2,15 +2,5 @@
 
 # dummy script for flashing
 
-sleep 10
-
-if [ -f ~/turcodewar ]
-then
-    rm -f ~/turcodewar
-else
-    echo "zlyhalo to, posralo sa"
-    touch ~/turcodewar
-    exit 1
-fi
-
-exit 0
+sleep 2
+echo "ok, vsetko v poriadko" > /home/palko/Projects/router/instalator/mock/session.log
