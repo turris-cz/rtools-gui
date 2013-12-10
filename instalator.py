@@ -11,6 +11,7 @@ import subprocess
 import sys
 import os
 from tempfile import mkstemp
+from shutil import copy
 
 # gui related stuff
 from PyQt4 import QtGui, QtCore, QtSql
@@ -29,6 +30,7 @@ STEP_TWO_CMD = "/home/palko/Projects/router/instalator/mock/lattice"
 STEP_TWO_INFILE = "/home/palko/neexistujucialejetojedno"
 STEP_THREE_CMD = "/home/palko/Projects/router/instalator/mock/codewarrior"
 STEP_THREE_LOGFILE = "/home/palko/Projects/router/instalator/mock/session.log"
+LOG_BACKUP_CMD = "/bin/true" # "/home/turris/backup_logs.sh"
 
 # database
 DB_HOST = 'localhost'
@@ -41,6 +43,8 @@ LOGLEVEL = logging.NOTSET # log everyting
 
 logger = logging.getLogger('installer')
 logger.root.setLevel(LOGLEVEL)
+nanlogsdir = os.path.join(os.path.split(os.path.abspath(__file__))[0],
+                   "nandnorlogs")
 logfile = os.path.join(os.path.split(os.path.abspath(__file__))[0],
                    "logdir/flasher.log")
 fh = logging.FileHandler(logfile)
@@ -200,6 +204,16 @@ class FlashingWorker(QtCore.QObject):
         logger.debug("[FLASHWORKER] starting third step (routerId=%s)" % self.router.id)
         p_return = self.runCmd(("/bin/bash", STEP_THREE_CMD))
         
+        # copy and send log_backup
+        persistentLog = os.path.join(nanlogsdir, "%s-%d-%s.log" %
+                (self.router.id, self.router.attempt,
+                 self.router.secondChance['FLASH'] and "0" or "1"))
+        try:
+            copy(STEP_THREE_LOGFILE, persistentLog)
+            self.runCmd((LOG_BACKUP_CMD, persistentLog))
+        except Exception: # IOError, OSError, ...?
+            pass
+        
         return_code = 0
         err_msg = ""
         
@@ -216,14 +230,14 @@ class FlashingWorker(QtCore.QObject):
             # cable disconnected,
             logger.warning("[FLASHWORKER] FLASH step failed, check the cables (routerId=%s)" % self.router.id)
             self.router.secondChance['FLASH'] = False
-            self.router.error = "Flashing exited with 'Cable disconnected' in session.log\n"
+            self.router.error = "Flashing exited with \"Cable disconnected\" in session.log\n"
                                 # TODO copy session.log
             
             return_code = 1
             err_msg = u"Flashování Flash pamětí zlyhalo, zkontrolujte připojené kabely."
         elif logtext.find("Error") >= 0 or (cableDisconnected and not self.router.secondChance['FLASH']):
             logger.warning("[FLASHWORKER] FLASH step failed definitely (routerId=%s)" % self.router.id)
-            self.router.error = "Flashing exited with 'Error' in session.log"
+            self.router.error = "Flashing exited with \"Error\" in session.log"
                                 # TODO copy session.log
             return_code = 2
             err_msg = u"Flashování NAND a NOR zlyhalo."
@@ -321,6 +335,14 @@ class Installer(QtGui.QWidget, Ui_Installer):
         self.db.setDatabaseName(DB_DBNAME)
         
         self.flashingStage = 0 # we start at zero, (start page)
+        
+        # try to create nanlogsdir if doesn't exist
+        try:
+            if not os.path.exists(nanlogsdir):
+                os.mkdir(nanlogsdir)
+        except (IOError, OSError):
+            logger.critical("[MAIN] could not create directory "
+                    "for saving session.log (%s)" % nanlogsdir)
     
     @QtCore.pyqtSlot()
     def simpleMoveToScan(self):
