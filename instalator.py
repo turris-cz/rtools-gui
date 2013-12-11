@@ -7,11 +7,11 @@
 
 #python modules
 import logging
+import os
 import subprocess
 import sys
-import os
-from tempfile import mkstemp
 from shutil import copy
+from tempfile import mkstemp
 
 # gui related stuff
 from PyQt4 import QtGui, QtCore, QtSql
@@ -20,11 +20,15 @@ from gui.gui_installer import Ui_Installer
 
 # router object
 from router import Router, DbError, DuplicateKey, DoesNotExist
+from serial_console import SerialConsole
 
 # tests
 from router_tests import TESTLIST
 
 # settings
+SERIAL_CONSOLE_BAUDRATE = 115200
+
+# commands
 # STEP_ONE_CMD = "/home/turris/remote_run.sh"
 # STEP_TWO_CMD = "/usr/local/programmer/3.0_x64/bin/lin64/pgrcmd"
 # STEP_TWO_INFILE = "/home/turris/workspace_cpld/cpld_20131209_001/CZ_NIC_Router_CPLD_program.xcf"
@@ -269,14 +273,32 @@ class FlashingWorker(QtCore.QObject):
         logger.debug("[TESTING] Executing test %d on the router with routerId=%s"
                 % (self.router.currentTest, self.router.id))
         
+        # create and prepare a serial console connection
+        if self.router.currentTest == 0:
+            # find ttyUSBx
+            dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
+            if len(dev) != 1:
+                # TODO display a warning to the user
+                self.testFinished.emit(-1)
+                return
+            
+            # open console
+            try:
+                self.serialConsole = SerialConsole("/dev/" + dev[0], SERIAL_CONSOLE_BAUDRATE)
+            except Exception: # serial console exception, IOError,...
+                self.testFinished.emit(-1)
+                return
+        
         # run the test
-        p_return = self.runCmd(TESTLIST[self.router.currentTest]['cmd'])
+        # TODO write tests and run them
+        # p_return = self.runCmd(TESTLIST[self.router.currentTest]['cmd'])
         
         # save to db the test result p_return[0]
-        self.router.saveTestResult(p_return[0])
+        self.router.saveTestResult(0)
         
         self.router.currentTest += 1
         if self.router.currentTest >= len(TESTLIST):
+            self.serialConsole.close()
             nextTest = -1
         else:
             nextTest = self.router.currentTest
