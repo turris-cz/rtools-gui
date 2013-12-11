@@ -93,14 +93,18 @@ class Router(object):
     def nextAttempt(cls, routerId):
         routerId = str(routerId)
         query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
-        if query.exec_("INSERT INTO routers (id, attempt) "
-                       "SELECT '%(id)s' AS \"id\", max(attempt) + 1 AS \"attempt\" "
-                       "FROM routers WHERE id = '%(id)s' RETURNING attempt;"
+        if query.exec_("INSERT INTO routers (id, attempt, status) "
+                       "SELECT '%(id)s' AS \"id\", attempt + 1 AS \"attempt\", status "
+                       "FROM routers "
+                       "WHERE id = '%(id)s' AND attempt = (SELECT max(attempt) FROM routers WHERE id = '%(id)s') "
+                       "RETURNING attempt, status;"
                        % {'id': routerId}):
             logger.debug("[DB] succesfully added router record (routerId=%s)" % routerId)
             router = cls(routerId)
             query.next()
-            router.attempt = query.record().value('attempt').toInt()[0]
+            rec = query.record()
+            router.attempt = rec.value('attempt').toInt()[0]
+            router.status = rec.value('status').toInt()[0]
             return router
         elif str(query.lastError().text()).startswith("ERROR:  null value"):
             raise DoesNotExist()

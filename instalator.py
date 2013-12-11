@@ -98,18 +98,18 @@ class FlashingWorker(QtCore.QObject):
     
     @QtCore.pyqtSlot('QString', bool)
     def addNewRouter(self, routerId, nextAttempt):
-        return_code = 0
-        err_msg = ""
-        dbErr = False
-        
         routerId = str(routerId)
+        
+        dbErr = False
         try:
             if nextAttempt:
                 self.router = Router.nextAttempt(str(routerId)) # add next attempt to flash
             else:
                 self.router = Router.createNewRouter(str(routerId)) # try to create new router
+            return_code = self.router.status
+            err_msg = ""
         except DuplicateKey:
-            return_code = 1
+            return_code = -1
             err_msg = u"O tomhle routeru je v databázi záznam, že už byl naflashován, " \
                       u"přejete si to zkusit znovu?"
         except DoesNotExist:
@@ -117,10 +117,10 @@ class FlashingWorker(QtCore.QObject):
                             "no router with this id (routerId=%s). This should never "
                             "happen. It is a bug in this application."
                             % routerId)
-            return_code = 2
+            return_code = -2
             err_msg = u"Vyskytla se chyba, která by se nikdy neměla. Prosím, restartujte program."
         except DbError, e:
-            return_code = 2
+            return_code = -2
             err_msg = e.message
             dbErr = True
         
@@ -381,11 +381,20 @@ class Installer(QtGui.QWidget, Ui_Installer):
         i = self.stackedWidget.currentIndex()
         
         if i == self.STEPS['SCAN']:
-            if flash_result[0] == 0:
-                i = self.STEPS['I2C']
+            if flash_result[0] >= 0:
+                # start with step given in flash_result[0]
+                if flash_result[0] == 0:
+                    i = self.STEPS['I2C']
+                    self.flashStepOneSig.emit()
+                elif flash_result[0] == 1:
+                    i = self.STEPS['CPLD']
+                    self.flashStepTwoSig.emit()
+                elif flash_result[0] == 2:
+                    i = self.STEPS['FLASH']
+                    self.flashStepThreeSig.emit()
                 self.flashingStage = i
-                self.flashStepOneSig.emit()
-            elif flash_result[0] == 1:
+            elif flash_result[0] == -1:
+                # router already exists
                 if QtGui.QMessageBox.question(self, 'Router existuje', flash_result[1],
                         buttons=QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
                         defaultButton=QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Ok:
@@ -400,7 +409,7 @@ class Installer(QtGui.QWidget, Ui_Installer):
                     self.lineEdit.setFocus()
                 return
             else:
-                # db error
+                # db error, flash_result[0] == -2
                 self.blockClose = False
                 self.scanToOne.setEnabled(True)
                 self.modalMessage(flash_result[1])
