@@ -58,10 +58,10 @@ class BarcodeChecker(QtGui.QMainWindow, Ui_BarcodeCheckerWindow):
         code2 = self.edit2.text()
         if code1 == code2:
             self.scanningDone = True
-            self.setSuccessStatus(u"Vše je v pořádku, kódy se shodují.<br>Pro nový start načtěte jakýkoliv kód.")
+            self.setSuccessStatus(u"Vše je v pořádku, kódy se shodují.<br>Pro nový start načtěte jakýkoliv kód nebo stiskněte Enter.")
         else:
             self.setErrorStatus(u"Chyba! Kódy se neshodují.")
-            self.showCriticalError(u"Kódy se neshodují, pravděpodobně došlo k záměně routeru a krabice nebo byla do boxu vložena špatná deska.<br><br>"
+            self.showCriticalError(u"Kódy se neshodují, pravděpodobně nevkládáte router do správné krabice, případně byla do skříně vložena špatná deska.<br><br>"
                                    u"Chyba také může být způsobena špatným načtením jednoho z kódů, zkuste kontrolu provést důkladně ještě jednou.")
             self.initialize()
 
