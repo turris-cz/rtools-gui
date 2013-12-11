@@ -27,8 +27,8 @@ from router_tests import TESTLIST
 # settings
 # STEP_ONE_CMD = "/home/turris/remote_run.sh"
 # STEP_TWO_CMD = "/usr/local/programmer/3.0_x64/bin/lin64/pgrcmd"
-# STEP_TWO_INFILE = "/home/turris/workspace_cpld/cpld_20131129_001/CZ_NIC_Router_CPLD_program.xcf"
-# STEP_THREE_CMD = "/home/turris/workspace/go_TURRIS_NOR_program_uboot_057_nodebug_cpld_read.sh"
+# STEP_TWO_INFILE = "/home/turris/workspace_cpld/cpld_20131209_001/CZ_NIC_Router_CPLD_program.xcf"
+# STEP_THREE_CMD = "/home/turris/workspace/go_TURRIS_NOR_program_all.sh"
 # STEP_THREE_LOGFILE = "/home/turris/workspace/session.log"
 # LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
 STEP_ONE_CMD = "/home/palko/Projects/router/instalator/mock/i2cflasher"
