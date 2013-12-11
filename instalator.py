@@ -285,13 +285,14 @@ class Installer(QtGui.QWidget, Ui_Installer):
         'SCAN': 1,
         'I2C': 2,
         'CPLD': 3,
-        'FLASH': 4,
-        'SUCCESS': 5,
-        'CHCKCABLE': 6,
-        'ERROR': 7,
-        'TESTPREPARE': 8,
-        'TESTEXEC': 9,
-        'FINISH': 10
+        'RESET': 4,
+        'FLASH': 5,
+        'SUCCESS': 6,
+        'CHCKCABLE': 7,
+        'ERROR': 8,
+        'TESTPREPARE': 9,
+        'TESTEXEC': 10,
+        'FINISH': 11
     }
         
     def __init__(self):
@@ -306,6 +307,7 @@ class Installer(QtGui.QWidget, Ui_Installer):
         # buttons event listeners
         self.startToScan.clicked.connect(self.simpleMoveToScan)
         self.scanToOne.clicked.connect(self.launchProgramming)
+        self.resetToThree.clicked.connect(self.routerReset)
         self.finalToTest.clicked.connect(self.toNextTest)
         self.chckToStepX.clicked.connect(self.userHasCheckedCables)
         self.errToScan.clicked.connect(self.simpleMoveToScan)
@@ -416,9 +418,7 @@ class Installer(QtGui.QWidget, Ui_Installer):
                 i = self.STEPS['ERROR']
         elif i == self.STEPS['CPLD']:
             if flash_result[0] == 0:
-                i = self.STEPS['FLASH']
-                self.flashingStage = i
-                self.flashStepThreeSig.emit()
+                i = self.STEPS['RESET']
             elif flash_result[0] == 1:
                 self.tmpErrMsg.setText(flash_result[1])
                 i = self.STEPS['CHCKCABLE']
@@ -471,6 +471,12 @@ class Installer(QtGui.QWidget, Ui_Installer):
     def startPreparedTest(self):
         self.runTestSig.emit()
         self.stackedWidget.setCurrentIndex(self.STEPS['TESTEXEC'])
+    
+    @QtCore.pyqtSlot()
+    def routerReset(self):
+        self.flashingStage = self.STEPS['FLASH']
+        self.flashStepThreeSig.emit()
+        self.stackedWidget.setCurrentIndex(self.flashingStage)
     
     def closeEvent(self, event):
         if self.blockClose:
