@@ -13,6 +13,10 @@ class BarcodeChecker(QtGui.QMainWindow, Ui_BarcodeCheckerWindow):
     def __init__(self):
         super(BarcodeChecker, self).__init__()
         self.setupUi(self)
+        from gui import uiresources
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(QtCore.QString.fromUtf8(":/favicon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.setWindowIcon(icon)
         self.edit1.returnPressed.connect(self.edit1filled)
         self.edit2.returnPressed.connect(self.edit2filled)
         self.initialize()
