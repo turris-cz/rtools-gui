@@ -43,7 +43,16 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Připravte se psychicky na těžý úkol. Před začátkem běžte koupit basu piva, protože počas práce přijde žízeň.&lt;/li&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vezměte jeden router.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zapojte všechny kabely.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Oveřte, ze jsou kabely zapojené správně.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Klikněte na tlačítko &amp;quot;Pokračovat&amp;quot;&lt;br/&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;ul&gt;
+&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Zkontrolujte pracoviště pro programování a testování routeru TURRIS podle přiložené dokumentace.
+&lt;/li&gt;
+&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Zejména ověřte všechny datové kabely 1 až 7, napájecí kabely , funkčnost TURRIS PROGRAMMERu
+&lt;/li&gt;
+&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Vložte paměťový modul DDR3 SODIMM do slotu&lt;/li&gt;
+&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Nastavte DIP SWITCHe SW1 a SW2 dle návodu&lt;/li&gt;
+&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Vložte baterii do patice BT1&lt;/li&gt;
+&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Přilepte chladiče na procesor a LAN switch&lt;/li&gt;
+&lt;/ul&gt;</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -94,10 +103,10 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Sejměte čárový kód nalepený na LAN konektoru desky routeru TURRIS.</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Nalepte na konektor CN3 malý štítek a odstřihněte z kotouče velké štítky, které přiložte k programované desce. &lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárový kód nalepený na LAN konektoru desky routeru TURRIS. &lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="textFormat">
-          <enum>Qt::PlainText</enum>
+          <enum>Qt::RichText</enum>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -136,7 +145,7 @@
          <item>
           <widget class="QPushButton" name="scanToOne">
            <property name="text">
-            <string>Spustit programovnání</string>
+            <string>Spustit programování</string>
            </property>
           </widget>
          </item>
@@ -162,9 +171,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Praesentium molestiae sed molestias modi et impedit earum. Sint nihil sed amet dolor est eos et. Occaecati voluptatem eum autem aut voluptate.
-
-Vel exercitationem animi in accusantium voluptatem ea qui consequatur. Nisi explicabo aut voluptatem sit. Nisi numquam magnam rem totam. Sit sed qui omnis quis iusto.</string>
+          <string>V tomto kroku se programují přes kabel 1 a I2C sběrnici následující zařízení: Zdroj, Cryptochip, RTC, Teploměr.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -210,9 +217,7 @@ Vel exercitationem animi in accusantium voluptatem ea qui consequatur. Nisi expl
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Odio nihil placeat quibusdam repellendus labore id. Illo aut iste omnis dolore et nesciunt neque quia. Et fuga vero blanditiis maiores aut. Sequi corrupti et deserunt assumenda voluptatibus molestiae rem. Et et sequi molestias fugit.
-
-Quia modi rerum asperiores sapiente odio et maiores. Quo sed rem repudiandae nostrum. Quos et qui laborum iste. Est consequatur adipisci aspernatur sapiente aut ducimus. Sunt totam dignissimos eos.</string>
+          <string>V tomto kroku probíhá programování CPLD obvodu pomocí kabelu 2.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -252,7 +257,7 @@ Quia modi rerum asperiores sapiente odio et maiores. Quo sed rem repudiandae nos
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Odpojte a zapojte kabel napájení. Zkontrolujte baterku.</string>
+          <string>Odpojte a zapojte kabel napájení 7,5V. Zkontrolujte vložení baterie.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -303,9 +308,7 @@ Quia modi rerum asperiores sapiente odio et maiores. Quo sed rem repudiandae nos
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Ducimus assumenda est quia. Aliquid ducimus quia aspernatur qui inventore dicta. Aut ullam ad a. Et magnam ab qui quas odit. Aperiam eos sed quibusdam non non minus unde quidem.
-
-Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem quidem a itaque aliquid. Laudantium maiores dolorem soluta dolorum. Officiis sint sapiente veniam magnam. Inventore et est voluptatem error.</string>
+          <string>V tomto kroku probíhá programování NOR Flash paměti procesoru pomocí kabelu 3. Prosím vyčkejte přibližně 5 minut na dokončení.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -345,7 +348,7 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Router byl úspěšně naprogramován, otevřte šampanské a jděte to zapít, pak se vraťte, odpojte tento router a pokračujte s testováním.</string>
+          <string>Operace programování desky routeru TURRIS skončila úspěšně. Ověřte připojení všech kabelů nezbytných k testování funkčnosti.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -396,7 +399,7 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Zkontrolujte připojení kabelů.</string>
+          <string/>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -447,7 +450,7 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Vezměte router, odpojte kabely, otevřte okno a hoďte router z okna. Pak pokračujte dalším.</string>
+          <string>Během programování se vyskytla chyba. Odložte desku routeru TURRIS pro další analýzu.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -498,9 +501,7 @@ Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem qu
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Zapojte kabel do lan 1 portu. Placeat sit omnis sunt sunt quis animi aut ipsa. Reiciendis deleniti est quae quas quibusdam nisi et rerum. Modi iusto et deserunt et minima dicta ab. Et voluptatibus iusto vitae molestiae ipsam quod quo sint. Omnis dolor atque consequuntur ut. Et magnam rerum sapiente assumenda repudiandae architecto possimus nobis.
-
-Ut quisquam quia autem nihil veniam eos. Aut occaecati quia pariatur ipsa voluptatem numquam et labore. Sint aut quo maxime eum accusantium est non saepe. Perspiciatis placeat esse odio qui unde. Quod quos et autem laboriosam deleniti.</string>
+          <string/>
          </property>
          <property name="wordWrap">
           <bool>true</bool>

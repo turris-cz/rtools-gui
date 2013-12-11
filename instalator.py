@@ -152,7 +152,9 @@ class FlashingWorker(QtCore.QObject):
             self.router.secondChance['I2C'] = False
             self.router.error = p_return[1]
             return_code = 1
-            err_msg = u"Flashování I2C zlyhalo, zkontrolujte připojené kabely."
+            err_msg = u"Programování zařízení na I2C sběrnici selhalo. Prosím ověřte zapojení kabelu 1 " \
+                      u"(Zapojen z TURRIS PROGRAMMERu konektor P1 na programovaný TURRIS konektor J2). " \
+                      u" Zkontrolujte připojení napájecího adaptéru 7,5V."
         else:
             logger.warning("[FLASHWORKER] I2C step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = p_return[1]
@@ -191,7 +193,9 @@ class FlashingWorker(QtCore.QObject):
             self.router.secondChance['CPLD'] = False
             self.router.error = log_content
             return_code = 1
-            err_msg = u"Flashování CPLD zlyhalo, zkontrolujte připojené kabely."
+            err_msg = u"Programování CPLD obvodu selhalo. Prosím ověřte zapojení kabelu 2 " \
+                      u"(Zapojen z USB portu PC na programovaný TURRIS konektor J7). " \
+                      u"Zkontrolujte připojení napájecího adaptéru 7,5V."
         else:
             logger.warning("[FLASHWORKER] CPLD step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = log_content
@@ -241,7 +245,9 @@ class FlashingWorker(QtCore.QObject):
                                 # TODO copy session.log
             
             return_code = 1
-            err_msg = u"Flashování Flash pamětí zlyhalo, zkontrolujte připojené kabely."
+            err_msg = u"Programování NOR Flash selhalo. Prosím ověřte zapojení kabelu 3 " \
+                      u"(Zapojen z USB portu PC na programovaný TURRIS konektor P2). " \
+                      u"Zkontrolujte připojení napájecího adaptéru 7,5V."
         elif logtext.find("Error") >= 0 or (cableDisconnected and not self.router.secondChance['FLASH']):
             logger.warning("[FLASHWORKER] FLASH step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = "Flashing exited with \"Error\" in session.log"

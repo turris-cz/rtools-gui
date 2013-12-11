@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Dec 11 12:53:48 2013
+# Created: Wed Dec 11 20:39:46 2013
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -71,7 +71,7 @@ class Ui_Installer(object):
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.label_5.sizePolicy().hasHeightForWidth())
         self.label_5.setSizePolicy(sizePolicy)
-        self.label_5.setTextFormat(QtCore.Qt.PlainText)
+        self.label_5.setTextFormat(QtCore.Qt.RichText)
         self.label_5.setWordWrap(True)
         self.label_5.setObjectName(_fromUtf8("label_5"))
         self.verticalLayout_3.addWidget(self.label_5)
@@ -230,6 +230,7 @@ class Ui_Installer(object):
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.tmpErrMsg.sizePolicy().hasHeightForWidth())
         self.tmpErrMsg.setSizePolicy(sizePolicy)
+        self.tmpErrMsg.setText(_fromUtf8(""))
         self.tmpErrMsg.setWordWrap(True)
         self.tmpErrMsg.setObjectName(_fromUtf8("tmpErrMsg"))
         self.verticalLayout_9.addWidget(self.tmpErrMsg)
@@ -280,6 +281,7 @@ class Ui_Installer(object):
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.testInstructions.sizePolicy().hasHeightForWidth())
         self.testInstructions.setSizePolicy(sizePolicy)
+        self.testInstructions.setText(_fromUtf8(""))
         self.testInstructions.setWordWrap(True)
         self.testInstructions.setObjectName(_fromUtf8("testInstructions"))
         self.verticalLayout_10.addWidget(self.testInstructions)
@@ -351,40 +353,39 @@ class Ui_Installer(object):
     def retranslateUi(self, Installer):
         Installer.setWindowTitle(_translate("Installer", "Instalátor", None))
         self.label_2.setText(_translate("Installer", "<html><head/><body><p><span style=\" font-size:xx-large; font-weight:600;\">Začínáme</span></p></body></html>", None))
-        self.label_8.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Připravte se psychicky na těžý úkol. Před začátkem běžte koupit basu piva, protože počas práce přijde žízeň.</li><li style=\" margin-top:12px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Vezměte jeden router.</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zapojte všechny kabely.</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Oveřte, ze jsou kabely zapojené správně.</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Klikněte na tlačítko &quot;Pokračovat&quot;<br/></li></ul></body></html>", None))
+        self.label_8.setText(_translate("Installer", "<ul>\n"
+"<li style=\"margin-bottom: 10px;\">Zkontrolujte pracoviště pro programování a testování routeru TURRIS podle přiložené dokumentace.\n"
+"</li>\n"
+"<li style=\"margin-bottom: 10px;\">Zejména ověřte všechny datové kabely 1 až 7, napájecí kabely , funkčnost TURRIS PROGRAMMERu\n"
+"</li>\n"
+"<li style=\"margin-bottom: 10px;\">Vložte paměťový modul DDR3 SODIMM do slotu</li>\n"
+"<li style=\"margin-bottom: 10px;\">Nastavte DIP SWITCHe SW1 a SW2 dle návodu</li>\n"
+"<li style=\"margin-bottom: 10px;\">Vložte baterii do patice BT1</li>\n"
+"<li style=\"margin-bottom: 10px;\">Přilepte chladiče na procesor a LAN switch</li>\n"
+"</ul>", None))
         self.startToScan.setText(_translate("Installer", "Pokračovat", None))
         self.label_3.setText(_translate("Installer", "<h1>Scan</h1>", None))
-        self.label_5.setText(_translate("Installer", "Sejměte čárový kód nalepený na LAN konektoru desky routeru TURRIS.", None))
+        self.label_5.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nalepte na konektor CN3 malý štítek a odstřihněte z kotouče velké štítky, které přiložte k programované desce. </li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Sejměte čárový kód nalepený na LAN konektoru desky routeru TURRIS. </li></ul></body></html>", None))
         self.label_4.setText(_translate("Installer", "Čárový kód", None))
-        self.scanToOne.setText(_translate("Installer", "Spustit programovnání", None))
+        self.scanToOne.setText(_translate("Installer", "Spustit programování", None))
         self.label_15.setText(_translate("Installer", "<h1>I2C Programování</h1>", None))
-        self.label_16.setText(_translate("Installer", "Praesentium molestiae sed molestias modi et impedit earum. Sint nihil sed amet dolor est eos et. Occaecati voluptatem eum autem aut voluptate.\n"
-"\n"
-"Vel exercitationem animi in accusantium voluptatem ea qui consequatur. Nisi explicabo aut voluptatem sit. Nisi numquam magnam rem totam. Sit sed qui omnis quis iusto.", None))
+        self.label_16.setText(_translate("Installer", "V tomto kroku se programují přes kabel 1 a I2C sběrnici následující zařízení: Zdroj, Cryptochip, RTC, Teploměr.", None))
         self.label_6.setText(_translate("Installer", "<h1>CPLD Programování</h1>", None))
-        self.label_7.setText(_translate("Installer", "Odio nihil placeat quibusdam repellendus labore id. Illo aut iste omnis dolore et nesciunt neque quia. Et fuga vero blanditiis maiores aut. Sequi corrupti et deserunt assumenda voluptatibus molestiae rem. Et et sequi molestias fugit.\n"
-"\n"
-"Quia modi rerum asperiores sapiente odio et maiores. Quo sed rem repudiandae nostrum. Quos et qui laborum iste. Est consequatur adipisci aspernatur sapiente aut ducimus. Sunt totam dignissimos eos.", None))
+        self.label_7.setText(_translate("Installer", "V tomto kroku probíhá programování CPLD obvodu pomocí kabelu 2.", None))
         self.label_19.setText(_translate("Installer", "<h1>Restart</h1>", None))
-        self.label_24.setText(_translate("Installer", "Odpojte a zapojte kabel napájení. Zkontrolujte baterku.", None))
+        self.label_24.setText(_translate("Installer", "Odpojte a zapojte kabel napájení 7,5V. Zkontrolujte vložení baterie.", None))
         self.resetToThree.setText(_translate("Installer", "Pokračovat", None))
         self.label_9.setText(_translate("Installer", "<h1>FLASH Programování</h1>", None))
-        self.label_10.setText(_translate("Installer", "Ducimus assumenda est quia. Aliquid ducimus quia aspernatur qui inventore dicta. Aut ullam ad a. Et magnam ab qui quas odit. Aperiam eos sed quibusdam non non minus unde quidem.\n"
-"\n"
-"Qui dolorum ut iusto facilis exercitationem. Aut voluptatem et quo voluptatem quidem a itaque aliquid. Laudantium maiores dolorem soluta dolorum. Officiis sint sapiente veniam magnam. Inventore et est voluptatem error.", None))
+        self.label_10.setText(_translate("Installer", "V tomto kroku probíhá programování NOR Flash paměti procesoru pomocí kabelu 3. Prosím vyčkejte přibližně 5 minut na dokončení.", None))
         self.label_11.setText(_translate("Installer", "<h1>Naprogramováno</h1>", None))
-        self.label_12.setText(_translate("Installer", "Router byl úspěšně naprogramován, otevřte šampanské a jděte to zapít, pak se vraťte, odpojte tento router a pokračujte s testováním.", None))
+        self.label_12.setText(_translate("Installer", "Operace programování desky routeru TURRIS skončila úspěšně. Ověřte připojení všech kabelů nezbytných k testování funkčnosti.", None))
         self.finalToTest.setText(_translate("Installer", "Testovat router", None))
         self.label_17.setText(_translate("Installer", "<h1>Chyba</h1>", None))
-        self.tmpErrMsg.setText(_translate("Installer", "Zkontrolujte připojení kabelů.", None))
         self.chckToStepX.setText(_translate("Installer", "Zkusit znovu", None))
         self.label_13.setText(_translate("Installer", "<h1>Chyba</h1>", None))
-        self.label_14.setText(_translate("Installer", "Vezměte router, odpojte kabely, otevřte okno a hoďte router z okna. Pak pokračujte dalším.", None))
+        self.label_14.setText(_translate("Installer", "Během programování se vyskytla chyba. Odložte desku routeru TURRIS pro další analýzu.", None))
         self.errToScan.setText(_translate("Installer", "Další router", None))
         self.label_18.setText(_translate("Installer", "<h1>Testování</h1>", None))
-        self.testInstructions.setText(_translate("Installer", "Zapojte kabel do lan 1 portu. Placeat sit omnis sunt sunt quis animi aut ipsa. Reiciendis deleniti est quae quas quibusdam nisi et rerum. Modi iusto et deserunt et minima dicta ab. Et voluptatibus iusto vitae molestiae ipsam quod quo sint. Omnis dolor atque consequuntur ut. Et magnam rerum sapiente assumenda repudiandae architecto possimus nobis.\n"
-"\n"
-"Ut quisquam quia autem nihil veniam eos. Aut occaecati quia pariatur ipsa voluptatem numquam et labore. Sint aut quo maxime eum accusantium est non saepe. Perspiciatis placeat esse odio qui unde. Quod quos et autem laboriosam deleniti.", None))
         self.prepTestToRunTest.setText(_translate("Installer", "Spustit test", None))
         self.label_20.setText(_translate("Installer", "<h1>Testování</h1>", None))
         self.label_21.setText(_translate("Installer", "Probíhá testování, prosím vyčkejte chvilku.", None))
