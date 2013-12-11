@@ -25,14 +25,21 @@ from router import Router, DbError, DuplicateKey, DoesNotExist
 from router_tests import TESTLIST
 
 # settings
+# STEP_ONE_CMD = "/home/turris/remote_run.sh"
+# STEP_TWO_CMD = "/usr/local/programmer/3.0_x64/bin/lin64/pgrcmd"
+# STEP_TWO_INFILE = "/home/turris/workspace_cpld/cpld_20131129_001/CZ_NIC_Router_CPLD_program.xcf"
+# STEP_THREE_CMD = "/home/turris/workspace/go_TURRIS_NOR_program_uboot_057_nodebug_cpld_read.sh"
+# STEP_THREE_LOGFILE = "/home/turris/workspace/session.log"
+# LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
 STEP_ONE_CMD = "/home/palko/Projects/router/instalator/mock/i2cflasher"
 STEP_TWO_CMD = "/home/palko/Projects/router/instalator/mock/lattice"
 STEP_TWO_INFILE = "/home/palko/neexistujucialejetojedno"
 STEP_THREE_CMD = "/home/palko/Projects/router/instalator/mock/codewarrior"
 STEP_THREE_LOGFILE = "/home/palko/Projects/router/instalator/mock/session.log"
-LOG_BACKUP_CMD = "/bin/true" # "/home/turris/backup_logs.sh"
+LOG_BACKUP_CMD = "/bin/true"
 
 # database
+# DB_HOST = "10.0.0.2"
 DB_HOST = 'localhost'
 DB_USER = 'tflasher'
 DB_PASS = 'poiuytrewq'
