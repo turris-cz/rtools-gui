@@ -279,7 +279,7 @@ class FlashingWorker(QtCore.QObject):
             dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
             if len(dev) != 1:
                 # TODO display a warning to the user
-                self.testFinished.emit(-1)
+                self.testFinished.emit(-2)
                 return
             
             # open console
@@ -290,18 +290,21 @@ class FlashingWorker(QtCore.QObject):
                 return
         
         # run the test
-        # TODO write tests and run them
-        # p_return = self.runCmd(TESTLIST[self.router.currentTest]['cmd'])
-        
-        # save to db the test result p_return[0]
-        self.router.saveTestResult(0)
-        
-        self.router.currentTest += 1
-        if self.router.currentTest >= len(TESTLIST):
-            self.serialConsole.close()
-            nextTest = -1
+        try:
+            p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
+        except Exception:
+            p_return = -1
+            nextTest = -2
         else:
-            nextTest = self.router.currentTest
+            # save to db the test result p_return[0]
+            self.router.saveTestResult(p_return)
+            
+            self.router.currentTest += 1
+            if self.router.currentTest >= len(TESTLIST):
+                self.serialConsole.close()
+                nextTest = -1
+            else:
+                nextTest = self.router.currentTest
         
         self.testFinished.emit(nextTest)
 

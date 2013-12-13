@@ -9,34 +9,59 @@ class SerialConsole(object):
     def __init__(self, device, baudrate):
         super(SerialConsole, self).__init__()
         
-        self.sc = serial.Serial(device, baudrate, timeout = 1)
-        self.sc.write("\n")
+        self._device = device
+        self._baudrate = baudrate
+        self._sc = serial.Serial(self._device, self._baudrate, timeout = 1)
+        
+        # if booting up, read the log until no output in WAITTIME seconds
+        # try it 5 times
+        bootLog = "1"
+        #attempt = 4
+        #while
+        while bootLog:
+            time.sleep(WAITTIME)
+            bootLog = self._sc.read(self._sc.inWaiting())
+            print ">" + bootLog + "<"
+        print "i think that there's no more bootLog"
+        
+        self._sc.write("\r\n")
         time.sleep(WAITTIME)
         # get the prompt, we will use it to search for
-        curPrompt = self.sc.read(self.sc.inWaiting()).strip().split()[-1]
+        curPrompt = self._sc.read(self._sc.inWaiting()).strip()
+        if not curPrompt:
+            raise ValueError("Cannot find prompt on the console.")
+        curPrompt = curPrompt.split()[-1]
         match = search("(\w+)@(\w+):[\w/~]+#", curPrompt)
         if not match:
-            self.sc.close()
+            self._sc.close()
             raise ValueError("Cannot find prompt on the console.")
         
         self.promptRegexp = match.group(1) + "@" + match.group(2) + ":[\w/~]+#"
     
     def close(self):
-        self.sc.close()
+        self._sc.close()
+        self._sc = None
+    
+    def reopen(self):
+        if self._sc:
+            self._sc.close()
+        self._sc = serial.Serial(self._device, self._baudrate, timeout = 1)
     
     def exec_(self, cmd):
-        self.sc.write(cmd.strip())
-        self.sc.write("\n")
+        self._sc.write(cmd.strip())
+        self._sc.write("\r\n")
         
         consOutput = ""
-        endPrompt = compile("\\n" + self.promptRegexp + "\s*$")
+        endPromptRegexp = compile("\n" + self.promptRegexp + "\s*$")
         
         # wait until a prompt appears
         counter = WAITROUNDS
         while True:
             time.sleep(WAITTIME)
-            consOutput += self.sc.read(self.sc.inWaiting()).replace("\r", "")
-            if endPrompt.search(consOutput):
+            consOutput += self._sc.read(self._sc.inWaiting()).replace("\r", "")
+            match = endPromptRegexp.search(consOutput)
+            if match:
+                strEndPrompt = match.group(0).strip()
                 break
             elif counter == 0:
                 raise IOError("I've been waiting for output too long, giving up...")
@@ -47,9 +72,7 @@ class SerialConsole(object):
         if consOutput.startswith(cmd):
             consOutput = consOutput[len(cmd):].strip()
         
-        epMatch = endPrompt.search(consOutput)
-        while epMatch:
-            consOutput = consOutput[: -len(epMatch.group(0))]
-            epMatch = endPrompt.search(consOutput)
+        while consOutput.endswith(strEndPrompt):
+            consOutput = consOutput[: -len(strEndPrompt)].rstrip()
         
         return consOutput.strip()
