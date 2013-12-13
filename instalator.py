@@ -427,6 +427,8 @@ class Installer(QtGui.QWidget, Ui_Installer):
                 elif flash_result[0] == 2:
                     i = self.STEPS['FLASH']
                     self.flashStepThreeSig.emit()
+                elif flash_result[0] == 3:
+                    i = self.STEPS['SUCCESS']
                 self.flashingStage = i
             elif flash_result[0] == -1:
                 # router already exists
