@@ -2,8 +2,9 @@ import serial
 import time
 from re import compile, search
 
-WAITTIME = 1
-WAITROUNDS = 20
+WAITTIME = 1 # waittime should not be too short to be able to detect end of boot messages
+WAITROUNDS = 10
+BOOTWAITROUNDS = 6 * WAITROUNDS
 
 class SerialConsole(object):
     def __init__(self, device, baudrate):
@@ -13,30 +14,38 @@ class SerialConsole(object):
         self._baudrate = baudrate
         self._sc = serial.Serial(self._device, self._baudrate, timeout = 1)
         
-        # if booting up, read the log until no output in WAITTIME seconds
-        # try it 5 times
-        bootLog = "1"
-        #attempt = 4
-        #while
-        while bootLog:
-            time.sleep(WAITTIME)
-            bootLog = self._sc.read(self._sc.inWaiting())
-            print ">" + bootLog + "<"
-        print "i think that there's no more bootLog"
-        
-        self._sc.write("\r\n")
-        time.sleep(WAITTIME)
-        # get the prompt, we will use it to search for
-        curPrompt = self._sc.read(self._sc.inWaiting()).strip()
-        if not curPrompt:
-            raise ValueError("Cannot find prompt on the console.")
-        curPrompt = curPrompt.split()[-1]
-        match = search("(\w+)@(\w+):[\w/~]+#", curPrompt)
-        if not match:
+        try:
+            # if booting up, read the log until prompt found
+            counter = BOOTWAITROUNDS
+            lastOutput = "1"
+            consOutput = ""
+            
+            while True:
+                if not lastOutput:
+                    self._sc.write("\r\n")
+                time.sleep(WAITTIME)
+                lastOutput = self._sc.read(self._sc.inWaiting()).replace("\r", "")
+                consOutput += lastOutput
+                match = search(r"(\w+)@(\w+):[\w/~]+#\s*$", consOutput)
+                if match:
+                    self.promptRegexp = match.group(1) + "@" + match.group(2) + r":[\w/~]+#"
+                    break
+                elif counter <= 0:
+                    raise IOError("I've been waiting for prompt too long, giving up...")
+                else:
+                    counter -= 1
+        except Exception:
             self._sc.close()
-            raise ValueError("Cannot find prompt on the console.")
+            self._sc = None
+            raise
         
-        self.promptRegexp = match.group(1) + "@" + match.group(2) + ":[\w/~]+#"
+        # we should get no more output here
+        time.sleep(WAITTIME)
+        oBufChars = self._sc.inWaiting()
+        while oBufChars:
+            self._sc.read(oBufChars)
+            time.sleep(WAITTIME)
+            oBufChars = self._sc.inWaiting()
     
     def close(self):
         self._sc.close()
@@ -48,11 +57,16 @@ class SerialConsole(object):
         self._sc = serial.Serial(self._device, self._baudrate, timeout = 1)
     
     def exec_(self, cmd):
-        self._sc.write(cmd.strip())
-        self._sc.write("\r\n")
+        # cmd should use unix newline (\n)
+        cmd = cmd.replace("\r\n","\n").replace("\r","\n").strip()
+        
+        # clear if there is something in the buffer
+        self._sc.read(self._sc.inWaiting())
+        self._sc.write(cmd)
+        self._sc.write("\n")
         
         consOutput = ""
-        endPromptRegexp = compile("\n" + self.promptRegexp + "\s*$")
+        endPromptRegexp = compile(self.promptRegexp + r"\s*$")
         
         # wait until a prompt appears
         counter = WAITROUNDS
@@ -61,7 +75,6 @@ class SerialConsole(object):
             consOutput += self._sc.read(self._sc.inWaiting()).replace("\r", "")
             match = endPromptRegexp.search(consOutput)
             if match:
-                strEndPrompt = match.group(0).strip()
                 break
             elif counter == 0:
                 raise IOError("I've been waiting for output too long, giving up...")
@@ -69,10 +82,18 @@ class SerialConsole(object):
                 counter -= 1
         
         # cut the command at the beginning and prompt at the end
-        if consOutput.startswith(cmd):
-            consOutput = consOutput[len(cmd):].strip()
+        consOutput = consOutput.split("\n")
+        cmdLines = len(cmd.split("\n"))
         
-        while consOutput.endswith(strEndPrompt):
-            consOutput = consOutput[: -len(strEndPrompt)].rstrip()
+        if cmd.startswith(consOutput[0]):
+            consOutput = "\n".join(consOutput[cmdLines:])
+        
+        match = endPromptRegexp.search(consOutput)
+        while match:
+            consOutput = consOutput[: -len(match.group(0))].rstrip()
+            match = endPromptRegexp.search(consOutput)
         
         return consOutput.strip()
+    
+    def lastStatus(self):
+        return self.exec_("echo $?")
