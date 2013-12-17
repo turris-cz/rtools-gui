@@ -97,6 +97,7 @@ class FlashingWorker(QtCore.QObject):
     def __init__(self):
         super(FlashingWorker, self).__init__()
         self.router = None
+        self.serialConsole = None
     
     def runCmd(self, cmdWithArgs):
         logger.info("[FLASHWORKER] start flashing (command: `%s`)" % " ".join(cmdWithArgs))
@@ -238,7 +239,7 @@ class FlashingWorker(QtCore.QObject):
         except IOError:
             logger.critical("[FLASHWORKER] Could not read codewarrior session.log, application error")
             logtext = "Error"
-            # TODO maybe close the application now
+            # FIXME maybe close the application now
         
         cableDisconnected = logtext.find("Cable disconnected") >= 0
         if cableDisconnected and self.router.secondChance['FLASH']:
@@ -246,8 +247,6 @@ class FlashingWorker(QtCore.QObject):
             logger.warning("[FLASHWORKER] FLASH step failed, check the cables (routerId=%s)" % self.router.id)
             self.router.secondChance['FLASH'] = False
             self.router.error = "Flashing exited with \"Cable disconnected\" in session.log\n"
-                                # TODO copy session.log
-            
             return_code = 1
             err_msg = u"Programování NOR Flash selhalo. Prosím ověřte zapojení kabelu 3 " \
                       u"(Zapojen z USB portu PC na programovaný TURRIS konektor P2). " \
@@ -255,7 +254,6 @@ class FlashingWorker(QtCore.QObject):
         elif logtext.find("Error") >= 0 or (cableDisconnected and not self.router.secondChance['FLASH']):
             logger.warning("[FLASHWORKER] FLASH step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = "Flashing exited with \"Error\" in session.log"
-                                # TODO copy session.log
             return_code = 2
             err_msg = u"Flashování NAND a NOR zlyhalo."
         else:
@@ -270,31 +268,32 @@ class FlashingWorker(QtCore.QObject):
     
     @QtCore.pyqtSlot()
     def executeTest(self):
+        print "spustam test " + str(self.router.currentTest)
         logger.debug("[TESTING] Executing test %d on the router with routerId=%s"
                 % (self.router.currentTest, self.router.id))
         
         # create and prepare a serial console connection
-        if self.router.currentTest == 0:
+        if self.serialConsole is None:
             # find ttyUSBx
             dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
             if len(dev) != 1:
-                # TODO display a warning to the user
-                self.testFinished.emit(-2)
+                self.testFinished.emit(-2 if len(dev) == 0 else -3)
                 return
             
             # open console
             try:
                 self.serialConsole = SerialConsole("/dev/" + dev[0], SERIAL_CONSOLE_BAUDRATE)
             except Exception: # serial console exception, IOError,...
-                self.testFinished.emit(-1)
+                self.testFinished.emit(-2)
                 return
         
         # run the test
         try:
             p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
         except Exception:
-            p_return = -1
-            nextTest = -2
+            nextTest = -1 # TODO put -2 and display 'check the cable'
+            self.serialConsole.close()
+            self.serialConsole = None
         else:
             # save to db the test result p_return[0]
             self.router.saveTestResult(p_return)
@@ -302,6 +301,7 @@ class FlashingWorker(QtCore.QObject):
             self.router.currentTest += 1
             if self.router.currentTest >= len(TESTLIST):
                 self.serialConsole.close()
+                self.serialConsole = None
                 nextTest = -1
             else:
                 nextTest = self.router.currentTest
@@ -509,6 +509,7 @@ class Installer(QtGui.QWidget, Ui_Installer):
         page if testNum = -1"""
         
         if testNum < 0:
+            # TODO -1 - no more tests, -2 & -3 - check the cable
             nextPage = self.STEPS['FINISH']
         else:
             nextPage = self.STEPS['TESTPREPARE']
