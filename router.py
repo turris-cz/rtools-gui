@@ -56,13 +56,13 @@ class Router(object):
         routerId = str(routerId)
         
         if attempt == -1:
-            subquery = "(SELECT max(attempt) FROM routers WHERE id = '%s')" % routerId
+            subquery = "(SELECT max(attempt) FROM routers WHERE id = '%s')" % routerId.replace("'", "''")
         else:
             subquery = "'%d'" % attempt
         
         query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
         if query.exec_("SELECT * FROM routers WHERE id = '%s' AND attempt = %s;"
-                       % (routerId, subquery)):
+                       % (routerId.replace("'", "''"), subquery)):
             if query.size() == 0:
                 raise DoesNotExist()
             else:
@@ -81,7 +81,7 @@ class Router(object):
     def createNewRouter(cls, routerId):
         routerId = str(routerId)
         query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
-        if query.exec_("INSERT INTO routers (id) VALUES ('%s');" % routerId):
+        if query.exec_("INSERT INTO routers (id) VALUES ('%s');" % routerId.replace("'", "''")):
             logger.debug("[DB] succesfully added router record (routerId=%s)" % routerId)
             return cls(routerId)
         elif str(query.lastError().text()).startswith("ERROR:  duplicate key"):
@@ -98,7 +98,7 @@ class Router(object):
                        "FROM routers "
                        "WHERE id = '%(id)s' AND attempt = (SELECT max(attempt) FROM routers WHERE id = '%(id)s') "
                        "RETURNING attempt, status;"
-                       % {'id': routerId}):
+                       % {'id': routerId.replace("'", "''")}):
             logger.debug("[DB] succesfully added router record (routerId=%s)" % routerId)
             router = cls(routerId)
             query.next()
@@ -116,7 +116,7 @@ class Router(object):
         # and be consistent - raise a DbError if failure
         sqlquery = "UPDATE routers SET status='%d', error='%s' " \
                    "WHERE id='%s' AND attempt = '%d';" \
-                   % (self.status, self.error, self.id, self.attempt)
+                   % (self.status, self.error.replace("'", "''"), self.id.replace("'", "''"), self.attempt)
         if self.query.exec_(sqlquery):
             logger.debug("[DB] succesfully updated router record (routerId=%s)" % self.id)
             return True
@@ -128,8 +128,8 @@ class Router(object):
     def saveTestResult(self, testStatus, testText):
         sqlquery = "INSERT INTO tests (id, attempt, testid, testresult, msg) " \
                    "VALUES ('%s', '%d', '%d', '%d', %s);" \
-                   % (self.id, self.attempt, self.currentTest, testStatus,
-                      "'%s'" % testText if testStatus != 0 and testText else "NULL")
+                   % (self.id.replace("'", "''"), self.attempt, self.currentTest, testStatus,
+                      "'%s'" % testText.replace("'", "''") if testStatus != 0 and testText else "NULL")
         if self.query.exec_(sqlquery):
             logger.debug("[DB] router test record inserted successfully (routerId=%s)" % self.id)
             return True
