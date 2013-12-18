@@ -16,6 +16,7 @@ CREATE TABLE tests (
     attempt int,
     testid int NOT NULL,
     testresult int NOT NULL,
+    msg text DEFAULT NULL,
     PRIMARY KEY (id, attempt, testid),
     FOREIGN KEY (id, attempt) REFERENCES routers (id, attempt) ON DELETE CASCADE
 );

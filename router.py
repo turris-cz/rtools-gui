@@ -125,10 +125,11 @@ class Router(object):
             self.saveFailedDbQuery(sqlquery)
             return False
     
-    def saveTestResult(self, testResult):
-        sqlquery = "INSERT INTO tests (id, attempt, testid, testresult) " \
-                   "VALUES ('%s', '%d', '%d', '%d');" \
-                   % (self.id, self.attempt, self.currentTest, testResult)
+    def saveTestResult(self, testStatus, testText):
+        sqlquery = "INSERT INTO tests (id, attempt, testid, testresult, msg) " \
+                   "VALUES ('%s', '%d', '%d', '%d', %s);" \
+                   % (self.id, self.attempt, self.currentTest, testStatus,
+                      "'%s'" % testText if testStatus != 0 and testText else "NULL")
         if self.query.exec_(sqlquery):
             logger.debug("[DB] router test record inserted successfully (routerId=%s)" % self.id)
             return True

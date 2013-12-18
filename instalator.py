@@ -92,12 +92,13 @@ class FlashingWorker(QtCore.QObject):
     
     # tuple (int code, str msg) code 0 - ok, 1 - router already flashed / error, chceck cables, 2 - final error
     flashFinished = QtCore.pyqtSignal(tuple)
-    testFinished = QtCore.pyqtSignal(int)
+    testFinished = QtCore.pyqtSignal(int, 'QString')
     
     def __init__(self):
         super(FlashingWorker, self).__init__()
         self.router = None
         self.serialConsole = None
+        self.canRepeatTest = True
     
     def runCmd(self, cmdWithArgs):
         logger.info("[FLASHWORKER] start flashing (command: `%s`)" % " ".join(cmdWithArgs))
@@ -268,7 +269,6 @@ class FlashingWorker(QtCore.QObject):
     
     @QtCore.pyqtSlot()
     def executeTest(self):
-        print "spustam test " + str(self.router.currentTest)
         logger.debug("[TESTING] Executing test %d on the router with routerId=%s"
                 % (self.router.currentTest, self.router.id))
         
@@ -277,28 +277,35 @@ class FlashingWorker(QtCore.QObject):
             # find ttyUSBx
             dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
             if len(dev) != 1:
-                self.testFinished.emit(-2 if len(dev) == 0 else -3)
+                if len(dev) == 0:
+                    errMsg = u"Check the cable, no Serial Console detected"
+                else:
+                    errMsg = u"More than one serial interface, don't know which one to use"
+                self.testFinished.emit(self.router.currentTest, errMsg)
                 return
             
             # open console
             try:
                 self.serialConsole = SerialConsole("/dev/" + dev[0], SERIAL_CONSOLE_BAUDRATE)
             except Exception: # serial console exception, IOError,...
-                self.testFinished.emit(-2)
+                self.testFinished.emit(self.router.currentTest, u"Could not open serial console")
                 return
         
         # run the test
+        errMsg = ""
         try:
             p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
         except Exception:
-            nextTest = -1 # TODO put -2 and display 'check the cable'
+            errMsg = u"Vyskytla se chyba při testování, zkontrolujte správné zapojení sériové konzole."
             self.serialConsole.close()
             self.serialConsole = None
+            nextTest = self.router.currentTest
         else:
             # save to db the test result p_return[0]
-            self.router.saveTestResult(p_return)
+            self.router.saveTestResult(p_return[0], p_return[1])
             
             self.router.currentTest += 1
+            self.canRepeatTest = True
             if self.router.currentTest >= len(TESTLIST):
                 self.serialConsole.close()
                 self.serialConsole = None
@@ -306,7 +313,7 @@ class FlashingWorker(QtCore.QObject):
             else:
                 nextTest = self.router.currentTest
         
-        self.testFinished.emit(nextTest)
+        self.testFinished.emit(nextTest, errMsg)
 
 
 class Installer(QtGui.QWidget, Ui_Installer):
@@ -503,13 +510,15 @@ class Installer(QtGui.QWidget, Ui_Installer):
             self.flashStepThreeSig.emit()
     
     @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(int)
-    def toNextTest(self, testNum = 0):
+    @QtCore.pyqtSlot(int, 'QString')
+    def toNextTest(self, testNum = 0, errorText = ""):
         """current test finished, show given test instructions or "theEnd"
         page if testNum = -1"""
+        if errorText:
+            QtGui.QMessageBox.warning(self, u"Chyba", errorText)
         
-        if testNum < 0:
-            # TODO -1 - no more tests, -2 & -3 - check the cable
+        if testNum == -1:
+            # no more tests
             nextPage = self.STEPS['FINISH']
         else:
             nextPage = self.STEPS['TESTPREPARE']
