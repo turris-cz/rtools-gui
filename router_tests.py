@@ -105,6 +105,7 @@ gpiotest () {
     for i in `seq 1 4`; do
         VAL=$(($i%2));
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
+        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -117,6 +118,7 @@ gpiotest () {
         VAL=$(($i%2));
         if [ $VAL -eq 0 ]; then VAL=1; else VAL=0; fi
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
+        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -134,6 +136,7 @@ gpiotest () {
     for i in `seq 1 4`; do
         VAL=$(($i%2));
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
+        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -146,6 +149,7 @@ gpiotest () {
         VAL=$(($i%2));
         if [ $VAL -eq 0 ]; then VAL=1; else VAL=0; fi
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
+        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -163,52 +167,52 @@ gpiotest () {
 TESTLIST = (
 {
     "desc":
-        u"WAN test",
+        u"test WAN portu",
     "testfunc": test_WAN
 },
 {
     "desc":
-        u"LAN1 test",
+        u"test LAN portu č. 1",
     "testfunc": test_LAN1
 },
 {
     "desc":
-        u"LAN2 test",
+        u"test LAN portu č. 2",
     "testfunc": test_LAN_ping
 },
 {
     "desc":
-        u"LAN3 test",
+        u"test LAN portu č. 3",
     "testfunc": test_LAN_ping
 },
 {
     "desc":
-        u"LAN4 test",
+        u"test LAN portu č. 4",
     "testfunc": test_LAN_ping
 },
 {
     "desc":
-        u"LAN5 test",
+        u"test LAN portu č. 5",
     "testfunc": test_LAN_ping
 },
 {
     "desc":
-        u"USB1 test",
+        u"test USB č. 1",
     "testfunc": test_USB1
 },
 {
     "desc":
-        u"USB2 test",
+        u"test USB č. 2",
     "testfunc": test_USB2
 },
 {
     "desc":
-        u"mini PCIe test",
+        u"test mini PCI express slotů",
     "testfunc": test_miniPCIe
 },
 {
     "desc":
-        u"GPIO test",
+        u"test GPIO",
     "testfunc": test_GPIO
 },
 )
