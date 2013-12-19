@@ -290,7 +290,7 @@ class FlashingWorker(QtCore.QObject):
                 self.serialConsole = SerialConsole("/dev/" + dev[0], SERIAL_CONSOLE_BAUDRATE)
             except Exception: # serial console exception, IOError,...
                 self.testFinished.emit(self.router.currentTest,
-                                       u"Nezdařilo se připojit k testovanému routeru, zkontrolujte kabel č.5.",
+                                       u"Nezdařila se komunikace po sériové konzoli.",
                                        u"Sériová komunikace s testovaným Turrisem zlyhala.")
                 return
         
@@ -300,9 +300,9 @@ class FlashingWorker(QtCore.QObject):
         try:
             p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
         except Exception:
-            errMsg = u"Vyskytla se chyba při testování, zkontrolujte správné zapojení sériové konzole."
-            testResult = u"Chyba testu. Zkontrolujte připojení kabelu č. 5. Když se to zopakuje, " \
-                         u"bude pravděpodobně problém v testu samotném."
+            errMsg = u"Vyskytla se chyba při testování, chyba může být v testu samotném nebo na routeru (nedokážu rozlišit bez další analýzy)."
+            testResult = u"Chyba testu. Zkuste znova. Když se to zopakuje, " \
+                         u"bude problém v OS routeru nebo v testu samotném."
             self.serialConsole.close()
             self.serialConsole = None
             nextTest = self.router.currentTest
@@ -339,12 +339,14 @@ class Installer(QtGui.QWidget, Ui_Installer):
         'CPLD': 3,
         'RESET': 4,
         'FLASH': 5,
-        'SUCCESS': 6,
-        'CHCKCABLE': 7,
-        'ERROR': 8,
-        'TESTPREPARE': 9,
-        'TESTEXEC': 10,
-        'FINISH': 11
+        'FLASHFINISHED': 6,
+        'AFTERRESET': 7,
+        'BEFORETESTS': 8,
+        'CHCKCABLE': 9,
+        'ERROR': 10,
+        'TESTPREPARE': 11,
+        'TESTEXEC': 12,
+        'FINISH': 13
     }
         
     def __init__(self):
@@ -360,7 +362,9 @@ class Installer(QtGui.QWidget, Ui_Installer):
         self.startToScan.clicked.connect(self.simpleMoveToScan)
         self.scanToOne.clicked.connect(self.launchProgramming)
         self.resetToThree.clicked.connect(self.routerReset)
-        self.finalToTest.clicked.connect(self.toNextTest)
+        self.finalToReset.clicked.connect(self.simpleNextPage)
+        self.resetToTests.clicked.connect(self.simpleNextPage)
+        self.prepareToFirstTest.clicked.connect(self.toNextTest)
         self.chckToStepX.clicked.connect(self.userHasCheckedCables)
         self.errToScan.clicked.connect(self.simpleMoveToScan)
         self.prepTestToRunTest.clicked.connect(self.startPreparedTest)
@@ -445,7 +449,7 @@ class Installer(QtGui.QWidget, Ui_Installer):
                     i = self.STEPS['FLASH']
                     self.flashStepThreeSig.emit()
                 elif flash_result[0] == 3:
-                    i = self.STEPS['SUCCESS']
+                    i = self.STEPS['FLASHFINISHED']
                 self.flashingStage = i
             elif flash_result[0] == -1:
                 # router already exists
@@ -490,14 +494,14 @@ class Installer(QtGui.QWidget, Ui_Installer):
         elif i == self.STEPS['FLASH']:
             if flash_result[0] == 0:
                 self.flashingStage = 0
-                i = self.STEPS['SUCCESS']
+                i = self.STEPS['FLASHFINISHED']
             elif flash_result[0] == 1:
                 self.tmpErrMsg.setText(flash_result[1])
                 i = self.STEPS['CHCKCABLE']
             else:
                 i = self.STEPS['ERROR']
         
-        if i in (self.STEPS['SUCCESS'], self.STEPS['ERROR']):
+        if i in (self.STEPS['FLASHFINISHED'], self.STEPS['ERROR']):
             # unblock the possibility to close the app
             self.blockClose = False
         
@@ -550,6 +554,13 @@ class Installer(QtGui.QWidget, Ui_Installer):
         self.flashingStage = self.STEPS['FLASH']
         self.flashStepThreeSig.emit()
         self.stackedWidget.setCurrentIndex(self.flashingStage)
+    
+    @QtCore.pyqtSlot()
+    def simpleNextPage(self):
+        i = self.stackedWidget.currentIndex()
+        i += 1
+        self.flashingStage = i
+        self.stackedWidget.setCurrentIndex(i)
     
     def closeEvent(self, event):
         if self.blockClose:
