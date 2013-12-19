@@ -64,12 +64,19 @@ def test_LAN_ping(sc):
     return runLocalCmd("ping -c 3 192.168.1.1")
 
 
-def test_USB1(sc):
-    return runRemoteCmd(sc, "[ -d /sys/bus/usb/devices/1-1.1/ ] && [ -b /dev/sda ]")
-
-
-def test_USB2(sc):
-    return runRemoteCmd(sc, "[ -d /sys/bus/usb/devices/1-1.2/ ] && [ -b /dev/sda ]")
+def test_USB(sc):
+    cmd = "ls /dev/sd? 2> /dev/null | wc -l"
+    countSD = sc.exec_(cmd)
+    
+    try:
+        countSD = int(countSD)
+    except ValueError:
+        return (1000, "on tested turris `" + cmd + "` returned:\n" + str(countSD))
+    else:
+        if countSD == 2:
+            return (0, "")
+        else:
+            return (1, "on tested turris `" + cmd + "` returned:\n" + str(countSD))
 
 
 def test_miniPCIe(sc):
@@ -131,7 +138,7 @@ gpiotest () {
     for i in $GPIO_OUT; do echo out > /sys/class/gpio/gpio$i/direction; done
     for i in $GPIO_IN; do echo in > /sys/class/gpio/gpio$i/direction; done
 
-    for i in `seq 1 4`; do
+    for i in 1 2 4; do
         VAL=$(($i%2));
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
@@ -142,11 +149,10 @@ gpiotest () {
             return 1
         fi
     done
-    for i in `seq 1 4`; do
+    for i in 1 2 4; do
         VAL=$(($i%2));
         if [ $VAL -eq 0 ]; then VAL=1; else VAL=0; fi
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
-        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -209,20 +215,13 @@ def textresult_LAN5(p_result):
                 % p_result[1]
 
 
-def textresult_USB1(p_result):
+def textresult_USB(p_result):
     if p_result[0] == 0:
-        return u"Test USB č.1 proběhl úspěšně."
+        return u"Test USB proběhl úspěšně."
     else:
-        return u"Při testování USB č.1 nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
-                % p_result[1]
-
-
-def textresult_USB2(p_result):
-    if p_result[0] == 0:
-        return u"Test USB č.2 proběhl úspěšně."
-    else:
-        return u"Při testování USB č.2 nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
-                % p_result[1]
+        numdetected = p_result[1].split("` returned:\n")[-1]
+        return u"Detekovali jsme jenom %s USB zařízení. Očekávali jsme 2." \
+                % numdetected
 
 
 def textresult_miniPCIe(p_result):
@@ -281,15 +280,9 @@ TESTLIST = (
 },
 {
     "desc":
-        u"test USB č. 1",
-    "testfunc": test_USB1,
-    "interpretresult": textresult_USB1
-},
-{
-    "desc":
-        u"test USB č. 2",
-    "testfunc": test_USB2,
-    "interpretresult": textresult_USB2
+        u"test USB",
+    "testfunc": test_USB,
+    "interpretresult": textresult_USB
 },
 {
     "desc":
