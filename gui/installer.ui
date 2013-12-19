@@ -493,7 +493,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="testInstructions">
+        <widget class="QLabel" name="testResultLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>1</horstretch>
@@ -503,8 +503,30 @@
          <property name="text">
           <string/>
          </property>
+         <property name="textFormat">
+          <enum>Qt::RichText</enum>
+         </property>
          <property name="wordWrap">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="nextTestDesc">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
@@ -544,7 +566,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_21">
+        <widget class="QLabel" name="runningTestDesc">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>1</horstretch>
@@ -552,7 +574,10 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Probíhá testování, prosím vyčkejte chvilku.</string>
+          <string/>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
          </property>
          <property name="wordWrap">
           <bool>true</bool>

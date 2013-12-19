@@ -146,6 +146,7 @@ gpiotest () {
         VAL=$(($i%2));
         if [ $VAL -eq 0 ]; then VAL=1; else VAL=0; fi
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
+        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -164,56 +165,64 @@ def textresult_WAN(p_result):
     if p_result[0] == 0:
         return u"Test WAN portu proběhl úspěšně."
     else:
-        return u"Při testování WAN portu nastala chyba\n" + p_result[1]
+        return u"Při testování WAN portu nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
+                % p_result[1]
 
 
 def textresult_LAN1(p_result):
     if p_result[0] == 0:
         return u"Test LAN portu č.1 proběhl úspěšně."
     else:
-        return u"Při testování LAN portu č.1 portu nastala chyba\n" + p_result[1]
+        return u"Při testování LAN portu č.1 nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
+                % p_result[1]
 
 
 def textresult_LAN2(p_result):
     if p_result[0] == 0:
         return u"Test LAN portu č.2 proběhl úspěšně."
     else:
-        return u"Při testování LAN portu č.2 portu nastala chyba\n" + p_result[1]
+        return u"Při testování LAN portu č.2 nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
+                % p_result[1]
 
 
 def textresult_LAN3(p_result):
     if p_result[0] == 0:
         return u"Test LAN portu č.3 proběhl úspěšně."
     else:
-        return u"Při testování LAN portu č.3 portu nastala chyba\n" + p_result[1]
+        return u"Při testování LAN portu č.3 nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
+                % p_result[1]
 
 
 def textresult_LAN4(p_result):
     if p_result[0] == 0:
         return u"Test LAN portu č.4 proběhl úspěšně."
     else:
-        return u"Při testování LAN portu č.4 portu nastala chyba\n" + p_result[1]
+        return u"Při testování LAN portu č.4 nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
+                % p_result[1]
 
 
 def textresult_LAN5(p_result):
     if p_result[0] == 0:
         return u"Test LAN portu č.5 proběhl úspěšně."
     else:
-        return u"Při testování LAN portu č.5 portu nastala chyba\n" + p_result[1]
+        return u"Při testování LAN portu č.5 nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
+                % p_result[1]
 
 
 def textresult_USB1(p_result):
     if p_result[0] == 0:
         return u"Test USB č.1 proběhl úspěšně."
     else:
-        return u"Při testování USB č.1 nastala chyba " + p_result[1]
+        return u"Při testování USB č.1 nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
+                % p_result[1]
 
 
 def textresult_USB2(p_result):
     if p_result[0] == 0:
         return u"Test USB č.2 proběhl úspěšně."
     else:
-        return u"Při testování USB č.2 nastala chyba " + p_result[1]
+        return u"Při testování USB č.2 nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
+                % p_result[1]
 
 
 def textresult_miniPCIe(p_result):
@@ -229,7 +238,8 @@ def textresult_GPIO(p_result):
     if p_result[0] == 0:
         return u"Test GPIO proběhl úspěšně."
     else:
-        return u"Při testování GPIO nastala chyba " + p_result[1]
+        return u"Při testování GPIO nastala chyba <div style=\"font-size: 11px;\">%s</div>" \
+                % p_result[1]
 
 
 TESTLIST = (

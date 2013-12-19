@@ -526,20 +526,23 @@ class Installer(QtGui.QWidget, Ui_Installer):
         
         if testNum == -1:
             # no more tests
+            QtGui.QMessageBox.information(self, u"Výsledek posledního testu",
+                    u"Výsledek předchozího testu:<br>%s" % testResult) #  FIXME this is a temporary solution
             nextPage = self.STEPS['FINISH']
         else:
             nextPage = self.STEPS['TESTPREPARE']
             if testResult:
-                testResult = u"Výsledek předchozího testu\n%s\n\n" % testResult
-            self.testInstructions.setText(testResult +
-                    u"Následující test je %s." % TESTLIST[testNum]['desc'])
+                testResult = u"Výsledek předchozího testu:<br>%s" \
+                        % testResult.replace("\n", "<br>\n")
+            self.testResultLabel.setText(testResult)
+            self.nextTestDesc.setText(u"Následující test je %s." % TESTLIST[testNum]['desc'])
         
         self.stackedWidget.setCurrentIndex(nextPage)
     
     @QtCore.pyqtSlot()
     def startPreparedTest(self):
         self.runTestSig.emit()
-        self.
+        self.runningTestDesc.setText(u"Probíhající test je " + self.nextTestDesc.text()[20:])
         self.stackedWidget.setCurrentIndex(self.STEPS['TESTEXEC'])
     
     @QtCore.pyqtSlot()
