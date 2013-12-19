@@ -10,6 +10,7 @@
 
 
 import subprocess
+import time
 from shlex import split
 
 
@@ -41,6 +42,8 @@ def runRemoteCmd(sc, cmdstr):
 
 
 def test_WAN(sc):
+    time.sleep(2) # wait for link
+    
     cmdResult = runLocalCmd("sudo ifconfig %s 192.168.100.2" % LOCAL_TEST_IFACE)
     if cmdResult[0] != 0:
         return cmdResult
@@ -61,6 +64,7 @@ def test_LAN1(sc):
 
 
 def test_LAN_ping(sc):
+    time.sleep(2) # wait for link
     return runLocalCmd("ping -c 3 192.168.1.1")
 
 
