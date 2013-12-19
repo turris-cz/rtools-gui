@@ -31,13 +31,13 @@ def runRemoteCmd(sc, cmdstr):
     stdOut = sc.exec_(cmdstr)
     cmdStatus = sc.lastStatus()
     try:
-        cmdStatus = int(cmdStatus)
+        cmdStatusInt = int(cmdStatus)
     except ValueError:
-        cmdStatus = 1
+        cmdStatusInt = 1000
     
-    return (cmdStatus,
+    return (cmdStatusInt,
             "on tested turris `" + cmdstr + "` returned:\n"
-            + stdOut + "\n-----\ncommand exit code: " + str(cmdStatus))
+            + stdOut + "\n-----\ncommand exit code: " + cmdStatus)
 
 
 def test_WAN(sc):
@@ -78,7 +78,7 @@ def test_miniPCIe(sc):
     try:
         countPci = int(countPci)
     except ValueError:
-        return (1, "on tested turris `" + cmd + "` returned:\n" + str(countPci))
+        return (1000, "on tested turris `" + cmd + "` returned:\n" + str(countPci))
     else:
         if countPci == 2:
             return (0, "")
@@ -105,7 +105,6 @@ gpiotest () {
     for i in `seq 1 4`; do
         VAL=$(($i%2));
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
-        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -118,7 +117,6 @@ gpiotest () {
         VAL=$(($i%2));
         if [ $VAL -eq 0 ]; then VAL=1; else VAL=0; fi
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
-        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -136,7 +134,6 @@ gpiotest () {
     for i in `seq 1 4`; do
         VAL=$(($i%2));
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
-        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -149,7 +146,6 @@ gpiotest () {
         VAL=$(($i%2));
         if [ $VAL -eq 0 ]; then VAL=1; else VAL=0; fi
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
-        sleep 1
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
         INVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_IN | cut -d ' ' -f $i)/value`;
         if [ $OUTVAL -ne $INVAL ]
@@ -164,55 +160,137 @@ gpiotest () {
     return runRemoteCmd(sc, "( set -e; gpiotest )")
 
 
+def textresult_WAN(p_result):
+    if p_result[0] == 0:
+        return u"Test WAN portu proběhl úspěšně."
+    else:
+        return u"Při testování WAN portu nastala chyba\n" + p_result[1]
+
+
+def textresult_LAN1(p_result):
+    if p_result[0] == 0:
+        return u"Test LAN portu č.1 proběhl úspěšně."
+    else:
+        return u"Při testování LAN portu č.1 portu nastala chyba\n" + p_result[1]
+
+
+def textresult_LAN2(p_result):
+    if p_result[0] == 0:
+        return u"Test LAN portu č.2 proběhl úspěšně."
+    else:
+        return u"Při testování LAN portu č.2 portu nastala chyba\n" + p_result[1]
+
+
+def textresult_LAN3(p_result):
+    if p_result[0] == 0:
+        return u"Test LAN portu č.3 proběhl úspěšně."
+    else:
+        return u"Při testování LAN portu č.3 portu nastala chyba\n" + p_result[1]
+
+
+def textresult_LAN4(p_result):
+    if p_result[0] == 0:
+        return u"Test LAN portu č.4 proběhl úspěšně."
+    else:
+        return u"Při testování LAN portu č.4 portu nastala chyba\n" + p_result[1]
+
+
+def textresult_LAN5(p_result):
+    if p_result[0] == 0:
+        return u"Test LAN portu č.5 proběhl úspěšně."
+    else:
+        return u"Při testování LAN portu č.5 portu nastala chyba\n" + p_result[1]
+
+
+def textresult_USB1(p_result):
+    if p_result[0] == 0:
+        return u"Test USB č.1 proběhl úspěšně."
+    else:
+        return u"Při testování USB č.1 nastala chyba " + p_result[1]
+
+
+def textresult_USB2(p_result):
+    if p_result[0] == 0:
+        return u"Test USB č.2 proběhl úspěšně."
+    else:
+        return u"Při testování USB č.2 nastala chyba " + p_result[1]
+
+
+def textresult_miniPCIe(p_result):
+    if p_result[0] == 0:
+        return u"Test mini PCI express proběhl úspěšně."
+    else:
+        numdetected = p_result[1].split("` returned:\n")[-1]
+        return u"Detekovali jsme jenom %s mini PCI express slotů. Očekávali jsme 2." \
+                % numdetected
+
+
+def textresult_GPIO(p_result):
+    if p_result[0] == 0:
+        return u"Test GPIO proběhl úspěšně."
+    else:
+        return u"Při testování GPIO nastala chyba " + p_result[1]
+
+
 TESTLIST = (
 {
     "desc":
         u"test WAN portu",
-    "testfunc": test_WAN
+    "testfunc": test_WAN,
+    "interpretresult": textresult_WAN
 },
 {
     "desc":
         u"test LAN portu č. 1",
-    "testfunc": test_LAN1
+    "testfunc": test_LAN1,
+    "interpretresult": textresult_LAN1
 },
 {
     "desc":
         u"test LAN portu č. 2",
-    "testfunc": test_LAN_ping
+    "testfunc": test_LAN_ping,
+    "interpretresult": textresult_LAN2
 },
 {
     "desc":
         u"test LAN portu č. 3",
-    "testfunc": test_LAN_ping
+    "testfunc": test_LAN_ping,
+    "interpretresult": textresult_LAN3
 },
 {
     "desc":
         u"test LAN portu č. 4",
-    "testfunc": test_LAN_ping
+    "testfunc": test_LAN_ping,
+    "interpretresult": textresult_LAN4
 },
 {
     "desc":
         u"test LAN portu č. 5",
-    "testfunc": test_LAN_ping
+    "testfunc": test_LAN_ping,
+    "interpretresult": textresult_LAN5
 },
 {
     "desc":
         u"test USB č. 1",
-    "testfunc": test_USB1
+    "testfunc": test_USB1,
+    "interpretresult": textresult_USB1
 },
 {
     "desc":
         u"test USB č. 2",
-    "testfunc": test_USB2
+    "testfunc": test_USB2,
+    "interpretresult": textresult_USB2
 },
 {
     "desc":
         u"test mini PCI express slotů",
-    "testfunc": test_miniPCIe
+    "testfunc": test_miniPCIe,
+    "interpretresult": textresult_miniPCIe
 },
 {
     "desc":
         u"test GPIO",
-    "testfunc": test_GPIO
+    "testfunc": test_GPIO,
+    "interpretresult": textresult_GPIO
 },
 )

@@ -92,7 +92,7 @@ class FlashingWorker(QtCore.QObject):
     
     # tuple (int code, str msg) code 0 - ok, 1 - router already flashed / error, chceck cables, 2 - final error
     flashFinished = QtCore.pyqtSignal(tuple)
-    testFinished = QtCore.pyqtSignal(int, 'QString')
+    testFinished = QtCore.pyqtSignal(int, 'QString', 'QString')
     
     def __init__(self):
         super(FlashingWorker, self).__init__()
@@ -278,32 +278,39 @@ class FlashingWorker(QtCore.QObject):
             dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
             if len(dev) != 1:
                 if len(dev) == 0:
-                    errMsg = u"Check the cable, no Serial Console detected"
+                    errMsg = u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli."
                 else:
-                    errMsg = u"More than one serial interface, don't know which one to use"
-                self.testFinished.emit(self.router.currentTest, errMsg)
+                    errMsg = u"Našel jsem více sériových konzolí, nevím kterou použít."
+                self.testFinished.emit(self.router.currentTest, errMsg,
+                                       u"Sériová komunikace s testovaným Turrisem zlyhala.")
                 return
             
             # open console
             try:
                 self.serialConsole = SerialConsole("/dev/" + dev[0], SERIAL_CONSOLE_BAUDRATE)
             except Exception: # serial console exception, IOError,...
-                self.testFinished.emit(self.router.currentTest, u"Could not open serial console")
+                self.testFinished.emit(self.router.currentTest,
+                                       u"Nezdařilo se připojit k testovanému routeru, zkontrolujte kabel č.5.",
+                                       u"Sériová komunikace s testovaným Turrisem zlyhala.")
                 return
         
         # run the test
         errMsg = ""
+        testResult = ""
         try:
             p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
         except Exception:
             errMsg = u"Vyskytla se chyba při testování, zkontrolujte správné zapojení sériové konzole."
+            testResult = u"Chyba testu. Zkontrolujte připojení kabelu č. 5. Když se to zopakuje, " \
+                         u"bude pravděpodobně problém v testu samotném."
             self.serialConsole.close()
             self.serialConsole = None
             nextTest = self.router.currentTest
         else:
             # save to db the test result p_return[0]
             self.router.saveTestResult(p_return[0], p_return[1])
-            
+        
+            testResult = TESTLIST[self.router.currentTest]['interpretresult'](p_return)
             self.router.currentTest += 1
             self.canRepeatTest = True
             if self.router.currentTest >= len(TESTLIST):
@@ -313,7 +320,7 @@ class FlashingWorker(QtCore.QObject):
             else:
                 nextTest = self.router.currentTest
         
-        self.testFinished.emit(nextTest, errMsg)
+        self.testFinished.emit(nextTest, errMsg, testResult)
 
 
 class Installer(QtGui.QWidget, Ui_Installer):
@@ -510,8 +517,8 @@ class Installer(QtGui.QWidget, Ui_Installer):
             self.flashStepThreeSig.emit()
     
     @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(int, 'QString')
-    def toNextTest(self, testNum = 0, errorText = ""):
+    @QtCore.pyqtSlot(int, 'QString', 'QString')
+    def toNextTest(self, testNum=0, errorText="", testResult=""):
         """current test finished, show given test instructions or "theEnd"
         page if testNum = -1"""
         if errorText:
@@ -522,13 +529,17 @@ class Installer(QtGui.QWidget, Ui_Installer):
             nextPage = self.STEPS['FINISH']
         else:
             nextPage = self.STEPS['TESTPREPARE']
-            self.testInstructions.setText(TESTLIST[testNum]['desc'])
+            if testResult:
+                testResult = u"Výsledek předchozího testu\n%s\n\n" % testResult
+            self.testInstructions.setText(testResult +
+                    u"Následující test je %s." % TESTLIST[testNum]['desc'])
         
         self.stackedWidget.setCurrentIndex(nextPage)
     
     @QtCore.pyqtSlot()
     def startPreparedTest(self):
         self.runTestSig.emit()
+        self.
         self.stackedWidget.setCurrentIndex(self.STEPS['TESTEXEC'])
     
     @QtCore.pyqtSlot()
