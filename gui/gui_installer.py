@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Thu Jan  2 21:12:21 2014
+# Created: Thu Jan  2 22:42:29 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -445,17 +445,17 @@ class Ui_Installer(object):
         self.label_31 = QtGui.QLabel(self.onlyTests)
         self.label_31.setObjectName(_fromUtf8("label_31"))
         self.horizontalLayout_12.addWidget(self.label_31)
-        self.lineEdit_2 = QtGui.QLineEdit(self.onlyTests)
-        self.lineEdit_2.setObjectName(_fromUtf8("lineEdit_2"))
-        self.horizontalLayout_12.addWidget(self.lineEdit_2)
+        self.barcodeOnlyTests = QtGui.QLineEdit(self.onlyTests)
+        self.barcodeOnlyTests.setObjectName(_fromUtf8("barcodeOnlyTests"))
+        self.horizontalLayout_12.addWidget(self.barcodeOnlyTests)
         self.verticalLayout_17.addLayout(self.horizontalLayout_12)
         self.horizontalLayout_13 = QtGui.QHBoxLayout()
         self.horizontalLayout_13.setObjectName(_fromUtf8("horizontalLayout_13"))
         spacerItem12 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_13.addItem(spacerItem12)
-        self.pushButton = QtGui.QPushButton(self.onlyTests)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.horizontalLayout_13.addWidget(self.pushButton)
+        self.toOnlyTests = QtGui.QPushButton(self.onlyTests)
+        self.toOnlyTests.setObjectName(_fromUtf8("toOnlyTests"))
+        self.horizontalLayout_13.addWidget(self.toOnlyTests)
         self.verticalLayout_17.addLayout(self.horizontalLayout_13)
         self.stackedWidget.addWidget(self.onlyTests)
         self.cpldErase = QtGui.QWidget()
@@ -483,9 +483,9 @@ class Ui_Installer(object):
         self.horizontalLayout_16.setObjectName(_fromUtf8("horizontalLayout_16"))
         spacerItem13 = QtGui.QSpacerItem(348, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_16.addItem(spacerItem13)
-        self.pushButton_2 = QtGui.QPushButton(self.page)
-        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.horizontalLayout_16.addWidget(self.pushButton_2)
+        self.startEraseCpld = QtGui.QPushButton(self.page)
+        self.startEraseCpld.setObjectName(_fromUtf8("startEraseCpld"))
+        self.horizontalLayout_16.addWidget(self.startEraseCpld)
         self.verticalLayout_19.addLayout(self.horizontalLayout_16)
         self.cpldDeleteStack.addWidget(self.page)
         self.page_2 = QtGui.QWidget()
@@ -594,10 +594,10 @@ class Ui_Installer(object):
         self.label_29.setText(_translate("Installer", "<h1>Testování</h1>", None))
         self.label_30.setText(_translate("Installer", "Sejměte čárový kód nalepený na LAN konektoru desky routeru TURRIS nebo na spodní straně krabice (tyto kódy jsou stejné).", None))
         self.label_31.setText(_translate("Installer", "Čárový kód", None))
-        self.pushButton.setText(_translate("Installer", "Otestovat tento router", None))
+        self.toOnlyTests.setText(_translate("Installer", "Otestovat tento router", None))
         self.label.setText(_translate("Installer", "<h1>Smazání CPLD obvodu</h1>", None))
         self.label_33.setText(_translate("Installer", "Před provedením této operace zkontrolujte připojení kabelu č. ??.", None))
-        self.pushButton_2.setText(_translate("Installer", "Smazat CPLD", None))
+        self.startEraseCpld.setText(_translate("Installer", "Smazat CPLD", None))
         self.label_32.setText(_translate("Installer", "Probíhá mazání obvodu CPLD.", None))
         self.menuAkce.setTitle(_translate("Installer", "&Soubor", None))
         self.menuN_stroje.setTitle(_translate("Installer", "&Nástroje", None))

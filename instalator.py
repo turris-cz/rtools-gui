@@ -139,6 +139,26 @@ class FlashingWorker(QtCore.QObject):
         
         self.flashFinished.emit((return_code, err_msg, dbErr))
     
+    @QtCore.pyqtSlot('QString')
+    def getFlashedRouter(self, routerId):
+        routerId = str(routerId)
+        
+        dbErr = False
+        try:
+            self.router = Router.fetchFromDb(routerId) # get last attempt for given id router
+            return_code = self.router.status
+            err_msg = ""
+        except DoesNotExist:
+            return_code = -1
+            err_msg = u"Router s daným ID ještě nebyl naprogramován, musíte ho nejdříve " \
+                      u"naprogramovat, až pak testovat."
+        except DbError, e:
+            return_code = -2
+            err_msg = e.message
+            dbErr = True
+        
+        self.flashFinished.emit((return_code, err_msg, dbErr))
+    
     @QtCore.pyqtSlot()
     def flashStepOne(self):
         logger.debug("[FLASHWORKER] starting first step (routerId=%s)" % self.router.id)
@@ -336,6 +356,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     flashStepTwoSig = QtCore.pyqtSignal()
     flashStepThreeSig = QtCore.pyqtSignal()
     runTestSig = QtCore.pyqtSignal()
+    checkRouterDbExistsSig = QtCore.pyqtSignal('QString')
     
     STEPS = {
         'START': 0,
@@ -377,6 +398,10 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.errToScan.clicked.connect(self.simpleMoveToScan)
         self.prepTestToRunTest.clicked.connect(self.startPreparedTest)
         self.endToScan.clicked.connect(self.simpleMoveToScan)
+        self.toAccessoriesTests.clicked.connect(self.showOnlyTests)
+        self.toAccessoriesCPLDErase.clicked.connect(self.showCpldEraser)
+        self.toOnlyTests.clicked.connect(self.chckRouterAndTest)
+        self.startEraseCpld.clicked.connect(self.eraseCpld)
         
         # action trigger slots
         self.actionKonec.triggered.connect(self.close)
@@ -393,6 +418,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.flashStepTwoSig.connect(self.flashWorker.flashStepTwo)
         self.flashStepThreeSig.connect(self.flashWorker.flashStepThree)
         self.runTestSig.connect(self.flashWorker.executeTest)
+        self.checkRouterDbExistsSig.connect(self.flashWorker.getFlashedRouter)
         self.flashWorker.flashFinished.connect(self.moveToNext)
         self.flashWorker.testFinished.connect(self.toNextTest)
         
@@ -514,6 +540,17 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                 i = self.STEPS['CHCKCABLE']
             else:
                 i = self.STEPS['ERROR']
+        elif i == self.STEPS['ACCTESTS']:
+            self.toOnlyTests.setEnabled(True)
+            if flash_result[2]:
+                QtGui.QMessageBox.warning(self, u"Chyba databáze", flash_result[1])
+            elif flash_result[0] == -1:
+                QtGui.QMessageBox.warning(self, u"Chyba", flash_result[1])
+                self.barcodeOnlyTests.clear()
+                self.barcodeOnlyTests.setFocus()
+            else:
+                self.toNextTest()
+            return
         
         if i in (self.STEPS['FLASHFINISHED'], self.STEPS['ERROR']):
             # unblock the possibility to close the app
@@ -521,7 +558,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         
         # change the stackedWidget index
         self.stackedWidget.setCurrentIndex(i)
-        logger.debug("[MAIN] switching to the step %d (step 6 is error page)" % i)
+        logger.debug("[MAIN] switching to the step %d" % i)
     
     @QtCore.pyqtSlot()
     def userHasCheckedCables(self):
@@ -582,11 +619,41 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     
     @QtCore.pyqtSlot()
     def showOnlyTests(self):
+        self.barcodeOnlyTests.clear()
         self.stackedWidget.setCurrentIndex(self.STEPS['ACCTESTS'])
+        self.barcodeOnlyTests.setFocus()
     
     @QtCore.pyqtSlot()
     def showCpldEraser(self):
+        self.cpldDeleteStack.setCurrentIndex(0)
         self.stackedWidget.setCurrentIndex(self.STEPS['ACCCPLDERASE'])
+    
+    @QtCore.pyqtSlot()
+    def chckRouterAndTest(self):
+        """do the check of scanned id, check if that router exists in db"""
+        barCode = self.barcodeOnlyTests.text()
+        if barCode.isEmpty():
+            QtGui.QMessageBox.critical(self, u"Chyba",
+                    u"Musíte naskenovat čárový kód.")
+            self.barcodeOnlyTests.clear()
+            self.barcodeOnlyTests.setFocus()
+            return
+        
+        if not serialNumberValidator(barCode):
+            QtGui.QMessageBox.critical(self, u"Chyba",
+                    u"Neplatný čárový kód, naskenujte ho znovu.")
+            self.barcodeOnlyTests.clear()
+            self.barcodeOnlyTests.setFocus()
+            return
+        
+        # check if this router is in db and set router id and attempt accordingly
+        self.toOnlyTests.setEnabled(False)
+        self.checkRouterDbExistsSig.emit(barCode)
+    
+    @QtCore.pyqtSlot()
+    def eraseCpld(self):
+        self.cpldDeleteStack.setCurrentIndex(1)
+        # self.eraseCpldSig.emit()
     
     def closeEvent(self, event):
         if self.blockClose:

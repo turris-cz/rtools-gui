@@ -840,7 +840,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="lineEdit_2"/>
+           <widget class="QLineEdit" name="barcodeOnlyTests"/>
           </item>
          </layout>
         </item>
@@ -860,7 +860,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="toOnlyTests">
             <property name="text">
              <string>Otestovat tento router</string>
             </property>
@@ -912,7 +912,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
                </spacer>
               </item>
               <item>
-               <widget class="QPushButton" name="pushButton_2">
+               <widget class="QPushButton" name="startEraseCpld">
                 <property name="text">
                  <string>Smazat CPLD</string>
                 </property>
