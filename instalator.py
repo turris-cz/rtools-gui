@@ -306,6 +306,11 @@ class FlashingWorker(QtCore.QObject):
             self.serialConsole.close()
             self.serialConsole = None
             nextTest = self.router.currentTest
+            import traceback
+            logger.critical("[TESTING] error during test \"" +
+                            TESTLIST[self.router.currentTest]['desc'] +
+                            "\"\n" +
+                            traceback.format_exc())
         else:
             # save to db the test result p_return[0]
             self.router.saveTestResult(p_return[0], p_return[1])
