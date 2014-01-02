@@ -323,7 +323,7 @@ class FlashingWorker(QtCore.QObject):
         self.testFinished.emit(nextTest, errMsg, testResult)
 
 
-class Installer(QtGui.QWidget, Ui_Installer):
+class Installer(QtGui.QMainWindow, Ui_Installer):
     """Installer GUI application for flashing the Turris routers"""
     
     newRouterAddSig = QtCore.pyqtSignal('QString', bool)
