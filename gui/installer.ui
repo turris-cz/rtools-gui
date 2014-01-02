@@ -968,12 +968,12 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
    </widget>
    <widget class="QMenu" name="menuN_stroje">
     <property name="title">
-     <string>Nástroje</string>
+     <string>&amp;Nástroje</string>
     </property>
-    <addaction name="actionDal_funkce_2"/>
+    <addaction name="actionDalsifunkce"/>
     <addaction name="separator"/>
-    <addaction name="actionTestov_n_2"/>
-    <addaction name="actionSmaz_n_CPLD_obvodu"/>
+    <addaction name="actionTestovani"/>
+    <addaction name="actionSmazaniCPLD"/>
    </widget>
    <addaction name="menuAkce"/>
    <addaction name="menuN_stroje"/>
@@ -988,32 +988,17 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
     <string>Konec</string>
    </property>
   </action>
-  <action name="actionTestov_n">
-   <property name="text">
-    <string>Testování</string>
-   </property>
-  </action>
-  <action name="actionSmaz_n_CPLD">
-   <property name="text">
-    <string>Smazání CPLD</string>
-   </property>
-  </action>
-  <action name="actionDal_funkce">
+  <action name="actionDalsifunkce">
    <property name="text">
     <string>Další funkce</string>
    </property>
   </action>
-  <action name="actionDal_funkce_2">
-   <property name="text">
-    <string>Další funkce</string>
-   </property>
-  </action>
-  <action name="actionTestov_n_2">
+  <action name="actionTestovani">
    <property name="text">
     <string>Testování</string>
    </property>
   </action>
-  <action name="actionSmaz_n_CPLD_obvodu">
+  <action name="actionSmazaniCPLD">
    <property name="text">
     <string>Smazání CPLD obvodu</string>
    </property>

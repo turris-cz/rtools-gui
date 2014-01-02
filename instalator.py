@@ -351,7 +351,10 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         'ERROR': 10,
         'TESTPREPARE': 11,
         'TESTEXEC': 12,
-        'FINISH': 13
+        'FINISH': 13,
+        'ACCESSORIES': 14,
+        'ACCTESTS': 15,
+        'ACCCPLDERASE': 16
     }
         
     def __init__(self):
@@ -374,6 +377,12 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.errToScan.clicked.connect(self.simpleMoveToScan)
         self.prepTestToRunTest.clicked.connect(self.startPreparedTest)
         self.endToScan.clicked.connect(self.simpleMoveToScan)
+        
+        # action trigger slots
+        self.actionKonec.triggered.connect(self.close)
+        self.actionDalsifunkce.triggered.connect(self.showAccessories)
+        self.actionTestovani.triggered.connect(self.showOnlyTests)
+        self.actionSmazaniCPLD.triggered.connect(self.showCpldEraser)
         
         # start a second thread which will do the flashing
         self.flashWorker = FlashingWorker()
@@ -566,6 +575,18 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         i += 1
         self.flashingStage = i
         self.stackedWidget.setCurrentIndex(i)
+    
+    @QtCore.pyqtSlot()
+    def showAccessories(self):
+        self.stackedWidget.setCurrentIndex(self.STEPS['ACCESSORIES'])
+    
+    @QtCore.pyqtSlot()
+    def showOnlyTests(self):
+        self.stackedWidget.setCurrentIndex(self.STEPS['ACCTESTS'])
+    
+    @QtCore.pyqtSlot()
+    def showCpldEraser(self):
+        self.stackedWidget.setCurrentIndex(self.STEPS['ACCCPLDERASE'])
     
     def closeEvent(self, event):
         if self.blockClose:

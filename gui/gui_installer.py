@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Thu Jan  2 20:25:38 2014
+# Created: Thu Jan  2 21:12:21 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -517,23 +517,17 @@ class Ui_Installer(object):
         icon = QtGui.QIcon.fromTheme(_fromUtf8("application-exit"))
         self.actionKonec.setIcon(icon)
         self.actionKonec.setObjectName(_fromUtf8("actionKonec"))
-        self.actionTestov_n = QtGui.QAction(Installer)
-        self.actionTestov_n.setObjectName(_fromUtf8("actionTestov_n"))
-        self.actionSmaz_n_CPLD = QtGui.QAction(Installer)
-        self.actionSmaz_n_CPLD.setObjectName(_fromUtf8("actionSmaz_n_CPLD"))
-        self.actionDal_funkce = QtGui.QAction(Installer)
-        self.actionDal_funkce.setObjectName(_fromUtf8("actionDal_funkce"))
-        self.actionDal_funkce_2 = QtGui.QAction(Installer)
-        self.actionDal_funkce_2.setObjectName(_fromUtf8("actionDal_funkce_2"))
-        self.actionTestov_n_2 = QtGui.QAction(Installer)
-        self.actionTestov_n_2.setObjectName(_fromUtf8("actionTestov_n_2"))
-        self.actionSmaz_n_CPLD_obvodu = QtGui.QAction(Installer)
-        self.actionSmaz_n_CPLD_obvodu.setObjectName(_fromUtf8("actionSmaz_n_CPLD_obvodu"))
+        self.actionDalsifunkce = QtGui.QAction(Installer)
+        self.actionDalsifunkce.setObjectName(_fromUtf8("actionDalsifunkce"))
+        self.actionTestovani = QtGui.QAction(Installer)
+        self.actionTestovani.setObjectName(_fromUtf8("actionTestovani"))
+        self.actionSmazaniCPLD = QtGui.QAction(Installer)
+        self.actionSmazaniCPLD.setObjectName(_fromUtf8("actionSmazaniCPLD"))
         self.menuAkce.addAction(self.actionKonec)
-        self.menuN_stroje.addAction(self.actionDal_funkce_2)
+        self.menuN_stroje.addAction(self.actionDalsifunkce)
         self.menuN_stroje.addSeparator()
-        self.menuN_stroje.addAction(self.actionTestov_n_2)
-        self.menuN_stroje.addAction(self.actionSmaz_n_CPLD_obvodu)
+        self.menuN_stroje.addAction(self.actionTestovani)
+        self.menuN_stroje.addAction(self.actionSmazaniCPLD)
         self.menubar.addAction(self.menuAkce.menuAction())
         self.menubar.addAction(self.menuN_stroje.menuAction())
 
@@ -606,12 +600,9 @@ class Ui_Installer(object):
         self.pushButton_2.setText(_translate("Installer", "Smazat CPLD", None))
         self.label_32.setText(_translate("Installer", "Probíhá mazání obvodu CPLD.", None))
         self.menuAkce.setTitle(_translate("Installer", "&Soubor", None))
-        self.menuN_stroje.setTitle(_translate("Installer", "Nástroje", None))
+        self.menuN_stroje.setTitle(_translate("Installer", "&Nástroje", None))
         self.actionKonec.setText(_translate("Installer", "Konec", None))
-        self.actionTestov_n.setText(_translate("Installer", "Testování", None))
-        self.actionSmaz_n_CPLD.setText(_translate("Installer", "Smazání CPLD", None))
-        self.actionDal_funkce.setText(_translate("Installer", "Další funkce", None))
-        self.actionDal_funkce_2.setText(_translate("Installer", "Další funkce", None))
-        self.actionTestov_n_2.setText(_translate("Installer", "Testování", None))
-        self.actionSmaz_n_CPLD_obvodu.setText(_translate("Installer", "Smazání CPLD obvodu", None))
+        self.actionDalsifunkce.setText(_translate("Installer", "Další funkce", None))
+        self.actionTestovani.setText(_translate("Installer", "Testování", None))
+        self.actionSmazaniCPLD.setText(_translate("Installer", "Smazání CPLD obvodu", None))
 
