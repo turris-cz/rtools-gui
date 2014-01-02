@@ -14,7 +14,7 @@ import time
 from shlex import split
 
 
-LOCAL_TEST_IFACE = "eth0"
+LOCAL_TEST_IFACE = "eth42"
 TURRIS_WAN_IFACE = "eth2"
 
 
