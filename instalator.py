@@ -500,12 +500,14 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         barCode = self.lineEdit.text()
         err = False
         if barCode.isEmpty():
-            self.modalMessage(u"Musíte naskenovat čárový kód.")
+            QtGui.QMessageBox.warning(self, u"Chyba",
+                    u"Musíte naskenovat čárový kód.")
             self.simpleMoveToScan()
             return
         
         if not serialNumberValidator(barCode):
-            self.modalMessage(u"Neplatný čárový kód, naskenujte ho znovu.")
+            QtGui.QMessageBox.warning(self, u"Chyba",
+                    u"Neplatný čárový kód, naskenujte ho znovu.")
             self.simpleMoveToScan()
             return
         
@@ -554,7 +556,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                 # db error, flash_result[0] == -2
                 self.blockClose = False
                 self.scanToOne.setEnabled(True)
-                self.modalMessage(flash_result[1])
+                QtGui.QMessageBox.warning(self, u"Chyba", flash_result[1])
                 self.lineEdit.setFocus()
                 return
         elif i == self.STEPS['I2C']:
@@ -709,7 +711,8 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     
     def closeEvent(self, event):
         if self.blockClose:
-            self.modalMessage(u"Probíhá flashování, vyčkejte chvíli.")
+            QtGui.QMessageBox.warning(self, u"Chyba",
+                                      u"Probíhá flashování, vyčkejte chvíli.")
             event.ignore()
             return
         
@@ -718,15 +721,6 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
             self.db.close()
         self.flashThread.quit()
         event.accept()
-    
-    def modalMessage(self, msg):
-        # FIXME refactor using QMessageBox.information
-        mBox = QtGui.QMessageBox(self)
-        mBox.setWindowTitle(u"Chyba")
-        mBox.setText(msg)
-        # StandardButtons=QtGui.QMessageBox.Ok
-        mBox.show()
-        return mBox.exec_()
 
 
 def main():
