@@ -45,6 +45,7 @@ class Router(object):
         self.error = "" # string / text in db
         # second chance for flashing steps (if the user can check the cables)
         self.secondChance = {'I2C': True, 'CPLD': True, 'FLASH': True}
+        self.testSerie = 0
         self.currentTest = 0
         
         # we use the default (and only) database, open it now if closed
@@ -73,9 +74,24 @@ class Router(object):
                 router.attempt = rec.value('attempt').toInt()[0]
                 router.status = rec.value('status').toInt()[0]
                 router.error = str(rec.value('error').toString())
-                return router
         else:
             raise DbError(CONN_ERR_MSG)
+        
+        sqlquery = "SELECT MAX(serie) AS \"lastserie\" FROM tests WHERE id='%s' AND attempt='%d';" \
+                   % (router.id.replace("'", "''"), router.attempt)
+        if query.exec_(sqlquery):
+            try:
+                query.next()
+                lastSerie = query.record().value("lastserie")
+                router.testSerie = 0 if lastSerie.isNull() else lastSerie.toInt()[0] + 1
+            except Exception:
+                raise DbError(u"Chyba databáze, data nejsou v pořádku. Zkontrolujte integritu databáze.")
+        else:
+            logger.warning("[DB] fetching router max test serie failed (routerId=%s) with error\n%s"
+                           % (router.id, str(query.lastError().text())))
+            raise DbError(CONN_ERR_MSG)
+        
+        return router
     
     @classmethod
     def createNewRouter(cls, routerId):
@@ -126,9 +142,9 @@ class Router(object):
             return False
     
     def saveTestResult(self, testStatus, testText):
-        sqlquery = "INSERT INTO tests (id, attempt, testid, testresult, msg) " \
-                   "VALUES ('%s', '%d', '%d', '%d', %s);" \
-                   % (self.id.replace("'", "''"), self.attempt, self.currentTest, testStatus,
+        sqlquery = "INSERT INTO tests (id, attempt, serie, testid, testresult, msg) " \
+                   "VALUES ('%s', '%d', '%d', '%d', '%d', %s);" \
+                   % (self.id.replace("'", "''"), self.attempt, self.testSerie, self.currentTest, testStatus,
                       "'%s'" % testText.replace("'", "''") if testStatus != 0 and testText else "NULL")
         if self.query.exec_(sqlquery):
             logger.debug("[DB] router test record inserted successfully (routerId=%s)" % self.id)

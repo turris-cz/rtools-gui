@@ -14,9 +14,10 @@ CREATE TABLE routers (
 CREATE TABLE tests (
     id varchar(20),
     attempt int,
+    serie int NOT NULL CHECK (serie >= 0),
     testid int NOT NULL,
     testresult int NOT NULL,
     msg text DEFAULT NULL,
-    PRIMARY KEY (id, attempt, testid),
+    PRIMARY KEY (id, attempt, serie, testid),
     FOREIGN KEY (id, attempt) REFERENCES routers (id, attempt) ON DELETE CASCADE
 );
