@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Thu Jan  2 22:42:29 2014
+# Created: Fri Jan  3 21:22:04 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -477,6 +477,7 @@ class Ui_Installer(object):
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.label_33.sizePolicy().hasHeightForWidth())
         self.label_33.setSizePolicy(sizePolicy)
+        self.label_33.setWordWrap(True)
         self.label_33.setObjectName(_fromUtf8("label_33"))
         self.verticalLayout_19.addWidget(self.label_33)
         self.horizontalLayout_16 = QtGui.QHBoxLayout()
@@ -596,7 +597,7 @@ class Ui_Installer(object):
         self.label_31.setText(_translate("Installer", "Čárový kód", None))
         self.toOnlyTests.setText(_translate("Installer", "Otestovat tento router", None))
         self.label.setText(_translate("Installer", "<h1>Smazání CPLD obvodu</h1>", None))
-        self.label_33.setText(_translate("Installer", "Před provedením této operace zkontrolujte připojení kabelu č. ??.", None))
+        self.label_33.setText(_translate("Installer", "Před provedením této operace zkontrolujte připojení kabelu 2 a napájecího adaptéru 7,5V.", None))
         self.startEraseCpld.setText(_translate("Installer", "Smazat CPLD", None))
         self.label_32.setText(_translate("Installer", "Probíhá mazání obvodu CPLD.", None))
         self.menuAkce.setTitle(_translate("Installer", "&Soubor", None))
