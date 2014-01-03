@@ -29,17 +29,19 @@ from router_tests import TESTLIST
 SERIAL_CONSOLE_BAUDRATE = 115200
 
 # commands
-# STEP_ONE_CMD = "/home/turris/remote_run.sh"
-# STEP_TWO_CMD = "/usr/local/programmer/3.0_x64/bin/lin64/pgrcmd"
-# STEP_TWO_INFILE = "/home/turris/workspace_cpld/cpld_20131209_001/CZ_NIC_Router_CPLD_program.xcf"
-# STEP_THREE_CMD = "/home/turris/workspace/go_TURRIS_NOR_program_all.sh"
-# STEP_THREE_LOGFILE = "/home/turris/workspace/session.log"
+# STEP_I2C_CMD = "/home/turris/remote_run.sh"
+# STEP_CPLD_CMD = "/usr/local/programmer/3.0_x64/bin/lin64/pgrcmd"
+# CPLD_FLASH_INFILE = "/home/turris/workspace_cpld/cpld_20131209_001/CZ_NIC_Router_CPLD_program.xcf"
+# CPLD_ERASE_INFILE = ""
+# STEP_FLASH_CMD = "/home/turris/workspace/go_TURRIS_NOR_program_all.sh"
+# STEP_FLASH_LOGFILE = "/home/turris/workspace/session.log"
 # LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
-STEP_ONE_CMD = "/home/palko/Projects/router/instalator/mock/i2cflasher"
-STEP_TWO_CMD = "/home/palko/Projects/router/instalator/mock/lattice"
-STEP_TWO_INFILE = "/home/palko/neexistujucialejetojedno"
-STEP_THREE_CMD = "/home/palko/Projects/router/instalator/mock/codewarrior"
-STEP_THREE_LOGFILE = "/home/palko/Projects/router/instalator/mock/session.log"
+STEP_I2C_CMD = "/home/palko/Projects/router/instalator/mock/i2cflasher"
+STEP_CPLD_CMD = "/home/palko/Projects/router/instalator/mock/lattice"
+CPLD_FLASH_INFILE = "/home/palko/neexistujucialejetojedno"
+CPLD_ERASE_INFILE = "/home/palko/neexistujucialejetojedno"
+STEP_FLASH_CMD = "/home/palko/Projects/router/instalator/mock/codewarrior"
+STEP_FLASH_LOGFILE = "/home/palko/Projects/router/instalator/mock/session.log"
 LOG_BACKUP_CMD = "/bin/true"
 
 # database
@@ -162,7 +164,7 @@ class FlashingWorker(QtCore.QObject):
     @QtCore.pyqtSlot()
     def flashStepOne(self):
         logger.debug("[FLASHWORKER] starting first step (routerId=%s)" % self.router.id)
-        p_return = self.runCmd((STEP_ONE_CMD, self.router.id))
+        p_return = self.runCmd((STEP_I2C_CMD, self.router.id))
         
         return_code = 0
         err_msg = ""
@@ -198,7 +200,7 @@ class FlashingWorker(QtCore.QObject):
         tmpf_fd, tmpf_path = mkstemp(text=True)
         
         # execute the command
-        p_return = self.runCmd((STEP_TWO_CMD, "-infile", STEP_TWO_INFILE, "-logfile", tmpf_path))
+        p_return = self.runCmd((STEP_CPLD_CMD, "-infile", CPLD_FLASH_INFILE, "-logfile", tmpf_path))
         
         # read the log file
         log_content = ""
@@ -239,14 +241,14 @@ class FlashingWorker(QtCore.QObject):
     @QtCore.pyqtSlot()
     def flashStepThree(self):
         logger.debug("[FLASHWORKER] starting third step (routerId=%s)" % self.router.id)
-        p_return = self.runCmd(("/bin/bash", STEP_THREE_CMD))
+        p_return = self.runCmd(("/bin/bash", STEP_FLASH_CMD))
         
         # copy and send log_backup
         persistentLog = os.path.join(nanlogsdir, "%s-%d-%s.log" %
                 (self.router.id, self.router.attempt,
                  self.router.secondChance['FLASH'] and "0" or "1"))
         try:
-            copy(STEP_THREE_LOGFILE, persistentLog)
+            copy(STEP_FLASH_LOGFILE, persistentLog)
             self.runCmd((LOG_BACKUP_CMD, persistentLog))
         except Exception: # IOError, OSError, ...?
             pass
@@ -255,7 +257,7 @@ class FlashingWorker(QtCore.QObject):
         err_msg = ""
         
         try:
-            with open(STEP_THREE_LOGFILE, "r") as fh:
+            with open(STEP_FLASH_LOGFILE, "r") as fh:
                 logtext = fh.read()
         except IOError:
             logger.critical("[FLASHWORKER] Could not read codewarrior session.log, application error")
@@ -346,6 +348,46 @@ class FlashingWorker(QtCore.QObject):
                 nextTest = self.router.currentTest
         
         self.testFinished.emit(nextTest, errMsg, testResult)
+    
+    @QtCore.pyqtSlot()
+    def stepCpldEraser(self):
+        logger.debug("[FLASHWORKER] starting cpld erasing step (routerId=%s)" % "not specified") # self.router.id)
+        # create a log file
+        tmpf_fd, tmpf_path = mkstemp(text=True)
+        
+        # execute the command
+        p_return = self.runCmd((STEP_CPLD_CMD, "-infile", CPLD_ERASE_INFILE, "-logfile", tmpf_path))
+        
+        # read the log file
+        log_content = ""
+        tmpr = os.read(tmpf_fd, 1024)
+        while tmpr:
+            log_content += tmpr
+            tmpr = os.read(tmpf_fd, 1024)
+        log_content = log_content.strip()
+        
+        if log_content.endswith("Operation: successful."):
+            logger.info("[FLASHWORKER] CPLD erase successful (routerId=%s)" % "not specified") # self.router.id)
+            # set self.router.status and error to something reasonable
+            # self.router.error = ""
+            return_code = 0
+            err_msg = ""
+        else:
+            logger.warning("[FLASHWORKER] CPLD erasing failed, check the cables (routerId=%s)" % "not specified") # self.router.id)
+            # self.router.error = log_content
+            return_code = 1
+            err_msg = u"Mazání CPLD obvodu selhalo. Prosím ověřte zapojení kabelu 2 " \
+                      u"(Zapojen z USB portu PC na programovaný TURRIS konektor J7). " \
+                      u"Zkontrolujte připojení napájecího adaptéru 7,5V."
+        
+        # close and delete the log file
+        os.close(tmpf_fd)
+        os.remove(tmpf_path)
+        
+        # dbErr = not self.router.save()
+        dbErr = False
+        
+        self.flashFinished.emit((return_code, err_msg, dbErr))
 
 
 class Installer(QtGui.QMainWindow, Ui_Installer):
@@ -357,6 +399,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     flashStepThreeSig = QtCore.pyqtSignal()
     runTestSig = QtCore.pyqtSignal()
     checkRouterDbExistsSig = QtCore.pyqtSignal('QString')
+    cpldStartEraseSig = QtCore.pyqtSignal()
     
     STEPS = {
         'START': 0,
@@ -421,6 +464,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.checkRouterDbExistsSig.connect(self.flashWorker.getFlashedRouter)
         self.flashWorker.flashFinished.connect(self.moveToNext)
         self.flashWorker.testFinished.connect(self.toNextTest)
+        self.cpldStartEraseSig.connect(self.flashWorker.stepCpldEraser)
         
         self.flashWorker.moveToThread(self.flashThread)
         self.flashThread.start()
@@ -551,6 +595,14 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
             else:
                 self.toNextTest()
             return
+        elif i == self.STEPS['ACCCPLDERASE']:
+            if flash_result[0] < 0:
+                QtGui.QMessageBox.warning(self, u"Chyba", flash_result[1])
+                self.cpldDeleteStack.setCurrentIndex(0)
+            else:
+                QtGui.QMessageBox.warning(self, u"Smazáno", u"CPLD obvod byl úspěšně smazán.")
+                self.stackedWidget.setCurrentIndex(self.STEPS['START'])
+            return
         
         if i in (self.STEPS['FLASHFINISHED'], self.STEPS['ERROR']):
             # unblock the possibility to close the app
@@ -629,6 +681,11 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.stackedWidget.setCurrentIndex(self.STEPS['ACCCPLDERASE'])
     
     @QtCore.pyqtSlot()
+    def eraseCpld(self):
+        self.cpldDeleteStack.setCurrentIndex(1)
+        self.cpldStartEraseSig.emit()
+    
+    @QtCore.pyqtSlot()
     def chckRouterAndTest(self):
         """do the check of scanned id, check if that router exists in db"""
         barCode = self.barcodeOnlyTests.text()
@@ -649,11 +706,6 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         # check if this router is in db and set router id and attempt accordingly
         self.toOnlyTests.setEnabled(False)
         self.checkRouterDbExistsSig.emit(barCode)
-    
-    @QtCore.pyqtSlot()
-    def eraseCpld(self):
-        self.cpldDeleteStack.setCurrentIndex(1)
-        # self.eraseCpldSig.emit()
     
     def closeEvent(self, event):
         if self.blockClose:
