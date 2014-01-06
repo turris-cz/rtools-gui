@@ -142,7 +142,7 @@ gpiotest () {
     for i in $GPIO_OUT; do echo out > /sys/class/gpio/gpio$i/direction; done
     for i in $GPIO_IN; do echo in > /sys/class/gpio/gpio$i/direction; done
 
-    for i in 1 2 4; do
+    for i in `seq 1 4`; do
         VAL=$(($i%2));
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
@@ -153,7 +153,7 @@ gpiotest () {
             return 1
         fi
     done
-    for i in 1 2 4; do
+    for i in `seq 1 4`; do
         VAL=$(($i%2));
         if [ $VAL -eq 0 ]; then VAL=1; else VAL=0; fi
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
@@ -168,7 +168,7 @@ gpiotest () {
 }
 """
     sc.exec_(funcdef)
-    return runRemoteCmd(sc, "( set -e; gpiotest )")
+    return runRemoteCmd(sc, "( set -e; for i in `seq 10`; do gpiotest; done; )")
 
 
 def textresult_WAN(p_result):
