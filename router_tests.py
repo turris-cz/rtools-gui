@@ -247,56 +247,56 @@ def textresult_GPIO(p_result):
 
 TESTLIST = (
 {
-    "desc":
-        u"test WAN portu",
+    "desc": u"test WAN portu",
+    "instructions": u"Zapojte testovací ethernet kabel do portu WAN.",    
     "testfunc": test_WAN,
     "interpretresult": textresult_WAN
 },
 {
-    "desc":
-        u"test LAN portu č. 1",
+    "desc": u"test LAN portu č. 1",
+    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 1.",
     "testfunc": test_LAN1,
     "interpretresult": textresult_LAN1
 },
 {
-    "desc":
-        u"test LAN portu č. 2",
+    "desc": u"test LAN portu č. 2",
+    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 2.",
     "testfunc": test_LAN_ping,
     "interpretresult": textresult_LAN2
 },
 {
-    "desc":
-        u"test LAN portu č. 3",
+    "desc": u"test LAN portu č. 3",
+    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 3.",
     "testfunc": test_LAN_ping,
     "interpretresult": textresult_LAN3
 },
 {
-    "desc":
-        u"test LAN portu č. 4",
+    "desc": u"test LAN portu č. 4",
+    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 4.",
     "testfunc": test_LAN_ping,
     "interpretresult": textresult_LAN4
 },
 {
-    "desc":
-        u"test LAN portu č. 5",
+    "desc": u"test LAN portu č. 5",
+    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 5.",
     "testfunc": test_LAN_ping,
     "interpretresult": textresult_LAN5
 },
 {
-    "desc":
-        u"test USB",
+    "desc": u"test USB",
+    "instructions": u"Zkontrolujte připojení USB klíčů.",
     "testfunc": test_USB,
     "interpretresult": textresult_USB
 },
 {
-    "desc":
-        u"test mini PCI express slotů",
+    "desc": u"test mini PCI express slotů",
+    "instructions": u"Zkontrolujte připojení mini PCIe karet.",
     "testfunc": test_miniPCIe,
     "interpretresult": textresult_miniPCIe
 },
 {
-    "desc":
-        u"test GPIO",
+    "desc": u"test GPIO",
+    "instructions": u"Zkontrolujte připojení GPIO přípravku.",
     "testfunc": test_GPIO,
     "interpretresult": textresult_GPIO
 },

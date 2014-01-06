@@ -35,6 +35,10 @@ class Router(object):
     STATUS_CPLD = 2
     STATUS_FINISHED = 3
     
+    TEST_OK = 0
+    TEST_FAIL = 1
+    TEST_PROBLEM = 2
+    
     def __init__(self, routerId):
         """Fetch the info about a router from db and if doesn't exist,
         raise DoesNotExist error"""
@@ -46,6 +50,7 @@ class Router(object):
         # second chance for flashing steps (if the user can check the cables)
         self.secondChance = {'I2C': True, 'CPLD': True, 'FLASH': True}
         self.testSerie = 0
+        self.testResults = {}
         self.currentTest = 0
         
         # we use the default (and only) database, open it now if closed

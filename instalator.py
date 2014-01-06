@@ -31,8 +31,8 @@ SERIAL_CONSOLE_BAUDRATE = 115200
 # commands
 # STEP_I2C_CMD = "/home/turris/remote_run.sh"
 # STEP_CPLD_CMD = "/usr/local/programmer/3.0_x64/bin/lin64/pgrcmd"
-# CPLD_FLASH_INFILE = "/home/turris/workspace_cpld/cpld_20131209_001/CZ_NIC_Router_CPLD_program.xcf"
-# CPLD_ERASE_INFILE = ""
+# CPLD_FLASH_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_program.xcf"
+# CPLD_ERASE_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_program.xcf"
 # STEP_FLASH_CMD = "/home/turris/workspace/go_TURRIS_NOR_program_all.sh"
 # STEP_FLASH_LOGFILE = "/home/turris/workspace/session.log"
 # LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
@@ -311,9 +311,11 @@ class FlashingWorker(QtCore.QObject):
             try:
                 self.serialConsole = SerialConsole("/dev/" + dev[0], SERIAL_CONSOLE_BAUDRATE)
             except Exception: # serial console exception, IOError,...
+                self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
                 self.testFinished.emit(self.router.currentTest,
-                                       u"Nezdařila se komunikace po sériové konzoli.",
-                                       u"Sériová komunikace s testovaným Turrisem zlyhala.")
+                                       u"Nezdařilo se navázat komunikaci po sériové konzoli. Pokud bude tenhle "
+                                       u"problém přetrvávat, pravděpodobně systém na routeru nefunguje.",
+                                       u"")
                 return
         
         # run the test
@@ -322,6 +324,7 @@ class FlashingWorker(QtCore.QObject):
         try:
             p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
         except Exception:
+            self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
             errMsg = u"Vyskytla se chyba při testování, chyba může být v testu samotném nebo na routeru (nedokážu rozlišit bez další analýzy)."
             testResult = u"Chyba testu. Zkuste znova. Když se to zopakuje, " \
                          u"bude problém v OS routeru nebo v testu samotném."
@@ -334,6 +337,11 @@ class FlashingWorker(QtCore.QObject):
                             "\"\n" +
                             traceback.format_exc())
         else:
+            if p_return[0] == 0:
+                self.router.testResults[self.router.currentTest] = self.router.TEST_OK
+            else:
+                self.router.testResults[self.router.currentTest] = self.router.TEST_FAIL
+            
             # save to db the test result p_return[0]
             self.router.saveTestResult(p_return[0], p_return[1])
         
@@ -343,6 +351,23 @@ class FlashingWorker(QtCore.QObject):
             if self.router.currentTest >= len(TESTLIST):
                 self.serialConsole.close()
                 self.serialConsole = None
+                
+                # generate test failure list and append it to testResult
+                failedTests = [t for t in self.router.testResults.iterkeys() if self.router.testResults[t] != self.router.TEST_OK]
+                testsReport = u"<h3>Testy, které zlyhali</h3>" if failedTests else u"<h3>Všechny testy proběhli správně</h3>"
+                for t in failedTests:
+                    testsReport += TESTLIST[t]['desc'] + u": "
+                    if self.router.testResults[t] == self.router.TEST_FAIL:
+                        testsReport += u"neúspěch"
+                    elif self.router.testResults[t] == self.router.TEST_PROBLEM:
+                        testsReport += u"zlyhání testu"
+                    testsReport += u"<br>"
+                    
+                if p_return[0] == 0: # last test was ok
+                    testResult = testsReport
+                else:
+                    testResult += testsReport
+                
                 nextTest = -1
             else:
                 nextTest = self.router.currentTest
@@ -635,8 +660,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         
         if testNum == -1:
             # no more tests
-            QtGui.QMessageBox.information(self, u"Výsledek posledního testu",
-                    u"Výsledek předchozího testu:<br>%s" % testResult) #  FIXME this is a temporary solution
+            self.finalSummary.setText(testResult)
             nextPage = self.STEPS['FINISH']
         else:
             nextPage = self.STEPS['TESTPREPARE']
@@ -644,14 +668,15 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                 testResult = u"Výsledek předchozího testu:<br>%s" \
                         % testResult.replace("\n", "<br>\n")
             self.testResultLabel.setText(testResult)
-            self.nextTestDesc.setText(u"Následující test je %s." % TESTLIST[testNum]['desc'])
+            self.nextTestDesc.setText(u"Následující test je %s." % TESTLIST[testNum]['desc']
+                                      + u"\n" + TESTLIST[testNum]['instructions'])
         
         self.stackedWidget.setCurrentIndex(nextPage)
     
     @QtCore.pyqtSlot()
     def startPreparedTest(self):
         self.runTestSig.emit()
-        self.runningTestDesc.setText(u"Probíhající test je " + self.nextTestDesc.text()[20:])
+        self.runningTestDesc.setText(u"Probíhající test je " + self.nextTestDesc.text()[20:].split("\n", 1)[0]
         self.stackedWidget.setCurrentIndex(self.STEPS['TESTEXEC'])
     
     @QtCore.pyqtSlot()
