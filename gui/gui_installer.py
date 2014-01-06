@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Mon Jan  6 10:58:02 2014
+# Created: Mon Jan  6 17:13:27 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -525,9 +525,12 @@ class Ui_Installer(object):
         self.actionTestovani.setObjectName(_fromUtf8("actionTestovani"))
         self.actionSmazaniCPLD = QtGui.QAction(Installer)
         self.actionSmazaniCPLD.setObjectName(_fromUtf8("actionSmazaniCPLD"))
+        self.actionUvodniObrazovka = QtGui.QAction(Installer)
+        self.actionUvodniObrazovka.setObjectName(_fromUtf8("actionUvodniObrazovka"))
         self.menuAkce.addAction(self.actionKonec)
-        self.menuN_stroje.addAction(self.actionDalsifunkce)
+        self.menuN_stroje.addAction(self.actionUvodniObrazovka)
         self.menuN_stroje.addSeparator()
+        self.menuN_stroje.addAction(self.actionDalsifunkce)
         self.menuN_stroje.addAction(self.actionTestovani)
         self.menuN_stroje.addAction(self.actionSmazaniCPLD)
         self.menubar.addAction(self.menuAkce.menuAction())
@@ -607,4 +610,5 @@ class Ui_Installer(object):
         self.actionDalsifunkce.setText(_translate("Installer", "Další funkce", None))
         self.actionTestovani.setText(_translate("Installer", "Testování", None))
         self.actionSmazaniCPLD.setText(_translate("Installer", "Smazání CPLD obvodu", None))
+        self.actionUvodniObrazovka.setText(_translate("Installer", "Programování routeru", None))
 

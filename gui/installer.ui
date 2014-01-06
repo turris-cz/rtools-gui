@@ -976,8 +976,9 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
     <property name="title">
      <string>&amp;Nástroje</string>
     </property>
-    <addaction name="actionDalsifunkce"/>
+    <addaction name="actionUvodniObrazovka"/>
     <addaction name="separator"/>
+    <addaction name="actionDalsifunkce"/>
     <addaction name="actionTestovani"/>
     <addaction name="actionSmazaniCPLD"/>
    </widget>
@@ -1007,6 +1008,11 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
   <action name="actionSmazaniCPLD">
    <property name="text">
     <string>Smazání CPLD obvodu</string>
+   </property>
+  </action>
+  <action name="actionUvodniObrazovka">
+   <property name="text">
+    <string>Programování routeru</string>
    </property>
   </action>
  </widget>

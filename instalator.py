@@ -473,6 +473,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         
         # action trigger slots
         self.actionKonec.triggered.connect(self.close)
+        self.actionUvodniObrazovka.triggered.connect(self.simpleMoveToScan)
         self.actionDalsifunkce.triggered.connect(self.showAccessories)
         self.actionTestovani.triggered.connect(self.showOnlyTests)
         self.actionSmazaniCPLD.triggered.connect(self.showCpldEraser)
