@@ -5,7 +5,7 @@ from re import compile, search
 WAITTIME = 1 # waittime should not be too short to be able to detect end of boot messages
 WAITROUNDS = 10
 BOOTWAITROUNDS = 6 * WAITROUNDS
-WRITESLEEP = 0.001
+WRITESLEEP = 0.01
 
 class SerialConsole(object):
     def __init__(self, device, baudrate):
