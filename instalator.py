@@ -676,7 +676,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     @QtCore.pyqtSlot()
     def startPreparedTest(self):
         self.runTestSig.emit()
-        self.runningTestDesc.setText(u"Probíhající test je " + self.nextTestDesc.text()[20:].split("\n", 1)[0]
+        self.runningTestDesc.setText(u"Probíhající test je " + self.nextTestDesc.text()[20:].split("\n", 1)[0])
         self.stackedWidget.setCurrentIndex(self.STEPS['TESTEXEC'])
     
     @QtCore.pyqtSlot()
