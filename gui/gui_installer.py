@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Fri Jan  3 21:22:04 2014
+# Created: Mon Jan  6 10:58:02 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -388,15 +388,16 @@ class Ui_Installer(object):
         self.label_22 = QtGui.QLabel(self.theEnd)
         self.label_22.setObjectName(_fromUtf8("label_22"))
         self.verticalLayout_12.addWidget(self.label_22)
-        self.label_23 = QtGui.QLabel(self.theEnd)
+        self.finalSummary = QtGui.QLabel(self.theEnd)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
-        sizePolicy.setHeightForWidth(self.label_23.sizePolicy().hasHeightForWidth())
-        self.label_23.setSizePolicy(sizePolicy)
-        self.label_23.setWordWrap(True)
-        self.label_23.setObjectName(_fromUtf8("label_23"))
-        self.verticalLayout_12.addWidget(self.label_23)
+        sizePolicy.setHeightForWidth(self.finalSummary.sizePolicy().hasHeightForWidth())
+        self.finalSummary.setSizePolicy(sizePolicy)
+        self.finalSummary.setTextFormat(QtCore.Qt.RichText)
+        self.finalSummary.setWordWrap(True)
+        self.finalSummary.setObjectName(_fromUtf8("finalSummary"))
+        self.verticalLayout_12.addWidget(self.finalSummary)
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
         spacerItem9 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -587,7 +588,7 @@ class Ui_Installer(object):
         self.prepTestToRunTest.setText(_translate("Installer", "Spustit test", None))
         self.label_20.setText(_translate("Installer", "<h1>Testování</h1>", None))
         self.label_22.setText(_translate("Installer", "<h1>Konec</h1>", None))
-        self.label_23.setText(_translate("Installer", "Router byl naflashován a zkontrolován.", None))
+        self.finalSummary.setText(_translate("Installer", "<html><head/><body><p><br/></p></body></html>", None))
         self.endToScan.setText(_translate("Installer", "Další router", None))
         self.label_28.setText(_translate("Installer", "<h1>Další funkce</h1>", None))
         self.toAccessoriesTests.setText(_translate("Installer", "Znovu vykonat testy na již naflashovaném routeru", None))
