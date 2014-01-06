@@ -187,7 +187,7 @@ class FlashingWorker(QtCore.QObject):
             logger.warning("[FLASHWORKER] I2C step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = p_return[1]
             return_code = 2
-            err_msg = u"Flashování I2C zlyhalo."
+            err_msg = u"Flashování I2C selhalo."
         
         dbErr = not self.router.save()
         
@@ -228,7 +228,7 @@ class FlashingWorker(QtCore.QObject):
             logger.warning("[FLASHWORKER] CPLD step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = log_content
             return_code = 2
-            err_msg = u"Flashování CPLD zlyhalo."
+            err_msg = u"Flashování CPLD selhalo."
         
         # close and delete the log file
         os.close(tmpf_fd)
@@ -278,7 +278,7 @@ class FlashingWorker(QtCore.QObject):
             logger.warning("[FLASHWORKER] FLASH step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = "Flashing exited with \"Error\" in session.log"
             return_code = 2
-            err_msg = u"Flashování NAND a NOR zlyhalo."
+            err_msg = u"Flashování NAND a NOR selhalo."
         else:
             # TODO is there a Diagnose Succeeded string?
             logger.info("[FLASHWORKER] FLASH step successful (routerId=%s)" % self.router.id)
@@ -304,7 +304,7 @@ class FlashingWorker(QtCore.QObject):
                 else:
                     errMsg = u"Našel jsem více sériových konzolí, nevím kterou použít."
                 self.testFinished.emit(self.router.currentTest, errMsg,
-                                       u"Sériová komunikace s testovaným Turrisem zlyhala.")
+                                       u"Sériová komunikace s testovaným Turrisem selhala.")
                 return
             
             # open console
@@ -354,13 +354,13 @@ class FlashingWorker(QtCore.QObject):
                 
                 # generate test failure list and append it to testResult
                 failedTests = [t for t in self.router.testResults.iterkeys() if self.router.testResults[t] != self.router.TEST_OK]
-                testsReport = u"<h3>Testy, které zlyhali</h3>" if failedTests else u"<h3>Všechny testy proběhli správně</h3>"
+                testsReport = u"<h3>Testy, které selhali</h3>" if failedTests else u"<h3>Všechny testy proběhli správně</h3>"
                 for t in failedTests:
                     testsReport += TESTLIST[t]['desc'] + u": "
                     if self.router.testResults[t] == self.router.TEST_FAIL:
                         testsReport += u"neúspěch"
                     elif self.router.testResults[t] == self.router.TEST_PROBLEM:
-                        testsReport += u"zlyhání testu"
+                        testsReport += u"selhání testu"
                     testsReport += u"<br>"
                     
                 if p_return[0] == 0: # last test was ok

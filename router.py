@@ -14,7 +14,7 @@ logger = logging.getLogger('installer')
 fdblog = path.join(path.split(path.abspath(__file__))[0],
                    "logdir/faileddbqueries")
 
-CONN_ERR_MSG = u"Připojení k databázi zlyhalo. Zkontrolujte připojení k síti."
+CONN_ERR_MSG = u"Připojení k databázi selhalo. Zkontrolujte připojení k síti."
 
 
 class DoesNotExist(IOError):
