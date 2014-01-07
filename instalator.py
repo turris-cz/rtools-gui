@@ -26,42 +26,17 @@ from serial_console import SerialConsole
 from router_tests import TESTLIST
 
 # settings
-SERIAL_CONSOLE_BAUDRATE = 115200
-
-# commands
-# STEP_I2C_CMD = "/home/turris/remote_run.sh"
-# STEP_CPLD_CMD = "/usr/local/programmer/3.0_x64/bin/lin64/pgrcmd"
-# CPLD_FLASH_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_program.xcf"
-# CPLD_ERASE_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_erase.xcf"
-# STEP_FLASH_CMD = "/home/turris/workspace/go_TURRIS_NOR_program_all.sh"
-# STEP_FLASH_LOGFILE = "/home/turris/workspace/session.log"
-# LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
-STEP_I2C_CMD = "/home/palko/Projects/router/instalator/mock/i2cflasher"
-STEP_CPLD_CMD = "/home/palko/Projects/router/instalator/mock/lattice"
-CPLD_FLASH_INFILE = "/home/palko/neexistujucialejetojedno"
-CPLD_ERASE_INFILE = "/home/palko/neexistujucialejetojedno"
-STEP_FLASH_CMD = "/home/palko/Projects/router/instalator/mock/codewarrior"
-STEP_FLASH_LOGFILE = "/home/palko/Projects/router/instalator/mock/session.log"
-LOG_BACKUP_CMD = "/bin/true"
-
-# database
-# DB_HOST = "10.0.0.2"
-DB_HOST = 'localhost'
-DB_USER = 'tflasher'
-DB_PASS = 'poiuytrewq'
-DB_DBNAME = 'turris'
+from settings import *
 
 #logging
-LOGLEVEL = logging.NOTSET # log everyting
-
 logger = logging.getLogger('installer')
 logger.root.setLevel(LOGLEVEL)
 nanlogsdir = os.path.join(os.path.split(os.path.abspath(__file__))[0],
-                   "nandnorlogs")
+                   FLASH_LOGS)
 logfile = os.path.join(os.path.split(os.path.abspath(__file__))[0],
-                   "logdir/flasher.log")
+                   LOGFILE)
 fh = logging.FileHandler(logfile)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter(LOGFORMAT)
 fh.setFormatter(formatter)
 logger.root.addHandler(fh)
 
