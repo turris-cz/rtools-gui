@@ -193,6 +193,9 @@ class SerialConsole(object):
                 elif newPart == c + "\n" or newPart == "\n" + c:
                     blocked = False
                     inLength += 2
+                elif newPart == "\n":
+                    inLength += 1
+                    # stay blocked
                 else:
                     raise SCError("unexpected characters in inbuf")
         
@@ -239,3 +242,10 @@ class SerialConsole(object):
         self._accept_input = False
         
         return self.inbuf[cmdLen: -len(PS1)]
+    
+    def lastStatus(self):
+        """Return status of the last command run with SerialConsole.exec_().
+        It returns string as obtained from running "echo $?" with whitespaces
+        removed from the end.
+        """
+        return self.exec_("echo $?").rstrip()

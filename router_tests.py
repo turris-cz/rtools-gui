@@ -17,28 +17,36 @@ from shlex import split
 LOCAL_TEST_IFACE = "eth42"
 TURRIS_WAN_IFACE = "eth2"
 
+LOCAL = 0
+REMOTE = 1
+
+
+# results from
+#     runLocalCmd
+#     runRemoteCmd
+#     test_*
+#     are in the form
+#     (
+#         int exit_status (-1 if not a number),
+#         str exit_status,
+#         str command_output,
+#         enum {LOCAL, REMOTE}
+#    )
+
 
 def runLocalCmd(cmdstr):
     p = subprocess.Popen(split(cmdstr), stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
     retCode = p.wait()
-    stdOut = p.stdout.read().strip()
-    return (retCode,
-            "on local machine `" + cmdstr + "` returned:\n"
-             + stdOut)
+    stdOut = p.stdout.read()
+    return (retCode, str(retCode), stdOut, LOCAL)
 
 
 def runRemoteCmd(sc, cmdstr):
     stdOut = sc.exec_(cmdstr)
     cmdStatus = sc.lastStatus()
-    try:
-        cmdStatusInt = int(cmdStatus)
-    except ValueError:
-        cmdStatusInt = 1000
-    
-    return (cmdStatusInt,
-            "on tested turris `" + cmdstr + "` returned:\n"
-            + stdOut + "\n-----\ncommand exit code: " + cmdStatus)
+    intCmdStatus = int(cmdStatus) if cmdStatus.isdigit() else -1
+    return (intCmdStatus, cmdStatus, stdOut, REMOTE)
 
 
 def test_WAN(sc):
@@ -52,6 +60,8 @@ def test_WAN(sc):
     if cmdResult[0] != 0:
         return cmdResult
     
+    time.sleep(1) # wait for addresses to be set
+    
     return runLocalCmd("ping -c 3 192.168.100.1")
 
 
@@ -59,6 +69,8 @@ def test_LAN1(sc):
     cmdResult = runLocalCmd("sudo ifconfig %s 192.168.1.2" % LOCAL_TEST_IFACE)
     if cmdResult[0] != 0:
         return cmdResult
+    
+    time.sleep(1) # wait for the addresses to be set
     
     return test_LAN_ping(sc)
 
@@ -70,31 +82,30 @@ def test_LAN_ping(sc):
 
 def test_USB(sc):
     cmd = "ls /dev/sd? 2> /dev/null | wc -l"
-    countSD = sc.exec_(cmd)
-    
-    try:
+    cmdOut = sc.exec_(cmd)
+    countSD = cmdOut.strip()
+    if countSD.isdigit():
         countSD = int(countSD)
-    except ValueError:
-        return (1000, "on tested turris `" + cmd + "` returned:\n" + str(countSD))
-    else:
         if countSD == 2:
-            return (0, "")
+            return (0, "0", cmdOut, REMOTE)
         else:
-            return (1, "on tested turris `" + cmd + "` returned:\n" + str(countSD))
+            return (1, "1", cmdOut, REMOTE)
+    else:
+        return (-1, sc.lastStatus(), cmdOut, REMOTE)
 
 
 def test_miniPCIe(sc):
     cmd = "cat /sys/bus/pci/devices/*/vendor | grep -c '0x168c'"
-    countPci = sc.exec_(cmd)
-    try:
+    cmdOut = sc.exec_(cmd)
+    countPci = cmdOut.strip()
+    if countPci.isdigit():
         countPci = int(countPci)
-    except ValueError:
-        return (1000, "on tested turris `" + cmd + "` returned:\n" + str(countPci))
-    else:
         if countPci == 2:
-            return (0, "")
+            return (0, "0", cmdOut, REMOTE)
         else:
-            return (1, "on tested turris `" + cmd + "` returned:\n" + str(countPci))
+            return (1, "1", cmdOut, REMOTE)
+    else:
+        return (-1, sc.lastStatus(), cmdOut, REMOTE)
 
 
 def test_GPIO(sc):
@@ -167,9 +178,11 @@ gpiotest () {
     done
 }
 """
-    sc.exec_(funcdef)
-    return runRemoteCmd(sc, "( set -e; for i in `seq 10`; do gpiotest; done; )")
-
+    cmdOut = sc.exec_(funcdef)
+    if not cmdOut:
+        return runRemoteCmd(sc, "( set -e; for i in `seq 10`; do gpiotest; done; )")
+    else
+        return (-1, sc.lastStatus(), cmdOut, REMOTE)
 
 def textresult_WAN(p_result):
     if p_result[0] == 0:
