@@ -20,10 +20,14 @@ class SCError(IOError):
 
 
 class SerialConsole(object):
+    UNDEFINED = 0
+    UBOOT = 1
+    OPENWRT = 2
+    
     def __init__(self, device, baudrate=termios.B115200):
         super(SerialConsole, self).__init__()
         
-        # self.state = self.UNDEFINED # TODO add states - UNDEFINED, UBOOT, SYSTEM
+        self.state = self.UNDEFINED
         self._running = True
         self._accept_input = False
         self.inbuf = ""
@@ -85,8 +89,6 @@ class SerialConsole(object):
             else:
                 noInputCycle -= 1
             totalWaitCycles -= 1
-                
-                
         
         if noInputCycle != 0:
             # timeouted on totalWaitCycles
@@ -99,6 +101,7 @@ class SerialConsole(object):
             os.write(self._sc, "\n")
             time.sleep(WAITTIME)
             if self.inbuf.endswith("\n" + UBOOT_PROMPT):
+                self.state = self.UBOOT
                 raise SCError("We are in uboot, restart the router to go to the system.")
             if self.inbuf.endswith("\n" + PS1):
                 read = False
@@ -109,6 +112,7 @@ class SerialConsole(object):
             raise SCError("Could not obtain prompt.")
         
         self._accept_input = False
+        self.state = self.OPENWRT
     
     def to_uboot(self):
         """this function reads output from console and when the text
@@ -134,13 +138,12 @@ class SerialConsole(object):
             time.sleep(0.001)
             waitCycles -= 1
         
-        
-        
         wCounter = int(INIT_MAX_WAIT / WAITTIME)
         while wCounter and not self.inbuf.endswith(UBOOT_PROMPT):
             os.write(self._sc, "\n")
             if self.inbuf.find("\n" + PS1) != -1 or self.inbuf.find("\n" + PS2) != -1:
                 self._accept_input = False
+                self.state = self.OPENWRT
                 raise SCError("OS prompt found, restart the device")
             time.sleep(WAITTIME)
             wCounter -= 1
@@ -152,6 +155,7 @@ class SerialConsole(object):
             raise SCError("Could not get uboot prompt after interrupting autoboot")
         
         self._accept_input = False
+        self.state = self.UBOOT
     
     def _readWorker(self):
         while self._running:
@@ -203,11 +207,21 @@ class SerialConsole(object):
         
         return inLength
     
-    def exec_(self, text):
-        """Execute given command or script. It must be a
-        single command (output expected only after whole text written),
+    def exec_(self, cmd, timeout=10):
+        """exec_(cmd, timeout=10)
+        Execute given command or script. It must be a
+        single command (output expected only after the whole command written),
         but can span multiple lines.
+        
+        Timeout denotes how much time it waits for the command to finish (and the prompt
+        to be displayed at the end. It is in seconds.
         """
+        if self.state == self.OPENWRT:
+            prompt = PS1
+        elif self.state == self.UBOOT:
+            prompt = UBOOT_PROMPT
+        else:
+            raise ValueError("Connection in undefined state, call to_system or to_uboot before.")
         
         with self._inbuf_lock:
             self.inbuf = ""
@@ -233,9 +247,9 @@ class SerialConsole(object):
             
         cmdLen += self.writeLine(lines[-1] + "\n")
         
-        wCounter = 20
-        while wCounter and not self.inbuf.endswith(PS1):
-            time.sleep(0.5)
+        wCounter = int(timeout / WAITTIME)
+        while wCounter and not self.inbuf.endswith(prompt):
+            time.sleep(WAITTIME)
             wCounter -= 1
         
         if wCounter <= 0:
@@ -243,7 +257,7 @@ class SerialConsole(object):
         
         self._accept_input = False
         
-        return self.inbuf[cmdLen: -len(PS1)]
+        return self.inbuf[cmdLen: -len(prompt)]
     
     def lastStatus(self):
         """Return status of the last command run with SerialConsole.exec_().
