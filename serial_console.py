@@ -98,7 +98,9 @@ class SerialConsole(object):
         while wCounter and read:
             os.write(self._sc, "\n")
             time.sleep(WAITTIME)
-            if self.inbuf.endswith(PS1):
+            if self.inbuf.endswith("\n" + UBOOT_PROMPT):
+                raise SCError("We are in uboot, restart the router to go to the system.")
+            if self.inbuf.endswith("\n" + PS1):
                 read = False
             else:
                 wCounter -= 1

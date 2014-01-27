@@ -1,14 +1,11 @@
 from logging import NOTSET as _NOTSET
 
-# settings
-SERIAL_CONSOLE_BAUDRATE = 115200
-
 # commands
 # STEP_I2C_CMD = "/home/turris/remote_run.sh"
 # STEP_CPLD_CMD = "/usr/local/programmer/3.0_x64/bin/lin64/pgrcmd"
 # CPLD_FLASH_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_program.xcf"
 # CPLD_ERASE_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_erase.xcf"
-# STEP_FLASH_CMD = "/home/turris/workspace/go_TURRIS_NOR_program_all.sh"
+# STEP_FLASH_CMD = "/home/turris/workspace/go_TURRIS_UBOOT_program.sh"
 # STEP_FLASH_LOGFILE = "/home/turris/workspace/session.log"
 # LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
 STEP_I2C_CMD = "/home/palko/Projects/router/instalator/mock/i2cflasher"
