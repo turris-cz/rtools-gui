@@ -20,7 +20,7 @@ from gui.gui_installer import Ui_Installer
 
 # router object
 from router import Router, DbError, DuplicateKey, DoesNotExist
-from serial_console import SerialConsole
+from serial_console import SerialConsole, SCError
 
 # tests
 from router_tests import TESTLIST
@@ -282,14 +282,36 @@ class FlashingWorker(QtCore.QObject):
                                        u"Sériová komunikace s testovaným Turrisem selhala.")
                 return
             
-            # open console
+            # open the console
             try:
-                self.serialConsole = SerialConsole("/dev/" + dev[0], SERIAL_CONSOLE_BAUDRATE)
-            except Exception: # serial console exception, IOError,...
-                self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
+                self.serialConsole = SerialConsole("/dev/" + dev[0])
+            except Exception, e:
                 self.testFinished.emit(self.router.currentTest,
-                                       u"Nezdařilo se navázat komunikaci po sériové konzoli. Pokud bude tenhle "
-                                       u"problém přetrvávat, pravděpodobně systém na routeru nefunguje.",
+                                       u"Nezdařilo se otevřít spojení přes konzoli. Zkontrolujte, ",
+                                       u"")
+                return
+            
+            try:
+                self.serialConsole.to_system()
+            except SCError, e:
+                logger.warning("[TESTING] Serial console initialization failed (routerId=%d)."
+                                % self.router.id + str(e))
+                self.serialConsole.close()
+                self.serialConsole = None
+                self.testFinished.emit(self.router.currentTest,
+                                       u"Nezdařilo se otevřít sériovou konzoli. Zkontrolujte správné zapojení "
+                                       u"kabelu č. 5 a napájecího adaptéru 7,5V.",
+                                       u"")
+                return
+            except Exception, e: # serial console exception, IOError,...
+                logger.warning("[TESTING] Serial console initialization failed (Exception other than SCError) (routerId=%d)."
+                                % self.router.id + str(e))
+                self.serialConsole.close()
+                self.serialConsole = None
+                # self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
+                self.testFinished.emit(self.router.currentTest,
+                                       u"Nezdařilo se otevřít sériovou konzoli. Zkontrolujte správné zapojení "
+                                       u"kabelu č. 5 a napájecího adaptéru 7,5V.",
                                        u"")
                 return
         
@@ -300,11 +322,11 @@ class FlashingWorker(QtCore.QObject):
             p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
         except Exception:
             self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
-            errMsg = u"Vyskytla se chyba při testování, chyba může být v testu samotném nebo na routeru (nedokážu rozlišit bez další analýzy)."
-            testResult = u"Chyba testu. Zkuste znova. Když se to zopakuje, " \
-                         u"bude problém v OS routeru nebo v testu samotném."
-            self.serialConsole.close()
-            self.serialConsole = None
+            errMsg = u"Vyskytla se chyba při testování, chyba je pravděpodobně v testu samtném nebo konzole " \
+                     u"vrátila výsledek, který nedokážu zpracovat."
+            testResult = u"Chyba testu."
+            self.serialConsole.close()  # TODO reset the console (send ^D) and wait for the prompt
+            self.serialConsole = None   # -- || --
             nextTest = self.router.currentTest
             import traceback
             logger.critical("[TESTING] error during test \"" +
@@ -314,13 +336,21 @@ class FlashingWorker(QtCore.QObject):
         else:
             if p_return[0] == 0:
                 self.router.testResults[self.router.currentTest] = self.router.TEST_OK
+                testResult = TESTLIST[self.router.currentTest]['desc'] + u" proběhl úspěšně"
             else:
+                testResult = u"%s skončil s chybou:<div style=\"font-size: 11px;\">%s</div>" % (
+                             TESTLIST[self.router.currentTest]['desc'].capitalize(),
+                             TESTLIST[self.router.currentTest]['interpretfailure'](p_return)
+                             )
                 self.router.testResults[self.router.currentTest] = self.router.TEST_FAIL
             
             # save to db the test result p_return[0]
-            self.router.saveTestResult(p_return[0], p_return[1])
-        
-            testResult = TESTLIST[self.router.currentTest]['interpretresult'](p_return)
+            self.router.saveTestResult(
+                    p_return[0],
+                    ""
+                    if p_return[0] == 0 else
+                    p_return[1] + "\n-----\n" + p_return[2] + "\n-----\n" + p_return[3])
+            
             self.router.currentTest += 1
             self.canRepeatTest = True
             if self.router.currentTest >= len(TESTLIST):
