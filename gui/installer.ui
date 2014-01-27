@@ -304,7 +304,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </sizepolicy>
           </property>
           <property name="text">
-           <string>V tomto kroku probíhá programování NOR Flash paměti procesoru pomocí kabelu 3. Prosím vyčkejte přibližně 5 minut na dokončení.</string>
+           <string>V tomto kroku probíhá programování NOR Flash paměti procesoru pomocí kabelu 3. Prosím vyčkejte přibližně 1 až 2 minuty na dokončení.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -326,12 +326,12 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="flashFinished">
+      <widget class="QWidget" name="beforeTFTPBoot">
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
          <widget class="QLabel" name="label_11">
           <property name="text">
-           <string>&lt;h1&gt;Rozbalení OS do NAND&lt;/h1&gt;</string>
+           <string>&lt;h1&gt;Naprogramování NOR paměti&lt;/h1&gt;</string>
           </property>
          </widget>
         </item>
@@ -344,7 +344,10 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Podržte minimálně 6 sekund tlačítko RESET (červené). LED dioda POWER bude blikat v intervalech 1 sekunda. Po 6 sekundách přestane blikat a tlačítko RESET můžete uvolnit.</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zkontrolujte zapojení kabelu č. 5 a ethernet kabelu do WAN programovaného routeru.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Stiskněte tlačítko RESET.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vyčkejte, pokým se nahraje NOR paměť přes TFTP.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::RichText</enum>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -367,9 +370,9 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="finalToReset">
+           <widget class="QPushButton" name="resetToUboot">
             <property name="text">
-             <string>RESET po 6s stisknutí uvolněno</string>
+             <string>Reset zmáčknut</string>
             </property>
            </widget>
           </item>
@@ -377,17 +380,17 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="stepAfterReset">
-       <layout class="QVBoxLayout" name="verticalLayout_14">
+      <widget class="QWidget" name="tftpBoot">
+       <layout class="QVBoxLayout" name="verticalLayout_21">
         <item>
-         <widget class="QLabel" name="label_21">
+         <widget class="QLabel" name="label_23">
           <property name="text">
-           <string>&lt;h1&gt;Rozbalení OS do NAND&lt;/h1&gt;</string>
+           <string>&lt;h1&gt;Naprogramování NOR paměti&lt;/h1&gt;</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_25">
+         <widget class="QLabel" name="label_34">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>1</horstretch>
@@ -395,9 +398,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&lt;ul&gt;
-&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Probíhá rozbalení OS do NAND. Vyčkejte přibližně 1 minutu.&lt;/li&gt;
-&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Po rozbalení OS do NAND se router sám zresetuje což bude indikováno zablikáním předních LED diod.&lt;/li&gt;&lt;/ul&gt;</string>
+           <string>Stahuje se image přes TFTP a programuje se NOR paměť.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -405,28 +406,14 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_10">
-          <item>
-           <spacer name="horizontalSpacer_9">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="resetToTests">
-            <property name="text">
-             <string>Router se zresetoval</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QProgressBar" name="progressBar_6">
+          <property name="maximum">
+           <number>0</number>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

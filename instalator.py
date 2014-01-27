@@ -264,6 +264,113 @@ class FlashingWorker(QtCore.QObject):
         
         self.flashFinished.emit((return_code, err_msg, dbErr))
     
+    
+    def go_to_uboot(self):
+        logger.debug("[FLASHWORKER] starting fourth step (routerId=%s)" % self.router.id)
+        
+        # create and prepare a serial console connection
+        if self.serialConsole is None:
+            # find ttyUSBx
+            dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
+            if len(dev) != 1:
+                if len(dev) == 0:
+                    errMsg = u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli."
+                else:
+                    errMsg = u"Našel jsem více sériových konzolí, nevím kterou použít."
+                self.flashFinished.emit((1, errMsg, False))
+                return
+            
+            # open the console
+            try:
+                self.serialConsole = SerialConsole("/dev/" + dev[0])
+            except Exception, e:
+                self.flashFinished.emit((
+                        1,
+                        u"Nezdařilo se otevřít spojení přes konzoli.",
+                        False))
+                return
+            
+        try:
+            self.serialConsole.to_uboot()
+        except SCError, e:
+            logger.warning("[TESTING] Serial console initialization failed (routerId=%d)."
+                            % self.router.id + str(e))
+            self.serialConsole.close()
+            self.serialConsole = None
+            self.flashFinished.emit((1, u"Nezdařilo se dostat do U-Bootu.", False))
+            return
+        except Exception, e: # serial console exception, IOError,...
+            logger.warning("[TESTING] Serial console initialization failed (Exception other than SCError) (routerId=%d)."
+                            % self.router.id + str(e))
+            self.serialConsole.close()
+            self.serialConsole = None
+            self.flashFinished.emit((1, u"Nezdařilo se dostat do U-Bootu.", False))
+            return
+        
+        # we are in uboot, move to the next window (with statusbar)
+        self.flashFinished.emit((0, u"", False))
+    
+    def tftp_flash(self):
+        # issue the uboot commands and parse the console output
+        cmdOut = self.serialConsole.exec_("setenv ipaddr 192.168.10.2")
+        if cmdOut:
+            return # ERROR + logger.warning
+        cmdOut = self.serialConsole.exec_("setenv serverip 192.168.10.1")
+        if cmdOut:
+            return # ERROR + logger.warning
+        cmdOut = self.serialConsole.exec_("setenv eth2addr 00:11:22:33:44:55")
+        if cmdOut:
+            return # ERROR + logger.warning
+        cmdOut = self.serialConsole.exec_("tftpboot 0x1000000 nor.bin")
+        # check cmdOut
+        
+        # no link (cable disconnected) outputs:
+        # Speed: 1000, full duplex\n*** ERROR: `ethaddr' not set\nSpeed: 1000, full duplex\n*** ERROR: `eth1addr' not set\neTSEC3 Waiting for PHY auto negotiation to complete......... TIMEOUT !\neTSEC3: No link.\nSpeed: 1000, full duplex\n
+        
+        # everything ok
+        # Speed: 1000, full duplex
+        # Using eTSEC3 device
+        # TFTP from server 192.168.10.1; our IP address is 192.168.10.2
+        # Filename 'nor.bin'.
+        # Load address: 0x1000000
+        # Loading: *\x08#################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t #################################################################
+        # \t ###############################\n\t 4.9 MiB/s\ndone\nBytes transferred = 12845056 (c40000 hex)\n
+        
+        cmdOut = self.serialConsole.exec_("protect off 0xef000000 +0xF80000")
+        if cmdOut != "Un-Protected 124 sectors\n":
+            return # ERROR + logger.warning + cmdOut
+        cmdOut = self.serialConsole.exec_("erase 0xef000000 +0xF80000", 90)
+        # erasing takes ~1min
+        # correct output is
+        # \n............................................................................................................................ done\nErased 124 sectors\n
+        
+        cmdOut = self.serialConsole.exec_("cp.b 0x1000000 0xef000000 0x$filesize")
+        # copying takes ~50sec
+        print ">" + cmdOut + "<"
+        self.serialConsole.writeLine("run norboot\n")
+        # wait quite a long time, there is one moment where we extract a tar file with no output on console for quite a few seconds
+        
+        self.flashFinished.emit((1, u"posralo sa to", False))
+    
+    @QtCore.pyqtSlot(int)
+    def ubootWaitAndTFTP(self, step):
+        if step == 0:
+            self.go_to_uboot()
+        else:
+            self.tftp_flash()
+    
     @QtCore.pyqtSlot()
     def executeTest(self):
         logger.debug("[TESTING] Executing test %d on the router with routerId=%s"
@@ -430,6 +537,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     runTestSig = QtCore.pyqtSignal()
     checkRouterDbExistsSig = QtCore.pyqtSignal('QString')
     cpldStartEraseSig = QtCore.pyqtSignal()
+    tftpBootWaitSig = QtCore.pyqtSignal(int)
     
     STEPS = {
         'START': 0,
@@ -438,8 +546,8 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         'CPLD': 3,
         'RESET': 4,
         'FLASH': 5,
-        'FLASHFINISHED': 6,
-        'AFTERRESET': 7,
+        'TOUBOOT': 6,
+        'UBOOTFLASH': 7,
         'BEFORETESTS': 8,
         'CHCKCABLE': 9,
         'ERROR': 10,
@@ -464,8 +572,8 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.startToScan.clicked.connect(self.simpleMoveToScan)
         self.scanToOne.clicked.connect(self.launchProgramming)
         self.resetToThree.clicked.connect(self.routerReset)
-        self.finalToReset.clicked.connect(self.simpleNextPage)
-        self.resetToTests.clicked.connect(self.simpleNextPage)
+        # self.finalToReset.clicked.connect(self.simpleNextPage)
+        # self.resetToTests.clicked.connect(self.simpleNextPage)
         self.prepareToFirstTest.clicked.connect(self.toNextTest)
         self.chckToStepX.clicked.connect(self.userHasCheckedCables)
         self.errToScan.clicked.connect(self.simpleMoveToScan)
@@ -496,6 +604,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.flashWorker.flashFinished.connect(self.moveToNext)
         self.flashWorker.testFinished.connect(self.toNextTest)
         self.cpldStartEraseSig.connect(self.flashWorker.stepCpldEraser)
+        self.tftpBootWaitSig.connect(self.flashWorker.ubootWaitAndTFTP)
         
         self.flashWorker.moveToThread(self.flashThread)
         self.flashThread.start()
@@ -566,7 +675,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                     i = self.STEPS['FLASH']
                     self.flashStepThreeSig.emit()
                 elif flash_result[0] == 3:
-                    i = self.STEPS['FLASHFINISHED']
+                    i = self.STEPS['TOUBOOT']
                 self.flashingStage = i
             elif flash_result[0] == -1:
                 # router already exists
@@ -610,8 +719,28 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                 i = self.STEPS['ERROR']
         elif i == self.STEPS['FLASH']:
             if flash_result[0] == 0:
+                i = self.STEPS['TOUBOOT']
+                self.flashingStage = i
+                self.tftpBootWaitSig.emit(0) # wait for RESET button pressed, then tftpboot and flash
+            elif flash_result[0] == 1:
+                self.tmpErrMsg.setText(flash_result[1])
+                i = self.STEPS['CHCKCABLE']
+            else:
+                i = self.STEPS['ERROR']
+        elif i == self.STEPS['TOUBOOT']:
+            if flash_result[0] == 0:
+                i = self.STEPS['UBOOTFLASH']
+                self.flashingStage = i
+                self.tftpBootWaitSig.emit(1)
+            elif flash_result[0] == 1:
+                self.tmpErrMsg.setText(flash_result[1])
+                i = self.STEPS['CHCKCABLE']
+            else:
+                i = self.STEPS['ERROR']   
+        elif i == self.STEPS['UBOOTFLASH']:
+            if flash_result[0] == 0:
+                i = self.STEPS['BEFORETESTS']
                 self.flashingStage = 0
-                i = self.STEPS['FLASHFINISHED']
             elif flash_result[0] == 1:
                 self.tmpErrMsg.setText(flash_result[1])
                 i = self.STEPS['CHCKCABLE']
@@ -637,7 +766,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                 self.stackedWidget.setCurrentIndex(self.STEPS['START'])
             return
         
-        if i in (self.STEPS['FLASHFINISHED'], self.STEPS['ERROR']):
+        if i in (self.STEPS['BEFORETESTS'], self.STEPS['ERROR']):
             # unblock the possibility to close the app
             self.blockClose = False
         
@@ -655,6 +784,10 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
             self.flashStepTwoSig.emit()
         elif self.flashingStage == self.STEPS['FLASH']:
             self.flashStepThreeSig.emit()
+        elif self.flashingStage == self.STEPS['TOUBOOT']:
+            self.tftpBootWaitSig.emit(0)
+        elif self.flashingStage == self.STEPS['UBOOTFLASH']:
+            self.tftpBootWaitSig.emit(1)
     
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(int, 'QString', 'QString')
