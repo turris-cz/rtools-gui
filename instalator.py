@@ -12,6 +12,7 @@ import subprocess
 import sys
 from shutil import copy
 from tempfile import mkstemp
+from time import sleep
 
 # gui related stuff
 from PyQt4 import QtGui, QtCore, QtSql
@@ -293,14 +294,14 @@ class FlashingWorker(QtCore.QObject):
         try:
             self.serialConsole.to_uboot()
         except SCError, e:
-            logger.warning("[TESTING] Serial console initialization failed (routerId=%d)."
+            logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%d)."
                             % self.router.id + str(e))
             self.serialConsole.close()
             self.serialConsole = None
             self.flashFinished.emit((1, u"Nezdařilo se dostat do U-Bootu.", False))
             return
         except Exception, e: # serial console exception, IOError,...
-            logger.warning("[TESTING] Serial console initialization failed (Exception other than SCError) (routerId=%d)."
+            logger.warning("[FLASHWORKER] Serial console initialization failed (Exception other than SCError) (routerId=%d)."
                             % self.router.id + str(e))
             self.serialConsole.close()
             self.serialConsole = None
@@ -311,65 +312,92 @@ class FlashingWorker(QtCore.QObject):
         self.flashFinished.emit((0, u"", False))
     
     def tftp_flash(self):
+        "return an empty string if everything ok or an error msg"
+        
+        # set the ip address on local interface
+        p = subprocess.Popen(["sudo", "ifconfig", LOCAL_TEST_IFACE, "192.168.10.1"],
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        retCode = p.wait()
+        if retCode != 0:
+            return (1, "localcmd 'sudo ifconfig %s 192.168.10.1'\nreturn status: %d\n" %
+                    (LOCAL_TEST_IFACE, retCode) + p.stdout.read())
+        sleep(2)
+        
         # issue the uboot commands and parse the console output
         cmdOut = self.serialConsole.exec_("setenv ipaddr 192.168.10.2")
         if cmdOut:
-            return # ERROR + logger.warning
+            return (2, "uboot 'setenv ipaddr 192.168.10.2':\n" + cmdOut)
         cmdOut = self.serialConsole.exec_("setenv serverip 192.168.10.1")
         if cmdOut:
-            return # ERROR + logger.warning
+            return (3, "uboot 'setenv serverip 192.168.10.1':\n" + cmdOut)
         cmdOut = self.serialConsole.exec_("setenv eth2addr 00:11:22:33:44:55")
         if cmdOut:
-            return # ERROR + logger.warning
+            return (4, "uboot 'setenv eth2addr 00:11:22:33:44:55':\n" + cmdOut)
+        cmdOut = self.serialConsole.exec_("ping 192.168.10.1", 25) # timeout for ping is 20s
+        if not cmdOut.endswith("host 192.168.10.1 is alive\n"):
+            return (5, "uboot 'ping 192.168.10.1':\n" + cmdOut)
         cmdOut = self.serialConsole.exec_("tftpboot 0x1000000 nor.bin")
-        # check cmdOut
-        
-        # no link (cable disconnected) outputs:
-        # Speed: 1000, full duplex\n*** ERROR: `ethaddr' not set\nSpeed: 1000, full duplex\n*** ERROR: `eth1addr' not set\neTSEC3 Waiting for PHY auto negotiation to complete......... TIMEOUT !\neTSEC3: No link.\nSpeed: 1000, full duplex\n
-        
-        # everything ok
-        # Speed: 1000, full duplex
-        # Using eTSEC3 device
-        # TFTP from server 192.168.10.1; our IP address is 192.168.10.2
-        # Filename 'nor.bin'.
-        # Load address: 0x1000000
-        # Loading: *\x08#################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t #################################################################
-        # \t ###############################\n\t 4.9 MiB/s\ndone\nBytes transferred = 12845056 (c40000 hex)\n
-        
+        if cmdOut == "Speed: 1000, full duplex\n*** ERROR: `ethaddr' not set\n" \
+                "Speed: 1000, full duplex\n*** ERROR: `eth1addr' not set\n" \
+                "eTSEC3 Waiting for PHY auto negotiation to complete......... " \
+                "TIMEOUT !\neTSEC3: No link.\nSpeed: 1000, full duplex\n":
+            # no link (cable disconnected)
+            return (6, "uboot 'tftpboot 0x1000000 nor.bin':\ncable disconnected")
+        elif not cmdOut.startswith("Speed: 1000, full duplex\n"
+                "Using eTSEC3 device"
+                "TFTP from server 192.168.10.1; our IP address is 192.168.10.2"
+                "Filename 'nor.bin'."
+                "Load address: 0x1000000"
+                "Loading: *\x08#################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t #################################################################\n"
+                "\t ###############################\n\t") \
+                or not cmdOut.endswith("\ndone\nBytes transferred = 12845056 (c40000 hex)\n"):
+            return (7, "uboot 'tftpboot 0x1000000 nor.bin':\n" + cmdOut)
         cmdOut = self.serialConsole.exec_("protect off 0xef000000 +0xF80000")
         if cmdOut != "Un-Protected 124 sectors\n":
-            return # ERROR + logger.warning + cmdOut
+            return (8, "uboot 'protect off 0xef000000 +0xF80000':\n" + cmdOut)
+        # erasing takes ~40sec
         cmdOut = self.serialConsole.exec_("erase 0xef000000 +0xF80000", 90)
-        # erasing takes ~1min
-        # correct output is
-        # \n............................................................................................................................ done\nErased 124 sectors\n
+        if cmdOut != "\n........................................................................." \
+                     "................................................... done\nErased 124 sectors\n":
+            return (9, "uboot 'erase 0xef000000 +0xF80000':\n" + cmdOut)
+        # copying takes ~40sec
+        cmdOut = self.serialConsole.exec_("cp.b 0x1000000 0xef000000 0x$filesize", 80)
+        if cmdOut != "Copy to Flash... 9....8....7....6....5....4....3....2....1....done\n":
+            return (10, "uboot 'cp.b 0x1000000 0xef000000 0x$filesize':\n" + cmdOut)
         
-        cmdOut = self.serialConsole.exec_("cp.b 0x1000000 0xef000000 0x$filesize")
-        # copying takes ~50sec
-        print ">" + cmdOut + "<"
         self.serialConsole.writeLine("run norboot\n")
         # wait quite a long time, there is one moment where we extract a tar file with no output on console for quite a few seconds
+        sleep(90) # TODO wait for Hit any key to stop autoboot ~100 seconds
         
-        self.flashFinished.emit((1, u"posralo sa to", False))
+        return (0, "sme na konci, restartuje sa")
+        
+        #self.flashFinished.emit((1, u"posralo sa to", False))
     
     @QtCore.pyqtSlot(int)
     def ubootWaitAndTFTP(self, step):
         if step == 0:
             self.go_to_uboot()
         else:
-            self.tftp_flash()
+            try:
+                flash_result = self.tftp_flash()
+            except SCError, e:
+                logger.critical(str(e))
+            except Exception, e:
+                logger.critical(str(e))
+            else:
+                logger.critical(str(flash_result))
     
     @QtCore.pyqtSlot()
     def executeTest(self):
