@@ -228,7 +228,7 @@ class SerialConsole(object):
         
         self._accept_input = True
         
-        lines = text.strip().replace("\r", "").split("\n")
+        lines = cmd.strip().replace("\r", "").split("\n")
         cmdLen = 0
         for l in lines[:-1]:
             # write the line
