@@ -11,10 +11,7 @@
 import subprocess
 import time
 from shlex import split
-
-
-LOCAL_TEST_IFACE = "eth42"
-TURRIS_WAN_IFACE = "eth2"
+from settings import LOCAL_TEST_IFACE, TURRIS_WAN_IFACE
 
 
 # results from

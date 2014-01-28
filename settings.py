@@ -28,3 +28,6 @@ LOGLEVEL = _NOTSET # log everyting
 LOGFILE = "logdir/flasher.log"
 LOGFORMAT = '%(asctime)s - %(levelname)s - %(message)s'
 FLASH_LOGS = "nandnorlogs"
+
+LOCAL_TEST_IFACE = "eth42"
+TURRIS_WAN_IFACE = "eth2"
