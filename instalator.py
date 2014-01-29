@@ -367,13 +367,19 @@ class FlashingWorker(QtCore.QObject):
         if cmdOut != "Copy to Flash... 9....8....7....6....5....4....3....2....1....done\n":
             return (10, "uboot 'cp.b 0x1000000 0xef000000 0x$filesize':\n" + cmdOut)
         
+        # wait until nor -> nand
+        self.serialConsole.allow_input()
         self.serialConsole.writeLine("run norboot\n")
-        # wait quite a long time, there is one moment where we extract a tar file with no output on console for quite a few seconds
-        sleep(90) # TODO wait for Hit any key to stop autoboot ~100 seconds
+        wCounter = 120 # 120 seconds limit, normally it takes 80-90 seconds
+        while wCounter and self.serialConsole.inbuf.find("Hit any key to stop autoboot") == -1:
+            wCounter -= 1
+            sleep(1)
+        self.serialConsole.disable_input()
         
-        return (0, "sme na konci, restartuje sa")
-        
-        #self.flashFinished.emit((1, u"posralo sa to", False))
+        if wCounter:
+            return (0, "")
+        else:
+            return (11, "waiting for reboot after nor to nand unpacking timeouted")
     
     @QtCore.pyqtSlot(int)
     def ubootWaitAndTFTP(self, step):

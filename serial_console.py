@@ -165,6 +165,12 @@ class SerialConsole(object):
                     self.inbuf += tmps
             time.sleep(0.0003)
     
+    def allow_input(self):
+        self._accept_input = True
+    
+    def disable_input(self):
+        self._accept_input = False
+    
     def close(self):
         self._running = False
         self._readThread.join()
