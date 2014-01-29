@@ -77,6 +77,7 @@ class FlashingWorker(QtCore.QObject):
         self.router = None
         self.serialConsole = None
         self.canRepeatTest = True
+        self.imagesize = os.stat(TFTP_IMAGE_FILE).st_size
     
     def runCmd(self, cmdWithArgs):
         logger.info("[FLASHWORKER] start flashing (command: `%s`)" % " ".join(cmdWithArgs))
@@ -343,26 +344,15 @@ class FlashingWorker(QtCore.QObject):
                 "TIMEOUT !\neTSEC3: No link.\nSpeed: 1000, full duplex\n":
             # no link (cable disconnected)
             return (6, "uboot 'tftpboot 0x1000000 nor.bin':\ncable disconnected")
-        elif not cmdOut.startswith("Speed: 1000, full duplex\n"
-                "Using eTSEC3 device"
-                "TFTP from server 192.168.10.1; our IP address is 192.168.10.2"
-                "Filename 'nor.bin'."
-                "Load address: 0x1000000"
-                "Loading: *\x08#################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t #################################################################\n"
-                "\t ###############################\n\t") \
-                or not cmdOut.endswith("\ndone\nBytes transferred = 12845056 (c40000 hex)\n"):
+        elif not cmdOut.startswith(
+                "Speed: 1000, full duplex\n"
+                "Using eTSEC3 device\n"
+                "TFTP from server 192.168.10.1; our IP address is 192.168.10.2\n"
+                "Filename 'nor.bin'.\n"
+                "Load address: 0x1000000\n"
+                "Loading: ") \
+                or cmdOut.find("\ndone\nBytes transferred = %d (%s hex)\n" %
+                               (self.imagesize, hex(self.imagesize)[2:])) == -1:
             return (7, "uboot 'tftpboot 0x1000000 nor.bin':\n" + cmdOut)
         cmdOut = self.serialConsole.exec_("protect off 0xef000000 +0xF80000")
         if cmdOut != "Un-Protected 124 sectors\n":
@@ -703,6 +693,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                     i = self.STEPS['FLASH']
                     self.flashStepThreeSig.emit()
                 elif flash_result[0] == 3:
+                    self.tftpBootWaitSig.emit(0)
                     i = self.STEPS['TOUBOOT']
                 self.flashingStage = i
             elif flash_result[0] == -1:

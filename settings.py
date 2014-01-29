@@ -31,3 +31,5 @@ FLASH_LOGS = "nandnorlogs"
 
 LOCAL_TEST_IFACE = "eth42"
 TURRIS_WAN_IFACE = "eth2"
+
+TFTP_IMAGE_FILE = "/home/turris/tftp/nor.bin"
