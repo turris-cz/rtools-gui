@@ -259,7 +259,7 @@ class FlashingWorker(QtCore.QObject):
         else:
             # TODO is there a Diagnose Succeeded string?
             logger.info("[FLASHWORKER] FLASH step successful (routerId=%s)" % self.router.id)
-            self.router.status = self.router.STATUS_FINISHED
+            self.router.status = self.router.STATUS_UBOOT
             self.router.error = ""
         
         dbErr = not self.router.save()
@@ -390,10 +390,21 @@ class FlashingWorker(QtCore.QObject):
                 flash_result = self.tftp_flash()
             except SCError, e:
                 logger.critical(str(e))
+                err_msg = u"chyba konzole " + unicode(e)
+                return_code = 1
             except Exception, e:
                 logger.critical(str(e))
+                err_msg = u"chyba konzole " + unicode(e)
+                return_code = 1
             else:
-                logger.critical(str(flash_result))
+                err_msg = u""
+                return_code = 0 if flash_result[0] == 0 else 1 # TODO if failed for the second time, return 2 (definitely)
+                self.router.status = self.router.STATUS_FINISHED
+                self.router.error = ""
+            
+            dbErr = not self.router.save()
+            self.flashFinished.emit((return_code, err_msg, dbErr))
+            
     
     @QtCore.pyqtSlot()
     def executeTest(self):
@@ -701,6 +712,8 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                 elif flash_result[0] == 3:
                     self.tftpBootWaitSig.emit(0)
                     i = self.STEPS['TOUBOOT']
+                elif flash_result[0] == 4:
+                    i = self.STEPS['BEFORETESTS']
                 self.flashingStage = i
             elif flash_result[0] == -1:
                 # router already exists

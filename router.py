@@ -33,7 +33,8 @@ class Router(object):
     STATUS_START = 0
     STATUS_I2C = 1
     STATUS_CPLD = 2
-    STATUS_FINISHED = 3
+    STATUS_UBOOT = 3
+    STATUS_FINISHED = 4
     
     TEST_OK = 0
     TEST_FAIL = 1

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Mon Jan 27 14:20:18 2014
+# Created: Thu Jan 30 12:26:01 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -254,6 +254,7 @@ class Ui_Installer(object):
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.label_27.sizePolicy().hasHeightForWidth())
         self.label_27.setSizePolicy(sizePolicy)
+        self.label_27.setTextFormat(QtCore.Qt.PlainText)
         self.label_27.setWordWrap(True)
         self.label_27.setObjectName(_fromUtf8("label_27"))
         self.verticalLayout_15.addWidget(self.label_27)
@@ -570,12 +571,8 @@ class Ui_Installer(object):
         self.resetToUboot.setText(_translate("Installer", "Reset zmáčknut", None))
         self.label_23.setText(_translate("Installer", "<h1>Naprogramování NOR paměti</h1>", None))
         self.label_34.setText(_translate("Installer", "Stahuje se image přes TFTP a programuje se NOR paměť.", None))
-        self.label_26.setText(_translate("Installer", "<h1>Reset po rozbalení OS</h1>", None))
-        self.label_27.setText(_translate("Installer", "<ul>\n"
-"<li style=\"margin-bottom: 10px;\">Router bude potřeba znovu zresetovat. Odpojte kabel č.5 od routeru.</li>\n"
-"<li style=\"margin-bottom: 10px;\">Stiskněte krátce (&lt;5s) tlačítko RESET.</li>\n"
-"<li style=\"margin-bottom: 10px;\">Zapojte kabel č.5 do routeru.</li>\n"
-"</ul>", None))
+        self.label_26.setText(_translate("Installer", "<h1>Naprogramováno</h1>", None))
+        self.label_27.setText(_translate("Installer", "Router byl úspěšně naprogramován. V následujících krocích bude router otestován.", None))
         self.prepareToFirstTest.setText(_translate("Installer", "Projít na testy", None))
         self.label_17.setText(_translate("Installer", "<h1>Chyba</h1>", None))
         self.chckToStepX.setText(_translate("Installer", "Zkusit znovu", None))

@@ -422,7 +422,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
         <item>
          <widget class="QLabel" name="label_26">
           <property name="text">
-           <string>&lt;h1&gt;Reset po rozbalení OS&lt;/h1&gt;</string>
+           <string>&lt;h1&gt;Naprogramováno&lt;/h1&gt;</string>
           </property>
          </widget>
         </item>
@@ -435,11 +435,10 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&lt;ul&gt;
-&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Router bude potřeba znovu zresetovat. Odpojte kabel č.5 od routeru.&lt;/li&gt;
-&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Stiskněte krátce (&amp;lt;5s) tlačítko RESET.&lt;/li&gt;
-&lt;li style=&quot;margin-bottom: 10px;&quot;&gt;Zapojte kabel č.5 do routeru.&lt;/li&gt;
-&lt;/ul&gt;</string>
+           <string>Router byl úspěšně naprogramován. V následujících krocích bude router otestován.</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::PlainText</enum>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
