@@ -295,14 +295,14 @@ class FlashingWorker(QtCore.QObject):
         try:
             self.serialConsole.to_uboot()
         except SCError, e:
-            logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%d)."
+            logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%s). "
                             % self.router.id + str(e))
             self.serialConsole.close()
             self.serialConsole = None
             self.flashFinished.emit((1, u"Nezdařilo se dostat do U-Bootu.", False))
             return
         except Exception, e: # serial console exception, IOError,...
-            logger.warning("[FLASHWORKER] Serial console initialization failed (Exception other than SCError) (routerId=%d)."
+            logger.warning("[FLASHWORKER] Serial console initialization failed (Exception other than SCError) (routerId=%s). "
                             % self.router.id + str(e))
             self.serialConsole.close()
             self.serialConsole = None
@@ -436,7 +436,7 @@ class FlashingWorker(QtCore.QObject):
             try:
                 self.serialConsole.to_system()
             except SCError, e:
-                logger.warning("[TESTING] Serial console initialization failed (routerId=%d)."
+                logger.warning("[TESTING] Serial console initialization failed (routerId=%s). "
                                 % self.router.id + str(e))
                 self.serialConsole.close()
                 self.serialConsole = None
@@ -446,7 +446,7 @@ class FlashingWorker(QtCore.QObject):
                                        u"")
                 return
             except Exception, e: # serial console exception, IOError,...
-                logger.warning("[TESTING] Serial console initialization failed (Exception other than SCError) (routerId=%d)."
+                logger.warning("[TESTING] Serial console initialization failed (Exception other than SCError) (routerId=%s). "
                                 % self.router.id + str(e))
                 self.serialConsole.close()
                 self.serialConsole = None
