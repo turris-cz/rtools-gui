@@ -367,6 +367,8 @@ class FlashingWorker(QtCore.QObject):
             wCounter -= 1
             sleep(1)
         self.serialConsole.disable_input()
+        # set console state to UNDEFINED, it causes the serialConsole to call to_system before tests
+        self.serialConsole.state = self.serialConsole.UNDEFINED
         
         if wCounter:
             return (0, "")
@@ -441,6 +443,7 @@ class FlashingWorker(QtCore.QObject):
                                        u"")
                 return
             
+        if self.serialConsole.state != self.serialConsole.OPENWRT:
             try:
                 self.serialConsole.to_system()
             except SCError, e:
