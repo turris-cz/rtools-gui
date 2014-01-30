@@ -49,7 +49,7 @@ class Router(object):
         self.status = Router.STATUS_START # int
         self.error = "" # string / text in db
         # second chance for flashing steps (if the user can check the cables)
-        self.secondChance = {'I2C': True, 'CPLD': True, 'FLASH': True}
+        self.secondChance = {'I2C': True, 'CPLD': True, 'FLASH': True, 'NOR': True}
         self.testSerie = 0
         self.testResults = {}
         self.currentTest = 0

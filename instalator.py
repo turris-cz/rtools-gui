@@ -276,22 +276,16 @@ class FlashingWorker(QtCore.QObject):
             dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
             if len(dev) != 1:
                 if len(dev) == 0:
-                    errMsg = u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli."
+                    return u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli."
                 else:
-                    errMsg = u"Našel jsem více sériových konzolí, nevím kterou použít."
-                self.flashFinished.emit((1, errMsg, False))
-                return
+                    return u"Našel jsem více sériových konzolí, nevím kterou použít."
             
             # open the console
             try:
                 self.serialConsole = SerialConsole("/dev/" + dev[0])
             except Exception, e:
-                self.flashFinished.emit((
-                        1,
-                        u"Nezdařilo se otevřít spojení přes konzoli.",
-                        False))
-                return
-            
+                return u"Nezdařilo se otevřít spojení přes konzoli."
+        
         try:
             self.serialConsole.to_uboot()
         except SCError, e:
@@ -299,18 +293,16 @@ class FlashingWorker(QtCore.QObject):
                             % self.router.id + str(e))
             self.serialConsole.close()
             self.serialConsole = None
-            self.flashFinished.emit((1, u"Nezdařilo se dostat do U-Bootu.", False))
-            return
+            return u"Nezdařilo se dostat do U-Bootu."
         except Exception, e: # serial console exception, IOError,...
             logger.warning("[FLASHWORKER] Serial console initialization failed (Exception other than SCError) (routerId=%s). "
                             % self.router.id + str(e))
             self.serialConsole.close()
             self.serialConsole = None
-            self.flashFinished.emit((1, u"Nezdařilo se dostat do U-Bootu.", False))
-            return
+            return u"Nezdařilo se dostat do U-Bootu."
         
         # we are in uboot, move to the next window (with statusbar)
-        self.flashFinished.emit((0, u"", False))
+        return ""
     
     def tftp_flash(self):
         "return an empty string if everything ok or an error msg"
@@ -384,26 +376,42 @@ class FlashingWorker(QtCore.QObject):
     @QtCore.pyqtSlot(int)
     def ubootWaitAndTFTP(self, step):
         if step == 0:
-            self.go_to_uboot()
+            retStr = self.go_to_uboot()
+            if retStr:
+                # error
+                return_code = 1 if self.router.secondChance["NOR"] else 2
+                self.router.secondChance["NOR"] = False
+                err_msg = retStr
+                self.router.error = "error when going to uboot"
+                dbErr = not self.router.save()
+            else:
+                # everything ok
+                self.router.secondChance["NOR"] = True
+                return_code = 0
+                err_msg = ""
+                dbErr = False
         else:
             try:
                 flash_result = self.tftp_flash()
-            except SCError, e:
-                logger.critical(str(e))
-                err_msg = u"chyba konzole " + unicode(e)
-                return_code = 1
             except Exception, e:
-                logger.critical(str(e))
-                err_msg = u"chyba konzole " + unicode(e)
-                return_code = 1
+                logger.warning("[FLASHWORKER] exception when uboot tftp nor flashing: " + repr(e))
+                err_msg = u"Chyba konzole: " + unicode(e)
+                return_code = 1 if self.router.secondChance["NOR"] else 2
+                self.router.secondChance["NOR"] = False
+                self.router.error = "Exception in tftp flash procedure. " + repr(e)
             else:
-                err_msg = u""
-                return_code = 0 if flash_result[0] == 0 else 1 # TODO if failed for the second time, return 2 (definitely)
-                self.router.status = self.router.STATUS_FINISHED
-                self.router.error = ""
+                if flash_result[0] == 0:
+                    return_code = 0
+                    err_msg = u""
+                    self.router.status = self.router.STATUS_FINISHED
+                    self.router.error = ""
+                else:
+                    return_code = 1 if self.router.secondChance["NOR"] else 2
+                    self.router.secondChance["NOR"] = False
+                    err_msg = u"someting went wrong in the second stage (TODO specify)"
             
             dbErr = not self.router.save()
-            self.flashFinished.emit((return_code, err_msg, dbErr))
+        self.flashFinished.emit((return_code, err_msg, dbErr))
             
     
     @QtCore.pyqtSlot()
