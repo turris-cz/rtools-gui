@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Thu Jan 30 20:18:10 2014
+# Created: Fri Jan 31 19:54:03 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -542,7 +542,7 @@ class Ui_Installer(object):
         self.label_12.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zkontrolujte zapojení kabelu č. 5 a ethernet kabelu do WAN programovaného routeru.</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Stiskněte tlačítko RESET.</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Vyčkejte, pokým se nahraje NOR paměť přes TFTP.</li></ul></body></html>", None))
         self.resetToUboot.setText(_translate("Installer", "Reset zmáčknut", None))
         self.label_23.setText(_translate("Installer", "<h1>Naprogramování NOR paměti</h1>", None))
-        self.label_34.setText(_translate("Installer", "Stahuje se image přes TFTP a programuje se NOR paměť.", None))
+        self.label_34.setText(_translate("Installer", "Stahuje se image přes TFTP a programuje se NOR paměť. Následně se rozbaluje image z NOR do NAND. Tato operace trvá přibližně 3 minuty.", None))
         self.label_26.setText(_translate("Installer", "<h1>Naprogramováno</h1>", None))
         self.label_27.setText(_translate("Installer", "Router byl úspěšně naprogramován. V následujících krocích bude router otestován.", None))
         self.prepareToFirstTest.setText(_translate("Installer", "Projít na testy", None))
