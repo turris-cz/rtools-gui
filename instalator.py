@@ -305,7 +305,9 @@ class FlashingWorker(QtCore.QObject):
         return ""
     
     def tftp_flash(self):
-        "return an empty string if everything ok or an error msg"
+        """return (int, str), if everything ok, then (0, "")
+        else (step which failed, error message)
+        """
         
         # set the ip address on local interface
         p = subprocess.Popen(["sudo", "ifconfig", LOCAL_TEST_IFACE, "192.168.10.1"],
@@ -388,7 +390,6 @@ class FlashingWorker(QtCore.QObject):
                 dbErr = not self.router.save()
             else:
                 # everything ok
-                self.router.secondChance["NOR"] = True
                 return_code = 0
                 err_msg = ""
                 dbErr = False
@@ -410,11 +411,17 @@ class FlashingWorker(QtCore.QObject):
                 else:
                     return_code = 1 if self.router.secondChance["NOR"] else 2
                     self.router.secondChance["NOR"] = False
+                    self.router.error = flash_result[1]
                     err_msg = u"someting went wrong in the second stage (TODO specify)"
             
             dbErr = not self.router.save()
+        
+        # if final error, close the console
+        if return_code == 2 and self.serialConsole:
+            self.serialConsole.close()
+            self.serialConsole = None
+        
         self.flashFinished.emit((return_code, err_msg, dbErr))
-            
     
     @QtCore.pyqtSlot()
     def executeTest(self):
@@ -777,7 +784,6 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         elif i == self.STEPS['TOUBOOT']:
             if flash_result[0] == 0:
                 i = self.STEPS['UBOOTFLASH']
-                self.flashingStage = i
                 self.tftpBootWaitSig.emit(1)
             elif flash_result[0] == 1:
                 self.tmpErrMsg.setText(flash_result[1])
@@ -833,8 +839,6 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
             self.flashStepThreeSig.emit()
         elif self.flashingStage == self.STEPS['TOUBOOT']:
             self.tftpBootWaitSig.emit(0)
-        elif self.flashingStage == self.STEPS['UBOOTFLASH']:
-            self.tftpBootWaitSig.emit(1)
     
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(int, 'QString', 'QString')
