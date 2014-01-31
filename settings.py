@@ -32,4 +32,5 @@ FLASH_LOGS = "nandnorlogs"
 LOCAL_TEST_IFACE = "eth42"
 TURRIS_WAN_IFACE = "eth2"
 
-TFTP_IMAGE_FILE = "/home/turris/tftp/nor.bin"
+TFTP_IMAGE_FILE = "/home/palko/Projects/router/instalator/dbinit.sql"
+# TFTP_IMAGE_FILE = "/home/turris/workspace/tftp/nor.bin"
