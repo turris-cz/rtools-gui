@@ -76,7 +76,6 @@ class FlashingWorker(QtCore.QObject):
         super(FlashingWorker, self).__init__()
         self.router = None
         self.serialConsole = None
-        self.canRepeatTest = True
         self.imagesize = os.stat(TFTP_IMAGE_FILE).st_size
     
     def runCmd(self, cmdWithArgs):
@@ -423,8 +422,7 @@ class FlashingWorker(QtCore.QObject):
         
         self.flashFinished.emit((return_code, err_msg, dbErr))
     
-    @QtCore.pyqtSlot()
-    def executeTest(self):
+    def testPrepareConsole(self):
         logger.debug("[TESTING] Executing test %d on the router with routerId=%s"
                 % (self.router.currentTest, self.router.id))
         
@@ -437,19 +435,15 @@ class FlashingWorker(QtCore.QObject):
                     errMsg = u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli."
                 else:
                     errMsg = u"Našel jsem více sériových konzolí, nevím kterou použít."
-                self.testFinished.emit(self.router.currentTest, errMsg,
-                                       u"Sériová komunikace s testovaným Turrisem selhala.")
-                return
-            
+                return (errMsg, u"Problém sériové konzole.")
             # open the console
             try:
                 self.serialConsole = SerialConsole("/dev/" + dev[0])
             except Exception, e:
-                self.testFinished.emit(self.router.currentTest,
-                                       u"Nezdařilo se otevřít spojení přes konzoli. Zkontrolujte, ",
-                                       u"")
-                return
-            
+                return (u"Nezdařilo se otevřít spojení přes konzoli. Zkontrolujte, "
+                        u"kabel č. 5 a napájení 7,5V.",
+                        u"Problém sériové konzole.")
+        
         if self.serialConsole.state != self.serialConsole.OPENWRT:
             try:
                 self.serialConsole.to_system()
@@ -458,22 +452,46 @@ class FlashingWorker(QtCore.QObject):
                                 % self.router.id + str(e))
                 self.serialConsole.close()
                 self.serialConsole = None
-                self.testFinished.emit(self.router.currentTest,
-                                       u"Nezdařilo se otevřít sériovou konzoli. Zkontrolujte správné zapojení "
-                                       u"kabelu č. 5 a napájecího adaptéru 7,5V.",
-                                       u"")
-                return
+                return (u"Nezdařila se komunikace se systémem na routru."
+                        u"Problém sériové konzole.")
             except Exception, e: # serial console exception, IOError,...
                 logger.warning("[TESTING] Serial console initialization failed (Exception other than SCError) (routerId=%s). "
                                 % self.router.id + str(e))
                 self.serialConsole.close()
                 self.serialConsole = None
                 # self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
+                return (u"Při komunikaci s routrem přes sériovou konzoli došlo k chybě.",
+                        u"Problém sériové konzole.")
+    
+    @QtCore.pyqtSlot()
+    def executeTest(self):
+        def report_tests_results():
+            # generate test failure list and append it to testResult
+            failedTests = [t for t in self.router.testResults.iterkeys() if self.router.testResults[t] != self.router.TEST_OK]
+            testsReport = u"<h3>Testy, které selhali</h3>" if failedTests else u"<h3>Všechny testy proběhli správně</h3>"
+            for t in failedTests:
+                testsReport += TESTLIST[t]['desc'] + u": "
+                if self.router.testResults[t] == self.router.TEST_FAIL:
+                    testsReport += u"neúspěch"
+                elif self.router.testResults[t] == self.router.TEST_PROBLEM:
+                    testsReport += u"selhání testu"
+                testsReport += u"<br>"
+                
+            return testsReport
+        # end def report_tests_results
+        
+        # prepare the serial console
+        cons_prep_err = self.testPrepareConsole()
+        if cons_prep_err:
+            self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
+            if self.router.testSecondChance:
+                self.router.testSecondChance = False
                 self.testFinished.emit(self.router.currentTest,
-                                       u"Nezdařilo se otevřít sériovou konzoli. Zkontrolujte správné zapojení "
-                                       u"kabelu č. 5 a napájecího adaptéru 7,5V.",
-                                       u"")
-                return
+                                       cons_prep_err[0], cons_prep_err[1])
+            else:
+                self.testFinished.emit(-1, cons_prep_err[0],
+                                       report_tests_results())
+            return
         
         # run the test
         errMsg = ""
@@ -485,14 +503,18 @@ class FlashingWorker(QtCore.QObject):
             errMsg = u"Vyskytla se chyba při testování, chyba je pravděpodobně v testu samtném nebo konzole " \
                      u"vrátila výsledek, který nedokážu zpracovat."
             testResult = u"Chyba testu."
-            self.serialConsole.close()  # TODO reset the console (send ^D) and wait for the prompt
-            self.serialConsole = None   # -- || --
-            nextTest = self.router.currentTest
+            if self.router.testSecondChance:
+                self.router.testSecondChance = False
+                nextTest = self.router.currentTest
+            else:
+                nextTest = -1
             import traceback
             logger.critical("[TESTING] error during test \"" +
                             TESTLIST[self.router.currentTest]['desc'] +
                             "\"\n" +
                             traceback.format_exc())
+            self.serialConsole.close()
+            self.serialConsole = None
         else:
             if p_return[0] == 0:
                 self.router.testResults[self.router.currentTest] = self.router.TEST_OK
@@ -512,30 +534,15 @@ class FlashingWorker(QtCore.QObject):
                     p_return[1] + "\n-----\n" + p_return[2] + "\n-----\n" + p_return[3])
             
             self.router.currentTest += 1
-            self.canRepeatTest = True
             if self.router.currentTest >= len(TESTLIST):
                 self.serialConsole.close()
                 self.serialConsole = None
-                
-                # generate test failure list and append it to testResult
-                failedTests = [t for t in self.router.testResults.iterkeys() if self.router.testResults[t] != self.router.TEST_OK]
-                testsReport = u"<h3>Testy, které selhali</h3>" if failedTests else u"<h3>Všechny testy proběhli správně</h3>"
-                for t in failedTests:
-                    testsReport += TESTLIST[t]['desc'] + u": "
-                    if self.router.testResults[t] == self.router.TEST_FAIL:
-                        testsReport += u"neúspěch"
-                    elif self.router.testResults[t] == self.router.TEST_PROBLEM:
-                        testsReport += u"selhání testu"
-                    testsReport += u"<br>"
-                    
-                if p_return[0] == 0: # last test was ok
-                    testResult = testsReport
-                else:
-                    testResult += testsReport
-                
                 nextTest = -1
             else:
                 nextTest = self.router.currentTest
+        
+        if nextTest == -1:
+            testResult += report_tests_results()
         
         self.testFinished.emit(nextTest, errMsg, testResult)
     
