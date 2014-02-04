@@ -452,7 +452,7 @@ class FlashingWorker(QtCore.QObject):
                                 % self.router.id + str(e))
                 self.serialConsole.close()
                 self.serialConsole = None
-                return (u"Nezdařila se komunikace se systémem na routru."
+                return (u"Nezdařila se komunikace se systémem na routru.",
                         u"Problém sériové konzole.")
             except Exception, e: # serial console exception, IOError,...
                 logger.warning("[TESTING] Serial console initialization failed (Exception other than SCError) (routerId=%s). "
