@@ -138,7 +138,7 @@ class SerialConsole(object):
             time.sleep(0.001)
             waitCycles -= 1
         
-        wCounter = int(INIT_MAX_WAIT / WAITTIME)
+        wCounter = 10
         while wCounter and not self.inbuf.endswith(UBOOT_PROMPT):
             os.write(self._sc, "\n")
             if self.inbuf.find("\n" + PS1) != -1 or self.inbuf.find("\n" + PS2) != -1:
