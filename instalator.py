@@ -500,9 +500,10 @@ class FlashingWorker(QtCore.QObject):
             p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
         except Exception:
             self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
-            errMsg = u"Vyskytla se chyba při testování, chyba je pravděpodobně v testu samtném nebo konzole " \
+            errMsg = u"Vyskytla se chyba při testování, sériová konzole " \
                      u"vrátila výsledek, který nedokážu zpracovat."
-            testResult = u"Chyba testu."
+            testResult = TESTLIST[self.router.currentTest]['desc'] + \
+                         u" skončil s chybou:<br>Chyba konzole."
             if self.router.testSecondChance:
                 self.router.testSecondChance = False
                 nextTest = self.router.currentTest
