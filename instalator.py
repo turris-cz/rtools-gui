@@ -265,7 +265,6 @@ class FlashingWorker(QtCore.QObject):
         
         self.flashFinished.emit((return_code, err_msg, dbErr))
     
-    
     def go_to_uboot(self):
         logger.debug("[FLASHWORKER] starting fourth step (routerId=%s)" % self.router.id)
         
@@ -558,8 +557,17 @@ class FlashingWorker(QtCore.QObject):
             
             self.router.currentTest += 1
             if self.router.currentTest >= len(TESTLIST):
-                self.serialConsole.close()
-                self.serialConsole = None
+                try:
+                    # delete /etc/config/wireless because it contains 2 radios
+                    # it will be regenerated the very next boot
+                    self.serialConsole.exec_("rm /etc/config/wireless")
+                except:
+                    pass
+                try:
+                    self.serialConsole.close()
+                    self.serialConsole = None
+                except:
+                    pass
                 nextTest = -1
             else:
                 nextTest = self.router.currentTest
