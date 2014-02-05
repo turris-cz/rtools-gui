@@ -380,7 +380,8 @@ class FlashingWorker(QtCore.QObject):
         if wCounter:
             return (0, "")
         else:
-            return (-1, "waiting for reboot after nor to nand unpacking timeouted")
+            # this is not expected to happen
+            return (0, "waiting for reboot after nor to nand unpacking timeouted")
     
     @QtCore.pyqtSlot(int)
     def ubootWaitAndTFTP(self, step):
@@ -408,7 +409,7 @@ class FlashingWorker(QtCore.QObject):
                 self.router.secondChance["NOR"] = False
                 self.router.error = "Exception in tftp flash procedure. " + repr(e)
             else:
-                if flash_result[0] <= 0:
+                if flash_result[0] == 0:
                     return_code = 0
                     self.router.status = self.router.STATUS_FINISHED
                     self.router.error = ""
@@ -431,10 +432,8 @@ class FlashingWorker(QtCore.QObject):
                     err_msg = u"Zdá se, že tftp server neběží, kontaktujte prosím podporu."
                 elif flash_result[0] == 8:
                     err_msg = u"Tftp image se nestáhl správně."
-                elif flash_result == 12:
-                    err_msg = u"NOR pamět byla správne naprogramována, ale při následném " \
-                              u"restartu se nepovedlo nabootovat systém. Zkuste před testy " \
-                              u"zmáčknout tlačítko reset."
+                else:
+                    err_msg = u""
             dbErr = not self.router.save()
         
         # if final error, close the console
