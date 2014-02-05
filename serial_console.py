@@ -59,6 +59,7 @@ class SerialConsole(object):
                 pass
             raise
         
+        self._interrupt_flag = False
         self._inbuf_lock = threading.Lock()
         self._readThread = threading.Thread(target=self._readWorker)
         self._readThread.start()
@@ -76,6 +77,7 @@ class SerialConsole(object):
         
         with self._inbuf_lock:
             self.inbuf = ""
+        
         self._accept_input = True
         
         totalWaitCycles = int(INIT_MAX_WAIT / WAITTIME)
@@ -114,29 +116,38 @@ class SerialConsole(object):
         self._accept_input = False
         self.state = self.OPENWRT
     
-    def to_uboot(self):
+    def to_uboot(self, timeout=INIT_MAX_WAIT):
         """this function reads output from console and when the text
         "Hit any key to stop autoboot" is read, it sends ' ' (space) to
         interrupt the autoboot. Then it waits for $UBOOT_PROMPT.
         
         If operating system prompt is found (denoting that os is running)
         it raises an exception.
+        
+        This function waits at most timeout seconds, then it raises
+        an exception. If timeout is -1, it waits forever.
         """
         
         with self._inbuf_lock:
             self.inbuf = ""
         
+        self._interrupt_flag = False
         self._accept_input = True
         
-        waitCycles = int(INIT_MAX_WAIT / 0.001)
+        waitCycles = int(timeout / 0.001)
         waiting = True
-        while waitCycles > 0 and waiting:
+        while (waitCycles == -1000 or waitCycles > 0) and waiting:
+            if self._interrupt_flag:
+                self._accept_input = False
+                self.state = self.UNDEFINED
+                raise SCError("waiting interrupted")
             if self.inbuf.find("Hit any key to stop autoboot") != -1:
                 # send ' ' to interrupt autoboot
                 os.write(self._sc, ' ')
                 waiting = False
             time.sleep(0.001)
-            waitCycles -= 1
+            if waitCycles > 0:
+                waitCycles -= 1
         
         wCounter = 10
         while wCounter and not self.inbuf.endswith(UBOOT_PROMPT):
@@ -156,6 +167,9 @@ class SerialConsole(object):
         
         self._accept_input = False
         self.state = self.UBOOT
+    
+    def interrupt_wait(self):
+        self._interrupt_flag = True
     
     def _readWorker(self):
         while self._running:

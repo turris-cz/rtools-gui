@@ -286,7 +286,8 @@ class FlashingWorker(QtCore.QObject):
                 return u"Nezdařilo se otevřít spojení přes konzoli."
         
         try:
-            self.serialConsole.to_uboot()
+            # to_uboot(timeout=-1) - wait forever (there is a button to interrupt the wait)
+            self.serialConsole.to_uboot(-1)
         except SCError, e:
             logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%s). "
                             % self.router.id + str(e))
@@ -652,6 +653,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         # buttons event listeners
         self.startToScan.clicked.connect(self.simpleMoveToScan)
         self.scanToOne.clicked.connect(self.launchProgramming)
+        self.resetToUboot.clicked.connect(self.interruptUbootWait)
         self.prepareToFirstTest.clicked.connect(self.toNextTest)
         self.chckToStepX.clicked.connect(self.userHasCheckedCables)
         self.errToScan.clicked.connect(self.simpleMoveToScan)
@@ -952,6 +954,13 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         # check if this router is in db and set router id and attempt accordingly
         self.toOnlyTests.setEnabled(False)
         self.checkRouterDbExistsSig.emit(barCode)
+    
+    @QtCore.pyqtSlot()
+    def interruptUbootWait(self):
+        try:
+            self.flashWorker.serialConsole.interrupt_wait()
+        except:
+            pass
     
     def closeEvent(self, event):
         if self.blockClose:
