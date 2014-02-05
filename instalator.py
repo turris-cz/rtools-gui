@@ -380,7 +380,7 @@ class FlashingWorker(QtCore.QObject):
         if wCounter:
             return (0, "")
         else:
-            return (12, "waiting for reboot after nor to nand unpacking timeouted")
+            return (-1, "waiting for reboot after nor to nand unpacking timeouted")
     
     @QtCore.pyqtSlot(int)
     def ubootWaitAndTFTP(self, step):
@@ -408,17 +408,33 @@ class FlashingWorker(QtCore.QObject):
                 self.router.secondChance["NOR"] = False
                 self.router.error = "Exception in tftp flash procedure. " + repr(e)
             else:
-                if flash_result[0] == 0:
+                if flash_result[0] <= 0:
                     return_code = 0
-                    err_msg = u""
                     self.router.status = self.router.STATUS_FINISHED
                     self.router.error = ""
                 else:
                     return_code = 1 if self.router.secondChance["NOR"] else 2
                     self.router.secondChance["NOR"] = False
                     self.router.error = flash_result[1]
-                    err_msg = u"someting went wrong in the second stage (TODO specify)"
-            
+                
+                if flash_result[0] == 0:
+                    err_msg = u""
+                elif flash_result[0] == 1:
+                    err_msg = u"Nezdařilo se nastavit lokální IP adresu. Tohle " \
+                                u"je chyba aplikace. Kontaktujte prosím podporu."
+                elif flash_result[0] in (2, 3, 4, 9, 10, 11):
+                    err_msg = u"Chyba skriptu spouštěném na routeru."
+                elif flash_result[0] in (5, 7):
+                    err_msg = u"Nedokážu se připojit na tftp server. Zkontrolujte " \
+                                u"zapojení kabelu do WAN portu programovaného routeru."
+                elif flash_result[0] == 6:
+                    err_msg = u"Zdá se, že tftp server neběží, kontaktujte prosím podporu."
+                elif flash_result[0] == 8:
+                    err_msg = u"Tftp image se nestáhl správně."
+                elif flash_result == 12:
+                    err_msg = u"NOR pamět byla správne naprogramována, ale při následném " \
+                              u"restartu se nepovedlo nabootovat systém. Zkuste před testy " \
+                              u"zmáčknout tlačítko reset."
             dbErr = not self.router.save()
         
         # if final error, close the console
