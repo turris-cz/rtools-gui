@@ -330,13 +330,19 @@ class FlashingWorker(QtCore.QObject):
         cmdOut = self.serialConsole.exec_("ping 192.168.10.1", 25) # timeout for ping is 20s
         if not cmdOut.endswith("host 192.168.10.1 is alive\n"):
             return (5, "uboot 'ping 192.168.10.1':\n" + cmdOut)
-        cmdOut = self.serialConsole.exec_("tftpboot 0x1000000 nor.bin")
+        try:
+            cmdOut = self.serialConsole.exec_("tftpboot 0x1000000 nor.bin")
+        except SCError, e:
+            return (6, "uboot 'tftpboot 0x1000000 nor.bin':\n" +
+                    self.serialConsole.inbuf
+                    if hasattr(self.serialConsole, 'inbuf')
+                    else "SCError")
         if cmdOut == "Speed: 1000, full duplex\n*** ERROR: `ethaddr' not set\n" \
                 "Speed: 1000, full duplex\n*** ERROR: `eth1addr' not set\n" \
                 "eTSEC3 Waiting for PHY auto negotiation to complete......... " \
                 "TIMEOUT !\neTSEC3: No link.\nSpeed: 1000, full duplex\n":
             # no link (cable disconnected)
-            return (6, "uboot 'tftpboot 0x1000000 nor.bin':\ncable disconnected")
+            return (7, "uboot 'tftpboot 0x1000000 nor.bin':\ncable disconnected")
         elif not cmdOut.startswith(
                 "Speed: 1000, full duplex\n"
                 "Using eTSEC3 device\n"
@@ -346,19 +352,19 @@ class FlashingWorker(QtCore.QObject):
                 "Loading: ") \
                 or cmdOut.find("\ndone\nBytes transferred = %d (%s hex)\n" %
                                (self.imagesize, hex(self.imagesize)[2:])) == -1:
-            return (7, "uboot 'tftpboot 0x1000000 nor.bin':\n" + cmdOut)
+            return (8, "uboot 'tftpboot 0x1000000 nor.bin':\n" + cmdOut)
         cmdOut = self.serialConsole.exec_("protect off 0xef000000 +0xF80000")
         if cmdOut != "Un-Protected 124 sectors\n":
-            return (8, "uboot 'protect off 0xef000000 +0xF80000':\n" + cmdOut)
+            return (9, "uboot 'protect off 0xef000000 +0xF80000':\n" + cmdOut)
         # erasing takes ~40sec
         cmdOut = self.serialConsole.exec_("erase 0xef000000 +0xF80000", 90)
         if cmdOut != "\n........................................................................." \
                      "................................................... done\nErased 124 sectors\n":
-            return (9, "uboot 'erase 0xef000000 +0xF80000':\n" + cmdOut)
+            return (10, "uboot 'erase 0xef000000 +0xF80000':\n" + cmdOut)
         # copying takes ~40sec
         cmdOut = self.serialConsole.exec_("cp.b 0x1000000 0xef000000 0x$filesize", 80)
         if cmdOut != "Copy to Flash... 9....8....7....6....5....4....3....2....1....done\n":
-            return (10, "uboot 'cp.b 0x1000000 0xef000000 0x$filesize':\n" + cmdOut)
+            return (11, "uboot 'cp.b 0x1000000 0xef000000 0x$filesize':\n" + cmdOut)
         
         # wait until nor -> nand
         self.serialConsole.allow_input()
@@ -374,7 +380,7 @@ class FlashingWorker(QtCore.QObject):
         if wCounter:
             return (0, "")
         else:
-            return (11, "waiting for reboot after nor to nand unpacking timeouted")
+            return (12, "waiting for reboot after nor to nand unpacking timeouted")
     
     @QtCore.pyqtSlot(int)
     def ubootWaitAndTFTP(self, step):
