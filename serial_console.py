@@ -224,6 +224,7 @@ class SerialConsole(object):
                     # stay blocked
                 else:
                     raise SCError("unexpected characters in inbuf")
+                wCounter -= 1
         
         return inLength
     
