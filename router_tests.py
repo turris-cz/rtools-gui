@@ -112,12 +112,15 @@ gpiotest () {
             echo $i > /sys/class/gpio/export
         fi
     done
-    GPIO_OUT="224 225 226 227"
-    GPIO_IN="228 229 230 239"
+    # GPIO_OUT="224 225 226 227"
+    # GPIO_IN="228 229 230 239"
+    GPIO_OUT="224 225 227"
+    GPIO_IN="228 229 239"
     for i in $GPIO_OUT; do echo out > /sys/class/gpio/gpio$i/direction; done
     for i in $GPIO_IN; do echo in > /sys/class/gpio/gpio$i/direction; done
 
-    for i in `seq 1 4`; do
+    # for i in `seq 1 4`; do
+    for i in `seq 1 3`; do
         VAL=$(($i%2));
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
@@ -128,7 +131,8 @@ gpiotest () {
             return 1
         fi
     done
-    for i in `seq 1 4`; do
+    # for i in `seq 1 4`; do
+    for i in `seq 1 3`; do
         VAL=$(($i%2));
         if [ $VAL -eq 0 ]; then VAL=1; else VAL=0; fi
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
@@ -140,13 +144,16 @@ gpiotest () {
             return 1
         fi
     done
-
-    GPIO_IN="224 225 226 227"
-    GPIO_OUT="228 229 230 239"
+    
+    # GPIO_IN="224 225 226 227"
+    # GPIO_OUT="228 229 230 239"
+    GPIO_IN="224 225 227"
+    GPIO_OUT="228 229 239"
     for i in $GPIO_OUT; do echo out > /sys/class/gpio/gpio$i/direction; done
     for i in $GPIO_IN; do echo in > /sys/class/gpio/gpio$i/direction; done
 
-    for i in `seq 1 4`; do
+    # for i in `seq 1 4`; do
+    for i in `seq 1 3`; do
         VAL=$(($i%2));
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
         OUTVAL=`cat /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value`;
@@ -157,7 +164,8 @@ gpiotest () {
             return 1
         fi
     done
-    for i in `seq 1 4`; do
+    # for i in `seq 1 4`; do
+    for i in `seq 1 3`; do
         VAL=$(($i%2));
         if [ $VAL -eq 0 ]; then VAL=1; else VAL=0; fi
         echo $VAL > /sys/class/gpio/gpio$(echo $GPIO_OUT | cut -d ' ' -f $i)/value;
