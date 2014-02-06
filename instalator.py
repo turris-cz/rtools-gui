@@ -373,6 +373,11 @@ class FlashingWorker(QtCore.QObject):
         while wCounter and self.serialConsole.inbuf.find("Hit any key to stop autoboot") == -1:
             wCounter -= 1
             sleep(1)
+        wCounter = 60 # 60 seconds limit, normally it takes 20-30 seconds to boot up
+        while wCounter and self.serialConsole.inbuf.find("procd: - init complete -") == -1:
+            wCounter -= 1
+            sleep(1)
+            
         self.serialConsole.disable_input()
         # set console state to UNDEFINED, it causes the serialConsole to call to_system before tests
         self.serialConsole.state = self.serialConsole.UNDEFINED
