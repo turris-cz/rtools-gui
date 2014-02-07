@@ -189,26 +189,6 @@ def textresult_generic(p_result):
     return  "%s<br>returned:<br>%s<br>return code: %s" % (p_result[3], p_result[2], p_result[1])
 
 
-def textresult_LAN1(p_result):
-    return p_result[1]
-
-
-def textresult_LAN2(p_result):
-    return p_result[1]
-
-
-def textresult_LAN3(p_result):
-    return p_result[2]
-
-
-def textresult_LAN4(p_result):
-    return p_result[1]
-
-
-def textresult_LAN5(p_result):
-    return p_result[1]
-
-
 def textresult_USB(p_result):
     if p_result[0] == -1:
         return textresult_generic(p_result)
