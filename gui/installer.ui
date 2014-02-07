@@ -293,7 +293,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zkontrolujte zapojení kabelu č. 5 a ethernet kabelu do WAN programovaného routeru.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Stiskněte tlačítko RESET.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vyčkejte, pokým se nahraje NOR paměť přes TFTP.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zkontrolujte zapojení kabelu č. 5 a ethernet kabelu do WAN programovaného routeru.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Stiskněte tlačítko RESET.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zmáčknutí RESETu je detekováno automaticky a to ihned spustí následující krok. V případě chyby tato autodetekce selže a v tom případě použijte dolní tlačítko na přerušení čekání.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vyčkejte, dokud se nenahraje NOR paměť přes TFTP.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textFormat">
            <enum>Qt::RichText</enum>
@@ -321,7 +321,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
           <item>
            <widget class="QPushButton" name="resetToUboot">
             <property name="text">
-             <string>Reset zmáčknut</string>
+             <string>Reset zmáčknut, autodetekce selhala</string>
             </property>
            </widget>
           </item>
@@ -347,7 +347,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Stahuje se image přes TFTP a programuje se NOR paměť. Následně se rozbaluje image z NOR do NAND. Tato operace trvá přibližně 3 minuty.</string>
+           <string>Stahuje se image přes TFTP a programuje se NOR paměť. Následně se rozbaluje image z NOR do NAND. Tato operace trvá přibližně 4 minuty.</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -384,7 +384,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Router byl úspěšně naprogramován. V následujících krocích bude router otestován.</string>
+           <string>Operace programování desky routeru TURRIS skončila úspěšně. V následujících krocích bude router otestován.</string>
           </property>
           <property name="textFormat">
            <enum>Qt::PlainText</enum>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Fri Jan 31 19:54:03 2014
+# Created: Fri Feb  7 14:04:01 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -539,12 +539,12 @@ class Ui_Installer(object):
         self.label_9.setText(_translate("Installer", "<h1>FLASH Programování</h1>", None))
         self.label_10.setText(_translate("Installer", "V tomto kroku probíhá programování NOR Flash paměti procesoru pomocí kabelu 3. Prosím vyčkejte přibližně 1 až 2 minuty na dokončení.", None))
         self.label_11.setText(_translate("Installer", "<h1>Naprogramování NOR paměti</h1>", None))
-        self.label_12.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zkontrolujte zapojení kabelu č. 5 a ethernet kabelu do WAN programovaného routeru.</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Stiskněte tlačítko RESET.</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Vyčkejte, pokým se nahraje NOR paměť přes TFTP.</li></ul></body></html>", None))
-        self.resetToUboot.setText(_translate("Installer", "Reset zmáčknut", None))
+        self.label_12.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zkontrolujte zapojení kabelu č. 5 a ethernet kabelu do WAN programovaného routeru.</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Stiskněte tlačítko RESET.</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zmáčknutí RESETu je detekováno automaticky a to ihned spustí následující krok. V případě chyby tato autodetekce selže a v tom případě použijte dolní tlačítko na přerušení čekání.</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Vyčkejte, dokud se nenahraje NOR paměť přes TFTP.</li></ul></body></html>", None))
+        self.resetToUboot.setText(_translate("Installer", "Reset zmáčknut, autodetekce selhala", None))
         self.label_23.setText(_translate("Installer", "<h1>Naprogramování NOR paměti</h1>", None))
-        self.label_34.setText(_translate("Installer", "Stahuje se image přes TFTP a programuje se NOR paměť. Následně se rozbaluje image z NOR do NAND. Tato operace trvá přibližně 3 minuty.", None))
+        self.label_34.setText(_translate("Installer", "Stahuje se image přes TFTP a programuje se NOR paměť. Následně se rozbaluje image z NOR do NAND. Tato operace trvá přibližně 4 minuty.", None))
         self.label_26.setText(_translate("Installer", "<h1>Naprogramováno</h1>", None))
-        self.label_27.setText(_translate("Installer", "Router byl úspěšně naprogramován. V následujících krocích bude router otestován.", None))
+        self.label_27.setText(_translate("Installer", "Operace programování desky routeru TURRIS skončila úspěšně. V následujících krocích bude router otestován.", None))
         self.prepareToFirstTest.setText(_translate("Installer", "Projít na testy", None))
         self.label_17.setText(_translate("Installer", "<h1>Chyba</h1>", None))
         self.chckToStepX.setText(_translate("Installer", "Zkusit znovu", None))
