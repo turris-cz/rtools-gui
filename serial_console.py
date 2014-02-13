@@ -51,6 +51,7 @@ class SerialConsole(object):
                     baudrate,
                     newcc,
                     ])
+            termios.tcflush(self._sc, termios.TCIOFLUSH)
         except:
             # if exception, close tty file
             try:
@@ -107,6 +108,11 @@ class SerialConsole(object):
                 raise SCError("We are in uboot, restart the router to go to the system.")
             if self.inbuf.endswith("\n" + PS1):
                 read = False
+            elif self.inbuf.endswith("\n" + PS2):
+                # try to reset the console
+                os.write(self._sc, "\x04")
+                time.sleep(WAITTIME)
+                wCounter -= 1
             else:
                 wCounter -= 1
         

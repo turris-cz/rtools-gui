@@ -289,7 +289,7 @@ class FlashingWorker(QtCore.QObject):
             self.serialConsole.to_uboot(-1)
         except SCError, e:
             logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%s). "
-                            % self.router.id + str(e))
+                            % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
             self.serialConsole.close()
             self.serialConsole = None
             return u"Nezdařilo se dostat do U-Bootu."
@@ -475,7 +475,7 @@ class FlashingWorker(QtCore.QObject):
                 self.serialConsole.to_system()
             except SCError, e:
                 logger.warning("[TESTING] Serial console initialization failed (routerId=%s). "
-                                % self.router.id + str(e))
+                                % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
                 self.serialConsole.close()
                 self.serialConsole = None
                 return (u"Nezdařila se komunikace se systémem na routru.",
@@ -539,7 +539,8 @@ class FlashingWorker(QtCore.QObject):
             logger.critical("[TESTING] error during test \"" +
                             TESTLIST[self.router.currentTest]['desc'] +
                             "\"\n" +
-                            traceback.format_exc())
+                            traceback.format_exc() +
+                            "\n" + self.serialConsole.inbuf)
             self.serialConsole.close()
             self.serialConsole = None
         else:
