@@ -213,11 +213,12 @@ class SerialConsole(object):
             while blocked:
                 time.sleep(0.001)
                 newPart = self.inbuf[inLength:]
+                wCounter -= 1
                 if not newPart:
                     if wCounter > 0:
                         continue
                     else:
-                        IOError("Written character not echoed back.")
+                        raise SCError("Written character not echoed back.")
                 elif newPart == c or c == "\n" and newPart[0] == "\n":
                     # written character has been read
                     blocked = False
@@ -230,7 +231,6 @@ class SerialConsole(object):
                     # stay blocked
                 else:
                     raise SCError("unexpected characters in inbuf")
-                wCounter -= 1
         
         return inLength
     
