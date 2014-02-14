@@ -10,7 +10,7 @@ UBOOT_PROMPT = "=> "
 
 # following values are all in seconds
 WAITTIME = 0.5
-INIT_EMPTY_WAIT = 5
+INIT_EMPTY_WAIT = 10
 INIT_MAX_WAIT = 75
 WRITE_TIMEOUT = 0.1
 
