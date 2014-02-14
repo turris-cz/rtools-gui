@@ -654,7 +654,11 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         'ACCTESTS': 14,
         'ACCCPLDERASE': 15
     }
-        
+    
+    # working modes
+    FLASHING = 0
+    TESTING = 1
+    
     def __init__(self):
         super(Installer, self).__init__()
         
@@ -663,6 +667,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         icon.addPixmap(QtGui.QPixmap(QtCore.QString.fromUtf8(":/favicon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.setWindowIcon(icon)
         self.blockClose = False
+        self.working_mode = self.FLASHING
         
         # buttons event listeners
         self.startToScan.clicked.connect(self.simpleMoveToScan)
@@ -672,7 +677,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.chckToStepX.clicked.connect(self.userHasCheckedCables)
         self.errToScan.clicked.connect(self.simpleMoveToScan)
         self.prepTestToRunTest.clicked.connect(self.startPreparedTest)
-        self.endToScan.clicked.connect(self.simpleMoveToScan)
+        self.endToScan.clicked.connect(self.toNextRouter)
         self.toAccessoriesTests.clicked.connect(self.showOnlyTests)
         self.toAccessoriesCPLDErase.clicked.connect(self.showCpldEraser)
         self.toOnlyTests.clicked.connect(self.chckRouterAndTest)
@@ -723,10 +728,18 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     @QtCore.pyqtSlot()
     def simpleMoveToScan(self):
         """switch to the Scan page when clicked on a button"""
+        self.working_mode = self.FLASHING
         self.lineEdit.clear()
         self.lineEdit.setFocus()
         self.scanToOne.setEnabled(True)
         self.stackedWidget.setCurrentIndex(self.STEPS['SCAN'])
+    
+    @QtCore.pyqtSlot()
+    def toNextRouter(self):
+        if self.working_mode == self.FLASHING:
+            self.simpleMoveToScan()
+        else: # self.working_mode == self.TESTING
+            self.showOnlyTests()
     
     @QtCore.pyqtSlot()
     def launchProgramming(self):
@@ -933,6 +946,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     
     @QtCore.pyqtSlot()
     def showOnlyTests(self):
+        self.working_mode = self.TESTING
         self.barcodeOnlyTests.clear()
         self.stackedWidget.setCurrentIndex(self.STEPS['ACCTESTS'])
         self.barcodeOnlyTests.setFocus()
