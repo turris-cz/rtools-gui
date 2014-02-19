@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Fri Feb  7 14:04:01 2014
+# Created: Wed Feb 19 13:20:43 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -326,6 +326,7 @@ class Ui_Installer(object):
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem6)
         self.prepTestToRunTest = QtGui.QPushButton(self.testingInfo)
+        self.prepTestToRunTest.setDefault(True)
         self.prepTestToRunTest.setObjectName(_fromUtf8("prepTestToRunTest"))
         self.horizontalLayout_5.addWidget(self.prepTestToRunTest)
         self.verticalLayout_10.addLayout(self.horizontalLayout_5)
@@ -545,7 +546,7 @@ class Ui_Installer(object):
         self.label_34.setText(_translate("Installer", "Stahuje se image přes TFTP a programuje se NOR paměť. Následně se rozbaluje image z NOR do NAND. Tato operace trvá přibližně 4 minuty.", None))
         self.label_26.setText(_translate("Installer", "<h1>Naprogramováno</h1>", None))
         self.label_27.setText(_translate("Installer", "Operace programování desky routeru TURRIS skončila úspěšně. V následujících krocích bude router otestován.", None))
-        self.prepareToFirstTest.setText(_translate("Installer", "Projít na testy", None))
+        self.prepareToFirstTest.setText(_translate("Installer", "Přejít na testy", None))
         self.label_17.setText(_translate("Installer", "<h1>Chyba</h1>", None))
         self.chckToStepX.setText(_translate("Installer", "Zkusit znovu", None))
         self.label_13.setText(_translate("Installer", "<h1>Chyba</h1>", None))
