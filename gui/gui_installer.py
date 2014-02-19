@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Feb 19 13:20:43 2014
+# Created: Wed Feb 19 13:53:28 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -378,6 +378,7 @@ class Ui_Installer(object):
         spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_8.addItem(spacerItem7)
         self.endToScan = QtGui.QPushButton(self.theEnd)
+        self.endToScan.setDefault(True)
         self.endToScan.setObjectName(_fromUtf8("endToScan"))
         self.horizontalLayout_8.addWidget(self.endToScan)
         self.verticalLayout_12.addLayout(self.horizontalLayout_8)
