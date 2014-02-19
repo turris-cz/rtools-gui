@@ -42,6 +42,11 @@ fh.setFormatter(formatter)
 logger.root.addHandler(fh)
 
 
+USB_RECONNECT_MESSAGE = u"Nezdařila se komunikace se systémem na routru. Zkuste " \
+                        u"odpojit a zapojit USB kabel č. 5. Pokud to dále nechcete " \
+                        u"zkoušet, zvolte 'Ne'.\nZkusit znovu?"
+
+
 # code
 
 
@@ -63,6 +68,24 @@ def serialNumberValidator(sn):
     return True
 
 
+def report_tests_results(router):
+    "generate test failure list for given router"
+    
+    failedTests = [t for t in router.testResults.iterkeys()
+                   if router.testResults[t] != router.TEST_OK]
+    testsReport = u"<h3>Testy, které selhali</h3>" if failedTests \
+                   else u"<h3>Všechny testy proběhli správně</h3>"
+    for t in failedTests:
+        testsReport += TESTLIST[t]['desc'] + u": "
+        if router.testResults[t] == router.TEST_FAIL:
+            testsReport += u"neúspěch"
+        elif router.testResults[t] == router.TEST_PROBLEM:
+            testsReport += u"selhání testu"
+        testsReport += u"<br>"
+    
+    return testsReport
+
+
 class FlashingWorker(QtCore.QObject):
     """Flashing Worker which run given commands and returns the status of the
     flashing process.
@@ -70,7 +93,7 @@ class FlashingWorker(QtCore.QObject):
     
     # tuple (int code, str msg) code 0 - ok, 1 - router already flashed / error, chceck cables, 2 - final error
     flashFinished = QtCore.pyqtSignal(tuple)
-    testFinished = QtCore.pyqtSignal(int, 'QString', 'QString')
+    testFinished = QtCore.pyqtSignal(int, bool, 'QString', 'QString')
     
     def __init__(self):
         super(FlashingWorker, self).__init__()
@@ -89,6 +112,12 @@ class FlashingWorker(QtCore.QObject):
     
     @QtCore.pyqtSlot('QString', bool)
     def addNewRouter(self, routerId, nextAttempt):
+        if self.serialConsole:
+            try:
+                self.serialConsole.close()
+            except Exception:
+                pass
+        
         routerId = str(routerId)
         
         dbErr = False
@@ -119,6 +148,12 @@ class FlashingWorker(QtCore.QObject):
     
     @QtCore.pyqtSlot('QString')
     def getFlashedRouter(self, routerId):
+        if self.serialConsole:
+            try:
+                self.serialConsole.close()
+            except Exception:
+                pass
+        
         routerId = str(routerId)
         
         dbErr = False
@@ -274,15 +309,15 @@ class FlashingWorker(QtCore.QObject):
             dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
             if len(dev) != 1:
                 if len(dev) == 0:
-                    return u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli."
+                    return (u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli.", False)
                 else:
-                    return u"Našel jsem více sériových konzolí, nevím kterou použít."
+                    return (u"Našel jsem více sériových konzolí, nevím kterou použít.", False)
             
             # open the console
             try:
                 self.serialConsole = SerialConsole("/dev/" + dev[0])
             except Exception, e:
-                return u"Nezdařilo se otevřít spojení přes konzoli."
+                return (u"Nezdařilo se otevřít spojení přes konzoli.", False)
         
         try:
             # to_uboot(timeout=-1) - wait forever (there is a button to interrupt the wait)
@@ -292,16 +327,16 @@ class FlashingWorker(QtCore.QObject):
                             % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
             self.serialConsole.close()
             self.serialConsole = None
-            return u"Nezdařilo se dostat do U-Bootu."
+            return (u"Nezdařilo se dostat do U-Bootu.", True)
         except Exception, e: # serial console exception, IOError,...
             logger.warning("[FLASHWORKER] Serial console initialization failed (Exception other than SCError) (routerId=%s). "
                             % self.router.id + str(e))
             self.serialConsole.close()
             self.serialConsole = None
-            return u"Nezdařilo se dostat do U-Bootu."
+            return (u"Nezdařilo se dostat do U-Bootu.", False)
         
         # we are in uboot, move to the next window (with statusbar)
-        return ""
+        return ("", False)
     
     def tftp_flash(self):
         """return (int, str), if everything ok, then (0, "")
@@ -391,11 +426,14 @@ class FlashingWorker(QtCore.QObject):
     @QtCore.pyqtSlot(int)
     def ubootWaitAndTFTP(self, step):
         if step == 0:
-            retStr = self.go_to_uboot()
+            retStr, retryError = self.go_to_uboot()
             if retStr:
                 # error
-                return_code = 1 if self.router.secondChance["NOR"] else 2
-                self.router.secondChance["NOR"] = False
+                if retryError:
+                    return_code = 3 # special case, show dialog box
+                else:
+                    return_code = 1 if self.router.secondChance["NOR"] else 2
+                    self.router.secondChance["NOR"] = False
                 err_msg = retStr
                 self.router.error = "error when going to uboot"
                 dbErr = not self.router.save()
@@ -461,14 +499,14 @@ class FlashingWorker(QtCore.QObject):
                     errMsg = u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli."
                 else:
                     errMsg = u"Našel jsem více sériových konzolí, nevím kterou použít."
-                return (errMsg, u"Problém sériové konzole.")
+                return (errMsg, False)
             # open the console
             try:
                 self.serialConsole = SerialConsole("/dev/" + dev[0])
             except Exception, e:
                 return (u"Nezdařilo se otevřít spojení přes konzoli. Zkontrolujte, "
-                        u"kabel č. 5 a napájení 7,5V.",
-                        u"Problém sériové konzole.")
+                        u"kabel č. 5 a napájení 7,5V.", False)
+            self.serialConsole.state = self.serialConsole.UNDEFINED
         
         if self.serialConsole.state != self.serialConsole.OPENWRT:
             try:
@@ -476,47 +514,39 @@ class FlashingWorker(QtCore.QObject):
             except SCError, e:
                 logger.warning("[TESTING] Serial console initialization failed (routerId=%s). "
                                 % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
+                if not self.serialConsole.inbuf:
+                    # no output from serial console, deconnect and reconnect the usb cable
+                    return_status = (USB_RECONNECT_MESSAGE, True)
+                else:
+                    return_status = (u"Nezdařila se komunikace se systémem na routru.", False)
                 self.serialConsole.close()
                 self.serialConsole = None
-                return (u"Nezdařila se komunikace se systémem na routru.",
-                        u"Problém sériové konzole.")
+                return return_status
             except Exception, e: # serial console exception, IOError,...
                 logger.warning("[TESTING] Serial console initialization failed (Exception other than SCError) (routerId=%s). "
                                 % self.router.id + str(e))
                 self.serialConsole.close()
                 self.serialConsole = None
                 # self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
-                return (u"Při komunikaci s routrem přes sériovou konzoli došlo k chybě.",
-                        u"Problém sériové konzole.")
+                return (u"Při komunikaci s routrem přes sériovou "
+                        u"konzoli došlo k chybě.", False)
     
     @QtCore.pyqtSlot()
     def executeTest(self):
-        def report_tests_results():
-            # generate test failure list and append it to testResult
-            failedTests = [t for t in self.router.testResults.iterkeys() if self.router.testResults[t] != self.router.TEST_OK]
-            testsReport = u"<h3>Testy, které selhali</h3>" if failedTests else u"<h3>Všechny testy proběhli správně</h3>"
-            for t in failedTests:
-                testsReport += TESTLIST[t]['desc'] + u": "
-                if self.router.testResults[t] == self.router.TEST_FAIL:
-                    testsReport += u"neúspěch"
-                elif self.router.testResults[t] == self.router.TEST_PROBLEM:
-                    testsReport += u"selhání testu"
-                testsReport += u"<br>"
-                
-            return testsReport
-        # end def report_tests_results
-        
         # prepare the serial console
         cons_prep_err = self.testPrepareConsole()
         if cons_prep_err:
             self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
-            if self.router.testSecondChance:
+            if cons_prep_err[1]:
+                self.testFinished.emit(self.router.currentTest, True,
+                                       cons_prep_err[0], u"Problém sériové konzole.")
+            elif self.router.testSecondChance:
                 self.router.testSecondChance = False
-                self.testFinished.emit(self.router.currentTest,
-                                       cons_prep_err[0], cons_prep_err[1])
+                self.testFinished.emit(self.router.currentTest, False,
+                                       cons_prep_err[0], u"Problém sériové konzole.")
             else:
-                self.testFinished.emit(-1, cons_prep_err[0],
-                                       report_tests_results())
+                self.testFinished.emit(-1, False, cons_prep_err[0],
+                                       report_tests_results(self.router))
             return
         
         # run the test
@@ -579,9 +609,9 @@ class FlashingWorker(QtCore.QObject):
                 nextTest = self.router.currentTest
         
         if nextTest == -1:
-            testResult += report_tests_results()
+            testResult += report_tests_results(self.router)
         
-        self.testFinished.emit(nextTest, errMsg, testResult)
+        self.testFinished.emit(nextTest, False, errMsg, testResult)
     
     @QtCore.pyqtSlot()
     def stepCpldEraser(self):
@@ -846,8 +876,16 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
             elif flash_result[0] == 1:
                 self.tmpErrMsg.setText(flash_result[1])
                 i = self.STEPS['CHCKCABLE']
+            elif flash_result[0] == 2:
+                i = self.STEPS['ERROR']
             else:
-                i = self.STEPS['ERROR']   
+                # flash_result[0] == 3 - special case, let the user choose what to do
+                if QtGui.QMessageBox.question(self, u"Chyba", USB_RECONNECT_MESSAGE,
+                        QtGui.QMessageBox.Yes | QtGui.QMessageBox.No) == QtGui.QMessageBox.Yes:
+                    self.tftpBootWaitSig.emit(0)
+                    return
+                else:
+                    i = self.STEPS['ERROR']
         elif i == self.STEPS['UBOOTFLASH']:
             if flash_result[0] == 0:
                 i = self.STEPS['BEFORETESTS']
@@ -899,11 +937,17 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
             self.tftpBootWaitSig.emit(0)
     
     @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(int, 'QString', 'QString')
-    def toNextTest(self, testNum=0, errorText="", testResult=""):
+    @QtCore.pyqtSlot(int, bool, 'QString', 'QString')
+    def toNextTest(self, testNum=0, questionContinue=False, errorText="", testResult=""):
         """current test finished, show given test instructions or "theEnd"
         page if testNum = -1"""
-        if errorText:
+        if questionContinue:
+            if QtGui.QMessageBox.question(self, u"Chyba", errorText,
+                    QtGui.QMessageBox.Yes | QtGui.QMessageBox.No) != QtGui.QMessageBox.Yes:
+                testNum = -1
+                testResult = u"Výsledek předchozího testu:<br>%s" % testResult + \
+                             report_tests_results(self.flashWorker.router)
+        elif errorText:
             QtGui.QMessageBox.warning(self, u"Chyba", errorText)
         
         if testNum == -1:
