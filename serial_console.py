@@ -16,7 +16,13 @@ WRITE_TIMEOUT = 0.1
 
 
 class SCError(IOError):
-    pass
+    # recovery types:
+    IRRECOVERABLE = 0
+    FACTORY_RESET = 1
+    
+    def __init__(self, msg, recovery=IRRECOVERABLE):
+        super(SCError, self).__init__(msg)
+        self.recovery = recovery
 
 
 class SerialConsole(object):
@@ -83,12 +89,12 @@ class SerialConsole(object):
         
         totalWaitCycles = int(INIT_MAX_WAIT / WAITTIME)
         noInputCycle = int(INIT_EMPTY_WAIT / WAITTIME)
+        oldOutputLen = len(self.inbuf)
         while noInputCycle > 0 and totalWaitCycles > 0:
             time.sleep(WAITTIME)
-            if self.inbuf:
+            if len(self.inbuf) > oldOutputLen:
+                oldOutputLen = len(self.inbuf)
                 noInputCycle = int(INIT_EMPTY_WAIT / WAITTIME)
-                with self._inbuf_lock:
-                    self.inbuf = ""
             else:
                 noInputCycle -= 1
             totalWaitCycles -= 1
@@ -105,7 +111,7 @@ class SerialConsole(object):
             time.sleep(WAITTIME)
             if self.inbuf.endswith("\n" + UBOOT_PROMPT):
                 self.state = self.UBOOT
-                raise SCError("We are in uboot, restart the router to go to the system.")
+                raise SCError("We are in uboot, restart the router to go to the system.", SCError.FACTORY_RESET)
             if self.inbuf.endswith("\n" + PS1):
                 read = False
             elif self.inbuf.endswith("\n" + PS2):
