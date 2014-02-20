@@ -1036,11 +1036,16 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     
     def closeEvent(self, event):
         if self.blockClose:
-            QtGui.QMessageBox.warning(self, u"Chyba",
-                                      u"Probíhá flashování, vyčkejte chvíli.")
-            event.ignore()
-            return
-        
+            if QtGui.QMessageBox.question(self, u"Pracuju",
+                    u"Probíhá flashování, skutečně chcete program zavřít? "
+                    u"Router se může špatně naprogramovat. Hlavně první krok "
+                    u"(I2C) je kritický.",
+                    QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel) != QtGui.QMessageBox.Ok:
+                event.ignore()
+                return
+            else:
+                logger.critical("[MAIN] closing the application while flashWorker still running")
+                
         # close the database
         if self.db.isOpen():
             self.db.close()

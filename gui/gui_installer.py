@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Feb 19 13:53:28 2014
+# Created: Thu Feb 20 12:36:33 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -573,6 +573,7 @@ class Ui_Installer(object):
         self.menuAkce.setTitle(_translate("Installer", "&Soubor", None))
         self.menuN_stroje.setTitle(_translate("Installer", "&Nástroje", None))
         self.actionKonec.setText(_translate("Installer", "Konec", None))
+        self.actionKonec.setShortcut(_translate("Installer", "Ctrl+Q", None))
         self.actionDalsifunkce.setText(_translate("Installer", "Další funkce", None))
         self.actionTestovani.setText(_translate("Installer", "Testování", None))
         self.actionSmazaniCPLD.setText(_translate("Installer", "Smazání CPLD obvodu", None))
