@@ -357,7 +357,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
         <item>
          <widget class="QProgressBar" name="progressBar_6">
           <property name="maximum">
-           <number>0</number>
+           <number>100</number>
           </property>
           <property name="value">
            <number>0</number>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Thu Feb 20 12:36:33 2014
+# Created: Thu Feb 20 19:05:19 2014
 #      by: PyQt4 UI code generator 4.10.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -211,7 +211,7 @@ class Ui_Installer(object):
         self.label_34.setObjectName(_fromUtf8("label_34"))
         self.verticalLayout_21.addWidget(self.label_34)
         self.progressBar_6 = QtGui.QProgressBar(self.tftpBoot)
-        self.progressBar_6.setMaximum(0)
+        self.progressBar_6.setMaximum(100)
         self.progressBar_6.setProperty("value", 0)
         self.progressBar_6.setObjectName(_fromUtf8("progressBar_6"))
         self.verticalLayout_21.addWidget(self.progressBar_6)

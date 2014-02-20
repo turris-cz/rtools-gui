@@ -94,6 +94,7 @@ class FlashingWorker(QtCore.QObject):
     # tuple (int code, str msg) code 0 - ok, 1 - router already flashed / error, chceck cables, 2 - final error
     flashFinished = QtCore.pyqtSignal(tuple)
     testFinished = QtCore.pyqtSignal(int, bool, 'QString', 'QString')
+    longWaitMsg = QtCore.pyqtSignal(int)
     
     def __init__(self):
         super(FlashingWorker, self).__init__()
@@ -362,9 +363,11 @@ class FlashingWorker(QtCore.QObject):
         cmdOut = self.serialConsole.exec_("setenv eth2addr 00:11:22:33:44:55")
         if cmdOut:
             return (4, "uboot 'setenv eth2addr 00:11:22:33:44:55':\n" + cmdOut)
+        self.longWaitMsg.emit(0)
         cmdOut = self.serialConsole.exec_("ping 192.168.10.1", 25) # timeout for ping is 20s
         if not cmdOut.endswith("host 192.168.10.1 is alive\n"):
             return (5, "uboot 'ping 192.168.10.1':\n" + cmdOut)
+        self.longWaitMsg.emit(1)
         try:
             cmdOut = self.serialConsole.exec_("tftpboot 0x1000000 nor.bin")
         except SCError, e:
@@ -388,6 +391,7 @@ class FlashingWorker(QtCore.QObject):
                 or cmdOut.find("\ndone\nBytes transferred = %d (%s hex)\n" %
                                (self.imagesize, hex(self.imagesize)[2:])) == -1:
             return (8, "uboot 'tftpboot 0x1000000 nor.bin':\n" + cmdOut)
+        self.longWaitMsg.emit(2)
         cmdOut = self.serialConsole.exec_("protect off 0xef000000 +0xF80000")
         if cmdOut != "Un-Protected 124 sectors\n":
             return (9, "uboot 'protect off 0xef000000 +0xF80000':\n" + cmdOut)
@@ -397,10 +401,12 @@ class FlashingWorker(QtCore.QObject):
                      "................................................... done\nErased 124 sectors\n":
             return (10, "uboot 'erase 0xef000000 +0xF80000':\n" + cmdOut)
         # copying takes ~40sec
+        self.longWaitMsg.emit(3)
         cmdOut = self.serialConsole.exec_("cp.b 0x1000000 0xef000000 0x$filesize", 80)
         if cmdOut != "Copy to Flash... 9....8....7....6....5....4....3....2....1....done\n":
             return (11, "uboot 'cp.b 0x1000000 0xef000000 0x$filesize':\n" + cmdOut)
         
+        self.longWaitMsg.emit(4)
         # wait until nor -> nand
         self.serialConsole.allow_input()
         self.serialConsole.writeLine("run norboot\n")
@@ -408,6 +414,7 @@ class FlashingWorker(QtCore.QObject):
         while wCounter and self.serialConsole.inbuf.find("Hit any key to stop autoboot") == -1:
             wCounter -= 1
             sleep(1)
+        self.longWaitMsg.emit(5)
         wCounter = 60 # 60 seconds limit, normally it takes 20-30 seconds to boot up
         while wCounter and self.serialConsole.inbuf.find("procd: - init complete -") == -1:
             wCounter -= 1
@@ -732,6 +739,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.checkRouterDbExistsSig.connect(self.flashWorker.getFlashedRouter)
         self.flashWorker.flashFinished.connect(self.moveToNext)
         self.flashWorker.testFinished.connect(self.toNextTest)
+        self.flashWorker.longWaitMsg.connect(self.informLongWait)
         self.cpldStartEraseSig.connect(self.flashWorker.stepCpldEraser)
         self.tftpBootWaitSig.connect(self.flashWorker.ubootWaitAndTFTP)
         
@@ -872,6 +880,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         elif i == self.STEPS['TOUBOOT']:
             if flash_result[0] == 0:
                 i = self.STEPS['UBOOTFLASH']
+                self.progressBar_6.setValue(0)
                 self.tftpBootWaitSig.emit(1)
             elif flash_result[0] == 1:
                 self.tmpErrMsg.setText(flash_result[1])
@@ -922,6 +931,11 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         # change the stackedWidget index
         self.stackedWidget.setCurrentIndex(i)
         logger.debug("[MAIN] switching to the step %d" % i)
+    
+    @QtCore.pyqtSlot(int)
+    def informLongWait(self, step):
+        PROGRESS_STEPS = [1, 4, 5, 25, 45, 85]
+        self.progressBar_6.setValue(PROGRESS_STEPS[step])
     
     @QtCore.pyqtSlot()
     def userHasCheckedCables(self):
