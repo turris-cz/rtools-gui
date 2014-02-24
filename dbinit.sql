@@ -21,3 +21,10 @@ CREATE TABLE tests (
     PRIMARY KEY (id, attempt, serie, testid),
     FOREIGN KEY (id, attempt) REFERENCES routers (id, attempt) ON DELETE CASCADE
 );
+
+CREATE VIEW good_routers AS
+    SELECT DISTINCT id, attempt, add_time FROM routers
+    LEFT JOIN tests USING (id, attempt)
+    GROUP BY id, attempt, serie
+    HAVING max(testresult)='0' AND count(*)='9'
+    ORDER BY id;
