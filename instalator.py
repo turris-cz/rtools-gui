@@ -10,7 +10,6 @@ import logging
 import os
 import subprocess
 import sys
-from shutil import copy
 from tempfile import mkstemp
 from time import sleep
 
@@ -253,6 +252,12 @@ class FlashingWorker(QtCore.QObject):
     @QtCore.pyqtSlot()
     def flashStepThree(self):
         logger.debug("[FLASHWORKER] starting third step (routerId=%s)" % self.router.id)
+        # delete logfile if exists
+        try:
+            os.remove(STEP_FLASH_LOGFILE)
+        except OSError:
+            pass
+        
         p_return = self.runCmd(("/bin/bash", STEP_FLASH_CMD))
         
         # copy and send log_backup
@@ -260,7 +265,7 @@ class FlashingWorker(QtCore.QObject):
                 (self.router.id, self.router.attempt,
                  self.router.secondChance['FLASH'] and "0" or "1"))
         try:
-            copy(STEP_FLASH_LOGFILE, persistentLog)
+            os.rename(STEP_FLASH_LOGFILE, persistentLog)
             self.runCmd((LOG_BACKUP_CMD, persistentLog))
         except Exception: # IOError, OSError, ...?
             pass
@@ -269,33 +274,38 @@ class FlashingWorker(QtCore.QObject):
         err_msg = ""
         
         try:
-            with open(STEP_FLASH_LOGFILE, "r") as fh:
+            with open(persistentLog, "r") as fh:
                 logtext = fh.read()
-        except IOError:
-            logger.critical("[FLASHWORKER] Could not read codewarrior session.log, application error")
-            logtext = "Error"
-            # FIXME maybe close the application now
-        
-        cableDisconnected = logtext.find("Cable disconnected") >= 0
-        if cableDisconnected and self.router.secondChance['FLASH']:
-            # cable disconnected,
-            logger.warning("[FLASHWORKER] FLASH step failed, check the cables (routerId=%s)" % self.router.id)
-            self.router.secondChance['FLASH'] = False
-            self.router.error = "Flashing exited with \"Cable disconnected\" in session.log\n"
-            return_code = 1
-            err_msg = u"Programování NOR Flash selhalo. Prosím ověřte zapojení kabelu 3 " \
-                      u"(Zapojen z USB portu PC na programovaný TURRIS konektor P2). " \
-                      u"Zkontrolujte připojení napájecího adaptéru 7,5V."
-        elif logtext.find("Error") >= 0 or (cableDisconnected and not self.router.secondChance['FLASH']):
-            logger.warning("[FLASHWORKER] FLASH step failed definitely (routerId=%s)" % self.router.id)
-            self.router.error = "Flashing exited with \"Error\" in session.log"
-            return_code = 2
-            err_msg = u"Flashování NAND a NOR selhalo."
+        except IOError, e:
+            logger.critical("[FLASHWORKER] Could not read codewarrior session.log")
+            self.router.error = "Could not read codewarrior session.log " + str(e)
+            if self.router.secondChance['FLASH']:
+                self.router.secondChance['FLASH'] = False
+                return_code = 1
+            else:
+                return_code = 2
+            err_msg = u"Flashování UBOOTu selhalo, aplikace nedokáže přečíst log soubor."
         else:
-            # TODO is there a Diagnose Succeeded string?
-            logger.info("[FLASHWORKER] FLASH step successful (routerId=%s)" % self.router.id)
-            self.router.status = self.router.STATUS_UBOOT
-            self.router.error = ""
+            cableDisconnected = logtext.find("Cable disconnected") >= 0
+            if cableDisconnected and self.router.secondChance['FLASH']:
+                # cable disconnected,
+                logger.warning("[FLASHWORKER] FLASH step failed, check the cables (routerId=%s)" % self.router.id)
+                self.router.secondChance['FLASH'] = False
+                self.router.error = "Flashing exited with \"Cable disconnected\" in session.log\n"
+                return_code = 1
+                err_msg = u"Programování NOR Flash selhalo. Prosím ověřte zapojení kabelu 3 " \
+                            u"(Zapojen z USB portu PC na programovaný TURRIS konektor P2). " \
+                            u"Zkontrolujte připojení napájecího adaptéru 7,5V."
+            elif logtext.find("Error") >= 0 or (cableDisconnected and not self.router.secondChance['FLASH']):
+                logger.warning("[FLASHWORKER] FLASH step failed definitely (routerId=%s)" % self.router.id)
+                self.router.error = "Flashing exited with \"Error\" in session.log"
+                return_code = 2
+                err_msg = u"Flashování UBOOTu selhalo."
+            else:
+                # TODO is there a Diagnose Succeeded string?
+                logger.info("[FLASHWORKER] FLASH step successful (routerId=%s)" % self.router.id)
+                self.router.status = self.router.STATUS_UBOOT
+                self.router.error = ""
         
         dbErr = not self.router.save()
         
