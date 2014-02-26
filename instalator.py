@@ -363,6 +363,7 @@ class FlashingWorker(QtCore.QObject):
         cmdOut = self.serialConsole.exec_("setenv eth2addr 00:11:22:33:44:55")
         if cmdOut:
             return (4, "uboot 'setenv eth2addr 00:11:22:33:44:55':\n" + cmdOut)
+        sleep(2)
         self.longWaitMsg.emit(0)
         cmdOut = self.serialConsole.exec_("ping 192.168.10.1", 25) # timeout for ping is 20s
         if not cmdOut.endswith("host 192.168.10.1 is alive\n"):
