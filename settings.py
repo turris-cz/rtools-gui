@@ -8,12 +8,12 @@ from logging import NOTSET as _NOTSET
 # STEP_FLASH_CMD = "/home/turris/workspace/go_TURRIS_UBOOT_program.sh"
 # STEP_FLASH_LOGFILE = "/home/turris/workspace/session.log"
 # LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
-STEP_I2C_CMD = "/home/palko/Projects/router/instalator/mock/i2cflasher"
-STEP_CPLD_CMD = "/home/palko/Projects/router/instalator/mock/lattice"
+STEP_I2C_CMD = "mock/i2cflasher"
+STEP_CPLD_CMD = "mock/lattice"
 CPLD_FLASH_INFILE = "/home/palko/neexistujucialejetojedno"
 CPLD_ERASE_INFILE = "/home/palko/neexistujucialejetojedno"
-STEP_FLASH_CMD = "/home/palko/Projects/router/instalator/mock/codewarrior"
-STEP_FLASH_LOGFILE = "/home/palko/Projects/router/instalator/mock/session.log"
+STEP_FLASH_CMD = "mock/codewarrior"
+STEP_FLASH_LOGFILE = "mock/session.log"
 LOG_BACKUP_CMD = "/bin/true"
 
 # database
@@ -21,10 +21,10 @@ LOG_BACKUP_CMD = "/bin/true"
 DB_HOST = 'localhost'
 DB_USER = 'tflasher'
 DB_PASS = 'poiuytrewq'
-DB_DBNAME = 'turris'
+DB_DBNAME = 'tflasher'
 
 #logging
-LOGLEVEL = _NOTSET # log everyting
+LOGLEVEL = _NOTSET  # log everyting
 LOGFILE = "logdir/flasher.log"
 LOGFORMAT = '%(asctime)s - %(levelname)s - %(message)s'
 FLASH_LOGS = "nandnorlogs"
@@ -32,5 +32,5 @@ FLASH_LOGS = "nandnorlogs"
 LOCAL_TEST_IFACE = "eth42"
 TURRIS_WAN_IFACE = "eth2"
 
-TFTP_IMAGE_FILE = "/home/palko/tftp/nor.bin"
+TFTP_IMAGE_FILE = "mock/nor.bin"
 # TFTP_IMAGE_FILE = "/home/turris/workspace/tftp/nor.bin"

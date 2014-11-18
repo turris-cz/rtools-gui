@@ -3,4 +3,4 @@
 # dummy script for flashing
 
 sleep 2
-echo "ok, vsetko v poriadko" > /home/palko/Projects/router/instalator/mock/session.log
+echo "ok, vsetko v poriadko" > mock/session.log
