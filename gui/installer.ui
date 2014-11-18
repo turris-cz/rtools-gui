@@ -235,7 +235,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="stepThree">
+      <widget class="QWidget" name="flashingStep">
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
          <widget class="QLabel" name="label_9">
@@ -253,7 +253,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </sizepolicy>
           </property>
           <property name="text">
-           <string>V tomto kroku probíhá programování NOR Flash paměti procesoru pomocí kabelu 3. Prosím vyčkejte přibližně 1 až 2 minuty na dokončení.</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;V tomto kroku probíhá programování NOR Flash paměti procesoru pomocí SD karty.&lt;br/&gt;&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vypnětě router, tak že jej odpojíte z napájení. &lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vyjmětě paměťový modul DDR3 SODIMM ze slotu&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vložte SD kartu do slotu pro SD kartu&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vložte paměťový modul DDR3 SODIMM do slotu&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Nastavte DIP SWITCHe SW1 a SW2 pro bootování z SD karty&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zapojte router opět do napájení.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Nyní se flashuje NOR pamět, počkejte cca 4 minuty&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
@@ -273,14 +273,38 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
           </property>
          </widget>
         </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <item>
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="flashingTimeoutButton">
+            <property name="text">
+             <string>Čekám už déle než 4 minuty</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="beforeTFTPBoot">
+      <widget class="QWidget" name="flashedStep">
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
          <widget class="QLabel" name="label_11">
           <property name="text">
-           <string>&lt;h1&gt;Naprogramování NOR paměti&lt;/h1&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:xx-large; font-weight:600;&quot;&gt;Úklid po naflashován&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
         </item>
@@ -293,7 +317,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </sizepolicy>
           </property>
           <property name="text">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zkontrolujte zapojení kabelu č. 5 a ethernet kabelu do WAN programovaného routeru.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Stiskněte tlačítko RESET.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zmáčknutí RESETu je detekováno automaticky a to ihned spustí následující krok. V případě chyby tato autodetekce selže a v tom případě použijte dolní tlačítko na přerušení čekání.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vyčkejte, dokud se nenahraje NOR paměť přes TFTP.&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Naflashování NOR paměti proběhlo úspěšně. Nyní je nutné vrátit DIP SWITCH do původního stavu a provést factory reset.&lt;br/&gt;&lt;/p&gt;&lt;ul style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;&quot;&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vypnětě router, tak že jej odpojíte z napájení. &lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vyjmětě paměťový modul DDR3 SODIMM ze slotu&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vyměte SD kartu ze slotu pro SD kartu (pro flashování dalších routerů)&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Vložte paměťový modul DDR3 SODIMM do slotu&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Nastavte DIP SWITCHe SW1 a SW2 pro bootování z NOR paměti&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Zapojte router opět do napájení.&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Podržte červené tlačítko reset aspoň 7 vteřin&lt;/li&gt;&lt;li style=&quot; margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Nyní probíhá factory reset, počkejte cca 3 minuty&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="textFormat">
            <enum>Qt::RichText</enum>
@@ -319,50 +343,13 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="resetToUboot">
+           <widget class="QPushButton" name="factoryResetTimeoutButton">
             <property name="text">
-             <string>Reset zmáčknut, autodetekce selhala</string>
+             <string>Už čekám déle než 3 minuty</string>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="tftpBoot">
-       <layout class="QVBoxLayout" name="verticalLayout_21">
-        <item>
-         <widget class="QLabel" name="label_23">
-          <property name="text">
-           <string>&lt;h1&gt;Naprogramování NOR paměti&lt;/h1&gt;</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_34">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>1</horstretch>
-            <verstretch>1</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Stahuje se image přes TFTP a programuje se NOR paměť. Následně se rozbaluje image z NOR do NAND. Tato operace trvá přibližně 4 minuty.</string>
-          </property>
-          <property name="wordWrap">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QProgressBar" name="progressBar_6">
-          <property name="maximum">
-           <number>100</number>
-          </property>
-          <property name="value">
-           <number>0</number>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
@@ -904,7 +891,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
      <x>0</x>
      <y>0</y>
      <width>600</width>
-     <height>24</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuAkce">
