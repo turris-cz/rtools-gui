@@ -33,41 +33,41 @@ class Router(object):
     STATUS_START = 0
     STATUS_I2C = 1
     STATUS_CPLD = 2
-    STATUS_UBOOT = 3
+    STATUS_FLASHED = 3
     STATUS_FINISHED = 4
-    
+
     TEST_OK = 0
     TEST_FAIL = 1
     TEST_PROBLEM = 2
-    
+
     def __init__(self, routerId):
         """Fetch the info about a router from db and if doesn't exist,
         raise DoesNotExist error"""
-        
-        self.id = routerId # string
-        self.attempt = 0 # int
-        self.status = Router.STATUS_START # int
-        self.error = "" # string / text in db
+
+        self.id = routerId  # string
+        self.attempt = 0  # int
+        self.status = Router.STATUS_START  # int
+        self.error = ""  # string / text in db
         # second chance for flashing steps (if the user can check the cables)
         self.secondChance = {'I2C': True, 'CPLD': True, 'FLASH': True, 'NOR': True}
         self.testSecondChance = True
         self.testSerie = 0
         self.testResults = {}
         self.currentTest = 0
-        
+
         # we use the default (and only) database, open it now if closed
         self.query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
-    
+
     @classmethod
-    def fetchFromDb(cls, routerId, attempt = -1):
+    def fetchFromDb(cls, routerId, attempt=-1):
         # attempt -1 means the last one
         routerId = str(routerId)
-        
+
         if attempt == -1:
             subquery = "(SELECT max(attempt) FROM routers WHERE id = '%s')" % routerId.replace("'", "''")
         else:
             subquery = "'%d'" % attempt
-        
+
         query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
         if query.exec_("SELECT * FROM routers WHERE id = '%s' AND attempt = %s;"
                        % (routerId.replace("'", "''"), subquery)):
@@ -76,14 +76,14 @@ class Router(object):
             else:
                 query.next()
                 rec = query.record()
-                
+
                 router = cls(routerId)
                 router.attempt = rec.value('attempt').toInt()[0]
                 router.status = rec.value('status').toInt()[0]
                 router.error = str(rec.value('error').toString())
         else:
             raise DbError(CONN_ERR_MSG)
-        
+
         sqlquery = "SELECT MAX(serie) AS \"lastserie\" FROM tests WHERE id='%s' AND attempt='%d';" \
                    % (router.id.replace("'", "''"), router.attempt)
         if query.exec_(sqlquery):
@@ -97,9 +97,9 @@ class Router(object):
             logger.warning("[DB] fetching router max test serie failed (routerId=%s) with error\n%s"
                            % (router.id, str(query.lastError().text())))
             raise DbError(CONN_ERR_MSG)
-        
+
         return router
-    
+
     @classmethod
     def createNewRouter(cls, routerId):
         routerId = str(routerId)
@@ -111,7 +111,7 @@ class Router(object):
             raise DuplicateKey()
         else:
             raise DbError(CONN_ERR_MSG)
-    
+
     @classmethod
     def nextAttempt(cls, routerId):
         routerId = str(routerId)
@@ -133,7 +133,7 @@ class Router(object):
             raise DoesNotExist()
         else:
             raise DbError(CONN_ERR_MSG)
-    
+
     def save(self):
         # TODO be more precise, if no record with given id,...
         # and be consistent - raise a DbError if failure
@@ -147,7 +147,7 @@ class Router(object):
             logger.warning("[DB] router record update failed (routerId=%s)" % self.id)
             self.saveFailedDbQuery(sqlquery)
             return False
-    
+
     def saveTestResult(self, testStatus, testText):
         sqlquery = "INSERT INTO tests (id, attempt, serie, testid, testresult, msg) " \
                    "VALUES ('%s', '%d', '%d', '%d', '%d', %s);" \
@@ -160,7 +160,7 @@ class Router(object):
             logger.warning("[DB] router test record insertion failed (routerId=%s)" % self.id)
             self.saveFailedDbQuery(sqlquery)
             return False
-    
+
     def saveFailedDbQuery(self, sqlQuery):
         # FIXME do this better, inform the user about db failure
         # save to file

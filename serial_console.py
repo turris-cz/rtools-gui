@@ -19,7 +19,7 @@ class SCError(IOError):
     # recovery types:
     IRRECOVERABLE = 0
     FACTORY_RESET = 1
-    
+
     def __init__(self, msg, recovery=IRRECOVERABLE):
         super(SCError, self).__init__(msg)
         self.recovery = recovery
@@ -29,34 +29,34 @@ class SerialConsole(object):
     UNDEFINED = 0
     UBOOT = 1
     OPENWRT = 2
-    
+
     def __init__(self, device, baudrate=termios.B115200):
         super(SerialConsole, self).__init__()
-        
+
         self.state = self.UNDEFINED
         self._running = True
         self._accept_input = False
         self.inbuf = ""
-        
+
         self._sc = os.open(device, os.O_RDWR)
-        
+
         try:
             # set termios flags
             newcc = termios.tcgetattr(self._sc)[6]
-            
+
             # this causes read to be non-blocking (along with -ICANON)
             newcc[termios.VMIN] = 0
             newcc[termios.VTIME] = 0
-            
+
             termios.tcsetattr(self._sc, termios.TCSAFLUSH, [
-                    termios.IGNBRK,
-                    0,
-                    termios.CS8 | termios.CREAD | termios.CLOCAL | baudrate,
-                    0,
-                    baudrate,
-                    baudrate,
-                    newcc,
-                    ])
+                termios.IGNBRK,
+                0,
+                termios.CS8 | termios.CREAD | termios.CLOCAL | baudrate,
+                0,
+                baudrate,
+                baudrate,
+                newcc,
+            ])
             termios.tcflush(self._sc, termios.TCIOFLUSH)
         except:
             # if exception, close tty file
@@ -65,28 +65,28 @@ class SerialConsole(object):
             except:
                 pass
             raise
-        
+
         self._interrupt_flag = False
         self._inbuf_lock = threading.Lock()
         self._readThread = threading.Thread(target=self._readWorker)
         self._readThread.start()
-    
+
     def to_system(self):
         """Read the output (e.g. boot messages) from
         the console and if nothing is read for INIT_EMPTY_WAIT seconds,
         it iterpretes it as 'no more boot messages'. Then it echoes \\n
         to obtain the prompt. If it fails, it retries to send \\n
         few times.
-        
+
         This function either get the router to the state when it accepts
         commands or raises an SCError.
         """
-        
+
         with self._inbuf_lock:
             self.inbuf = ""
-        
+
         self._accept_input = True
-        
+
         totalWaitCycles = int(INIT_MAX_WAIT / WAITTIME)
         noInputCycle = int(INIT_EMPTY_WAIT / WAITTIME)
         oldOutputLen = len(self.inbuf)
@@ -98,11 +98,11 @@ class SerialConsole(object):
             else:
                 noInputCycle -= 1
             totalWaitCycles -= 1
-        
+
         if noInputCycle != 0:
             # timeouted on totalWaitCycles
             raise SCError("Too much output, as if booting was in a cycle or so...")
-            
+
         # try ten times to obtain the prompt
         wCounter = 10
         read = True
@@ -121,31 +121,32 @@ class SerialConsole(object):
                 wCounter -= 1
             else:
                 wCounter -= 1
-        
+
         if wCounter <= 0:
             raise SCError("Could not obtain prompt.")
-        
+
         self._accept_input = False
         self.state = self.OPENWRT
-    
-    def to_uboot(self, timeout=INIT_MAX_WAIT):
+
+    def to_factory_reset(self, timeout=INIT_MAX_WAIT):
+        # TODO
         """this function reads output from console and when the text
         "Hit any key to stop autoboot" is read, it sends ' ' (space) to
         interrupt the autoboot. Then it waits for $UBOOT_PROMPT.
-        
+
         If operating system prompt is found (denoting that os is running)
         it raises an exception.
-        
+
         This function waits at most timeout seconds, then it raises
         an exception. If timeout is -1, it waits forever.
         """
-        
+
         with self._inbuf_lock:
             self.inbuf = ""
-        
+
         self._interrupt_flag = False
         self._accept_input = True
-        
+
         waitCycles = int(timeout / 0.001)
         waiting = True
         while (waitCycles == -1000 or waitCycles > 0) and waiting:
@@ -160,7 +161,7 @@ class SerialConsole(object):
             time.sleep(0.001)
             if waitCycles > 0:
                 waitCycles -= 1
-        
+
         wCounter = 10
         while wCounter and not self.inbuf.endswith(UBOOT_PROMPT):
             os.write(self._sc, "\n")
@@ -170,19 +171,72 @@ class SerialConsole(object):
                 raise SCError("OS prompt found, restart the device")
             time.sleep(WAITTIME)
             wCounter -= 1
-        
+
         if waiting:
             raise SCError("Waiting for uboot messages timeouted.")
-        
+
         if wCounter <= 0:
             raise SCError("Could not get uboot prompt after interrupting autoboot")
-        
+
         self._accept_input = False
         self.state = self.UBOOT
-    
+
+    def to_flash(self, timeout=INIT_MAX_WAIT):
+        # TODO
+        """this function reads output from console and when the text
+        "Hit any key to stop autoboot" is read, it sends ' ' (space) to
+        interrupt the autoboot. Then it waits for $UBOOT_PROMPT.
+
+        If operating system prompt is found (denoting that os is running)
+        it raises an exception.
+
+        This function waits at most timeout seconds, then it raises
+        an exception. If timeout is -1, it waits forever.
+        """
+
+        with self._inbuf_lock:
+            self.inbuf = ""
+
+        self._interrupt_flag = False
+        self._accept_input = True
+
+        waitCycles = int(timeout / 0.001)
+        waiting = True
+        while (waitCycles == -1000 or waitCycles > 0) and waiting:
+            if self._interrupt_flag:
+                self._accept_input = False
+                self.state = self.UNDEFINED
+                raise SCError("waiting interrupted")
+            if self.inbuf.find("Hit any key to stop autoboot") != -1:
+                # send ' ' to interrupt autoboot
+                os.write(self._sc, ' ')
+                waiting = False
+            time.sleep(0.001)
+            if waitCycles > 0:
+                waitCycles -= 1
+
+        wCounter = 10
+        while wCounter and not self.inbuf.endswith(UBOOT_PROMPT):
+            os.write(self._sc, "\n")
+            if self.inbuf.find("\n" + PS1) != -1 or self.inbuf.find("\n" + PS2) != -1:
+                self._accept_input = False
+                self.state = self.OPENWRT
+                raise SCError("OS prompt found, restart the device")
+            time.sleep(WAITTIME)
+            wCounter -= 1
+
+        if waiting:
+            raise SCError("Waiting for uboot messages timeouted.")
+
+        if wCounter <= 0:
+            raise SCError("Could not get uboot prompt after interrupting autoboot")
+
+        self._accept_input = False
+        self.state = self.UBOOT
+
     def interrupt_wait(self):
         self._interrupt_flag = True
-    
+
     def _readWorker(self):
         while self._running:
             tmps = os.read(self._sc, 16).replace("\r", "")
@@ -190,26 +244,26 @@ class SerialConsole(object):
                 with self._inbuf_lock:
                     self.inbuf += tmps
             time.sleep(0.0003)
-    
+
     def allow_input(self):
         self._accept_input = True
-    
+
     def disable_input(self):
         self._accept_input = False
-    
+
     def close(self):
         self._running = False
         self._readThread.join()
         os.close(self._sc)
-    
+
     def writeLine(self, text):
         if not self._accept_input:
             raise ValueError("Allow accepting of input before running writeLine")
-        
+
         for c in text[:-1]:
             if c == "\n":
                 raise ValueError("SerialConsole.writeLine(text) accepts only one line of a text")
-        
+
         # write characters
         inLength = len(self.inbuf)
         for c in text:
@@ -237,15 +291,15 @@ class SerialConsole(object):
                     # stay blocked
                 else:
                     raise SCError("unexpected characters in inbuf")
-        
+
         return inLength
-    
+
     def exec_(self, cmd, timeout=10):
         """exec_(cmd, timeout=10)
         Execute given command or script. It must be a
         single command (output expected only after the whole command written),
         but can span multiple lines.
-        
+
         Timeout denotes how much time it waits for the command to finish (and the prompt
         to be displayed at the end. It is in seconds.
         """
@@ -255,43 +309,43 @@ class SerialConsole(object):
             prompt = UBOOT_PROMPT
         else:
             raise ValueError("Connection in undefined state, call to_system or to_uboot before.")
-        
+
         with self._inbuf_lock:
             self.inbuf = ""
-        
+
         self._accept_input = True
-        
+
         lines = cmd.strip().replace("\r", "").split("\n")
         cmdLen = 0
         for l in lines[:-1]:
             # write the line
             cmdLen += self.writeLine(l + "\n")
-            
+
             # wait for prompt PS2
             wCounter = 50
             while wCounter and not self.inbuf.endswith(PS2):
                 time.sleep(0.001)
                 wCounter -= 1
-                
+
             if wCounter <= 0:
                 raise SCError("Expected prompt not found")
-            
+
             cmdLen += len(PS2)
-            
+
         cmdLen += self.writeLine(lines[-1] + "\n")
-        
+
         wCounter = int(timeout / WAITTIME)
         while wCounter and not self.inbuf.endswith(prompt):
             time.sleep(WAITTIME)
             wCounter -= 1
-        
+
         if wCounter <= 0:
             raise SCError("Expected prompt not found")
-        
+
         self._accept_input = False
-        
+
         return self.inbuf[cmdLen: -len(prompt)]
-    
+
     def lastStatus(self):
         """Return status of the last command run with SerialConsole.exec_().
         It returns string as obtained from running "echo $?" with whitespaces
