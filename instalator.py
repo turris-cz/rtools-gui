@@ -260,7 +260,7 @@ class FlashingWorker(QtCore.QObject):
                 return_code = 1 if self.router.secondChance["NOR"] else 2
                 self.router.secondChance["NOR"] = False
             err_msg = retStr
-            self.router.error = "error when going to uboot"
+            self.router.error = "error when flashing NOR using uboot"
             dbErr = not self.router.save()
             logger.info("[FLASHWORKER] FLASH step failed (routerId=%s)" % self.router.id)
         else:
@@ -304,7 +304,7 @@ class FlashingWorker(QtCore.QObject):
         try:
             # to_factory_reset(timeout=-1) - wait forever
             # (there is a button to interrupt the wait)
-            self.serialConsole.to_factory_reset(-1)
+            self.serialConsole.to_system()
         except SCError, e:
             logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%s). "
                            % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
@@ -616,7 +616,8 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         # buttons event listeners
         self.startToScan.clicked.connect(self.simpleMoveToScan)
         self.scanToProgramming.clicked.connect(self.launchProgramming)
-        #self.resetToUboot.clicked.connect(self.interruptUbootWait)
+        self.flashingTimeoutButton.clicked.connect(self.interruptWait)
+        self.factoryResetTimeoutButton.clicked.connect(self.interruptWait)
         self.prepareToFirstTest.clicked.connect(self.toNextTest)
         self.chckToStepX.clicked.connect(self.userHasCheckedCables)
         self.errToScan.clicked.connect(self.simpleMoveToScan)
@@ -935,7 +936,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.checkRouterDbExistsSig.emit(barCode)
 
     @QtCore.pyqtSlot()
-    def interruptUbootWait(self):
+    def interruptWait(self):
         try:
             self.flashWorker.serialConsole.interrupt_wait()
         except:

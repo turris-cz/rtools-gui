@@ -128,64 +128,9 @@ class SerialConsole(object):
         self._accept_input = False
         self.state = self.OPENWRT
 
-    def to_factory_reset(self, timeout=INIT_MAX_WAIT):
-        # TODO
-        """this function reads output from console and when the text
-        "Hit any key to stop autoboot" is read, it sends ' ' (space) to
-        interrupt the autoboot. Then it waits for $UBOOT_PROMPT.
-
-        If operating system prompt is found (denoting that os is running)
-        it raises an exception.
-
-        This function waits at most timeout seconds, then it raises
-        an exception. If timeout is -1, it waits forever.
-        """
-
-        with self._inbuf_lock:
-            self.inbuf = ""
-
-        self._interrupt_flag = False
-        self._accept_input = True
-
-        waitCycles = int(timeout / 0.001)
-        waiting = True
-        while (waitCycles == -1000 or waitCycles > 0) and waiting:
-            if self._interrupt_flag:
-                self._accept_input = False
-                self.state = self.UNDEFINED
-                raise SCError("waiting interrupted")
-            if self.inbuf.find("Hit any key to stop autoboot") != -1:
-                # send ' ' to interrupt autoboot
-                os.write(self._sc, ' ')
-                waiting = False
-            time.sleep(0.001)
-            if waitCycles > 0:
-                waitCycles -= 1
-
-        wCounter = 10
-        while wCounter and not self.inbuf.endswith(UBOOT_PROMPT):
-            os.write(self._sc, "\n")
-            if self.inbuf.find("\n" + PS1) != -1 or self.inbuf.find("\n" + PS2) != -1:
-                self._accept_input = False
-                self.state = self.OPENWRT
-                raise SCError("OS prompt found, restart the device")
-            time.sleep(WAITTIME)
-            wCounter -= 1
-
-        if waiting:
-            raise SCError("Waiting for uboot messages timeouted.")
-
-        if wCounter <= 0:
-            raise SCError("Could not get uboot prompt after interrupting autoboot")
-
-        self._accept_input = False
-        self.state = self.UBOOT
-
     def to_flash(self, timeout=INIT_MAX_WAIT):
-        # TODO
         """this function reads output from console and when the text
-        "Hit any key to stop autoboot" is read, it sends ' ' (space) to
-        interrupt the autoboot. Then it waits for $UBOOT_PROMPT.
+        and waits for the 'HOTOVO' text then it waits for $UBOOT_PROMPT.
 
         If operating system prompt is found (denoting that os is running)
         it raises an exception.
@@ -200,23 +145,18 @@ class SerialConsole(object):
         self._interrupt_flag = False
         self._accept_input = True
 
-        waitCycles = int(timeout / 0.001)
-        waiting = True
-        while (waitCycles == -1000 or waitCycles > 0) and waiting:
+        wCounter = int(timeout / WAITTIME)
+        found = False
+        while (timeout == -1 or wCounter >= 0) and not found:
+            if self.inbuf.replace('\n', '').find("HOTOVO") > 0:
+                found = True
+                break
+
             if self._interrupt_flag:
                 self._accept_input = False
                 self.state = self.UNDEFINED
                 raise SCError("waiting interrupted")
-            if self.inbuf.find("Hit any key to stop autoboot") != -1:
-                # send ' ' to interrupt autoboot
-                os.write(self._sc, ' ')
-                waiting = False
-            time.sleep(0.001)
-            if waitCycles > 0:
-                waitCycles -= 1
 
-        wCounter = 10
-        while wCounter and not self.inbuf.endswith(UBOOT_PROMPT):
             os.write(self._sc, "\n")
             if self.inbuf.find("\n" + PS1) != -1 or self.inbuf.find("\n" + PS2) != -1:
                 self._accept_input = False
@@ -225,11 +165,8 @@ class SerialConsole(object):
             time.sleep(WAITTIME)
             wCounter -= 1
 
-        if waiting:
+        if not found:
             raise SCError("Waiting for uboot messages timeouted.")
-
-        if wCounter <= 0:
-            raise SCError("Could not get uboot prompt after interrupting autoboot")
 
         self._accept_input = False
         self.state = self.UBOOT
