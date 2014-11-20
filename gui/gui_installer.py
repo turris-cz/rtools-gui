@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Nov 19 11:24:52 2014
+# Created: Thu Nov 20 09:03:19 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -161,12 +161,12 @@ class Ui_Installer(object):
         self.label_10.setWordWrap(True)
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.verticalLayout_6.addWidget(self.label_10)
-        self.progressBar_3 = QtGui.QProgressBar(self.stepFlashing)
-        self.progressBar_3.setMinimum(0)
-        self.progressBar_3.setMaximum(0)
-        self.progressBar_3.setProperty("value", 0)
-        self.progressBar_3.setObjectName(_fromUtf8("progressBar_3"))
-        self.verticalLayout_6.addWidget(self.progressBar_3)
+        self.flashingProgressBar = QtGui.QProgressBar(self.stepFlashing)
+        self.flashingProgressBar.setMinimum(0)
+        self.flashingProgressBar.setMaximum(0)
+        self.flashingProgressBar.setProperty("value", 0)
+        self.flashingProgressBar.setObjectName(_fromUtf8("flashingProgressBar"))
+        self.verticalLayout_6.addWidget(self.flashingProgressBar)
         self.horizontalLayout_9 = QtGui.QHBoxLayout()
         self.horizontalLayout_9.setObjectName(_fromUtf8("horizontalLayout_9"))
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -195,11 +195,11 @@ class Ui_Installer(object):
         self.verticalLayout_7.addWidget(self.label_12)
         self.horizontalLayout_10 = QtGui.QHBoxLayout()
         self.horizontalLayout_10.setObjectName(_fromUtf8("horizontalLayout_10"))
-        self.progressBar_6 = QtGui.QProgressBar(self.stepFactoryReset)
-        self.progressBar_6.setMaximum(0)
-        self.progressBar_6.setProperty("value", -1)
-        self.progressBar_6.setObjectName(_fromUtf8("progressBar_6"))
-        self.horizontalLayout_10.addWidget(self.progressBar_6)
+        self.factoryResetProgressBar = QtGui.QProgressBar(self.stepFactoryReset)
+        self.factoryResetProgressBar.setMaximum(0)
+        self.factoryResetProgressBar.setProperty("value", -1)
+        self.factoryResetProgressBar.setObjectName(_fromUtf8("factoryResetProgressBar"))
+        self.horizontalLayout_10.addWidget(self.factoryResetProgressBar)
         self.verticalLayout_7.addLayout(self.horizontalLayout_10)
         self.horizontalLayout_7 = QtGui.QHBoxLayout()
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))

@@ -30,6 +30,9 @@ class SerialConsole(object):
     UBOOT = 1
     OPENWRT = 2
 
+    FLASH_DOT_COUNT = 185
+    FACTORY_RESET_NEWLINE_COUNT = 375
+
     def __init__(self, device, baudrate=termios.B115200):
         super(SerialConsole, self).__init__()
 
@@ -70,6 +73,14 @@ class SerialConsole(object):
         self._inbuf_lock = threading.Lock()
         self._readThread = threading.Thread(target=self._readWorker)
         self._readThread.start()
+
+    def update_progress_bar(self, progress_bar, value, max):
+        if progress_bar:
+            percent = value * 100.0 / max
+            percent = 99 if percent >= 100 else percent
+            progress_bar.setRange(0, 100)
+            progress_bar.setValue(percent)
+            progress_bar.update()
 
     def to_system(self):
         """Read the output (e.g. boot messages) from
@@ -130,7 +141,7 @@ class SerialConsole(object):
         self._accept_input = False
         self.state = self.OPENWRT
 
-    def to_factory_reset(self, timeout=INIT_MAX_WAIT):
+    def to_factory_reset(self, timeout=INIT_MAX_WAIT, progress_bar=None):
         """this function reads output from console and when the text
         and waits for the 'procd: - init complete -' text
 
@@ -158,6 +169,10 @@ class SerialConsole(object):
                 raise SCError("waiting interrupted")
 
             time.sleep(WAITTIME)
+
+            if len(self.inbuf) > 0:
+                self.update_progress_bar(progress_bar, self.inbuf.count('\n'),
+                                         SerialConsole.FACTORY_RESET_NEWLINE_COUNT)
             wCounter -= 1
 
         if not found:
@@ -166,7 +181,7 @@ class SerialConsole(object):
         self._accept_input = False
         self.state = self.UBOOT
 
-    def to_flash(self, timeout=INIT_MAX_WAIT):
+    def to_flash(self, timeout=INIT_MAX_WAIT, progress_bar=None):
         """this function reads output from console and when the text
         and waits for the 'HOTOVO' text
 
@@ -195,6 +210,9 @@ class SerialConsole(object):
                 raise SCError("waiting interrupted")
 
             time.sleep(WAITTIME)
+            if len(self.inbuf) > 0:
+                self.update_progress_bar(progress_bar, self.inbuf.count('.'),
+                                         SerialConsole.FLASH_DOT_COUNT)
             wCounter -= 1
 
         if not found:

@@ -93,11 +93,13 @@ class FlashingWorker(QtCore.QObject):
     testFinished = QtCore.pyqtSignal(int, bool, 'QString', 'QString')
     longWaitMsg = QtCore.pyqtSignal(int)
 
-    def __init__(self):
+    def __init__(self, flashProgressBar, resetProgressBar):
         super(FlashingWorker, self).__init__()
         self.router = None
         self.serialConsole = None
         self.imagesize = os.stat(settings.TFTP_IMAGE_FILE).st_size
+        self.flashProgressBar = flashProgressBar
+        self.resetProgressBar = resetProgressBar
 
     def runCmd(self, cmdWithArgs):
         logger.info("[FLASHWORKER] start flashing (command: `%s`)" % " ".join(cmdWithArgs))
@@ -285,6 +287,11 @@ class FlashingWorker(QtCore.QObject):
         logger.debug("[FLASHWORKER] starting to perform factory reset (routerId=%s)"
                      % self.router.id)
 
+        # clean the progress bar
+        self.resetProgressBar.setRange(0, 0)
+        self.resetProgressBar.setValue(0)
+        self.resetProgressBar.update()
+
         # create and prepare a serial console connection
         if self.serialConsole is None:
             # find ttyUSBx
@@ -304,7 +311,7 @@ class FlashingWorker(QtCore.QObject):
         try:
             # to_factory_reset(timeout=-1) - wait forever
             # (there is a button to interrupt the wait)
-            self.serialConsole.to_factory_reset(-1)
+            self.serialConsole.to_factory_reset(-1, self.resetProgressBar)
         except SCError, e:
             logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%s). "
                            % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
@@ -323,6 +330,11 @@ class FlashingWorker(QtCore.QObject):
 
     def go_to_flash(self):
         logger.debug("[FLASHWORKER] starting to FLASH (routerId=%s)" % self.router.id)
+
+        # clean the progress bar
+        self.flashProgressBar.setRange(0, 0)
+        self.flashProgressBar.setValue(0)
+        self.flashProgressBar.update()
 
         # create and prepare a serial console connection
         if self.serialConsole is None:
@@ -343,7 +355,7 @@ class FlashingWorker(QtCore.QObject):
         try:
             # to_flash(timeout=-1) - wait forever
             # (there is a button to interrupt the wait)
-            self.serialConsole.to_flash(-1)
+            self.serialConsole.to_flash(-1, self.flashProgressBar)
         except SCError, e:
             logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%s). "
                            % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
@@ -636,7 +648,8 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.actionSmazaniCPLD.triggered.connect(self.showCpldEraser)
 
         # start a second thread which will do the flashing
-        self.flashWorker = FlashingWorker()
+        self.flashWorker = FlashingWorker(
+            self.flashingProgressBar, self.factoryResetProgressBar)
         self.flashThread = QtCore.QThread()
 
         self.newRouterAddSig.connect(self.flashWorker.addNewRouter)

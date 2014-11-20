@@ -261,7 +261,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
          </widget>
         </item>
         <item>
-         <widget class="QProgressBar" name="progressBar_3">
+         <widget class="QProgressBar" name="flashingProgressBar">
           <property name="minimum">
            <number>0</number>
           </property>
@@ -330,7 +330,7 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_10">
           <item>
-           <widget class="QProgressBar" name="progressBar_6">
+           <widget class="QProgressBar" name="factoryResetProgressBar">
             <property name="maximum">
              <number>0</number>
             </property>
