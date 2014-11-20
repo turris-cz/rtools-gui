@@ -111,7 +111,9 @@ class SerialConsole(object):
             time.sleep(WAITTIME)
             if self.inbuf.endswith("\n" + UBOOT_PROMPT):
                 self.state = self.UBOOT
-                raise SCError("We are in uboot, restart the router to go to the system.", SCError.FACTORY_RESET)
+                raise SCError(
+                    "We are in uboot, restart the router to go to the system.",
+                    SCError.FACTORY_RESET)
             if self.inbuf.endswith("\n" + PS1):
                 read = False
             elif self.inbuf.endswith("\n" + PS2):
@@ -128,12 +130,45 @@ class SerialConsole(object):
         self._accept_input = False
         self.state = self.OPENWRT
 
+    def to_factory_reset(self, timeout=INIT_MAX_WAIT):
+        """this function reads output from console and when the text
+        and waits for the 'procd: - init complete -' text
+
+        This function waits at most timeout seconds, then it raises
+        an exception. If timeout is -1, it waits forever.
+        """
+        with self._inbuf_lock:
+            self.inbuf = ""
+
+        self._interrupt_flag = False
+        self._accept_input = True
+
+        wCounter = int(timeout / WAITTIME)
+        found = False
+
+        while (timeout == -1 or wCounter >= 0) and not found:
+
+            if self.inbuf.find("procd: - init complete -") > 0:
+                found = True
+                break
+
+            if self._interrupt_flag:
+                self._accept_input = False
+                self.state = self.UNDEFINED
+                raise SCError("waiting interrupted")
+
+            time.sleep(WAITTIME)
+            wCounter -= 1
+
+        if not found:
+            raise SCError("Waiting for uboot messages timeouted.")
+
+        self._accept_input = False
+        self.state = self.UBOOT
+
     def to_flash(self, timeout=INIT_MAX_WAIT):
         """this function reads output from console and when the text
-        and waits for the 'HOTOVO' text then it waits for $UBOOT_PROMPT.
-
-        If operating system prompt is found (denoting that os is running)
-        it raises an exception.
+        and waits for the 'HOTOVO' text
 
         This function waits at most timeout seconds, then it raises
         an exception. If timeout is -1, it waits forever.
@@ -147,8 +182,10 @@ class SerialConsole(object):
 
         wCounter = int(timeout / WAITTIME)
         found = False
+
         while (timeout == -1 or wCounter >= 0) and not found:
-            if self.inbuf.replace('\n', '').find("HOTOVO") > 0:
+
+            if self.inbuf.find("HOTOVO") > 0:
                 found = True
                 break
 
@@ -157,11 +194,6 @@ class SerialConsole(object):
                 self.state = self.UNDEFINED
                 raise SCError("waiting interrupted")
 
-            os.write(self._sc, "\n")
-            if self.inbuf.find("\n" + PS1) != -1 or self.inbuf.find("\n" + PS2) != -1:
-                self._accept_input = False
-                self.state = self.OPENWRT
-                raise SCError("OS prompt found, restart the device")
             time.sleep(WAITTIME)
             wCounter -= 1
 

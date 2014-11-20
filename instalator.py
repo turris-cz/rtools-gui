@@ -304,7 +304,7 @@ class FlashingWorker(QtCore.QObject):
         try:
             # to_factory_reset(timeout=-1) - wait forever
             # (there is a button to interrupt the wait)
-            self.serialConsole.to_system()
+            self.serialConsole.to_factory_reset(-1)
         except SCError, e:
             logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%s). "
                            % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
