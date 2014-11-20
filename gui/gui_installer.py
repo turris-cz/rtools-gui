@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Thu Nov 20 09:03:19 2014
+# Created: Thu Nov 20 13:43:51 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -94,6 +94,27 @@ class Ui_Installer(object):
         self.horizontalLayout_3.addWidget(self.scanToProgramming)
         self.verticalLayout_3.addLayout(self.horizontalLayout_3)
         self.stackedWidget.addWidget(self.stepScan)
+        self.stepPower = QtGui.QWidget()
+        self.stepPower.setObjectName(_fromUtf8("stepPower"))
+        self.verticalLayout_21 = QtGui.QVBoxLayout(self.stepPower)
+        self.verticalLayout_21.setObjectName(_fromUtf8("verticalLayout_21"))
+        self.label_19 = QtGui.QLabel(self.stepPower)
+        self.label_19.setObjectName(_fromUtf8("label_19"))
+        self.verticalLayout_21.addWidget(self.label_19)
+        self.label_21 = QtGui.QLabel(self.stepPower)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(1)
+        sizePolicy.setVerticalStretch(1)
+        sizePolicy.setHeightForWidth(self.label_21.sizePolicy().hasHeightForWidth())
+        self.label_21.setSizePolicy(sizePolicy)
+        self.label_21.setObjectName(_fromUtf8("label_21"))
+        self.verticalLayout_21.addWidget(self.label_21)
+        self.progressBar_3 = QtGui.QProgressBar(self.stepPower)
+        self.progressBar_3.setMaximum(0)
+        self.progressBar_3.setProperty("value", 0)
+        self.progressBar_3.setObjectName(_fromUtf8("progressBar_3"))
+        self.verticalLayout_21.addWidget(self.progressBar_3)
+        self.stackedWidget.addWidget(self.stepPower)
         self.stepI2C = QtGui.QWidget()
         self.stepI2C.setObjectName(_fromUtf8("stepI2C"))
         self.verticalLayout_8 = QtGui.QVBoxLayout(self.stepI2C)
@@ -528,8 +549,10 @@ class Ui_Installer(object):
 "margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Sejměte čárový kód nalepený na LAN konektoru desky routeru TURRIS. </li></ul></body></html>", None))
         self.label_4.setText(_translate("Installer", "Čárový kód", None))
         self.scanToProgramming.setText(_translate("Installer", "Spustit programování", None))
+        self.label_19.setText(_translate("Installer", "<h1>Programování zdrojů</h1>", None))
+        self.label_21.setText(_translate("Installer", "V tomto kroku probíhá oživování zdroje přes kabel XXX a sběrnici YYY.", None))
         self.label_15.setText(_translate("Installer", "<h1>I2C Programování</h1>", None))
-        self.label_16.setText(_translate("Installer", "V tomto kroku se programují přes kabel 1 a I2C sběrnici následující zařízení: Zdroj, Cryptochip, RTC, Teploměr.", None))
+        self.label_16.setText(_translate("Installer", "V tomto kroku se programují přes kabel 1 a I2C sběrnici následující zařízení: Cryptochip, RTC, Teploměr.", None))
         self.label_6.setText(_translate("Installer", "<h1>CPLD Programování</h1>", None))
         self.label_7.setText(_translate("Installer", "V tomto kroku probíhá programování CPLD obvodu pomocí kabelu 2.", None))
         self.label_9.setText(_translate("Installer", "<h1>FLASH Programování</h1>", None))

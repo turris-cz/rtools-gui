@@ -31,10 +31,11 @@ class DbError(IOError):
 
 class Router(object):
     STATUS_START = 0
-    STATUS_I2C = 1
-    STATUS_CPLD = 2
-    STATUS_FLASHED = 3
-    STATUS_FINISHED = 4
+    STATUS_POWER = 1
+    STATUS_I2C = 2
+    STATUS_CPLD = 3
+    STATUS_FLASHED = 4
+    STATUS_FINISHED = 5
 
     TEST_OK = 0
     TEST_FAIL = 1
@@ -49,7 +50,8 @@ class Router(object):
         self.status = Router.STATUS_START  # int
         self.error = ""  # string / text in db
         # second chance for flashing steps (if the user can check the cables)
-        self.secondChance = {'I2C': True, 'CPLD': True, 'FLASH': True, 'NOR': True}
+        self.secondChance = {
+            'I2C': True, 'CPLD': True, 'FLASH': True, 'NOR': True, 'POWER': True}
         self.testSecondChance = True
         self.testSerie = 0
         self.testResults = {}

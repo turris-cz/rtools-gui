@@ -44,9 +44,6 @@ USB_RECONNECT_MESSAGE = u"Nezdařila se komunikace se systémem na routru. Zkust
                         u"zkoušet, zvolte 'Ne'.\nZkusit znovu?"
 
 
-# code
-
-
 def serialNumberValidator(sn):
     # serial number must be integer
     try:
@@ -173,8 +170,65 @@ class FlashingWorker(QtCore.QObject):
         self.flashFinished.emit((return_code, err_msg, dbErr))
 
     @QtCore.pyqtSlot()
+    def flashStepPower(self):
+        logger.debug("[FLASHWORKER] starting POWER step (routerId=%s)"
+                     % self.router.id)
+        p_return = self.runCmd((
+            "sudo",
+            settings.OPENOCD_CMD,
+            '-s', settings.OPENOCD_DIR,
+            '-f', os.path.join(settings.OPENOCD_DIR, 'interface',
+                               settings.OPENOCD_INTERFACE),
+            '-f', os.path.join(settings.OPENOCD_DIR, 'target',
+                               settings.OPENOCD_INTERFACE),
+            '-c', '"init"',
+            '-c', '"sleep 200"',
+            '-c', '"reset init"',
+            '-c', '"sleep 200"',
+            '-c', '"reset halt"',
+            '-c', '"sleep 100"',
+            '-c', '"wait_halt 2"',
+            '-c', '"flash write_image erase %s 0x08000000"' % settings.POWER_BIN,
+            '-c', '"sleep 100"',
+            '-c', '"verify_image %s 0x08000000"' % settings.POWER_BIN,
+            '-c', '"sleep 100"',
+            '-c', '"reset run"',
+            '-c', '"shutdown"',
+        ))
+
+        return_code = 0
+        err_msg = ""
+
+        if p_return[0] == 0:
+            logger.info("[FLASHWORKER] POWER step successful (routerId=%s)"
+                        % self.router.id)
+            self.router.status = self.router.STATUS_POWER
+            self.router.error = ""
+        elif self.router.secondChance['POWER'] and \
+                not p_return[1].split("\n", 1)[0].endswith("OK"):
+            # if a user has a second chance (will check the cables,...)
+            # and first thing hasn't passed (is not 'something... OK')
+            logger.warning("[FLASHWORKER] POWER step failed, check the cables"
+                           " (routerId=%s)" % self.router.id)
+            self.router.secondChance['POWER'] = False
+            self.router.error = p_return[1]
+            return_code = 1
+            err_msg = u"Programování zdroje selhalo. Prosím ověřte zapojení kabelu X " \
+                      u"(Zapojen z TURRIS PROGRAMMERu konektor XX na programovaný TURRIS konektor XX). " \
+                      u" Zkontrolujte připojení napájecího adaptéru 7,5V."
+        else:
+            logger.warning("[FLASHWORKER] POWER step failed definitely (routerId=%s)" % self.router.id)
+            self.router.error = p_return[1]
+            return_code = 2
+            err_msg = u"Programování zdroje selhalo."
+
+        dbErr = not self.router.save()
+
+        self.flashFinished.emit((return_code, err_msg, dbErr))
+
+    @QtCore.pyqtSlot()
     def flashStepI2C(self):
-        logger.debug("[FLASHWORKER] starting first step (routerId=%s)" % self.router.id)
+        logger.debug("[FLASHWORKER] starting I2C step (routerId=%s)" % self.router.id)
         p_return = self.runCmd((settings.STEP_I2C_CMD, self.router.id))
 
         return_code = 0
@@ -206,7 +260,7 @@ class FlashingWorker(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def flashStepCPLD(self):
-        logger.debug("[FLASHWORKER] starting second step (routerId=%s)" % self.router.id)
+        logger.debug("[FLASHWORKER] starting CPLD step (routerId=%s)" % self.router.id)
         # create a log file
         tmpf_fd, tmpf_path = mkstemp(text=True)
 
@@ -251,7 +305,7 @@ class FlashingWorker(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def flashStepFlashing(self):
-        logger.debug("[FLASHWORKER] starting third step (routerId=%s)" % self.router.id)
+        logger.debug("[FLASHWORKER] starting FLASH step (routerId=%s)" % self.router.id)
 
         retStr, retryError = self.go_to_flash()
         if retStr:
@@ -583,6 +637,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     """Installer GUI application for flashing the Turris routers"""
 
     newRouterAddSig = QtCore.pyqtSignal('QString', bool)
+    flashStepPowerSig = QtCore.pyqtSignal()
     flashStepI2CSig = QtCore.pyqtSignal()
     flashStepCPLDSig = QtCore.pyqtSignal()
     flashStepFlashingSig = QtCore.pyqtSignal()
@@ -594,19 +649,20 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     STEPS = {
         'START': 0,
         'SCAN': 1,
-        'I2C': 2,
-        'CPLD': 3,
-        'FLASH': 4,
-        'FACTORYRESET': 5,
-        'BEFORETESTS': 6,
-        'CHCKCABLE': 7,
-        'ERROR': 8,
-        'TESTPREPARE': 9,
-        'TESTEXEC': 10,
-        'FINISH': 11,
-        'ACCESSORIES': 12,
-        'ACCTESTS': 13,
-        'ACCCPLDERASE': 14
+        'POWER': 2,
+        'I2C': 3,
+        'CPLD': 4,
+        'FLASH': 5,
+        'FACTORYRESET': 6,
+        'BEFORETESTS': 7,
+        'CHCKCABLE': 8,
+        'ERROR': 9,
+        'TESTPREPARE': 10,
+        'TESTEXEC': 11,
+        'FINISH': 12,
+        'ACCESSORIES': 13,
+        'ACCTESTS': 14,
+        'ACCCPLDERASE': 15
     }
 
     STEP_NUM_TO_ID = {v: k for k, v in STEPS.iteritems()}
@@ -653,6 +709,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.flashThread = QtCore.QThread()
 
         self.newRouterAddSig.connect(self.flashWorker.addNewRouter)
+        self.flashStepPowerSig.connect(self.flashWorker.flashStepPower)
         self.flashStepI2CSig.connect(self.flashWorker.flashStepI2C)
         self.flashStepCPLDSig.connect(self.flashWorker.flashStepCPLD)
         self.flashStepFlashingSig.connect(self.flashWorker.flashStepFlashing)
@@ -731,18 +788,21 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
             if flash_result[0] >= 0:
                 # start with step given in flash_result[0]
                 if flash_result[0] == 0:
+                    i = self.STEPS['POWER']
+                    self.flashStepPowerSig.emit()
+                elif flash_result[0] == 1:
                     i = self.STEPS['I2C']
                     self.flashStepI2CSig.emit()
-                elif flash_result[0] == 1:
+                elif flash_result[0] == 2:
                     i = self.STEPS['CPLD']
                     self.flashStepCPLDSig.emit()
-                elif flash_result[0] == 2:
+                elif flash_result[0] == 3:
                     i = self.STEPS['FLASH']
                     self.flashStepFlashingSig.emit()
-                elif flash_result[0] == 3:
+                elif flash_result[0] == 4:
                     self.factoryResetSig.emit()
                     i = self.STEPS['FACTORYRESET']
-                elif flash_result[0] == 4:
+                elif flash_result[0] == 5:
                     i = self.STEPS['BEFORETESTS']
                 self.flashingStage = i
             elif flash_result[0] == -1:
@@ -769,6 +829,16 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                 QtGui.QMessageBox.warning(self, u"Chyba", flash_result[1])
                 self.lineEdit.setFocus()
                 return
+        elif i == self.STEPS['POWER']:
+            if flash_result[0] == 0:
+                i = self.STEPS['I2C']
+                self.flashingStage = i
+                self.flashStepI2CSig.emit()
+            elif flash_result[0] == 1:
+                self.tmpErrMsg.setText(flash_result[1])
+                i = self.STEPS['CHCKCABLE']
+            else:
+                i = self.STEPS['ERROR']
         elif i == self.STEPS['I2C']:
             if flash_result[0] == 0:
                 i = self.STEPS['CPLD']
@@ -846,7 +916,9 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     def userHasCheckedCables(self):
         # change the stackedWidget to self.flashingStage and emmit the corresponding signal
         self.stackedWidget.setCurrentIndex(self.flashingStage)
-        if self.flashingStage == self.STEPS['I2C']:
+        if self.flashingStage == self.STEPS['POWER']:
+            self.flashStepPowerSig.emit()
+        elif self.flashingStage == self.STEPS['I2C']:
             self.flashStepI2CSig.emit()
         elif self.flashingStage == self.STEPS['CPLD']:
             self.flashStepCPLDSig.emit()

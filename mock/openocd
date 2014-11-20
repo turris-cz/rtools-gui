@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# dummy script for openocd
+
+sleep 2
+echo "ok, vsetko v poriadko" > mock/session.log
+

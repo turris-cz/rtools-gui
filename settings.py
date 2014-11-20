@@ -10,6 +10,13 @@ from logging import NOTSET as _NOTSET
 # LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
 STEP_I2C_CMD = "mock/i2cflasher"
 STEP_CPLD_CMD = "mock/lattice"
+
+OPENOCD_CMD = "mock/openocd"
+OPENOCD_DIR = "/usr/share/openocd/scripts"
+OPENOCD_INTERFACE = "stlink-v2.cfg"
+OPENOCD_TARGET = "stm32f0x_stlink.cfg"
+POWER_BIN = "mock/turris_power_control.bin"
+
 CPLD_FLASH_INFILE = "/home/palko/neexistujucialejetojedno"
 CPLD_ERASE_INFILE = "/home/palko/neexistujucialejetojedno"
 STEP_FLASH_CMD = "mock/codewarrior"
