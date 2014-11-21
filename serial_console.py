@@ -31,7 +31,7 @@ class SerialConsole(object):
     OPENWRT = 2
 
     FLASH_DOT_COUNT = 185
-    FACTORY_RESET_NEWLINE_COUNT = 375
+    FACTORY_RESET_NEWLINE_COUNT = 600
 
     def __init__(self, device, baudrate=termios.B115200):
         super(SerialConsole, self).__init__()
