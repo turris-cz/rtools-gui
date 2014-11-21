@@ -12,8 +12,6 @@ POWER_BIN = "mock/turris_power_control.bin"
 
 CPLD_FLASH_INFILE = "/path/to/file"
 CPLD_ERASE_INFILE = "/path/to/file"
-STEP_FLASH_CMD = "mock/codewarrior"
-STEP_FLASH_LOGFILE = "mock/session.log"
 LOG_BACKUP_CMD = "/bin/true"
 
 # database
