@@ -8,7 +8,12 @@
 #python modules
 import logging
 import os
-import settings
+
+# settings
+import importlib
+settings = importlib.import_module(
+    os.environ.get('RTOOLS_SETTINGS', 'settings'))
+
 import subprocess
 import sys
 from tempfile import mkstemp
@@ -24,7 +29,6 @@ from serial_console import SerialConsole, SCError
 # tests
 from router_tests import TESTLIST
 
-# settings
 
 #logging
 logger = logging.getLogger('installer')
@@ -94,7 +98,6 @@ class FlashingWorker(QtCore.QObject):
         super(FlashingWorker, self).__init__()
         self.router = None
         self.serialConsole = None
-        self.imagesize = os.stat(settings.TFTP_IMAGE_FILE).st_size
         self.flashProgressBar = flashProgressBar
         self.resetProgressBar = resetProgressBar
 
@@ -177,10 +180,8 @@ class FlashingWorker(QtCore.QObject):
             "sudo",
             settings.OPENOCD_CMD,
             '-s', settings.OPENOCD_DIR,
-            '-f', os.path.join(settings.OPENOCD_DIR, 'interface',
-                               settings.OPENOCD_INTERFACE),
-            '-f', os.path.join(settings.OPENOCD_DIR, 'target',
-                               settings.OPENOCD_INTERFACE),
+            '-f', os.path.join('interface', settings.OPENOCD_INTERFACE),
+            '-f', os.path.join('target', settings.OPENOCD_TARGET),
             '-c', '"init"',
             '-c', '"sleep 200"',
             '-c', '"reset init"',
