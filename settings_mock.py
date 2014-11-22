@@ -18,7 +18,7 @@ LOG_BACKUP_CMD = "/bin/true"
 DB_HOST = 'localhost'
 DB_USER = 'tflasher'
 DB_PASS = 'poiuytrewq'
-DB_DBNAME = 'tflasher'
+DB_DBNAME = 'turris'
 
 #logging
 LOGLEVEL = _NOTSET  # log everyting

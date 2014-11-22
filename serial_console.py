@@ -74,13 +74,11 @@ class SerialConsole(object):
         self._readThread = threading.Thread(target=self._readWorker)
         self._readThread.start()
 
-    def update_progress_bar(self, progress_bar, value, max):
-        if progress_bar:
+    def update_progress_bar(self, signal, value, max):
+        if signal:
             percent = value * 100.0 / max
             percent = 99 if percent >= 100 else percent
-            progress_bar.setRange(0, 100)
-            progress_bar.setValue(percent)
-            progress_bar.update()
+            signal.emit(0, 100, int(percent))
 
     def to_system(self):
         """Read the output (e.g. boot messages) from
@@ -141,7 +139,7 @@ class SerialConsole(object):
         self._accept_input = False
         self.state = self.OPENWRT
 
-    def to_factory_reset(self, timeout=INIT_MAX_WAIT, progress_bar=None):
+    def to_factory_reset(self, timeout=INIT_MAX_WAIT, worker=None):
         """this function reads output from console and when the text
         and waits for the 'procd: - init complete -' text
 
@@ -171,7 +169,8 @@ class SerialConsole(object):
             time.sleep(WAITTIME)
 
             if len(self.inbuf) > 0:
-                self.update_progress_bar(progress_bar, self.inbuf.count('\n'),
+                self.update_progress_bar(worker.updateResetProgressBar,
+                                         self.inbuf.count('\n'),
                                          SerialConsole.FACTORY_RESET_NEWLINE_COUNT)
             wCounter -= 1
 
@@ -181,7 +180,7 @@ class SerialConsole(object):
         self._accept_input = False
         self.state = self.UBOOT
 
-    def to_flash(self, timeout=INIT_MAX_WAIT, progress_bar=None):
+    def to_flash(self, timeout=INIT_MAX_WAIT, worker=None):
         """this function reads output from console and when the text
         and waits for the 'HOTOVO' text
 
@@ -211,7 +210,8 @@ class SerialConsole(object):
 
             time.sleep(WAITTIME)
             if len(self.inbuf) > 0:
-                self.update_progress_bar(progress_bar, self.inbuf.count('.'),
+                self.update_progress_bar(worker.updateFlashProgressBar,
+                                         self.inbuf.count('.'),
                                          SerialConsole.FLASH_DOT_COUNT)
             wCounter -= 1
 

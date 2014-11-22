@@ -93,13 +93,14 @@ class FlashingWorker(QtCore.QObject):
     flashFinished = QtCore.pyqtSignal(tuple)
     testFinished = QtCore.pyqtSignal(int, bool, 'QString', 'QString')
     longWaitMsg = QtCore.pyqtSignal(int)
+    updateFlashProgressBar = QtCore.pyqtSignal(int, int, int)
+    updateResetProgressBar = QtCore.pyqtSignal(int, int, int)
 
-    def __init__(self, flashProgressBar, resetProgressBar):
+
+    def __init__(self):
         super(FlashingWorker, self).__init__()
         self.router = None
         self.serialConsole = None
-        self.flashProgressBar = flashProgressBar
-        self.resetProgressBar = resetProgressBar
 
     def runCmd(self, cmdWithArgs):
         logger.info("[FLASHWORKER] start flashing (command: `%s`)" % " ".join(cmdWithArgs))
@@ -343,9 +344,7 @@ class FlashingWorker(QtCore.QObject):
                      % self.router.id)
 
         # clean the progress bar
-        self.resetProgressBar.setRange(0, 0)
-        self.resetProgressBar.setValue(0)
-        self.resetProgressBar.update()
+        self.updateResetProgressBar.emit(0, 0, 0)
 
         # create and prepare a serial console connection
         if self.serialConsole is None:
@@ -366,7 +365,7 @@ class FlashingWorker(QtCore.QObject):
         try:
             # to_factory_reset(timeout=-1) - wait forever
             # (there is a button to interrupt the wait)
-            self.serialConsole.to_factory_reset(-1, self.resetProgressBar)
+            self.serialConsole.to_factory_reset(-1, self)
         except SCError, e:
             logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%s). "
                            % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
@@ -387,9 +386,7 @@ class FlashingWorker(QtCore.QObject):
         logger.debug("[FLASHWORKER] starting to FLASH (routerId=%s)" % self.router.id)
 
         # clean the progress bar
-        self.flashProgressBar.setRange(0, 0)
-        self.flashProgressBar.setValue(0)
-        self.flashProgressBar.update()
+        self.updateFlashProgressBar.emit(0, 0, 0)
 
         # create and prepare a serial console connection
         if self.serialConsole is None:
@@ -410,7 +407,7 @@ class FlashingWorker(QtCore.QObject):
         try:
             # to_flash(timeout=-1) - wait forever
             # (there is a button to interrupt the wait)
-            self.serialConsole.to_flash(-1, self.flashProgressBar)
+            self.serialConsole.to_flash(-1, self)
         except SCError, e:
             logger.warning("[FLASHWORKER] Serial console initialization failed (routerId=%s). "
                            % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)
@@ -705,8 +702,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.actionSmazaniCPLD.triggered.connect(self.showCpldEraser)
 
         # start a second thread which will do the flashing
-        self.flashWorker = FlashingWorker(
-            self.flashingProgressBar, self.factoryResetProgressBar)
+        self.flashWorker = FlashingWorker()
         self.flashThread = QtCore.QThread()
 
         self.newRouterAddSig.connect(self.flashWorker.addNewRouter)
@@ -719,6 +715,8 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.flashWorker.flashFinished.connect(self.moveToNext)
         self.flashWorker.testFinished.connect(self.toNextTest)
         self.flashWorker.longWaitMsg.connect(self.informLongWait)
+        self.flashWorker.updateFlashProgressBar.connect(self.updateFlashProgressBar)
+        self.flashWorker.updateResetProgressBar.connect(self.updateResetProgressBar)
         self.cpldStartEraseSig.connect(self.flashWorker.stepCpldEraser)
         self.factoryResetSig.connect(self.flashWorker.doFactoryReset)
 
@@ -741,6 +739,18 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         except (IOError, OSError):
             logger.critical("[MAIN] could not create directory "
                             "for saving session.log (%s)" % nanlogsdir)
+
+    @QtCore.pyqtSlot(int, int, int)
+    def updateFlashProgressBar(self, min, max, value):
+        self.flashProgressBar.setRange(min, max)
+        self.flashProgressBar.setValue(value)
+        self.flashProgressBar.update()
+
+    @QtCore.pyqtSlot(int, int, int)
+    def updateResetProgressBar(self, min, max, value):
+        self.resetProgressBar.setRange(min, max)
+        self.resetProgressBar.setValue(value)
+        self.resetProgressBar.update()
 
     @QtCore.pyqtSlot()
     def simpleMoveToScan(self):

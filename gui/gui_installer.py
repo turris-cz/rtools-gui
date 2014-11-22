@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Fri Nov 21 09:51:00 2014
+# Created: Sat Nov 22 17:55:12 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -182,12 +182,12 @@ class Ui_Installer(object):
         self.label_10.setWordWrap(True)
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.verticalLayout_6.addWidget(self.label_10)
-        self.flashingProgressBar = QtGui.QProgressBar(self.stepFlashing)
-        self.flashingProgressBar.setMinimum(0)
-        self.flashingProgressBar.setMaximum(0)
-        self.flashingProgressBar.setProperty("value", 0)
-        self.flashingProgressBar.setObjectName(_fromUtf8("flashingProgressBar"))
-        self.verticalLayout_6.addWidget(self.flashingProgressBar)
+        self.flashProgressBar = QtGui.QProgressBar(self.stepFlashing)
+        self.flashProgressBar.setMinimum(0)
+        self.flashProgressBar.setMaximum(0)
+        self.flashProgressBar.setProperty("value", 0)
+        self.flashProgressBar.setObjectName(_fromUtf8("flashProgressBar"))
+        self.verticalLayout_6.addWidget(self.flashProgressBar)
         self.horizontalLayout_9 = QtGui.QHBoxLayout()
         self.horizontalLayout_9.setObjectName(_fromUtf8("horizontalLayout_9"))
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -216,11 +216,11 @@ class Ui_Installer(object):
         self.verticalLayout_7.addWidget(self.label_12)
         self.horizontalLayout_10 = QtGui.QHBoxLayout()
         self.horizontalLayout_10.setObjectName(_fromUtf8("horizontalLayout_10"))
-        self.factoryResetProgressBar = QtGui.QProgressBar(self.stepFactoryReset)
-        self.factoryResetProgressBar.setMaximum(0)
-        self.factoryResetProgressBar.setProperty("value", -1)
-        self.factoryResetProgressBar.setObjectName(_fromUtf8("factoryResetProgressBar"))
-        self.horizontalLayout_10.addWidget(self.factoryResetProgressBar)
+        self.resetProgressBar = QtGui.QProgressBar(self.stepFactoryReset)
+        self.resetProgressBar.setMaximum(0)
+        self.resetProgressBar.setProperty("value", -1)
+        self.resetProgressBar.setObjectName(_fromUtf8("resetProgressBar"))
+        self.horizontalLayout_10.addWidget(self.resetProgressBar)
         self.verticalLayout_7.addLayout(self.horizontalLayout_10)
         self.horizontalLayout_7 = QtGui.QHBoxLayout()
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
@@ -499,7 +499,7 @@ class Ui_Installer(object):
         self.verticalLayout.addWidget(self.stackedWidget)
         Installer.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(Installer)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 600, 19))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 600, 26))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuAkce = QtGui.QMenu(self.menubar)
         self.menuAkce.setObjectName(_fromUtf8("menuAkce"))
