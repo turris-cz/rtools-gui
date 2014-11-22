@@ -1,6 +1,8 @@
 CREATE ROLE tflasher LOGIN PASSWORD 'poiuytrewq';
 
-CREATE DATABASE turris OWNER tflasher;
+CREATE DATABASE turris WITH OWNER tflasher;
+
+\c turris
 
 CREATE TABLE routers (
     id varchar(20),
@@ -10,6 +12,7 @@ CREATE TABLE routers (
     error text NOT NULL DEFAULT '',
     PRIMARY KEY (id, attempt)
 );
+ALTER TABLE routers OWNER TO tflasher;
 
 CREATE TABLE tests (
     id varchar(20),
@@ -21,6 +24,7 @@ CREATE TABLE tests (
     PRIMARY KEY (id, attempt, serie, testid),
     FOREIGN KEY (id, attempt) REFERENCES routers (id, attempt) ON DELETE CASCADE
 );
+ALTER TABLE tests OWNER TO tflasher;
 
 CREATE VIEW good_routers AS
     SELECT DISTINCT id, attempt, add_time FROM routers
@@ -28,3 +32,4 @@ CREATE VIEW good_routers AS
     GROUP BY id, attempt, serie
     HAVING max(testresult)='0' AND count(*)='9'
     ORDER BY id;
+ALTER VIEW good_routers OWNER TO tflasher;
