@@ -215,8 +215,8 @@ class FlashingWorker(QtCore.QObject):
             self.router.secondChance['POWER'] = False
             self.router.error = p_return[1]
             return_code = 1
-            err_msg = u"Programování zdroje selhalo. Prosím ověřte zapojení kabelu X " \
-                      u"(Zapojen z TURRIS PROGRAMMERu konektor XX na programovaný TURRIS konektor XX). " \
+            err_msg = u"Programování zdroje selhalo. Prosím ověřte zapojení kabelu 3 " \
+                      u"(Zapojen z TURRIS PROGRAMMERu konektor P2 na programovaný TURRIS konektor J3). " \
                       u" Zkontrolujte připojení napájecího adaptéru 7,5V."
         else:
             logger.warning("[FLASHWORKER] POWER step failed definitely (routerId=%s)" % self.router.id)
