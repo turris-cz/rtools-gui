@@ -231,24 +231,6 @@ TESTLIST = (
         "interpretfailure": textresult_generic
     },
     {
-        "desc": u"test LAN portu č. 3",
-        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 3.",
-        "testfunc": test_LAN_ping,
-        "interpretfailure": textresult_generic
-    },
-    {
-        "desc": u"test LAN portu č. 4",
-        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 4.",
-        "testfunc": test_LAN_ping,
-        "interpretfailure": textresult_generic
-    },
-    {
-        "desc": u"test LAN portu č. 5",
-        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 5.",
-        "testfunc": test_LAN_ping,
-        "interpretfailure": textresult_generic
-    },
-    {
         "desc": u"test USB",
         "instructions": u"Zkontrolujte připojení USB klíčů.",
         "testfunc": test_USB,
