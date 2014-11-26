@@ -30,8 +30,8 @@ class SerialConsole(object):
     UBOOT = 1
     OPENWRT = 2
 
-    FLASH_DOT_COUNT = 185
-    FACTORY_RESET_NEWLINE_COUNT = 600
+    FLASH_DOT_COUNT = 167
+    FACTORY_RESET_NEWLINE_COUNT = 410
 
     def __init__(self, device, baudrate=termios.B115200):
         super(SerialConsole, self).__init__()
@@ -168,9 +168,10 @@ class SerialConsole(object):
 
             time.sleep(WAITTIME)
 
-            if len(self.inbuf) > 0:
+            index = self.inbuf.rfind('Welcome in rescue mode.')
+            if index > -1:
                 self.update_progress_bar(worker.updateResetProgressBar,
-                                         self.inbuf.count('\n'),
+                                         self.inbuf[index:].count('\n'),
                                          SerialConsole.FACTORY_RESET_NEWLINE_COUNT)
             wCounter -= 1
 
@@ -209,9 +210,10 @@ class SerialConsole(object):
                 raise SCError("waiting interrupted")
 
             time.sleep(WAITTIME)
-            if len(self.inbuf) > 0:
+            index = self.inbuf.rfind('Erase Flash Bank')
+            if index > -1:
                 self.update_progress_bar(worker.updateFlashProgressBar,
-                                         self.inbuf.count('.'),
+                                         self.inbuf[index:].count('.'),
                                          SerialConsole.FLASH_DOT_COUNT)
             wCounter -= 1
 
