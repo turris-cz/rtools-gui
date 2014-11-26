@@ -43,18 +43,18 @@ def runRemoteCmd(sc, cmdstr):
 
 
 def test_WAN(sc):
-    time.sleep(2) # wait for link
-    
+    time.sleep(2)  # wait for link
+
     cmdResult = runLocalCmd("sudo ifconfig %s 192.168.100.2" % LOCAL_TEST_IFACE)
     if cmdResult[0] != 0:
         return cmdResult
-    
+
     cmdResult = runRemoteCmd(sc, "ifconfig %s 192.168.100.1" % TURRIS_WAN_IFACE)
     if cmdResult[0] != 0:
         return cmdResult
-    
-    time.sleep(1) # wait for addresses to be set
-    
+
+    time.sleep(1)  # wait for addresses to be set
+
     return runLocalCmd("ping -c 3 192.168.100.1")
 
 
@@ -62,14 +62,14 @@ def test_LAN1(sc):
     cmdResult = runLocalCmd("sudo ifconfig %s 192.168.1.2" % LOCAL_TEST_IFACE)
     if cmdResult[0] != 0:
         return cmdResult
-    
-    time.sleep(1) # wait for the addresses to be set
-    
+
+    time.sleep(1)  # wait for the addresses to be set
+
     return test_LAN_ping(sc)
 
 
 def test_LAN_ping(sc):
-    time.sleep(2) # wait for link
+    time.sleep(2)  # wait for link
     return runLocalCmd("ping -c 3 192.168.1.1")
 
 
@@ -79,7 +79,7 @@ def test_USB(sc):
     countSD = cmdOut.strip()
     if countSD.isdigit():
         countSD = int(countSD)
-        if countSD == 2:
+        if countSD == 3:
             return (0, "0", cmdOut, "Remote cmd:\n" + cmd)
         else:
             return (1, "1", cmdOut, "Remote cmd:\n" + cmd)
@@ -144,7 +144,7 @@ gpiotest () {
             return 1
         fi
     done
-    
+
     # GPIO_IN="224 225 226 227"
     # GPIO_OUT="228 229 230 239"
     GPIO_IN="224 225 227"
@@ -185,8 +185,9 @@ gpiotest () {
     else:
         return (-1, sc.lastStatus(), cmdOut, "Remote cmd:\n<long gpiotest function definition>")
 
+
 def textresult_generic(p_result):
-    return  "%s<br>returned:<br>%s<br>return code: %s" % (p_result[3], p_result[2], p_result[1])
+    return "%s<br>returned:<br>%s<br>return code: %s" % (p_result[3], p_result[2], p_result[1])
 
 
 def textresult_USB(p_result):
@@ -194,7 +195,7 @@ def textresult_USB(p_result):
         return textresult_generic(p_result)
     else:
         return u"Detekovali jsme jenom %s USB zařízení. Očekávali jsme 2." \
-                % p_result[2].strip()
+            % p_result[2].strip()
 
 
 def textresult_miniPCIe(p_result):
@@ -211,58 +212,58 @@ def textresult_miniPCIe(p_result):
 
 
 TESTLIST = (
-{
-    "desc": u"test WAN portu",
-    "instructions": u"Zapojte testovací ethernet kabel do portu WAN.",    
-    "testfunc": test_WAN,
-    "interpretfailure": textresult_generic
-},
-{
-    "desc": u"test LAN portu č. 1",
-    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 1.",
-    "testfunc": test_LAN1,
-    "interpretfailure": textresult_generic
-},
-{
-    "desc": u"test LAN portu č. 2",
-    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 2.",
-    "testfunc": test_LAN_ping,
-    "interpretfailure": textresult_generic
-},
-{
-    "desc": u"test LAN portu č. 3",
-    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 3.",
-    "testfunc": test_LAN_ping,
-    "interpretfailure": textresult_generic
-},
-{
-    "desc": u"test LAN portu č. 4",
-    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 4.",
-    "testfunc": test_LAN_ping,
-    "interpretfailure": textresult_generic
-},
-{
-    "desc": u"test LAN portu č. 5",
-    "instructions": u"Zapojte testovací ethernet kabel do portu LAN 5.",
-    "testfunc": test_LAN_ping,
-    "interpretfailure": textresult_generic
-},
-{
-    "desc": u"test USB",
-    "instructions": u"Zkontrolujte připojení USB klíčů.",
-    "testfunc": test_USB,
-    "interpretfailure": textresult_USB
-},
-{
-    "desc": u"test mini PCI express slotů",
-    "instructions": u"Zkontrolujte připojení mini PCIe karet.",
-    "testfunc": test_miniPCIe,
-    "interpretfailure": textresult_miniPCIe
-},
-{
-    "desc": u"test GPIO",
-    "instructions": u"Zkontrolujte připojení GPIO přípravku.",
-    "testfunc": test_GPIO,
-    "interpretfailure": textresult_generic
-},
+    {
+        "desc": u"test WAN portu",
+        "instructions": u"Zapojte testovací ethernet kabel do portu WAN.",
+        "testfunc": test_WAN,
+        "interpretfailure": textresult_generic
+    },
+    {
+        "desc": u"test LAN portu č. 1",
+        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 1.",
+        "testfunc": test_LAN1,
+        "interpretfailure": textresult_generic
+    },
+    {
+        "desc": u"test LAN portu č. 2",
+        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 2.",
+        "testfunc": test_LAN_ping,
+        "interpretfailure": textresult_generic
+    },
+    {
+        "desc": u"test LAN portu č. 3",
+        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 3.",
+        "testfunc": test_LAN_ping,
+        "interpretfailure": textresult_generic
+    },
+    {
+        "desc": u"test LAN portu č. 4",
+        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 4.",
+        "testfunc": test_LAN_ping,
+        "interpretfailure": textresult_generic
+    },
+    {
+        "desc": u"test LAN portu č. 5",
+        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 5.",
+        "testfunc": test_LAN_ping,
+        "interpretfailure": textresult_generic
+    },
+    {
+        "desc": u"test USB",
+        "instructions": u"Zkontrolujte připojení USB klíčů.",
+        "testfunc": test_USB,
+        "interpretfailure": textresult_USB
+    },
+    {
+        "desc": u"test mini PCI express slotů",
+        "instructions": u"Zkontrolujte připojení mini PCIe karet.",
+        "testfunc": test_miniPCIe,
+        "interpretfailure": textresult_miniPCIe
+    },
+    {
+        "desc": u"test GPIO",
+        "instructions": u"Zkontrolujte připojení GPIO přípravku.",
+        "testfunc": test_GPIO,
+        "interpretfailure": textresult_generic
+    },
 )
