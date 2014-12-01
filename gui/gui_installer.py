@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Nov 26 15:12:23 2014
+# Created: Mon Dec  1 14:35:36 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -533,16 +533,7 @@ class Ui_Installer(object):
     def retranslateUi(self, Installer):
         Installer.setWindowTitle(_translate("Installer", "Instalátor", None))
         self.label_2.setText(_translate("Installer", "<html><head/><body><p><span style=\" font-size:xx-large; font-weight:600;\">Začínáme</span></p></body></html>", None))
-        self.label_8.setText(_translate("Installer", "<ul>\n"
-"<li style=\"margin-bottom: 10px;\">Zkontrolujte pracoviště pro programování a testování routeru TURRIS podle přiložené dokumentace.\n"
-"</li>\n"
-"<li style=\"margin-bottom: 10px;\">Zejména ověřte všechny datové kabely 1 až 7, napájecí kabely , funkčnost TURRIS PROGRAMMERu\n"
-"</li>\n"
-"<li style=\"margin-bottom: 10px;\">Vložte paměťový modul DDR3 SODIMM do slotu</li>\n"
-"<li style=\"margin-bottom: 10px;\">Nastavte DIP SWITCHe SW1 a SW2 dle návodu</li>\n"
-"<li style=\"margin-bottom: 10px;\">Vložte baterii do patice BT1</li>\n"
-"<li style=\"margin-bottom: 10px;\">Přilepte chladiče na procesor a LAN switch</li>\n"
-"</ul>", None))
+        self.label_8.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zkontrolujte pracoviště pro programování a testování routeru TURRIS podle přiložené dokumentace. </li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zejména ověřte všechny datové kabely 1 až 7, napájecí kabely , funkčnost TURRIS PROGRAMMERu </li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Vložte paměťový modul DDR3 SODIMM do slotu</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nastavte DIP SWITCHe SW1 a SW2 pro flashování podle návodu</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Připojte SD kartu přes piny k routeru</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Vložte baterii do patice BT1</li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Přilepte chladiče na procesor a LAN switch</li></ul></body></html>", None))
         self.startToScan.setText(_translate("Installer", "Pokračovat", None))
         self.label_3.setText(_translate("Installer", "<h1>Scan</h1>", None))
         self.label_5.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:12px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nalepte na konektor CN3 malý štítek a odstřihněte z kotouče velké štítky, které přiložte k programované desce. </li><li style=\" margin-top:0px; margin-bottom:12px; margin-left:0px; \n"
@@ -556,8 +547,19 @@ class Ui_Installer(object):
         self.label_6.setText(_translate("Installer", "<h1>CPLD Programování</h1>", None))
         self.label_7.setText(_translate("Installer", "V tomto kroku probíhá programování CPLD obvodu pomocí kabelu 2.", None))
         self.label_9.setText(_translate("Installer", "<h1>FLASH Programování</h1>", None))
-        self.label_10.setText(_translate("Installer", "<html><head/><body><p>V tomto kroku probíhá programování NOR Flash paměti procesoru pomocí SD karty.<br/></p><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Vypnětě router, tak že jej odpojíte z napájení. </li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Připojte SD kartu přes piny k routeru.</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Odpojte kabely 1, 2 a 3.</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nastavte DIP SWITCHe SW1 a SW2 pro bootování z SD karty.</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zapojte router opět do napájení.</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nyní se flashuje NOR pamět, počkejte cca 4 minuty.</li></ul></body></html>", None))
-        self.flashingTimeoutButton.setText(_translate("Installer", "Čekám už déle než 4 minuty", None))
+        self.label_10.setText(_translate("Installer", "<html><head/><body><p>V tomto kroku probíhá programování NOR Flash paměti procesoru pomocí SD karty.<br/></p>\n"
+"<ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\">\n"
+"<li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Chvíli počkejte, pokud se delší dobu nic neděje (posuvník se nezačne posouvat) zkuste:</li>\n"
+"<ul type=\"circle\" style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 2;\">\n"
+"<li style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Odpojit kabely 1, 2 a 3</li>\n"
+"<li style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zkontrolovat připojení SD karty</li>\n"
+"<li style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Zkontrolovat, jestli je DIP SWITCh nastaven pro bootovaní z SD karty</li>\n"
+"<li style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Krátce stisknout tlačítko reset.</li>\n"
+"</ul>\n"
+"<br />\n"
+"<li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nyní se flashuje NOR pamět, počkejte cca 3 minuty.</li>\n"
+"</ul></body></html>", None))
+        self.flashingTimeoutButton.setText(_translate("Installer", "Čekám už déle než 3 minuty", None))
         self.label_11.setText(_translate("Installer", "<html><head/><body><p><span style=\" font-size:xx-large; font-weight:600;\">Úklid po naflashování</span></p></body></html>", None))
         self.label_12.setText(_translate("Installer", "<html><head/><body><p>Naflashování NOR paměti proběhlo úspěšně. Nyní je nutné vrátit DIP SWITCH do původního stavu a provést factory reset.<br/></p><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nastavte DIP SWITCHe SW1 a SW2 pro bootování z NOR paměti</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Podržte červené tlačítko reset aspoň 7 vteřin (LED dioda bude blikat a po uplynutí 7 vteřin začne svítit)</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nyní probíhá factory reset, počkejte cca 3 minuty</li></ul></body></html>", None))
         self.factoryResetTimeoutButton.setText(_translate("Installer", "Už čekám déle než 3 minuty", None))
