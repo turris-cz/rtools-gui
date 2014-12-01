@@ -968,6 +968,8 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
                                       + u"\n" + TESTLIST[testNum]['instructions'])
 
         self.stackedWidget.setCurrentIndex(nextPage)
+        if not TESTLIST[testNum]['interactive'] and testNum != -1:
+            self.prepTestToRunTest.click()
 
     @QtCore.pyqtSlot()
     def startPreparedTest(self):

@@ -216,36 +216,42 @@ TESTLIST = (
         "desc": u"test WAN portu",
         "instructions": u"Zapojte testovací ethernet kabel do portu WAN.",
         "testfunc": test_WAN,
-        "interpretfailure": textresult_generic
+        "interpretfailure": textresult_generic,
+        "interactive": True,
     },
     {
         "desc": u"test LAN portu č. 1",
         "instructions": u"Zapojte testovací ethernet kabel do portu LAN 1.",
         "testfunc": test_LAN1,
-        "interpretfailure": textresult_generic
+        "interpretfailure": textresult_generic,
+        "interactive": True,
     },
     {
         "desc": u"test LAN portu č. 2",
         "instructions": u"Zapojte testovací ethernet kabel do portu LAN 2.",
         "testfunc": test_LAN_ping,
-        "interpretfailure": textresult_generic
+        "interpretfailure": textresult_generic,
+        "interactive": True,
     },
     {
         "desc": u"test USB",
         "instructions": u"Zkontrolujte připojení USB klíčů.",
         "testfunc": test_USB,
-        "interpretfailure": textresult_USB
+        "interpretfailure": textresult_USB,
+        "interactive": False,
     },
     {
         "desc": u"test mini PCI express slotů",
         "instructions": u"Zkontrolujte připojení mini PCIe karet.",
         "testfunc": test_miniPCIe,
-        "interpretfailure": textresult_miniPCIe
+        "interpretfailure": textresult_miniPCIe,
+        "interactive": False,
     },
     {
         "desc": u"test GPIO",
         "instructions": u"Zkontrolujte připojení GPIO přípravku.",
         "testfunc": test_GPIO,
-        "interpretfailure": textresult_generic
+        "interpretfailure": textresult_generic,
+        "interactive": False,
     },
 )
