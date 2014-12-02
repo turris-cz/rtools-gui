@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Mon Dec  1 14:35:36 2014
+# Created: Tue Dec  2 15:53:51 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -497,6 +497,9 @@ class Ui_Installer(object):
         self.verticalLayout_18.addWidget(self.cpldDeleteStack)
         self.stackedWidget.addWidget(self.cpldErase)
         self.verticalLayout.addWidget(self.stackedWidget)
+        self.testLogText = QtGui.QTextBrowser(self.centralwidget)
+        self.testLogText.setObjectName(_fromUtf8("testLogText"))
+        self.verticalLayout.addWidget(self.testLogText)
         Installer.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(Installer)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 600, 19))

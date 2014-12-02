@@ -194,7 +194,7 @@ def textresult_USB(p_result):
     if p_result[0] == -1:
         return textresult_generic(p_result)
     else:
-        return u"Detekovali jsme jenom %s USB zařízení. Očekávali jsme 2." \
+        return u"Detekovali jsme jenom %s USB zařízení. Očekávali jsme 3." \
             % p_result[2].strip()
 
 

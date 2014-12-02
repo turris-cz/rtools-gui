@@ -95,7 +95,7 @@ class FlashingWorker(QtCore.QObject):
     longWaitMsg = QtCore.pyqtSignal(int)
     updateFlashProgressBar = QtCore.pyqtSignal(int, int, int)
     updateResetProgressBar = QtCore.pyqtSignal(int, int, int)
-
+    appendTestLogSig = QtCore.pyqtSignal('QString')
 
     def __init__(self):
         super(FlashingWorker, self).__init__()
@@ -526,6 +526,8 @@ class FlashingWorker(QtCore.QObject):
         # run the test
         errMsg = ""
         testResult = ""
+        self.appendTestLogSig.emit("#### <b>%s</b> ####"
+                                   % TESTLIST[self.router.currentTest]['desc'])
         try:
             p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
         except Exception:
@@ -533,7 +535,7 @@ class FlashingWorker(QtCore.QObject):
             errMsg = u"Vyskytla se chyba při testování, sériová konzole " \
                      u"vrátila výsledek, který nedokážu zpracovat."
             testResult = TESTLIST[self.router.currentTest]['desc'] + \
-                u" skončil s chybou:<br>Chyba konzole."
+                u" skončil s chybou:<br><pre>Chyba konzole.</pre>"
             if self.router.testSecondChance:
                 self.router.testSecondChance = False
                 nextTest = self.router.currentTest
@@ -550,11 +552,18 @@ class FlashingWorker(QtCore.QObject):
         else:
             if p_return[0] == 0:
                 self.router.testResults[self.router.currentTest] = self.router.TEST_OK
-                testResult = TESTLIST[self.router.currentTest]['desc'] + u" proběhl úspěšně"
+                success_msg = u" proběhl úspěšně"
+                testResult = TESTLIST[self.router.currentTest]['desc'] + success_msg
+                self.appendTestLogSig.emit("%s" % success_msg)
             else:
-                testResult = u"%s skončil s chybou:<div style=\"font-size: 11px;\">%s</div>" % (
-                    TESTLIST[self.router.currentTest]['desc'].capitalize(),
+                error_msg = u"skončil s chybou:<pre style=\"font-size: 11px;\">%s</pre>" % (
                     TESTLIST[self.router.currentTest]['interpretfailure'](p_return)
+                )
+                self.appendTestLogSig.emit("%s" % error_msg)
+
+                testResult = u"%s %s" % (
+                    TESTLIST[self.router.currentTest]['desc'].capitalize(),
+                    error_msg,
                 )
                 self.router.testResults[self.router.currentTest] = self.router.TEST_FAIL
 
@@ -717,11 +726,15 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.flashWorker.longWaitMsg.connect(self.informLongWait)
         self.flashWorker.updateFlashProgressBar.connect(self.updateFlashProgressBar)
         self.flashWorker.updateResetProgressBar.connect(self.updateResetProgressBar)
+        self.flashWorker.appendTestLogSig.connect(self.appendTestLog)
         self.cpldStartEraseSig.connect(self.flashWorker.stepCpldEraser)
         self.factoryResetSig.connect(self.flashWorker.doFactoryReset)
 
         self.flashWorker.moveToThread(self.flashThread)
         self.flashThread.start()
+
+        # Init view
+        self.prepareView()
 
         # create a database connection, but do not open it, until necessary
         self.db = QtSql.QSqlDatabase.addDatabase("QPSQL")
@@ -739,6 +752,21 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         except (IOError, OSError):
             logger.critical("[MAIN] could not create directory "
                             "for saving session.log (%s)" % nanlogsdir)
+
+    def prepareView(self, display_test_log=False):
+        # hide / show the log box
+        if display_test_log:
+            self.testLogText.show()
+        else:
+            self.testLogText.hide()
+            self.testLogText.clear()
+
+    @QtCore.pyqtSlot('QString')
+    def appendTestLog(self, string):
+        self.testLogText.append(string)
+        vbar = self.testLogText.verticalScrollBar()
+        vbar.setValue(vbar.maximum())
+        self.testLogText.update()
 
     @QtCore.pyqtSlot(int, int, int)
     def updateFlashProgressBar(self, min, max, value):
@@ -760,6 +788,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.lineEdit.setFocus()
         self.scanToProgramming.setEnabled(True)
         self.stackedWidget.setCurrentIndex(self.STEPS['SCAN'])
+        self.prepareView()
 
     @QtCore.pyqtSlot()
     def toNextRouter(self):
@@ -790,8 +819,10 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.newRouterAddSig.emit(barCode, False)
 
     @QtCore.pyqtSlot(tuple)
-    def moveToNext(self, flash_result = None):
+    def moveToNext(self, flash_result=None):
         """slot for signals from flashWorker in flashThread"""
+
+        self.prepareView()
 
         i = self.stackedWidget.currentIndex()
 
@@ -943,6 +974,9 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     def toNextTest(self, testNum=0, questionContinue=False, errorText="", testResult=""):
         """current test finished, show given test instructions or "theEnd"
         page if testNum = -1"""
+
+        self.prepareView(display_test_log=True)
+
         if questionContinue:
             if QtGui.QMessageBox.question(
                 self, u"Chyba", errorText,
@@ -961,8 +995,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         else:
             nextPage = self.STEPS['TESTPREPARE']
             if testResult:
-                testResult = u"Výsledek předchozího testu:<br>%s" \
-                    % testResult.replace("\n", "<br>\n")
+                testResult = u"Výsledek předchozího testu:<br>%s" % testResult
             self.testResultLabel.setText(testResult)
             self.nextTestDesc.setText(u"Následující test je %s." % TESTLIST[testNum]['desc']
                                       + u"\n" + TESTLIST[testNum]['instructions'])
@@ -976,23 +1009,12 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.runTestSig.emit()
         self.runningTestDesc.setText(u"Probíhající test je " + self.nextTestDesc.text()[20:].split("\n", 1)[0])
         self.stackedWidget.setCurrentIndex(self.STEPS['TESTEXEC'])
-
-    @QtCore.pyqtSlot()
-    def routerReset(self):
-        self.flashingStage = self.STEPS['FLASH']
-        self.flashStepFlashingSig.emit()
-        self.stackedWidget.setCurrentIndex(self.flashingStage)
-
-    @QtCore.pyqtSlot()
-    def simpleNextPage(self):
-        i = self.stackedWidget.currentIndex()
-        i += 1
-        self.flashingStage = i
-        self.stackedWidget.setCurrentIndex(i)
+        self.prepareView(display_test_log=True)
 
     @QtCore.pyqtSlot()
     def showAccessories(self):
         self.stackedWidget.setCurrentIndex(self.STEPS['ACCESSORIES'])
+        self.prepareView()
 
     @QtCore.pyqtSlot()
     def showOnlyTests(self):
@@ -1000,16 +1022,19 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.barcodeOnlyTests.clear()
         self.stackedWidget.setCurrentIndex(self.STEPS['ACCTESTS'])
         self.barcodeOnlyTests.setFocus()
+        self.prepareView()
 
     @QtCore.pyqtSlot()
     def showCpldEraser(self):
         self.cpldDeleteStack.setCurrentIndex(0)
         self.stackedWidget.setCurrentIndex(self.STEPS['ACCCPLDERASE'])
+        self.prepareView()
 
     @QtCore.pyqtSlot()
     def eraseCpld(self):
         self.cpldDeleteStack.setCurrentIndex(1)
         self.cpldStartEraseSig.emit()
+        self.prepareView()
 
     @QtCore.pyqtSlot()
     def chckRouterAndTest(self):
@@ -1032,6 +1057,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         # check if this router is in db and set router id and attempt accordingly
         self.toOnlyTests.setEnabled(False)
         self.checkRouterDbExistsSig.emit(barCode)
+        self.prepareView()
 
     @QtCore.pyqtSlot()
     def interruptWait(self):

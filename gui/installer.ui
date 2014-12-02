@@ -933,6 +933,9 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
       </widget>
      </widget>
     </item>
+    <item>
+     <widget class="QTextBrowser" name="testLogText"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
