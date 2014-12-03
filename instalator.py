@@ -691,6 +691,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         # buttons event listeners
         self.startToScan.clicked.connect(self.simpleMoveToScan)
         self.scanToProgramming.clicked.connect(self.launchProgramming)
+        self.lineEdit.returnPressed.connect(self.launchProgramming)
         self.flashingTimeoutButton.clicked.connect(self.interruptWait)
         self.factoryResetTimeoutButton.clicked.connect(self.interruptWait)
         self.prepareToFirstTest.clicked.connect(self.toNextTest)
@@ -701,6 +702,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.toAccessoriesTests.clicked.connect(self.showOnlyTests)
         self.toAccessoriesCPLDErase.clicked.connect(self.showCpldEraser)
         self.toOnlyTests.clicked.connect(self.chckRouterAndTest)
+        self.barcodeOnlyTests.returnPressed.connect(self.chckRouterAndTest)
         self.startEraseCpld.clicked.connect(self.eraseCpld)
 
         # action trigger slots
