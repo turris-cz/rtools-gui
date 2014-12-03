@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Dec  3 11:20:36 2014
+# Created: Wed Dec  3 16:27:47 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -564,7 +564,7 @@ class Ui_Installer(object):
 "</ul></body></html>", None))
         self.flashingTimeoutButton.setText(_translate("Installer", "Čekám už déle než 3 minuty", None))
         self.label_11.setText(_translate("Installer", "<html><head/><body><p><span style=\" font-size:xx-large; font-weight:600;\">Reset programovaného zařízení</span></p></body></html>", None))
-        self.label_12.setText(_translate("Installer", "<html><head/><body><p>Naflashování NOR paměti proběhlo úspěšně. Nyní je nutné nastavit DIP SWITCH pro bootování z NOR paměti a provést factory reset, čímž se přeflashuje NAND pamět.<br/></p><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nastavte DIP SWITCHe SW1 a SW2 pro bootování z NOR paměti</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Podržte červené tlačítko reset aspoň 7 vteřin (LED dioda bude blikat a po uplynutí 7 vteřin začne svítit)</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nyní probíhá factory reset, počkejte cca 3 minuty</li></ul></body></html>", None))
+        self.label_12.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nastavte DIP SWITCHe SW1 a SW2 pro bootování z NOR paměti</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Podržte červené tlačítko reset aspoň 7 vteřin (LED dioda bude blikat a po uplynutí 7 vteřin začne svítit)</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nyní probíhá factory reset, počkejte cca 3 minuty</li></ul></body></html>", None))
         self.factoryResetTimeoutButton.setText(_translate("Installer", "Už čekám déle než 3 minuty", None))
         self.label_26.setText(_translate("Installer", "<h1>Naprogramováno</h1>", None))
         self.label_27.setText(_translate("Installer", "Operace programování desky routeru TURRIS skončila úspěšně. V následujících krocích bude router otestován.", None))
