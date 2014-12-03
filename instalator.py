@@ -43,7 +43,7 @@ fh.setFormatter(formatter)
 logger.root.addHandler(fh)
 
 
-USB_RECONNECT_MESSAGE = u"Nezdařila se komunikace se systémem na routru. Zkuste " \
+USB_RECONNECT_MESSAGE = u"Nezdařila se komunikace se systémem na routeru. Zkuste " \
                         u"odpojit a zapojit USB kabel č. 5. Pokud to dále nechcete " \
                         u"zkoušet, zvolte 'Ne'.\nZkusit znovu?"
 
@@ -72,7 +72,7 @@ def report_tests_results(router):
     failedTests = [t for t in router.testResults.iterkeys()
                    if router.testResults[t] != router.TEST_OK]
     testsReport = u"<h3>Testy, které selhaly</h3>" if failedTests \
-                  else u"<h3>Všechny testy proběhli správně</h3>"
+                  else u"<h3>Všechny testy proběhly správně</h3>"
     for t in failedTests:
         testsReport += TESTLIST[t]['desc'] + u": "
         if router.testResults[t] == router.TEST_FAIL:
@@ -131,7 +131,7 @@ class FlashingWorker(QtCore.QObject):
             err_msg = ""
         except DuplicateKey:
             return_code = -1
-            err_msg = u"O tomhle routeru je v databázi záznam, že už byl naflashován, " \
+            err_msg = u"O tomhle routeru je již v databázi záznam, že byl naflashován, " \
                       u"přejete si to zkusit znovu?"
         except DoesNotExist:
             logger.critical("[FLASHWORKER] adding new flash attempt to db failed, "
@@ -139,7 +139,7 @@ class FlashingWorker(QtCore.QObject):
                             "happen. It is a bug in this application."
                             % routerId)
             return_code = -2
-            err_msg = u"Vyskytla se chyba, která by se nikdy neměla. Prosím, restartujte program."
+            err_msg = u"Vyskytla se chyba, která by nikdy neměla nastat. Prosím, restartujte program."
         except DbError, e:
             return_code = -2
             err_msg = e.message
@@ -216,7 +216,7 @@ class FlashingWorker(QtCore.QObject):
             self.router.error = p_return[1]
             return_code = 1
             err_msg = u"Programování zdroje selhalo. Prosím ověřte zapojení kabelu 3 " \
-                      u"(Zapojen z TURRIS PROGRAMMERu konektor P2 na programovaný TURRIS konektor J3). " \
+                      u"(Zapojen z Programátora zdroje na programovaný TURRIS konektor J17). " \
                       u" Zkontrolujte připojení napájecího adaptéru 7,5V."
         else:
             logger.warning("[FLASHWORKER] POWER step failed definitely (routerId=%s)" % self.router.id)
@@ -492,7 +492,7 @@ class FlashingWorker(QtCore.QObject):
                     # no output from serial console, deconnect and reconnect the usb cable
                     return_status = (USB_RECONNECT_MESSAGE, True)
                 else:
-                    return_status = (u"Nezdařila se komunikace se systémem na routru.", False)
+                    return_status = (u"Nezdařila se komunikace se systémem na routeru.", False)
                 self.serialConsole.close()
                 self.serialConsole = None
                 return return_status
@@ -502,8 +502,8 @@ class FlashingWorker(QtCore.QObject):
                 self.serialConsole.close()
                 self.serialConsole = None
                 # self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
-                return (u"Při komunikaci s routrem přes sériovou "
-                        u"konzoli došlo k chybě.", False)
+                return (u"Při komunikaci s routrem přes sériovou konzoli došlo k chybě.",
+                        False)
 
     @QtCore.pyqtSlot()
     def executeTest(self):
