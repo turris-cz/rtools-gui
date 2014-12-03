@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Dec  3 16:27:47 2014
+# Created: Wed Dec  3 16:35:26 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,6 +27,9 @@ class Ui_Installer(object):
     def setupUi(self, Installer):
         Installer.setObjectName(_fromUtf8("Installer"))
         Installer.resize(600, 500)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/favicon.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Installer.setWindowIcon(icon)
         self.centralwidget = QtGui.QWidget(Installer)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
@@ -600,3 +603,4 @@ class Ui_Installer(object):
         self.actionSmazaniCPLD.setText(_translate("Installer", "Smazání CPLD obvodu", None))
         self.actionUvodniObrazovka.setText(_translate("Installer", "Programování routeru", None))
 
+import installer_rc

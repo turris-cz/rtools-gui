@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>Instalátor</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="installer.qrc">
+    <normaloff>:/favicon.png</normaloff>:/favicon.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -1000,6 +1004,8 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="installer.qrc"/>
+ </resources>
  <connections/>
 </ui>
