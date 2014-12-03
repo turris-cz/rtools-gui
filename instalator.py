@@ -93,8 +93,10 @@ class FlashingWorker(QtCore.QObject):
     flashFinished = QtCore.pyqtSignal(tuple)
     testFinished = QtCore.pyqtSignal(int, bool, 'QString', 'QString')
     longWaitMsg = QtCore.pyqtSignal(int)
-    updateFlashProgressBar = QtCore.pyqtSignal(int, int, int)
-    updateResetProgressBar = QtCore.pyqtSignal(int, int, int)
+    updateFlashProgressSig = QtCore.pyqtSignal(int, int, int)
+    updateResetProgressSig = QtCore.pyqtSignal(int, int, int)
+    updateFlashSpentSig = QtCore.pyqtSignal('QString')
+    updateResetSpentSig = QtCore.pyqtSignal('QString')
     appendTestLogSig = QtCore.pyqtSignal('QString')
 
     def __init__(self):
@@ -344,7 +346,8 @@ class FlashingWorker(QtCore.QObject):
                      % self.router.id)
 
         # clean the progress bar
-        self.updateResetProgressBar.emit(0, 0, 0)
+        self.updateResetProgressSig.emit(0, 0, 0)
+        self.updateResetSpentSig.emit("0:00")
 
         # create and prepare a serial console connection
         if self.serialConsole is None:
@@ -386,7 +389,8 @@ class FlashingWorker(QtCore.QObject):
         logger.debug("[FLASHWORKER] starting to FLASH (routerId=%s)" % self.router.id)
 
         # clean the progress bar
-        self.updateFlashProgressBar.emit(0, 0, 0)
+        self.updateFlashProgressSig.emit(0, 0, 0)
+        self.updateFlashSpentSig.emit("0:00")
 
         # create and prepare a serial console connection
         if self.serialConsole is None:
@@ -726,8 +730,10 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.flashWorker.flashFinished.connect(self.moveToNext)
         self.flashWorker.testFinished.connect(self.toNextTest)
         self.flashWorker.longWaitMsg.connect(self.informLongWait)
-        self.flashWorker.updateFlashProgressBar.connect(self.updateFlashProgressBar)
-        self.flashWorker.updateResetProgressBar.connect(self.updateResetProgressBar)
+        self.flashWorker.updateFlashProgressSig.connect(self.updateFlashProgressBar)
+        self.flashWorker.updateResetProgressSig.connect(self.updateResetProgressBar)
+        self.flashWorker.updateFlashSpentSig.connect(self.updateFlashSpentLabel)
+        self.flashWorker.updateResetSpentSig.connect(self.updateResetSpentLabel)
         self.flashWorker.appendTestLogSig.connect(self.appendTestLog)
         self.cpldStartEraseSig.connect(self.flashWorker.stepCpldEraser)
         self.factoryResetSig.connect(self.flashWorker.doFactoryReset)
@@ -781,6 +787,16 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.resetProgressBar.setRange(min, max)
         self.resetProgressBar.setValue(value)
         self.resetProgressBar.update()
+
+    @QtCore.pyqtSlot('QString')
+    def updateFlashSpentLabel(self, value):
+        self.flashSpentLabel.setText(value)
+        self.flashSpentLabel.update()
+
+    @QtCore.pyqtSlot('QString')
+    def updateResetSpentLabel(self, value):
+        self.resetSpentLabel.setText(value)
+        self.resetSpentLabel.update()
 
     @QtCore.pyqtSlot()
     def simpleMoveToScan(self):

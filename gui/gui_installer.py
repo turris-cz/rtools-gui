@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Dec  3 16:35:26 2014
+# Created: Wed Dec  3 17:53:16 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -185,12 +185,18 @@ class Ui_Installer(object):
         self.label_10.setWordWrap(True)
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.verticalLayout_6.addWidget(self.label_10)
+        self.horizontalLayout_14 = QtGui.QHBoxLayout()
+        self.horizontalLayout_14.setObjectName(_fromUtf8("horizontalLayout_14"))
         self.flashProgressBar = QtGui.QProgressBar(self.stepFlashing)
         self.flashProgressBar.setMinimum(0)
         self.flashProgressBar.setMaximum(0)
         self.flashProgressBar.setProperty("value", 0)
         self.flashProgressBar.setObjectName(_fromUtf8("flashProgressBar"))
-        self.verticalLayout_6.addWidget(self.flashProgressBar)
+        self.horizontalLayout_14.addWidget(self.flashProgressBar)
+        self.flashSpentLabel = QtGui.QLabel(self.stepFlashing)
+        self.flashSpentLabel.setObjectName(_fromUtf8("flashSpentLabel"))
+        self.horizontalLayout_14.addWidget(self.flashSpentLabel)
+        self.verticalLayout_6.addLayout(self.horizontalLayout_14)
         self.horizontalLayout_9 = QtGui.QHBoxLayout()
         self.horizontalLayout_9.setObjectName(_fromUtf8("horizontalLayout_9"))
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -224,6 +230,9 @@ class Ui_Installer(object):
         self.resetProgressBar.setProperty("value", -1)
         self.resetProgressBar.setObjectName(_fromUtf8("resetProgressBar"))
         self.horizontalLayout_10.addWidget(self.resetProgressBar)
+        self.resetSpentLabel = QtGui.QLabel(self.stepFactoryReset)
+        self.resetSpentLabel.setObjectName(_fromUtf8("resetSpentLabel"))
+        self.horizontalLayout_10.addWidget(self.resetSpentLabel)
         self.verticalLayout_7.addLayout(self.horizontalLayout_10)
         self.horizontalLayout_7 = QtGui.QHBoxLayout()
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
@@ -565,9 +574,11 @@ class Ui_Installer(object):
 "<br />\n"
 "<li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nyní se flashuje NOR pamět, počkejte cca 3 minuty.</li>\n"
 "</ul></body></html>", None))
+        self.flashSpentLabel.setText(_translate("Installer", "0:00", None))
         self.flashingTimeoutButton.setText(_translate("Installer", "Čekám už déle než 3 minuty", None))
         self.label_11.setText(_translate("Installer", "<html><head/><body><p><span style=\" font-size:xx-large; font-weight:600;\">Reset programovaného zařízení</span></p></body></html>", None))
         self.label_12.setText(_translate("Installer", "<html><head/><body><ul style=\"margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 1;\"><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nastavte DIP SWITCHe SW1 a SW2 pro bootování z NOR paměti</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Podržte červené tlačítko reset aspoň 7 vteřin (LED dioda bude blikat a po uplynutí 7 vteřin začne svítit)</li><li style=\" margin-top:0px; margin-bottom:10px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Nyní probíhá factory reset, počkejte cca 3 minuty</li></ul></body></html>", None))
+        self.resetSpentLabel.setText(_translate("Installer", "0:00", None))
         self.factoryResetTimeoutButton.setText(_translate("Installer", "Už čekám déle než 3 minuty", None))
         self.label_26.setText(_translate("Installer", "<h1>Naprogramováno</h1>", None))
         self.label_27.setText(_translate("Installer", "Operace programování desky routeru TURRIS skončila úspěšně. V následujících krocích bude router otestován.", None))

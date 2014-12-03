@@ -74,11 +74,19 @@ class SerialConsole(object):
         self._readThread = threading.Thread(target=self._readWorker)
         self._readThread.start()
 
-    def update_progress_bar(self, signal, value, max):
-        if signal:
+    def update_progress(self, progress_bar_signal, value, max):
+        if progress_bar_signal:
             percent = value * 100.0 / max
             percent = 99 if percent >= 100 else percent
-            signal.emit(0, 100, int(percent))
+            progress_bar_signal.emit(0, 100, int(percent))
+
+    def update_time(self, time_label_signal, counter):
+
+        if time_label_signal:
+            seconds = counter * WAITTIME
+            minutes = seconds / 60
+            seconds %= 60
+            time_label_signal.emit("%d:%02d" % (minutes, seconds))
 
     def to_system(self):
         """Read the output (e.g. boot messages) from
@@ -154,6 +162,7 @@ class SerialConsole(object):
 
         wCounter = int(timeout / WAITTIME)
         found = False
+        spent_counter = 0
 
         while (timeout == -1 or wCounter >= 0) and not found:
 
@@ -167,13 +176,14 @@ class SerialConsole(object):
                 raise SCError("waiting interrupted")
 
             time.sleep(WAITTIME)
-
             index = self.inbuf.rfind('Welcome in rescue mode.')
             if index > -1:
-                self.update_progress_bar(worker.updateResetProgressBar,
-                                         self.inbuf[index:].count('\n'),
-                                         SerialConsole.FACTORY_RESET_NEWLINE_COUNT)
+                self.update_progress(worker.updateResetProgressSig,
+                                     self.inbuf[index:].count('\n'),
+                                     SerialConsole.FACTORY_RESET_NEWLINE_COUNT)
             wCounter -= 1
+            spent_counter += 1
+            self.update_time(worker.updateResetSpentSig, spent_counter)
 
         if not found:
             raise SCError("Waiting for uboot messages timeouted.")
@@ -197,6 +207,7 @@ class SerialConsole(object):
 
         wCounter = int(timeout / WAITTIME)
         found = False
+        spent_counter = 0
 
         while (timeout == -1 or wCounter >= 0) and not found:
 
@@ -212,10 +223,12 @@ class SerialConsole(object):
             time.sleep(WAITTIME)
             index = self.inbuf.rfind('Erase Flash Bank')
             if index > -1:
-                self.update_progress_bar(worker.updateFlashProgressBar,
-                                         self.inbuf[index:].count('.'),
-                                         SerialConsole.FLASH_DOT_COUNT)
+                self.update_progress(worker.updateFlashProgressSig,
+                                     self.inbuf[index:].count('.'),
+                                     SerialConsole.FLASH_DOT_COUNT)
             wCounter -= 1
+            spent_counter += 1
+            self.update_time(worker.updateFlashSpentSig, spent_counter)
 
         if not found:
             raise SCError("Waiting for uboot messages timeouted.")
