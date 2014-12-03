@@ -71,7 +71,7 @@ def report_tests_results(router):
 
     failedTests = [t for t in router.testResults.iterkeys()
                    if router.testResults[t] != router.TEST_OK]
-    testsReport = u"<h3>Testy, které selhali</h3>" if failedTests \
+    testsReport = u"<h3>Testy, které selhaly</h3>" if failedTests \
                   else u"<h3>Všechny testy proběhli správně</h3>"
     for t in failedTests:
         testsReport += TESTLIST[t]['desc'] + u": "
