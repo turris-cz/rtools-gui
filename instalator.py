@@ -51,6 +51,7 @@ USB_RECONNECT_MESSAGE = u"Nezdařila se komunikace se systémem na routeru. Zkus
 TEST_PREPARE_TEXT = u"""
 Před spuštěním testů se přesvědčte, že
 <ul>
+    <li>12V napájecí adaptér je připojen</li>
     <li>Sériový kabel (č.5) je připojen konektoru J1.</li>
     <li>Obě wifi karty jsou připojeny do slotů CN5 a CN6.</li>
     <li>Všechny USB flashky jsou zapojeny do odpovídajících konektorů (USB1, USB2, USB3)</li>
