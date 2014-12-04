@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Wed Dec  3 17:53:16 2014
+# Created: Thu Dec  4 10:41:27 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -260,6 +260,16 @@ class Ui_Installer(object):
         self.label_27.setWordWrap(True)
         self.label_27.setObjectName(_fromUtf8("label_27"))
         self.verticalLayout_15.addWidget(self.label_27)
+        self.testPrepareDescription1 = QtGui.QLabel(self.beforeTests)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(2)
+        sizePolicy.setVerticalStretch(2)
+        sizePolicy.setHeightForWidth(self.testPrepareDescription1.sizePolicy().hasHeightForWidth())
+        self.testPrepareDescription1.setSizePolicy(sizePolicy)
+        self.testPrepareDescription1.setText(_fromUtf8(""))
+        self.testPrepareDescription1.setTextFormat(QtCore.Qt.RichText)
+        self.testPrepareDescription1.setObjectName(_fromUtf8("testPrepareDescription1"))
+        self.verticalLayout_15.addWidget(self.testPrepareDescription1)
         self.horizontalLayout_11 = QtGui.QHBoxLayout()
         self.horizontalLayout_11.setObjectName(_fromUtf8("horizontalLayout_11"))
         spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -435,6 +445,16 @@ class Ui_Installer(object):
         self.label_29 = QtGui.QLabel(self.onlyTests)
         self.label_29.setObjectName(_fromUtf8("label_29"))
         self.verticalLayout_17.addWidget(self.label_29)
+        self.testPrepareDescription2 = QtGui.QLabel(self.onlyTests)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(2)
+        sizePolicy.setVerticalStretch(2)
+        sizePolicy.setHeightForWidth(self.testPrepareDescription2.sizePolicy().hasHeightForWidth())
+        self.testPrepareDescription2.setSizePolicy(sizePolicy)
+        self.testPrepareDescription2.setText(_fromUtf8(""))
+        self.testPrepareDescription2.setTextFormat(QtCore.Qt.RichText)
+        self.testPrepareDescription2.setObjectName(_fromUtf8("testPrepareDescription2"))
+        self.verticalLayout_17.addWidget(self.testPrepareDescription2)
         self.label_30 = QtGui.QLabel(self.onlyTests)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(1)

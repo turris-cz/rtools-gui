@@ -48,6 +48,19 @@ USB_RECONNECT_MESSAGE = u"Nezdařila se komunikace se systémem na routeru. Zkus
                         u"zkoušet, zvolte 'Ne'.\nZkusit znovu?"
 
 
+TEST_PREPARE_TEXT = u"""
+Před spuštěním testů se přesvědčte, že
+<ul>
+    <li>Sériový kabel (č.5) je připojen konektoru J1.</li>
+    <li>Obě wifi karty jsou připojeny do slotů CN5 a CN6.</li>
+    <li>Všechny USB flashky jsou zapojeny do odpovídajících konektorů (USB1, USB2, USB3)</li>
+    <li>kabel pro testování GPIO (č.4) je připojen do konektoru P3</li>
+    <li>kabel pro testování I2C2, SPI a UART1 (č.7) je připojen do konektoru P1</li>
+    <li>kabel pro testování ethernetů (č.6) je připojen do WAN</li>
+</ul>
+"""
+
+
 def serialNumberValidator(sn):
     # serial number must be integer
     try:
@@ -691,6 +704,10 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.setWindowIcon(icon)
         self.blockClose = False
         self.working_mode = self.FLASHING
+
+        # Init some texts
+        self.testPrepareDescription1.setText(TEST_PREPARE_TEXT)
+        self.testPrepareDescription2.setText(TEST_PREPARE_TEXT)
 
         # buttons event listeners
         self.startToScan.clicked.connect(self.simpleMoveToScan)
