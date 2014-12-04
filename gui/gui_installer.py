@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'installer.ui'
 #
-# Created: Thu Dec  4 10:41:27 2014
+# Created: Thu Dec  4 11:19:23 2014
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -412,6 +412,9 @@ class Ui_Installer(object):
         self.verticalLayout_12.addWidget(self.finalSummary)
         self.horizontalLayout_8 = QtGui.QHBoxLayout()
         self.horizontalLayout_8.setObjectName(_fromUtf8("horizontalLayout_8"))
+        self.retestButton = QtGui.QPushButton(self.theEnd)
+        self.retestButton.setObjectName(_fromUtf8("retestButton"))
+        self.horizontalLayout_8.addWidget(self.retestButton)
         spacerItem8 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_8.addItem(spacerItem8)
         self.endToScan = QtGui.QPushButton(self.theEnd)
@@ -613,6 +616,7 @@ class Ui_Installer(object):
         self.label_20.setText(_translate("Installer", "<h1>Testování</h1>", None))
         self.label_22.setText(_translate("Installer", "<h1>Konec</h1>", None))
         self.finalSummary.setText(_translate("Installer", "<html><head/><body><p><br/></p></body></html>", None))
+        self.retestButton.setText(_translate("Installer", "Znovu otestovat", None))
         self.endToScan.setText(_translate("Installer", "Další router", None))
         self.label_28.setText(_translate("Installer", "<h1>Další funkce</h1>", None))
         self.toAccessoriesTests.setText(_translate("Installer", "Znovu vykonat testy na již naflashovaném routeru", None))

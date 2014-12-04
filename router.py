@@ -60,6 +60,15 @@ class Router(object):
         # we use the default (and only) database, open it now if closed
         self.query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
 
+    def clear_tests(self):
+        self.error = ""
+        self.currentTest = 0
+        self.testResults = {}
+        self.testSerie += 1
+        self.secondChance = {
+            'I2C': True, 'CPLD': True, 'FLASH': True, 'NOR': True, 'POWER': True}
+        self.testSecondChance = True
+
     @classmethod
     def fetchFromDb(cls, routerId, attempt=-1):
         # attempt -1 means the last one

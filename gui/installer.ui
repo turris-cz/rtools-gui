@@ -747,6 +747,13 @@ margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Sejměte čárov
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_8">
           <item>
+           <widget class="QPushButton" name="retestButton">
+            <property name="text">
+             <string>Znovu otestovat</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_7">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>

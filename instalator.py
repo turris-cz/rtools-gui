@@ -48,7 +48,8 @@ USB_RECONNECT_MESSAGE = u"Nezdařila se komunikace se systémem na routeru. Zkus
                         u"zkoušet, zvolte 'Ne'.\nZkusit znovu?"
 
 
-TEST_PREPARE_TEXT = u"""
+TEST_PREPARE_TEXT = \
+    u"""
 Před spuštěním testů se přesvědčte, že
 <ul>
     <li>12V napájecí adaptér je připojen</li>
@@ -726,6 +727,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         self.toOnlyTests.clicked.connect(self.chckRouterAndTest)
         self.barcodeOnlyTests.returnPressed.connect(self.chckRouterAndTest)
         self.startEraseCpld.clicked.connect(self.eraseCpld)
+        self.retestButton.clicked.connect(self.retest)
 
         # action trigger slots
         self.actionKonec.triggered.connect(self.close)
@@ -786,6 +788,11 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
         else:
             self.testLogText.hide()
             self.testLogText.clear()
+
+    @QtCore.pyqtSlot()
+    def retest(self):
+        self.flashWorker.router.clear_tests()
+        self.prepareToFirstTest.click()
 
     @QtCore.pyqtSlot('QString')
     def appendTestLog(self, string):
@@ -1010,6 +1017,9 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
     def toNextTest(self, testNum=0, questionContinue=False, errorText="", testResult=""):
         """current test finished, show given test instructions or "theEnd"
         page if testNum = -1"""
+
+        if testNum == 0:
+            self.testLogText.clear()
 
         self.prepareView(display_test_log=True)
 
