@@ -238,7 +238,7 @@ class FlashingWorker(QtCore.QObject):
             return_code = 1
             err_msg = u"Programování zdroje selhalo. Prosím ověřte zapojení kabelu 3 " \
                       u"(Zapojen z Programátora zdroje na programovaný TURRIS konektor J17). " \
-                      u" Zkontrolujte připojení napájecího adaptéru 7,5V."
+                      u" Zkontrolujte připojení napájecího adaptéru 12V."
         else:
             logger.warning("[FLASHWORKER] POWER step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = p_return[1]
@@ -270,7 +270,7 @@ class FlashingWorker(QtCore.QObject):
             return_code = 1
             err_msg = u"Programování zařízení na I2C sběrnici selhalo. Prosím ověřte zapojení kabelu 1 " \
                       u"(Zapojen z TURRIS PROGRAMMERu konektor P1 na programovaný TURRIS konektor J2). " \
-                      u" Zkontrolujte připojení napájecího adaptéru 7,5V."
+                      u" Zkontrolujte připojení napájecího adaptéru 12V."
         else:
             logger.warning("[FLASHWORKER] I2C step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = p_return[1]
@@ -311,7 +311,7 @@ class FlashingWorker(QtCore.QObject):
             return_code = 1
             err_msg = u"Programování CPLD obvodu selhalo. Prosím ověřte zapojení kabelu 2 " \
                       u"(Zapojen z USB portu PC na programovaný TURRIS konektor J7). " \
-                      u"Zkontrolujte připojení napájecího adaptéru 7,5V."
+                      u"Zkontrolujte připojení napájecího adaptéru 12V."
         else:
             logger.warning("[FLASHWORKER] CPLD step failed definitely (routerId=%s)" % self.router.id)
             self.router.error = log_content
@@ -502,7 +502,7 @@ class FlashingWorker(QtCore.QObject):
                 self.serialConsole = SerialConsole("/dev/" + dev[0])
             except Exception, e:
                 return (u"Nezdařilo se otevřít spojení přes konzoli. Zkontrolujte, "
-                        u"kabel č. 5 a napájení 7,5V.", False)
+                        u"kabel č. 5 a napájecího adaptéru 12V.", False)
             self.serialConsole.state = self.serialConsole.UNDEFINED
 
         if self.serialConsole.state != self.serialConsole.OPENWRT:
@@ -651,7 +651,7 @@ class FlashingWorker(QtCore.QObject):
             return_code = 1
             err_msg = u"Mazání CPLD obvodu selhalo. Prosím ověřte zapojení kabelu 2 " \
                       u"(Zapojen z USB portu PC na programovaný TURRIS konektor J7). " \
-                      u"Zkontrolujte připojení napájecího adaptéru 7,5V."
+                      u"Zkontrolujte připojení napájecího adaptéru 12V."
 
         # close and delete the log file
         os.close(tmpf_fd)
