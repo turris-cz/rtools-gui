@@ -28,3 +28,8 @@ FLASH_LOGS = "nandnorlogs"
 
 LOCAL_TEST_IFACE = "eth42"
 TURRIS_WAN_IFACE = "eth2"
+
+# Error cases
+#STEP_I2C_CMD = "/bin/false"
+#STEP_CPLD_CMD = "/bin/false"
+#OPENOCD_CMD = "/bin/false"
