@@ -50,15 +50,19 @@ USB_RECONNECT_MESSAGE = u"Nezdařila se komunikace se systémem na routeru. Zkus
 
 TEST_PREPARE_TEXT = \
     u"""
-Před spuštěním testů se přesvědčte, že
+Před spuštěním testů je nezbytné udělat následující:
 <ul>
-    <li>12V napájecí adaptér je připojen</li>
-    <li>Sériový kabel (č.5) je připojen konektoru J1.</li>
-    <li>Obě wifi karty jsou připojeny do slotů CN5 a CN6.</li>
-    <li>Všechny USB flashky jsou zapojeny do odpovídajících konektorů (USB1, USB2, USB3)</li>
-    <li>kabel pro testování GPIO (č.4) je připojen do konektoru P3</li>
-    <li>kabel pro testování I2C2, SPI a UART1 (č.7) je připojen do konektoru P1</li>
-    <li>kabel pro testování ethernetů (č.6) je připojen do WAN</li>
+    <li>Odpojit kabely 1, 2, 3</li>
+    <li>Odpojit desku D1 s SD kartou</li>
+    <li>Připojit kabel pro testování GPIO (č.4) je připojen do konektoru P3</li>
+    <li>Připojit sériový kabel (č.5) do konektoru J1.</li>
+    <li>Připojit kabel pro testování ethernetů (č.6) do WAN</li>
+    <li>Připojit kabel pro testování I2C2, SPI a UART1 (č.7) do konektoru P1</li>
+    <li>Připojit všechny USB flashky do odpovídajících konektorů (USB1, USB2, USB3)</li>
+    <li>Připojit druhou wifi katru to slotu CN5</li>
+    <li>Připojit 12V napájecí adaptér</li>
+    <li>Krátce zmáčknout červené tlačítko reset</li>
+    <li>Počat až router naběhne (všechny diody zasvítí modře a pak zeleně)</li>
 </ul>
 """
 
