@@ -186,6 +186,24 @@ gpiotest () {
         return (-1, sc.lastStatus(), cmdOut, "Remote cmd:\n<long gpiotest function definition>")
 
 
+def test_SPI(sc):
+    cmd = "spidev_test -l -D /dev/spidev0.0 | tail -n 1"
+    cmdOut = sc.exec_(cmd)
+    string = cmdOut.strip()
+    status = sc.lastStatus()
+    if status == '0':
+        if string == "F0 0D":
+            return (0, "0", cmdOut, "Remote cmd:\n" + cmd)
+        else:
+            return (1, "1", cmdOut, "Remote cmd:\n" + cmd)
+    else:
+        return (-1, status, cmdOut, "Remote cmd:\n" + cmd)
+
+
+def test_I2C(sc):
+    return runRemoteCmd(sc, "i2cget -f -y 1 0x4c")
+
+
 def textresult_generic(p_result):
     return "%s<br>returned:<br>%s<br>return code: %s" % (p_result[3], p_result[2], p_result[1])
 
@@ -251,6 +269,20 @@ TESTLIST = (
         "desc": u"test GPIO",
         "instructions": u"Zkontrolujte připojení GPIO přípravku.",
         "testfunc": test_GPIO,
+        "interpretfailure": textresult_generic,
+        "interactive": False,
+    },
+    {
+        "desc": u"test SPI",
+        "instructions": u"Zkontrolujte připojení I2C2, SPI, UART přípravku.",
+        "testfunc": test_SPI,
+        "interpretfailure": textresult_generic,
+        "interactive": False,
+    },
+    {
+        "desc": u"test I2C",
+        "instructions": u"Zkontrolujte připojení I2C2, SPI, UART přípravku.",
+        "testfunc": test_I2C,
         "interpretfailure": textresult_generic,
         "interactive": False,
     },
