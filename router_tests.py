@@ -187,12 +187,12 @@ gpiotest () {
 
 
 def test_SPI(sc):
-    cmd = "spidev_test -l -D /dev/spidev0.0 | tail -n 1"
+    cmd = "spidev_test -D /dev/spidev0.0 | tail -n 1"
     cmdOut = sc.exec_(cmd)
     string = cmdOut.strip()
     status = sc.lastStatus()
     if status == '0':
-        if string == "F0 0D":
+        if string == "BA AD":
             return (0, "0", cmdOut, "Remote cmd:\n" + cmd)
         else:
             return (1, "1", cmdOut, "Remote cmd:\n" + cmd)
