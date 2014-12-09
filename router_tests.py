@@ -58,18 +58,13 @@ def test_WAN(sc):
     return runLocalCmd("ping -c 3 192.168.100.1")
 
 
-def test_LAN1(sc):
+def test_LAN(sc):
     cmdResult = runLocalCmd("sudo ifconfig %s 192.168.1.2" % LOCAL_TEST_IFACE)
     if cmdResult[0] != 0:
         return cmdResult
 
-    time.sleep(1)  # wait for the addresses to be set
+    time.sleep(3)  # wait for the addresses to be set
 
-    return test_LAN_ping(sc)
-
-
-def test_LAN_ping(sc):
-    time.sleep(2)  # wait for link
     return runLocalCmd("ping -c 3 192.168.1.1")
 
 
@@ -240,14 +235,14 @@ TESTLIST = (
     {
         "desc": u"test LAN portu č. 1",
         "instructions": u"Zapojte testovací ethernet kabel do portu LAN 1.",
-        "testfunc": test_LAN1,
+        "testfunc": test_LAN,
         "interpretfailure": textresult_generic,
         "interactive": True,
     },
     {
         "desc": u"test LAN portu č. 2",
         "instructions": u"Zapojte testovací ethernet kabel do portu LAN 2.",
-        "testfunc": test_LAN_ping,
+        "testfunc": test_LAN,
         "interpretfailure": textresult_generic,
         "interactive": True,
     },
