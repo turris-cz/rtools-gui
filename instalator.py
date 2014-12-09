@@ -52,6 +52,7 @@ TEST_PREPARE_TEXT = \
     u"""
 Před spuštěním testů je nezbytné udělat následující:
 <ul>
+    <li>Odpojit 12V napájecí adaptér</li>
     <li>Odpojit kabely 1, 2, 3</li>
     <li>Odpojit desku D1 s SD kartou</li>
     <li>Připojit kabel pro testování GPIO (č.4) je připojen do konektoru P3</li>
@@ -61,7 +62,6 @@ Před spuštěním testů je nezbytné udělat následující:
     <li>Připojit všechny USB flashky do odpovídajících konektorů (USB1, USB2, USB3)</li>
     <li>Připojit druhou wifi katru to slotu CN5</li>
     <li>Připojit 12V napájecí adaptér</li>
-    <li>Krátce zmáčknout červené tlačítko reset</li>
     <li>Počat až router naběhne (všechny diody zasvítí modře a pak zeleně)</li>
 </ul>
 """
