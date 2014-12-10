@@ -11,8 +11,8 @@ import os
 
 # settings
 import importlib
-settings = importlib.import_module(
-    os.environ.get('RTOOLS_SETTINGS', 'settings'))
+settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings')
+settings = importlib.import_module(settings_module)
 
 import subprocess
 import sys
@@ -1139,6 +1139,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
 
 def main():
     logger.info("[MAIN] starting the application")
+    logger.info("[MAIN] using '%s' as a settings module" % settings_module)
 
     app = QtGui.QApplication(sys.argv)
     widget = Installer()
