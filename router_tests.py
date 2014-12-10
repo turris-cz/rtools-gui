@@ -42,6 +42,43 @@ def runRemoteCmd(sc, cmdstr):
     return (intCmdStatus, cmdStatus, stdOut, "Remote cmd:\n" + cmdstr)
 
 
+def test_serial_console(sc):
+    characters = ['^', '!', '+', '@']
+    batches = [
+        (500, 4),
+        (100, 4),
+        (20, 4),
+        (1, 4),
+    ]
+
+    # write part
+    ch_index = 0
+    output = ""
+    for batch in batches:
+        size, count = batch
+        for i in range(count):
+            # prepare line
+            line = ""
+            for k in range(size):
+                line += characters[ch_index]
+                ch_index = 0 if len(characters) - 1 <= ch_index else ch_index + 1
+            output += sc.exec_("echo %s\n" % line, timeout=1, wait_interval=0.01)
+
+    ch_needed = reduce(lambda y, x: x[0] * x[1] + y, batches, 0) / len(characters)
+
+    errors = []
+    # read part
+    for ch in characters:
+        ch_count = output.count(ch)
+        if ch_needed > ch_count:
+            errors.append("'%s' count (%d) &lt; %d" % (ch, ch_count, ch_needed))
+
+    if errors:
+        return (-1, "-1", ", ".join(errors), "Remote echo commands")
+    else:
+        return (0, "0", "Serial console seems to be working", "Remote echo commands")
+
+
 def test_WAN(sc):
     time.sleep(2)  # wait for link
 
@@ -225,6 +262,13 @@ def textresult_miniPCIe(p_result):
 
 
 TESTLIST = (
+    {
+        "desc": u"test sériové konzole",
+        "instructions": u"Připojte kabel č. 5 do konektoru J1.",
+        "testfunc": test_serial_console,
+        "interpretfailure": textresult_generic,
+        "interactive": False,
+    },
     {
         "desc": u"test WAN portu",
         "instructions": u"Zapojte testovací ethernet kabel do portu WAN.",

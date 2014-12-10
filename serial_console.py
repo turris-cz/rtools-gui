@@ -99,8 +99,7 @@ class SerialConsole(object):
         commands or raises an SCError.
         """
 
-        with self._inbuf_lock:
-            self.inbuf = ""
+        self.clear_inbuf()
 
         self._accept_input = True
 
@@ -154,8 +153,7 @@ class SerialConsole(object):
         This function waits at most timeout seconds, then it raises
         an exception. If timeout is -1, it waits forever.
         """
-        with self._inbuf_lock:
-            self.inbuf = ""
+        self.clear_inbuf()
 
         self._interrupt_flag = False
         self._accept_input = True
@@ -199,8 +197,7 @@ class SerialConsole(object):
         an exception. If timeout is -1, it waits forever.
         """
 
-        with self._inbuf_lock:
-            self.inbuf = ""
+        self.clear_inbuf()
 
         self._interrupt_flag = False
         self._accept_input = True
@@ -258,6 +255,10 @@ class SerialConsole(object):
         self._readThread.join()
         os.close(self._sc)
 
+    def clear_inbuf(self):
+        with self._inbuf_lock:
+            self.inbuf = ""
+
     def writeLine(self, text):
         if not self._accept_input:
             raise ValueError("Allow accepting of input before running writeLine")
@@ -296,7 +297,7 @@ class SerialConsole(object):
 
         return inLength
 
-    def exec_(self, cmd, timeout=10):
+    def exec_(self, cmd, timeout=10, wait_interval=WAITTIME):
         """exec_(cmd, timeout=10)
         Execute given command or script. It must be a
         single command (output expected only after the whole command written),
@@ -312,8 +313,7 @@ class SerialConsole(object):
         else:
             raise ValueError("Connection in undefined state, call to_system or to_uboot before.")
 
-        with self._inbuf_lock:
-            self.inbuf = ""
+        self.clear_inbuf()
 
         self._accept_input = True
 
@@ -336,12 +336,12 @@ class SerialConsole(object):
 
         cmdLen += self.writeLine(lines[-1] + "\n")
 
-        wCounter = int(timeout / WAITTIME)
-        while wCounter and not self.inbuf.endswith(prompt):
-            time.sleep(WAITTIME)
+        wCounter = int(timeout / wait_interval)
+        while wCounter >= 0 and not self.inbuf.endswith(prompt):
+            time.sleep(wait_interval)
             wCounter -= 1
 
-        if wCounter <= 0:
+        if wCounter < 0:
             raise SCError("Expected prompt not found")
 
         self._accept_input = False
