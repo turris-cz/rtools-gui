@@ -60,7 +60,7 @@ Před spuštěním testů je nezbytné udělat následující:
     <li>Připojit kabel pro testování ethernetů (č.6) do WAN</li>
     <li>Připojit kabel pro testování I2C2, SPI a UART1 (č.7) do konektoru P1</li>
     <li>Připojit všechny USB flashky do odpovídajících konektorů (USB1, USB2, USB3)</li>
-    <li>Připojit druhou wifi katru to slotu CN5</li>
+    <li>Připojit druhou wifi kartu to slotu CN5</li>
     <li>Připojit 12V napájecí adaptér</li>
     <li>Počat až router naběhne (všechny diody zasvítí modře a pak zeleně)</li>
 </ul>
