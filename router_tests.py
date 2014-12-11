@@ -236,6 +236,14 @@ def test_I2C(sc):
     return runRemoteCmd(sc, "i2cget -f -y 1 0x4c")
 
 
+def test_hwclock(sc):
+    return runRemoteCmd(sc, "hwclock")
+
+
+def test_thermometer(sc):
+    return runRemoteCmd(sc, "thermometer")
+
+
 def textresult_generic(p_result):
     return "%s<br>returned:<br>%s<br>return code: %s" % (p_result[3], p_result[2], p_result[1])
 
@@ -325,6 +333,20 @@ TESTLIST = (
         "desc": u"test I2C",
         "instructions": u"Zkontrolujte připojení I2C2, SPI, UART přípravku.",
         "testfunc": test_I2C,
+        "interpretfailure": textresult_generic,
+        "interactive": False,
+    },
+    {
+        "desc": u"test příkazu hwclock",
+        "instructions": u"Připojte kabel č. 5 do konektoru J1.",
+        "testfunc": test_hwclock,
+        "interpretfailure": textresult_generic,
+        "interactive": False,
+    },
+    {
+        "desc": u"test příkazu thermometer",
+        "instructions": u"Připojte kabel č. 5 do konektoru J1.",
+        "testfunc": test_thermometer,
         "interpretfailure": textresult_generic,
         "interactive": False,
     },
