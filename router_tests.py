@@ -271,21 +271,24 @@ TESTLIST = (
     },
     {
         "desc": u"test WAN portu",
-        "instructions": u"Zapojte testovací ethernet kabel do portu WAN.",
+        "instructions": u"Zapojte testovací ethernet kabel do portu WAN "
+                        u"a počkejte, až se rozsvítí odpovídající dioda.",
         "testfunc": test_WAN,
         "interpretfailure": textresult_generic,
         "interactive": True,
     },
     {
         "desc": u"test LAN portu č. 1",
-        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 1.",
+        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 1 "
+                        u"a počkejte, až se rozsvítí odpovídající dioda.",
         "testfunc": test_LAN,
         "interpretfailure": textresult_generic,
         "interactive": True,
     },
     {
         "desc": u"test LAN portu č. 2",
-        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 2.",
+        "instructions": u"Zapojte testovací ethernet kabel do portu LAN 2 "
+                        u"a počkejte, až se rozsvítí odpovídající dioda.",
         "testfunc": test_LAN,
         "interpretfailure": textresult_generic,
         "interactive": True,
