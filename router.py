@@ -72,7 +72,7 @@ class Router(object):
     @classmethod
     def fetchFromDb(cls, routerId, attempt=-1):
         # attempt -1 means the last one
-        routerId = str(routerId)
+        routerId = str(routerId).strip()
 
         if attempt == -1:
             subquery = "(SELECT max(attempt) FROM routers WHERE id = '%s')" % routerId.replace("'", "''")
@@ -113,7 +113,7 @@ class Router(object):
 
     @classmethod
     def createNewRouter(cls, routerId):
-        routerId = str(routerId)
+        routerId = str(routerId).strip()
         query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
         if query.exec_("INSERT INTO routers (id) VALUES ('%s');" % routerId.replace("'", "''")):
             logger.debug("[DB] succesfully added router record (routerId=%s)" % routerId)
@@ -125,7 +125,7 @@ class Router(object):
 
     @classmethod
     def nextAttempt(cls, routerId):
-        routerId = str(routerId)
+        routerId = str(routerId).strip()
         query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
         if query.exec_("INSERT INTO routers (id, attempt, status) "
                        "SELECT '%(id)s' AS \"id\", attempt + 1 AS \"attempt\", status "
