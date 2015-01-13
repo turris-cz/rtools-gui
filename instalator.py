@@ -55,10 +55,9 @@ Před spuštěním testů je nezbytné udělat následující:
     <li>Odpojit 12V napájecí adaptér</li>
     <li>Odpojit kabely 1, 2, 3</li>
     <li>Odpojit desku D1 s SD kartou</li>
-    <li>Připojit kabel pro testování GPIO (č.4) je připojen do konektoru P3</li>
+    <li>Připojit desku pro testování GPIO, I2C2, SPI a UART1 (č.4+7) do konektoru P3 a P1</li>
     <li>Připojit sériový kabel (č.5) do konektoru J1.</li>
     <li>Připojit kabel pro testování ethernetů (č.6) do WAN</li>
-    <li>Připojit kabel pro testování I2C2, SPI a UART1 (č.7) do konektoru P1</li>
     <li>Připojit všechny USB flashky do odpovídajících konektorů (USB1, USB2, USB3)</li>
     <li>Připojit druhou wifi kartu to slotu CN5</li>
     <li>Připojit 12V napájecí adaptér</li>
