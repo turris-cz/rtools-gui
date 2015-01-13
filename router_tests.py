@@ -244,6 +244,10 @@ def test_thermometer(sc):
     return runRemoteCmd(sc, "thermometer")
 
 
+def test_atshacmd(sc):
+    return runRemoteCmd(sc, "atsha204cmd serial-number")
+
+
 def textresult_generic(p_result):
     return "%s<br>returned:<br>%s<br>return code: %s" % (p_result[3], p_result[2], p_result[1])
 
@@ -347,6 +351,13 @@ TESTLIST = (
         "desc": u"test příkazu thermometer",
         "instructions": u"Připojte kabel č. 5 do konektoru J1.",
         "testfunc": test_thermometer,
+        "interpretfailure": textresult_generic,
+        "interactive": False,
+    },
+    {
+        "desc": u"test příkazu atshacmd",
+        "instructions": u"Připojte kabel č. 5 do konektoru J1.",
+        "testfunc": test_atshacmd,
         "interpretfailure": textresult_generic,
         "interactive": False,
     },
