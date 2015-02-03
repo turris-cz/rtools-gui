@@ -15,11 +15,26 @@ import importlib
 settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings')
 settings = importlib.import_module(settings_module)
 
+
+def test_ETHERNET(sc):
+    time.sleep(2)  # wait for link
+
+    cmdResult = runLocalCmd("sudo ifconfig %s 192.168.100.2" % settings.LOCAL_TEST_IFACE)
+    if cmdResult[0] != 0:
+        return cmdResult
+
+    cmdResult = runRemoteCmd(sc, "ifconfig br-wan 192.168.100.1")
+    if cmdResult[0] != 0:
+        return cmdResult
+
+    time.sleep(1)  # wait for addresses to be set
+
+    return runLocalCmd("ping -c 3 192.168.100.1")
+
+
 from tests.common import runLocalCmd, runRemoteCmd, textresult_generic
 from tests.turris import (
     test_serial_console,
-    test_WAN,
-    test_LAN,
     test_miniPCIe,
     test_GPIO,
     test_SPI,
@@ -45,7 +60,7 @@ TESTLIST = (
         "desc": u"test WAN portu",
         "instructions": u"Zapojte testovací ethernet kabel do portu WAN "
                         u"a počkejte, až se rozsvítí odpovídající dioda.",
-        "testfunc": test_WAN,
+        "testfunc": test_ETHERNET,
         "interpretfailure": textresult_generic,
         "interactive": True,
     },
@@ -53,7 +68,7 @@ TESTLIST = (
         "desc": u"test LAN portu č. 1",
         "instructions": u"Zapojte testovací ethernet kabel do portu LAN 1 "
                         u"a počkejte, až se rozsvítí odpovídající dioda.",
-        "testfunc": test_LAN,
+        "testfunc": test_ETHERNET,
         "interpretfailure": textresult_generic,
         "interactive": True,
     },
@@ -61,7 +76,7 @@ TESTLIST = (
         "desc": u"test LAN portu č. 2",
         "instructions": u"Zapojte testovací ethernet kabel do portu LAN 2 "
                         u"a počkejte, až se rozsvítí odpovídající dioda.",
-        "testfunc": test_LAN,
+        "testfunc": test_ETHERNET,
         "interpretfailure": textresult_generic,
         "interactive": True,
     },
