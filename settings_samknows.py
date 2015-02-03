@@ -40,3 +40,4 @@ LOCAL_TEST_IFACE = "eth42"
 TURRIS_WAN_IFACE = "eth2"
 
 PS1_OVERRIDE = "root@OpenWrt:/# "
+TESTLIST_OVERRIDE_MODULE = 'tests.samknows'

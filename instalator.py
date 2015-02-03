@@ -27,8 +27,8 @@ from router import Router, DbError, DuplicateKey, DoesNotExist
 from serial_console import SerialConsole, SCError
 
 # tests
-from router_tests import TESTLIST
-
+tests_module = getattr(settings, 'TESTLIST_OVERRIDE_MODULE', 'tests.turris')
+tests_module = importlib.import_module(tests_module)
 
 #logging
 logger = logging.getLogger('installer')
@@ -92,7 +92,7 @@ def report_tests_results(router):
     testsReport = u"<h3>Testy, které selhaly</h3>" if failedTests \
                   else u"<h3>Všechny testy proběhly správně</h3>"
     for t in failedTests:
-        testsReport += TESTLIST[t]['desc'] + u": "
+        testsReport += tests_module.TESTLIST[t]['desc'] + u": "
         if router.testResults[t] == router.TEST_FAIL:
             testsReport += u"neúspěch"
         elif router.testResults[t] == router.TEST_PROBLEM:
@@ -548,15 +548,19 @@ class FlashingWorker(QtCore.QObject):
         # run the test
         errMsg = ""
         testResult = ""
-        self.appendTestLogSig.emit("#### <b>%s</b> ####"
-                                   % TESTLIST[self.router.currentTest]['desc'])
+        self.appendTestLogSig.emit(
+            "#### <b>%s</b> ####"
+            % tests_module.TESTLIST[self.router.currentTest]['desc']
+        )
         try:
-            p_return = TESTLIST[self.router.currentTest]['testfunc'](self.serialConsole)
+            p_return = tests_module.TESTLIST[self.router.currentTest]['testfunc'](
+                self.serialConsole
+            )
         except Exception:
             self.router.testResults[self.router.currentTest] = self.router.TEST_PROBLEM
             errMsg = u"Vyskytla se chyba při testování, sériová konzole " \
                      u"vrátila výsledek, který nedokážu zpracovat."
-            testResult = TESTLIST[self.router.currentTest]['desc'] + \
+            testResult = tests_module.TESTLIST[self.router.currentTest]['desc'] + \
                 u" skončil s chybou:<br><pre>Chyba konzole.</pre>"
             if self.router.testSecondChance:
                 self.router.testSecondChance = False
@@ -565,7 +569,7 @@ class FlashingWorker(QtCore.QObject):
                 nextTest = -1
             import traceback
             logger.critical("[TESTING] error during test \"" +
-                            TESTLIST[self.router.currentTest]['desc'] +
+                            tests_module.TESTLIST[self.router.currentTest]['desc'] +
                             "\"\n" +
                             traceback.format_exc() +
                             "\n" + self.serialConsole.inbuf)
@@ -575,16 +579,19 @@ class FlashingWorker(QtCore.QObject):
             if p_return[0] == 0:
                 self.router.testResults[self.router.currentTest] = self.router.TEST_OK
                 success_msg = u" proběhl úspěšně"
-                testResult = TESTLIST[self.router.currentTest]['desc'] + success_msg
+                testResult = tests_module.TESTLIST[self.router.currentTest]['desc'] \
+                    + success_msg
                 self.appendTestLogSig.emit("%s" % success_msg)
             else:
                 error_msg = u"skončil s chybou:<pre style=\"font-size: 11px;\">%s</pre>" % (
-                    TESTLIST[self.router.currentTest]['interpretfailure'](p_return)
+                    tests_module.TESTLIST[self.router.currentTest]['interpretfailure'](
+                        p_return
+                    )
                 )
                 self.appendTestLogSig.emit("%s" % error_msg)
 
                 testResult = u"%s %s" % (
-                    TESTLIST[self.router.currentTest]['desc'].capitalize(),
+                    tests_module.TESTLIST[self.router.currentTest]['desc'].capitalize(),
                     error_msg,
                 )
                 self.router.testResults[self.router.currentTest] = self.router.TEST_FAIL
@@ -598,7 +605,7 @@ class FlashingWorker(QtCore.QObject):
             )
 
             self.router.currentTest += 1
-            if self.router.currentTest >= len(TESTLIST):
+            if self.router.currentTest >= len(tests_module.TESTLIST):
                 try:
                     # delete /etc/config/wireless because it contains 2 radios
                     # it will be regenerated the very next boot
@@ -1046,11 +1053,13 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
             if testResult:
                 testResult = u"Výsledek předchozího testu:<br>%s" % testResult
             self.testResultLabel.setText(testResult)
-            self.nextTestDesc.setText(u"Následující test je %s." % TESTLIST[testNum]['desc']
-                                      + u"\n" + TESTLIST[testNum]['instructions'])
+            self.nextTestDesc.setText(
+                u"Následující test je %s." % tests_module.TESTLIST[testNum]['desc']
+                + u"\n" + tests_module.TESTLIST[testNum]['instructions']
+            )
 
         self.stackedWidget.setCurrentIndex(nextPage)
-        if not TESTLIST[testNum]['interactive'] and testNum != -1:
+        if not tests_module.TESTLIST[testNum]['interactive'] and testNum != -1:
             self.prepTestToRunTest.click()
 
     @QtCore.pyqtSlot()

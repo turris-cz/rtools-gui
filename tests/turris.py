@@ -8,38 +8,14 @@
 #                  >=0 - result of the test
 
 
-import subprocess
 import time
-from shlex import split
-from settings import LOCAL_TEST_IFACE, TURRIS_WAN_IFACE
 
+import os
+import importlib
+settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings')
+settings = importlib.import_module(settings_module)
 
-# results from
-#     runLocalCmd
-#     runRemoteCmd
-#     test_*
-#     are in the form
-#     (
-#         int exit_status (-1 if not a number),
-#         str exit_status,
-#         str command_output,
-#         str ("Local cmd:\n" | "Remote cmd\n:" + command)
-#    )
-
-
-def runLocalCmd(cmdstr):
-    p = subprocess.Popen(split(cmdstr), stdout=subprocess.PIPE,
-                         stderr=subprocess.STDOUT)
-    retCode = p.wait()
-    stdOut = p.stdout.read()
-    return (retCode, str(retCode), stdOut, "Local cmd:\n" + cmdstr)
-
-
-def runRemoteCmd(sc, cmdstr):
-    stdOut = sc.exec_(cmdstr)
-    cmdStatus = sc.lastStatus()
-    intCmdStatus = int(cmdStatus) if cmdStatus.isdigit() else -1
-    return (intCmdStatus, cmdStatus, stdOut, "Remote cmd:\n" + cmdstr)
+from tests.common import runLocalCmd, runRemoteCmd, textresult_generic
 
 
 def test_serial_console(sc):
@@ -82,11 +58,11 @@ def test_serial_console(sc):
 def test_WAN(sc):
     time.sleep(2)  # wait for link
 
-    cmdResult = runLocalCmd("sudo ifconfig %s 192.168.100.2" % LOCAL_TEST_IFACE)
+    cmdResult = runLocalCmd("sudo ifconfig %s 192.168.100.2" % settings.LOCAL_TEST_IFACE)
     if cmdResult[0] != 0:
         return cmdResult
 
-    cmdResult = runRemoteCmd(sc, "ifconfig %s 192.168.100.1" % TURRIS_WAN_IFACE)
+    cmdResult = runRemoteCmd(sc, "ifconfig %s 192.168.100.1" % settings.TURRIS_WAN_IFACE)
     if cmdResult[0] != 0:
         return cmdResult
 
@@ -96,7 +72,7 @@ def test_WAN(sc):
 
 
 def test_LAN(sc):
-    cmdResult = runLocalCmd("sudo ifconfig %s 192.168.1.2" % LOCAL_TEST_IFACE)
+    cmdResult = runLocalCmd("sudo ifconfig %s 192.168.1.2" % settings.LOCAL_TEST_IFACE)
     if cmdResult[0] != 0:
         return cmdResult
 
@@ -246,10 +222,6 @@ def test_thermometer(sc):
 
 def test_atshacmd(sc):
     return runRemoteCmd(sc, "atsha204cmd serial-number")
-
-
-def textresult_generic(p_result):
-    return "%s<br>returned:<br>%s<br>return code: %s" % (p_result[3], p_result[2], p_result[1])
 
 
 def textresult_USB(p_result):
