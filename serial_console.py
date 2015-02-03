@@ -3,10 +3,14 @@ import os
 import termios
 import time
 
+# settings
+import importlib
+settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings')
+settings = importlib.import_module(settings_module)
 
-PS1 = "root@turris:/# "
-PS2 = "> "
-UBOOT_PROMPT = "=> "
+PS1 = getattr(settings, 'PS1_OVERRIDE', "root@turris:/# ")
+PS2 = getattr(settings, 'PS2_OVERRIDE', "> ")
+UBOOT_PROMPT = getattr(settings, 'UBOOT_PROMPT_OVERRIDE', "=> ")
 
 # following values are all in seconds
 WAITTIME = 0.5
