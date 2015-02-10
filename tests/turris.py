@@ -200,7 +200,7 @@ def test_SPI(sc):
     string = cmdOut.strip()
     status = sc.lastStatus()
     if status == '0':
-        if string == "BA AD":
+        if string == "F0 0D":
             return (0, "0", cmdOut, "Remote cmd:\n" + cmd)
         else:
             return (1, "1", cmdOut, "Remote cmd:\n" + cmd)
