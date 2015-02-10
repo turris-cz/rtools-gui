@@ -27,8 +27,8 @@ from router import Router, DbError, DuplicateKey, DoesNotExist
 from serial_console import SerialConsole, SCError
 
 # tests
-tests_module = getattr(settings, 'TESTLIST_OVERRIDE_MODULE', 'tests.turris')
-tests_module = importlib.import_module(tests_module)
+tests_module_name = getattr(settings, 'TESTLIST_OVERRIDE_MODULE', 'tests.turris')
+tests_module = importlib.import_module(tests_module_name)
 
 #logging
 logger = logging.getLogger('installer')
@@ -1148,6 +1148,7 @@ class Installer(QtGui.QMainWindow, Ui_Installer):
 def main():
     logger.info("[MAIN] starting the application")
     logger.info("[MAIN] using '%s' as a settings module" % settings_module)
+    logger.info("[MAIN] using '%s' as a test module" % tests_module_name)
 
     app = QtGui.QApplication(sys.argv)
     widget = Installer()
