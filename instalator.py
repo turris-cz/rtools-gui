@@ -202,6 +202,7 @@ class FlashingWorker(QtCore.QObject):
             settings.OPENOCD_CMD,
             '-s', settings.OPENOCD_DIR,
             '-f', os.path.join('interface', settings.OPENOCD_INTERFACE),
+            '-c', 'transport select swd',
             '-f', os.path.join('target', settings.OPENOCD_TARGET),
             '-c', 'init',
             '-c', 'sleep 200',
@@ -283,19 +284,9 @@ class FlashingWorker(QtCore.QObject):
     @QtCore.pyqtSlot()
     def flashStepCPLD(self):
         logger.debug("[FLASHWORKER] starting CPLD step (routerId=%s)" % self.router.id)
-        # create a log file
-        tmpf_fd, tmpf_path = mkstemp(text=True)
 
         # execute the command
-        p_return = self.runCmd((settings.STEP_CPLD_CMD, "-infile", settings.CPLD_FLASH_INFILE, "-logfile", tmpf_path))
-
-        # read the log file
-        log_content = ""
-        tmpr = os.read(tmpf_fd, 1024)
-        while tmpr:
-            log_content += tmpr
-            tmpr = os.read(tmpf_fd, 1024)
-        log_content = log_content.strip()
+        p_return = self.runCmd((settings.STEP_CPLD_CMD, settings.CPLD_FLASH_INFILE))
 
         return_code = 0
         err_msg = ""

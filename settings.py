@@ -1,34 +1,39 @@
 from logging import NOTSET as _NOTSET
 
 # commands
-# OPENOCD_CMD = "/usr/bin/openocd"
-# STEP_I2C_CMD = "/home/turris/remote_run.sh"
-# STEP_CPLD_CMD = "/usr/local/programmer/3.0_x64/bin/lin64/pgrcmd"
-# CPLD_FLASH_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_program.xcf"
-# CPLD_ERASE_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_erase.xcf"
-# STEP_FLASH_CMD = "/home/turris/workspace/go_TURRIS_UBOOT_program.sh"
-# STEP_FLASH_LOGFILE = "/home/turris/workspace/session.log"
-# LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
+OPENOCD_CMD = "/usr/local/bin/openocd-wrapper"
+OPENOCD_INTERFACE = "sysfsgpio-raspberrypi.cfg"
+OPENOCD_TARGET = "stm32f0x.cfg"
+OPENOCD_DIR = "/usr/local/share/openocd/scripts"
+POWER_BIN = "/home/pi/turris_power_control.bin"
 
-STEP_I2C_CMD = "mock/i2cflasher"
-STEP_CPLD_CMD = "mock/lattice"
+STEP_I2C_CMD = "/home/pi/jachym/remote_run.sh"
 
-OPENOCD_CMD = "mock/openocd"
-OPENOCD_DIR = "/usr/share/openocd/scripts"
-OPENOCD_INTERFACE = "stlink-v2.cfg"
-OPENOCD_TARGET = "stm32f0x_stlink.cfg"
-POWER_BIN = "mock/turris_power_control.bin"
+STEP_CPLD_CMD = "/usr/local/bin/jtag"
+CPLD_FLASH_CMDS_FILE = "/home/pi/turris_cpld/urjtag_cmds"
+#CPLD_ERASE_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_erase.xcf"
 
-CPLD_FLASH_INFILE = "/home/palko/neexistujucialejetojedno"
-CPLD_ERASE_INFILE = "/home/palko/neexistujucialejetojedno"
-LOG_BACKUP_CMD = "/bin/true"
+STEP_FLASH_LOGFILE = "/home/turris/workspace/session.log"
+LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"
+
+
+#STEP_I2C_CMD = "mock/i2cflasher"
+#STEP_CPLD_CMD = "mock/lattice"
+#OPENOCD_CMD = "mock/openocd"
+#OPENOCD_DIR = "/usr/share/openocd/scripts"
+#OPENOCD_INTERFACE = "stlink-v2.cfg"
+#OPENOCD_TARGET = "stm32f0x_stlink.cfg"
+#POWER_BIN = "mock/turris_power_control.bin"
+#CPLD_FLASH_INFILE = "/home/palko/neexistujucialejetojedno"
+#CPLD_ERASE_INFILE = "/home/palko/neexistujucialejetojedno"
+#LOG_BACKUP_CMD = "/bin/true"
 
 # database
 # DB_HOST = "10.0.0.2"
 DB_HOST = 'localhost'
 DB_USER = 'tflasher'
 DB_PASS = 'poiuytrewq'
-DB_DBNAME = 'tflasher'
+DB_DBNAME = 'turris'
 
 #logging
 LOGLEVEL = _NOTSET  # log everyting
