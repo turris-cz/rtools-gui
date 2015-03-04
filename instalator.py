@@ -286,7 +286,7 @@ class FlashingWorker(QtCore.QObject):
         logger.debug("[FLASHWORKER] starting CPLD step (routerId=%s)" % self.router.id)
 
         # execute the command
-        p_return = self.runCmd((settings.STEP_CPLD_CMD, settings.CPLD_FLASH_CMDS_FILE))
+        p_return = self.runCmd(("sudo", settings.STEP_CPLD_CMD, settings.CPLD_FLASH_CMDS_FILE))
 
         return_code = 0
         err_msg = ""
@@ -618,7 +618,7 @@ class FlashingWorker(QtCore.QObject):
         logger.debug("[FLASHWORKER] starting cpld erasing step (routerId=%s)" % "not specified")  # self.router.id)
 
         # execute the command
-        p_return = self.runCmd((settings.STEP_CPLD_CMD, settings.CPLD_ERASE_CMDS_FILE))
+        p_return = self.runCmd(("sudo", settings.STEP_CPLD_CMD, settings.CPLD_ERASE_CMDS_FILE))
 
         if p_return[0] == 0:
             logger.info("[FLASHWORKER] CPLD erase successful (routerId=%s)"
