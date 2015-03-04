@@ -11,7 +11,7 @@ STEP_I2C_CMD = "/home/pi/jachym/remote_run.sh"
 
 STEP_CPLD_CMD = "/usr/local/bin/jtag"
 CPLD_FLASH_CMDS_FILE = "/home/pi/turris_cpld/urjtag_cmds"
-#CPLD_ERASE_INFILE = "/home/turris/workspace_cpld/cpld/CZ_NIC_Router_CPLD_erase.xcf"
+CPLD_ERASE_CMDS_FILE = "/home/pi/turris_cpld/erase_cmds"
 
 STEP_FLASH_LOGFILE = "/home/turris/workspace/session.log"
 LOG_BACKUP_CMD = "/home/turris/backup_logs.sh"

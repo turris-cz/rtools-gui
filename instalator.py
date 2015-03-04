@@ -286,31 +286,27 @@ class FlashingWorker(QtCore.QObject):
         logger.debug("[FLASHWORKER] starting CPLD step (routerId=%s)" % self.router.id)
 
         # execute the command
-        p_return = self.runCmd((settings.STEP_CPLD_CMD, settings.CPLD_FLASH_INFILE))
+        p_return = self.runCmd((settings.STEP_CPLD_CMD, settings.CPLD_FLASH_CMDS_FILE))
 
         return_code = 0
         err_msg = ""
-        if log_content.endswith("Operation: successful."):
+        if p_return[0] == 0:
             logger.info("[FLASHWORKER] CPLD step successful (routerId=%s)" % self.router.id)
             self.router.status = self.router.STATUS_CPLD
             self.router.error = ""
         elif self.router.secondChance['CPLD']:
             logger.warning("[FLASHWORKER] CPLD step failed, check the cables (routerId=%s)" % self.router.id)
             self.router.secondChance['CPLD'] = False
-            self.router.error = log_content
+            self.router.error = p_return[1]
             return_code = 1
             err_msg = u"Programování CPLD obvodu selhalo. Prosím ověřte zapojení kabelu 2 " \
                       u"(Zapojen z USB portu PC na programovaný TURRIS konektor J7). " \
                       u"Zkontrolujte připojení napájecího adaptéru 12V."
         else:
             logger.warning("[FLASHWORKER] CPLD step failed definitely (routerId=%s)" % self.router.id)
-            self.router.error = log_content
+            self.router.error = p_return[1]
             return_code = 2
             err_msg = u"Flashování CPLD selhalo."
-
-        # close and delete the log file
-        os.close(tmpf_fd)
-        os.remove(tmpf_path)
 
         dbErr = not self.router.save()
 
@@ -620,21 +616,11 @@ class FlashingWorker(QtCore.QObject):
     @QtCore.pyqtSlot()
     def stepCpldEraser(self):
         logger.debug("[FLASHWORKER] starting cpld erasing step (routerId=%s)" % "not specified")  # self.router.id)
-        # create a log file
-        tmpf_fd, tmpf_path = mkstemp(text=True)
 
         # execute the command
-        p_return = self.runCmd((settings.STEP_CPLD_CMD, "-infile", settings.CPLD_ERASE_INFILE, "-logfile", tmpf_path))
+        p_return = self.runCmd((settings.STEP_CPLD_CMD, settings.CPLD_ERASE_CMDS_FILE))
 
-        # read the log file
-        log_content = ""
-        tmpr = os.read(tmpf_fd, 1024)
-        while tmpr:
-            log_content += tmpr
-            tmpr = os.read(tmpf_fd, 1024)
-        log_content = log_content.strip()
-
-        if log_content.endswith("Operation: successful."):
+        if p_return[0] == 0:
             logger.info("[FLASHWORKER] CPLD erase successful (routerId=%s)"
                         % "not specified")  # self.router.id)
             # set self.router.status and error to something reasonable
@@ -649,10 +635,6 @@ class FlashingWorker(QtCore.QObject):
             err_msg = u"Mazání CPLD obvodu selhalo. Prosím ověřte zapojení kabelu 2 " \
                       u"(Zapojen z USB portu PC na programovaný TURRIS konektor J7). " \
                       u"Zkontrolujte připojení napájecího adaptéru 12V."
-
-        # close and delete the log file
-        os.close(tmpf_fd)
-        os.remove(tmpf_path)
 
         # dbErr = not self.router.save()
         dbErr = False
