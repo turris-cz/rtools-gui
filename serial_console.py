@@ -352,6 +352,11 @@ class SerialConsole(object):
 
         return self.inbuf[cmdLen: -len(prompt)]
 
+    def read_firmware_version(self):
+        stdOut = self.exec_('cat /etc/git-version')
+        cmdStatus = self.lastStatus()
+        return cmdStatus == "0", stdOut
+
     def lastStatus(self):
         """Return status of the last command run with SerialConsole.exec_().
         It returns string as obtained from running "echo $?" with whitespaces

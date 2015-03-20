@@ -5,7 +5,7 @@
 # copyright 2013 CZ.NIC, z.s.p.o.
 # licensed under the BSD license
 
-#python modules
+# python modules
 import logging
 import os
 
@@ -16,7 +16,6 @@ settings = importlib.import_module(settings_module)
 
 import subprocess
 import sys
-from tempfile import mkstemp
 
 # gui related stuff
 from PyQt4 import QtGui, QtCore, QtSql
@@ -30,7 +29,7 @@ from serial_console import SerialConsole, SCError
 tests_module_name = getattr(settings, 'TESTLIST_OVERRIDE_MODULE', 'tests.turris')
 tests_module = importlib.import_module(tests_module_name)
 
-#logging
+# logging
 logger = logging.getLogger('installer')
 logger.root.setLevel(settings.LOGLEVEL)
 nanlogsdir = os.path.join(
@@ -494,6 +493,10 @@ class FlashingWorker(QtCore.QObject):
         if self.serialConsole.state != self.serialConsole.OPENWRT:
             try:
                 self.serialConsole.to_system()
+                if not self.router.firmware_version:
+                    result, firmware = self.serialConsole.read_firmware_version()
+                    if result:
+                        self.router.saveFirmwareVersion(firmware.strip())
             except SCError, e:
                 logger.warning("[TESTING] Serial console initialization failed (routerId=%s). "
                                % self.router.id + str(e) + "\n" + self.serialConsole.inbuf)

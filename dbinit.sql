@@ -33,3 +33,12 @@ CREATE VIEW good_routers AS
     HAVING max(testresult)='0' AND count(*)='9'
     ORDER BY id;
 ALTER VIEW good_routers OWNER TO tflasher;
+
+CREATE TABLE last_seen_firmware (
+    time timestamp NOT NULL DEFAULT current_timestamp,
+    id varchar(20),
+    attempt int,
+    firmware text NOT NULL DEFAULT '',
+    FOREIGN KEY (id, attempt) REFERENCES routers (id, attempt) ON DELETE CASCADE
+);
+ALTER TABLE last_seen_firmware OWNER TO tflasher;

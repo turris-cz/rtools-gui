@@ -56,6 +56,7 @@ class Router(object):
         self.testSerie = 0
         self.testResults = {}
         self.currentTest = 0
+        self.firmware_version = ""
 
         # we use the default (and only) database, open it now if closed
         self.query = QtSql.QSqlQuery(QtSql.QSqlDatabase.database())
@@ -169,6 +170,21 @@ class Router(object):
             return True
         else:
             logger.warning("[DB] router test record insertion failed (routerId=%s)" % self.id)
+            self.saveFailedDbQuery(sqlquery)
+            return False
+
+    def saveFirmwareVersion(self, firmware_version):
+        self.firware_version = firmware_version
+
+        sqlquery = "INSERT INTO last_seen_firmware (id, attempt, firmware) " \
+                   "VALUES ('%s', '%d', '%s');" \
+                   % (self.id.replace("'", "''"), self.attempt, firmware_version)
+
+        if self.query.exec_(sqlquery):
+            logger.debug("[DB] succesfully updated router firmware record (routerId=%s)" % self.id)
+            return True
+        else:
+            logger.warning("[DB] router firmware record update failed (routerId=%s)" % self.id)
             self.saveFailedDbQuery(sqlquery)
             return False
 
