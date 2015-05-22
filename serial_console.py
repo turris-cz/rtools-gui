@@ -310,6 +310,17 @@ class SerialConsole(object):
 
         return inLength
 
+    def unchecked_write(self, cmd, wait_for=1.0):
+        self.clear_inbuf()
+
+        self._accept_input = True
+        cmd = cmd.strip().replace("\r", "") + "\n"
+        os.write(self._sc, cmd)
+        time.sleep(wait_for)
+
+        self._accept_input = False
+        return self.inbuf
+
     def exec_(self, cmd, timeout=10, wait_interval=WAITTIME):
         """exec_(cmd, timeout=10)
         Execute given command or script. It must be a

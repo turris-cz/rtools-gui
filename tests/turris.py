@@ -38,7 +38,7 @@ def test_serial_console(sc):
             for k in range(size):
                 line += characters[ch_index]
                 ch_index = 0 if len(characters) - 1 <= ch_index else ch_index + 1
-            output += sc.exec_("echo %s\n" % line, timeout=1, wait_interval=0.01)
+            output += sc.unchecked_write("echo %s\n" % line)
 
     ch_needed = reduce(lambda y, x: x[0] * x[1] + y, batches, 0) / len(characters)
 
@@ -46,7 +46,7 @@ def test_serial_console(sc):
     # read part
     for ch in characters:
         ch_count = output.count(ch)
-        if ch_needed > ch_count:
+        if ch_needed * 2 > ch_count:  # characters are printed twice (echo + output)
             errors.append("'%s' count (%d) &lt; %d" % (ch, ch_count, ch_needed))
 
     if errors:
