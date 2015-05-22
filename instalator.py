@@ -40,6 +40,7 @@ fh = logging.FileHandler(logfile)
 formatter = logging.Formatter(settings.LOGFORMAT)
 fh.setFormatter(formatter)
 logger.root.addHandler(fh)
+logdir = os.path.dirname(logfile)
 
 
 USB_RECONNECT_MESSAGE = u"Nezdařila se komunikace se systémem na routeru. Zkuste " \
@@ -365,7 +366,7 @@ class FlashingWorker(QtCore.QObject):
 
             # open the console
             try:
-                self.serialConsole = SerialConsole("/dev/" + dev[0])
+                self.serialConsole = SerialConsole("/dev/" + dev[0], self.router, logdir)
             except Exception, e:
                 return (u"Nezdařilo se otevřít spojení přes konzoli.", False)
 
@@ -408,7 +409,7 @@ class FlashingWorker(QtCore.QObject):
 
             # open the console
             try:
-                self.serialConsole = SerialConsole("/dev/" + dev[0])
+                self.serialConsole = SerialConsole("/dev/" + dev[0], self.router, logdir)
             except Exception, e:
                 return (u"Nezdařilo se otevřít spojení přes konzoli.", False)
 
@@ -484,7 +485,7 @@ class FlashingWorker(QtCore.QObject):
                 return (errMsg, False)
             # open the console
             try:
-                self.serialConsole = SerialConsole("/dev/" + dev[0])
+                self.serialConsole = SerialConsole("/dev/" + dev[0], self.router, logdir)
             except Exception, e:
                 return (u"Nezdařilo se otevřít spojení přes konzoli. Zkontrolujte, "
                         u"kabel č. 5 a napájecího adaptéru 12V.", False)

@@ -2,6 +2,7 @@ import threading
 import os
 import termios
 import time
+import datetime
 
 # settings
 import importlib
@@ -37,13 +38,18 @@ class SerialConsole(object):
     FLASH_DOT_COUNT = 167
     FACTORY_RESET_NEWLINE_COUNT = 410
 
-    def __init__(self, device, baudrate=termios.B115200):
+    def __init__(self, device, router, logdir, baudrate=termios.B115200):
         super(SerialConsole, self).__init__()
 
         self.state = self.UNDEFINED
         self._running = True
         self._accept_input = False
         self.inbuf = ""
+
+        now_time = datetime.datetime.now()
+        output_file_name = "sc-%s-%s.txt" % (
+            router.id, now_time.strftime("%Y-%m-%d-%H-%M"))
+        self._console_output_file = open(os.path.join(logdir, output_file_name), 'w', 0)
 
         self._sc = os.open(device, os.O_RDWR)
 
@@ -69,6 +75,7 @@ class SerialConsole(object):
             # if exception, close tty file
             try:
                 os.close(self._sc)
+                self._console_output_file.close()
             except:
                 pass
             raise
@@ -246,6 +253,7 @@ class SerialConsole(object):
             if self._accept_input and tmps:
                 with self._inbuf_lock:
                     self.inbuf += tmps
+                    self._console_output_file.write(tmps)
             time.sleep(0.0003)
 
     def allow_input(self):
@@ -258,6 +266,7 @@ class SerialConsole(object):
         self._running = False
         self._readThread.join()
         os.close(self._sc)
+        self._console_output_file.close()
 
     def clear_inbuf(self):
         with self._inbuf_lock:
