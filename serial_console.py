@@ -262,10 +262,15 @@ class SerialConsole(object):
     def disable_input(self):
         self._accept_input = False
 
+    @property
+    def closed(self):
+        return self._sc is None
+
     def close(self):
         self._running = False
         self._readThread.join()
         os.close(self._sc)
+        self._sc = None
         self._console_output_file.close()
 
     def clear_inbuf(self):

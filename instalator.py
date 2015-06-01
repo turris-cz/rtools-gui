@@ -474,7 +474,7 @@ class FlashingWorker(QtCore.QObject):
                      (self.router.currentTest, self.router.id))
 
         # create and prepare a serial console connection
-        if self.serialConsole is None:
+        if self.serialConsole is None or self.serialConsole.closed:
             # find ttyUSBx
             dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
             if len(dev) != 1:
