@@ -346,6 +346,24 @@ class FlashingWorker(QtCore.QObject):
 
         self.flashFinished.emit((return_code, err_msg, dbErr))
 
+    def _open_serial_console(self):
+        # find ttyUSBx
+        dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
+        if len(dev) != 1:
+            if len(dev) == 0:
+                return (u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli.", False)
+            else:
+                return (u"Našel jsem více sériových konzolí, nevím kterou použít.", False)
+
+        # open the console
+        try:
+            self.serialConsole = SerialConsole("/dev/" + dev[0], self.router, logdir)
+        except Exception:
+            return (u"Nezdařilo se otevřít spojení přes konzoli. "
+                    u"Zkontrolujte kabel č. 5 a napájecího adaptéru 12V.", False)
+
+        return (u"Serial console was successfully opened.", True)
+
     def go_to_factory_reset(self):
         logger.debug("[FLASHWORKER] starting to perform factory reset (routerId=%s)"
                      % self.router.id)
@@ -355,20 +373,10 @@ class FlashingWorker(QtCore.QObject):
         self.updateResetSpentSig.emit("0:00")
 
         # create and prepare a serial console connection
-        if self.serialConsole is None:
-            # find ttyUSBx
-            dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
-            if len(dev) != 1:
-                if len(dev) == 0:
-                    return (u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli.", False)
-                else:
-                    return (u"Našel jsem více sériových konzolí, nevím kterou použít.", False)
-
-            # open the console
-            try:
-                self.serialConsole = SerialConsole("/dev/" + dev[0], self.router, logdir)
-            except Exception, e:
-                return (u"Nezdařilo se otevřít spojení přes konzoli.", False)
+        if self.serialConsole is None or self.serialConsole.closed:
+            msg, result = self._open_serial_console()
+            if not result:
+                return (msg, result)
 
         try:
             # to_factory_reset(timeout=-1) - wait forever
@@ -381,8 +389,9 @@ class FlashingWorker(QtCore.QObject):
             self.serialConsole = None
             return (u"Nezdařil se Factory reset.", True)
         except Exception, e:  # serial console exception, IOError,...
-            logger.warning("[FLASHWORKER] Serial console initialization failed (Exception other than SCError) (routerId=%s). "
-                           % self.router.id + str(e))
+            logger.warning(
+                "[FLASHWORKER] Serial console initialization failed "
+                "(Exception other than SCError) (routerId=%s). " % self.router.id + str(e))
             self.serialConsole.close()
             self.serialConsole = None
             return (u"Nezdařil se Factory reset.", False)
@@ -398,20 +407,10 @@ class FlashingWorker(QtCore.QObject):
         self.updateFlashSpentSig.emit("0:00")
 
         # create and prepare a serial console connection
-        if self.serialConsole is None:
-            # find ttyUSBx
-            dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
-            if len(dev) != 1:
-                if len(dev) == 0:
-                    return (u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli.", False)
-                else:
-                    return (u"Našel jsem více sériových konzolí, nevím kterou použít.", False)
-
-            # open the console
-            try:
-                self.serialConsole = SerialConsole("/dev/" + dev[0], self.router, logdir)
-            except Exception, e:
-                return (u"Nezdařilo se otevřít spojení přes konzoli.", False)
+        if self.serialConsole is None or self.serialConsole.closed:
+            msg, result = self._open_serial_console()
+            if not result:
+                return (msg, result)
 
         try:
             # to_flash(timeout=-1) - wait forever
@@ -475,20 +474,9 @@ class FlashingWorker(QtCore.QObject):
 
         # create and prepare a serial console connection
         if self.serialConsole is None or self.serialConsole.closed:
-            # find ttyUSBx
-            dev = [t for t in os.listdir("/dev/") if t.startswith("ttyUSB")]
-            if len(dev) != 1:
-                if len(dev) == 0:
-                    errMsg = u"Zkontrolujte kabel č. 5, nenašel jsem sériovou konzoli."
-                else:
-                    errMsg = u"Našel jsem více sériových konzolí, nevím kterou použít."
-                return (errMsg, False)
-            # open the console
-            try:
-                self.serialConsole = SerialConsole("/dev/" + dev[0], self.router, logdir)
-            except Exception, e:
-                return (u"Nezdařilo se otevřít spojení přes konzoli. Zkontrolujte, "
-                        u"kabel č. 5 a napájecího adaptéru 12V.", False)
+            msg, result = self._open_serial_console()
+            if not result:
+                return (msg, result)
             self.serialConsole.state = self.serialConsole.UNDEFINED
 
         if self.serialConsole.state != self.serialConsole.OPENWRT:
