@@ -159,7 +159,7 @@ class SerialConsole(object):
 
     def to_factory_reset(self, timeout=INIT_MAX_WAIT, worker=None):
         """this function reads output from console and when the text
-        and waits for the 'procd: - init complete -' text
+        and waits for the 'Router Turris successfully started.' text
 
         This function waits at most timeout seconds, then it raises
         an exception. If timeout is -1, it waits forever.
@@ -175,7 +175,7 @@ class SerialConsole(object):
 
         while (timeout == -1 or wCounter >= 0) and not found:
 
-            if self.inbuf.find("procd: - init complete -") > 0:
+            if self.inbuf.find("Router Turris successfully started.") > 0:
                 found = True
                 break
 
