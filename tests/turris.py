@@ -217,7 +217,7 @@ def test_hwclock(sc):
 
 
 def test_thermometer(sc):
-    return runRemoteCmd(sc, "thermometer")
+    return runRemoteCmd(sc, "sensors sa56004-i2c-0-4c")
 
 
 def test_atshacmd(sc):
