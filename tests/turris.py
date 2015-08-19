@@ -9,9 +9,10 @@
 
 
 import time
-
 import os
+import re
 import importlib
+
 settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings')
 settings = importlib.import_module(settings_module)
 
@@ -217,7 +218,33 @@ def test_hwclock(sc):
 
 
 def test_thermometer(sc):
-    return runRemoteCmd(sc, "sensors sa56004-i2c-0-4c")
+    int_status, status, output, cmd_text = runRemoteCmd(sc, "sensors sa56004-i2c-0-4c")
+
+    if (int_status != 0):
+        return (1, "1", output, cmd_text)
+
+    # parse temperature:
+    temp1, temp2 = 0.0, 0.0
+    for line in output.split("\n"):
+        if line.startswith("temp1:"):
+            try:
+                temp1 = float(re.sub("^[^\(]* ([0-9\+\-\.]+) C.*", "\\1", line))
+            except ValueError:
+                temp1 = 0.0
+        if line.startswith("temp2:"):
+            try:
+                temp2 = float(re.sub("^[^\(]* ([0-9\+\-\.]+) C.*", "\\1", line))
+            except ValueError:
+                temp2 = 0.0
+
+    if not temp1 or not temp2:
+        int_status = 2
+        status = "2"
+        output = u"Výstup ze zjišťování teploty nebyl validní.\ntemp1: %.1f\ntemp2: %.1f" % (
+            temp1, temp2
+        )
+
+    return (int_status, status, output, cmd_text)
 
 
 def test_atshacmd(sc):
@@ -235,14 +262,20 @@ def textresult_USB(p_result):
 def textresult_miniPCIe(p_result):
     if p_result[0] == -1:
         return textresult_generic(p_result)
+
+    num_slots = p_result[2].strip()
+    if num_slots == "0":
+        return u"Nedetekovali jsme žádný PCI express slot. Očekávali jsme 2."
+    elif num_slots == "1":
+        return u"Detekovali jsme jenom 1 PCI express slot. Očekávali jsme 2."
     else:
-        num_slots = p_result[2].strip()
-        if num_slots == "0":
-            return u"Nedetekovali jsme žádný PCI express slot. Očekávali jsme 2."
-        elif num_slots == "1":
-            return u"Detekovali jsme jenom 1 PCI express slot. Očekávali jsme 2."
-        else:
-            return u"Detekovali jsme jenom %s PCI express sloty. Očekávali jsme 2." % num_slots
+        return u"Detekovali jsme jenom %s PCI express sloty. Očekávali jsme 2." % num_slots
+
+def textresult_thermometer(p_result):
+    if p_result[0] == 2:
+        return p_result[2]
+
+    return textresult_generic(p_result)
 
 
 TESTLIST = (
@@ -320,10 +353,10 @@ TESTLIST = (
         "interactive": False,
     },
     {
-        "desc": u"test příkazu thermometer",
+        "desc": u"test zjišťování teploty",
         "instructions": u"Připojte kabel č. 5 do konektoru J1.",
         "testfunc": test_thermometer,
-        "interpretfailure": textresult_generic,
+        "interpretfailure": textresult_thermometer,
         "interactive": False,
     },
     {
