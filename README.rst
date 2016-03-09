@@ -7,4 +7,9 @@ Requirements
 ------------
 
 * PyQt5
+  * python-pyqt5
 * pexpect
+
+Howto run it
+------------
+./rtools-gui.py
