@@ -124,6 +124,13 @@
           <item>
            <widget class="QLineEdit" name="barcodeLineEdit"/>
           </item>
+          <item>
+           <widget class="QPushButton" name="scanButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -131,19 +138,36 @@
       <widget class="QWidget" name="workPage">
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QLabel" name="serialNumberLabel">
-          <property name="font">
-           <font>
-            <pointsize>20</pointsize>
-           </font>
-          </property>
-          <property name="text">
-           <string>#SERIAL NUMBER</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QPushButton" name="backButton">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="serialNumberLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>1</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>20</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>#SERIAL NUMBER</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -366,14 +390,6 @@
      <height>19</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuMenu">
-    <property name="title">
-     <string>&amp;Menu</string>
-    </property>
-    <addaction name="actionBarcode"/>
-    <addaction name="actionEnd"/>
-   </widget>
-   <addaction name="menuMenu"/>
   </widget>
   <action name="actionBarcode">
    <property name="text">
@@ -391,38 +407,6 @@
  </resources>
  <connections>
   <connection>
-   <sender>actionEnd</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>399</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>actionBarcode</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>switchToBarcode()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>399</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>barcodeLineEdit</sender>
    <signal>returnPressed()</signal>
    <receiver>MainWindow</receiver>
@@ -435,6 +419,38 @@
     <hint type="destinationlabel">
      <x>798</x>
      <y>542</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>scanButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>checkBarcodeAndLoadRouter()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>712</x>
+     <y>764</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>backButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>switchToBarcode()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>58</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>399</y>
     </hint>
    </hints>
   </connection>

@@ -52,6 +52,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)  # create gui
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
 
+        # set icons for back and forward buttons
+        self.scanButton.setIcon(
+            QtWidgets.QApplication.style().standardIcon(QtWidgets.QStyle.SP_ArrowRight)
+        )
+        self.scanButton.setIconSize(QtCore.QSize(20, 20))
+
+        self.backButton.setIcon(
+            QtWidgets.QApplication.style().standardIcon(QtWidgets.QStyle.SP_ArrowLeft)
+        )
+        self.backButton.setIconSize(QtCore.QSize(20, 20))
+
         # TODO names shall be read from db
         workflow_len = len(WORKFLOW)
         for i in range(workflow_len):
