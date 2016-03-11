@@ -2,12 +2,14 @@
 
 import sys
 
-from PyQt5 import QtWidgets
-
-from mainwindow import MainWindow
+from application import Application
 
 def main(argv):
-    app = QtWidgets.QApplication(argv)
+    app = Application(argv)
+
+    # this import need to be used after the app is created
+    from mainwindow import MainWindow
+
     mainwindow = MainWindow()
     mainwindow.show()
     retval = app.exec_()

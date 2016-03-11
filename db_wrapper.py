@@ -1,7 +1,7 @@
 import re
 
 from PyQt5 import QtSql
-from settings import connection
+from application import qApp
 
 from custom_exceptions import DbError
 
@@ -9,7 +9,7 @@ class Router(object):
 
     @staticmethod
     def executeQuery(sql, *values):
-        query = QtSql.QSqlQuery(connection.database())
+        query = QtSql.QSqlQuery(qApp.connection.database())
         if not query.prepare(sql):
             raise DbError("Wrong sql '%s'" % sql)
 
@@ -19,7 +19,7 @@ class Router(object):
         # TODO logging db goes here
         print re.sub(' +', ' ', re.sub('\n', ' ', query.executedQuery())).strip(), values
         if not query.exec_():
-            raise DbError(connection.lastError().text())
+            raise DbError(qApp.connection.lastError().text())
 
         return query
 

@@ -4,12 +4,11 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QSizePolicy
 from ui.mainwindow import Ui_MainWindow
 
-from db_wrapper import Router
 from custom_exceptions import DbError
 from utils import serialNumberValidator, MAX_SERIAL_LEN
 
 # Include settings
-from settings import workflow, tests, connection
+from application import workflow, tests, qApp
 
 def _removeItemFromGridLayout(layout, row, column):
     item = layout.itemAtPosition(row, column)
@@ -65,9 +64,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.testsLayout.addItem(spacer, tests_len, 1)
 
         # open db connection
-        if not connection.open():
+        if not qApp.connection.open():
             # TODO display a message perhaps
-            raise DbError(connection.lastError().text())
+            raise DbError(qApp.connection.lastError().text())
 
     def loadRouter(self, router):
         # Set title
@@ -168,8 +167,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.stackedWidget.setCurrentWidget(self.workPage)
 
-            router = Router(serialNumber)
-            self.loadRouter(router)
+            # Set the router for the whole application
+            self.loadRouter(qApp.useRouter(serialNumber))
 
             # TODO this is just some sample remove it afterwards
             #router.storeStep(workflow.WORKFLOW[1].name, True)
@@ -184,7 +183,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def closeEvent(self, event):
 
         # close the database
-        if connection.isOpen():
-            connection.close()
+        if qApp.connection.isOpen():
+            qApp.connection.close()
 
         event.accept()
