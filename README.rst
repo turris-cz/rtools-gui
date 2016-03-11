@@ -8,6 +8,8 @@ Requirements
 
 * PyQt5
   * python-pyqt5
+  * libqt5sql5-psql
+  * python-pyqt5.qtsql
 * pexpect
 
 Howto run it
