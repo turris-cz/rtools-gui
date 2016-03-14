@@ -90,3 +90,7 @@ class Router(object):
                   VALUES (?, ?, ?, ?);
               """
         Router.executeQuery(sql, self.currentRun, name, self.stepAttempt, passed)
+
+    def setRunSuccessful(self):
+        sql = "UPDATE runs SET success = true WHERE id = ?;"
+        Router.executeQuery(sql, self.currentRun)

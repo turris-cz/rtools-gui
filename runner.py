@@ -40,7 +40,6 @@ class Runner(QtCore.QObject):
         else:
             # All finished
             self.runsFinished.emit(self.result)
-            pass
 
     @QtCore.pyqtSlot(int)
     def workerProgress(self, value):

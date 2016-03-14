@@ -216,8 +216,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.updateStep(qApp.stepPlan[planIndex], state)
         qApp.router.storeStep(workflow.WORKFLOW[qApp.stepPlan[planIndex]].name, passed)
 
-    @QtCore.pyqtSlot()
-    def stepsFinished(self):
+    @QtCore.pyqtSlot(bool)
+    def stepsFinished(self, passed):
         print "All steps finished"
         self.currentProgressBar.setEnabled(False)
         self.currentProgressBar.setValue(0)
@@ -272,11 +272,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.updateTest(qApp.testPlan[planIndex], state)
         qApp.router.storeTest(tests.TESTS[qApp.testPlan[planIndex]].name, passed)
 
-    @QtCore.pyqtSlot()
-    def testsFinished(self):
+    @QtCore.pyqtSlot(bool)
+    def testsFinished(self, passed):
         print "All tests finished"
         self.currentProgressBar.setEnabled(False)
         self.currentProgressBar.setValue(0)
         self.overallProgressBar.setEnabled(False)
         self.overallProgressBar.setValue(0)
         qApp.router.incTestAttempt()
+        if passed:
+            qApp.router.setRunSuccessful()
