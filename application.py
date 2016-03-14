@@ -4,7 +4,6 @@ import os
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtSql import QSqlDatabase
 
-from runner import Runner
 
 # custom qApp
 qApp = None
@@ -61,6 +60,7 @@ class Application(QApplication):
         return self.router
 
     def prepareTestRunner(self):
+        from runner import Runner
         # Plan all tests
         self.testPlan = range(len(tests.TESTS))
 
@@ -90,6 +90,7 @@ class Application(QApplication):
 
         # Note that runner needs to be a object member
         # otherwise it would be disposed its thread execution
+        from runner import Runner
         self.stepRunner = Runner([workflow.WORKFLOW[i] for i in self.stepPlan])
 
         return self.stepRunner
