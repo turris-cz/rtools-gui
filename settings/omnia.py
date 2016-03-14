@@ -6,9 +6,9 @@ DB = dict(
     PASSWORD='poiuytrewq',
 )
 
-# TODO set the workflow and test modules
-WORKFLOW_MODULE = 'workflow.omnia'
-TESTS_MODULE = 'tests.omnia'
+# set the steps and tests modules
+WORKFLOW_STEPS_MODULE = 'workflow.steps.omnia'
+WORKFLOW_TESTS_MODULE = 'workflow.tests.omnia'
 
 # TODO logging goes here
 #LOGGING_APP_DIR = ...

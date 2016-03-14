@@ -185,6 +185,7 @@ class Ui_MainWindow(object):
         self.scanButton.clicked.connect(MainWindow.checkBarcodeAndLoadRouter)
         self.backButton.clicked.connect(MainWindow.switchToBarcode)
         self.startStepsButton.clicked.connect(MainWindow.runSteps)
+        self.startTestsButton.clicked.connect(MainWindow.runTests)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

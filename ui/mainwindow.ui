@@ -470,10 +470,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>startTestsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>runTests()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>546</x>
+     <y>710</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>751</x>
+     <y>721</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>switchToBarcode()</slot>
   <slot>checkBarcodeAndLoadRouter()</slot>
   <slot>runSteps()</slot>
+  <slot>runTests()</slot>
  </slots>
 </ui>

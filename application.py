@@ -32,11 +32,11 @@ class Application(QApplication):
 
         # load workflow module
         global workflow
-        workflow = importlib.import_module(settings.WORKFLOW_MODULE)
+        workflow = importlib.import_module(settings.WORKFLOW_STEPS_MODULE)
 
         # load test module
         global tests
-        tests = importlib.import_module(settings.TESTS_MODULE)
+        tests = importlib.import_module(settings.WORKFLOW_TESTS_MODULE)
 
         # TODO init logging here
 
