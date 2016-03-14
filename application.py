@@ -4,6 +4,8 @@ import os
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtSql import QSqlDatabase
 
+from runner import Runner
+
 # custom qApp
 qApp = None
 
@@ -57,3 +59,37 @@ class Application(QApplication):
         self.router = Router(serialNumber)
 
         return self.router
+
+    def prepareTestRunner(self):
+        # Plan all tests
+        self.testPlan = range(len(tests.TESTS))
+
+        if not self.testPlan:
+            # TODO logging
+            print "No tests can be performed for router '%s'" % qApp.router.id
+            return None
+
+        # Note that runner needs to be a object member
+        # otherwise it would be disposed its thread execution
+        self.testRunner = Runner([tests.TESTS[i] for i in self.testPlan])
+
+        return self.testRunner
+
+    def prepareStepRunner(self):
+        # filter workflow (skipped passed)
+        self.stepPlan = [
+            i for i in range(len(workflow.WORKFLOW))
+            if not workflow.WORKFLOW[i].name in self.router.performedSteps['passed']
+        ]
+
+        # Everything was performed. Skipping
+        if not self.stepPlan:
+            # TODO logging
+            print "All steps were performed for router '%s'" % qApp.router.id
+            return
+
+        # Note that runner needs to be a object member
+        # otherwise it would be disposed its thread execution
+        self.stepRunner = Runner([workflow.WORKFLOW[i] for i in self.stepPlan])
+
+        return self.stepRunner
