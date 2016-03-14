@@ -9,6 +9,7 @@ from utils import serialNumberValidator, MAX_SERIAL_LEN
 
 # Include settings
 from application import workflow, tests, qApp
+from runner import Runner
 
 def _removeItemFromGridLayout(layout, row, column):
     item = layout.itemAtPosition(row, column)
@@ -171,7 +172,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.loadRouter(qApp.useRouter(serialNumber))
 
             # TODO this is just some sample remove it afterwards
-            #router.storeStep(workflow.WORKFLOW[1].name, True)
             #router.storeTest(tests.TESTS[1].name, True)
             self.updateTest(0, MainWindow.WORK_STATE_PASSED)
             self.updateTest(1, MainWindow.WORK_STATE_FAILED)
@@ -179,6 +179,68 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.updateTest(3, MainWindow.WORK_STATE_RUNNING)
         else:
             self.errorLabel.setText(u"'%s' je neplatné!" % serialNumber)
+
+    @QtCore.pyqtSlot()
+    def runSteps(self):
+        # filter workflow (skipped passed
+        self.plan = [
+            i for i in range(len(workflow.WORKFLOW))
+            if not workflow.WORKFLOW[i].name in qApp.router.performedSteps['passed']
+        ]
+
+        # Everything was performed. Skipping
+        if not self.plan:
+            # TODO logging
+            print "All steps were performed for router '%s'" % qApp.router.id
+            return
+
+        # Note that runner needs to be a object member
+        # otherwise it would be disposed its thread execution
+        self.runner = Runner([workflow.WORKFLOW[i] for i in self.plan])
+
+        # connect signals
+        self.runner.runProgress.connect(self.updateProgress)
+        self.runner.runStarted.connect(self.stepStarted)
+        self.runner.runFinished.connect(self.stepFinished)
+        self.runner.runsFinished.connect(self.stepsFinished)
+
+        # update progress bars
+        self.currentProgressBar.setEnabled(True)
+        self.overallProgressBar.setEnabled(True)
+        self.overallProgressBar.setMaximum(len(self.plan))
+        self.overallProgressBar.setValue(0)
+
+        # start runner
+        self.runner.performRuns()
+
+    @QtCore.pyqtSlot(int)
+    def updateProgress(self, value):
+        self.currentProgressBar.setValue(self.currentProgressBar.value() + value)
+
+    @QtCore.pyqtSlot(int)
+    def stepStarted(self, planIndex):
+        # TODO log
+        print "Starting step", workflow.WORKFLOW[self.plan[planIndex]].name
+        self.currentProgressBar.setValue(0)
+        self.updateStep(self.plan[planIndex], MainWindow.WORK_STATE_RUNNING)
+
+    @QtCore.pyqtSlot(int, bool)
+    def stepFinished(self, planIndex, passed):
+        # TODO log
+        print "Finished step", workflow.WORKFLOW[self.plan[planIndex]].name, passed
+        state = MainWindow.WORK_STATE_PASSED if passed else MainWindow.WORK_STATE_FAILED
+        self.overallProgressBar.setValue(self.overallProgressBar.value() + 1)
+        self.updateStep(self.plan[planIndex], state)
+        qApp.router.storeStep(workflow.WORKFLOW[self.plan[planIndex]].name, passed)
+
+    @QtCore.pyqtSlot()
+    def stepsFinished(self):
+        print "All steps finished"
+        self.currentProgressBar.setEnabled(False)
+        self.currentProgressBar.setValue(0)
+        self.overallProgressBar.setEnabled(False)
+        self.overallProgressBar.setValue(0)
+        qApp.router.incStepAttempt()
 
     def closeEvent(self, event):
 

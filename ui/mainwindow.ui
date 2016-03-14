@@ -350,7 +350,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QProgressBar" name="overallProgressBar">
+         <widget class="QProgressBar" name="currentProgressBar">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -363,7 +363,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QProgressBar" name="currentProgressBar">
+         <widget class="QProgressBar" name="overallProgressBar">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -413,8 +413,8 @@
    <slot>checkBarcodeAndLoadRouter()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>440</x>
-     <y>550</y>
+     <x>678</x>
+     <y>775</y>
     </hint>
     <hint type="destinationlabel">
      <x>798</x>
@@ -445,8 +445,24 @@
    <slot>switchToBarcode()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>58</x>
-     <y>52</y>
+     <x>54</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>startStepsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>runSteps()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>713</y>
     </hint>
     <hint type="destinationlabel">
      <x>374</x>
@@ -458,5 +474,6 @@
  <slots>
   <slot>switchToBarcode()</slot>
   <slot>checkBarcodeAndLoadRouter()</slot>
+  <slot>runSteps()</slot>
  </slots>
 </ui>

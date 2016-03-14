@@ -7,6 +7,20 @@ from custom_exceptions import DbError
 
 class Router(object):
 
+    def __init__(self, routerId):
+        self.performedSteps = dict(failed=set(), passed=set())
+        self.id = str(routerId).strip()
+        self.stepAttempt = 0
+        self.testAttempt = 0
+
+        # create db record if needed
+        if not self.createIfNeeded():
+            # When the router is not created get steps which passed
+            self.loadSteps()
+
+        # everytime the record is loaded start a new run
+        self.startRun()
+
     @staticmethod
     def executeQuery(sql, *values):
         query = QtSql.QSqlQuery(qApp.connection.database())
@@ -68,23 +82,11 @@ class Router(object):
               """
         order = len(self.performedSteps['passed'])
         Router.executeQuery(sql, self.currentRun, name, order, self.stepAttempt, passed)
+        if passed:
+            self.performedSteps['passed'].add(name)
 
     def storeTest(self, name, passed):
         sql = """ INSERT INTO tests (run, test_name, attempt, result)
                   VALUES (?, ?, ?, ?);
               """
         Router.executeQuery(sql, self.currentRun, name, self.stepAttempt, passed)
-
-    def __init__(self, routerId):
-        self.performedSteps = dict(failed=set(), passed=set())
-        self.id = str(routerId).strip()
-        self.stepAttempt = 0
-        self.testAttempt = 0
-
-        # create db record if needed
-        if not self.createIfNeeded():
-            # When the router is not created get steps which passed
-            self.loadSteps()
-
-        # everytime the record is loaded start a new run
-        self.startRun()
