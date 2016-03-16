@@ -47,7 +47,7 @@ class Runner(QtCore.QObject):
 
     def runSingle(self, i):
 
-        self.worker = self.runlist[i].getWorker()
+        self.worker = self.runlist[i].getWorker('/tmp/output.txt')
         self.thread = QtCore.QThread(self)
         self.worker.finished.connect(self.runDone)
         self.worker.progress.connect(self.workerProgress)

@@ -89,7 +89,7 @@ class Router(object):
         sql = """ INSERT INTO tests (run, test_name, attempt, result)
                   VALUES (?, ?, ?, ?);
               """
-        Router.executeQuery(sql, self.currentRun, name, self.stepAttempt, passed)
+        Router.executeQuery(sql, self.currentRun, name, self.testAttempt, passed)
 
     def setRunSuccessful(self):
         sql = "UPDATE runs SET success = true WHERE id = ?;"

@@ -1,5 +1,4 @@
-from PyQt5 import QtCore
-
+import time
 from workflow.base import Base, BaseWorker
 
 
@@ -11,7 +10,7 @@ class SimpleTest(Base):
         self._name = name
         self.result = result
 
-    def getWorker(self):
+    def createWorker(self):
         return SimpleTestWorker(self.result)
 
 
@@ -20,14 +19,14 @@ class SimpleTestWorker(BaseWorker):
         super(SimpleTestWorker, self).__init__()
         self.result = result
 
-    @QtCore.pyqtSlot()
-    def start(self):
-        for i in range(0, 100, 10):
-            QtCore.QThread.msleep(100)
-            self.progress.emit(10)
-            QtCore.QThread.msleep(100)
-        self.finished.emit(self.result)
+    def perform(self):
 
+        for i in range(0, 100, 10):
+            time.sleep(0.05)
+            self.progress.emit(10)
+            time.sleep(0.05)
+
+        return self.result
 
 
 TESTS = (

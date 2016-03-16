@@ -266,7 +266,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot(int, bool)
     def testFinished(self, planIndex, passed):
         # TODO log
-        print "Finished test", workflow.WORKFLOW[qApp.testPlan[planIndex]].name, passed
+        print "Finished test", tests.TESTS[qApp.testPlan[planIndex]].name, passed
         state = MainWindow.WORK_STATE_PASSED if passed else MainWindow.WORK_STATE_FAILED
         self.overallProgressBar.setValue(self.overallProgressBar.value() + 1)
         self.updateTest(qApp.testPlan[planIndex], state)
