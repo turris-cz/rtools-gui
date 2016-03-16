@@ -1,5 +1,7 @@
 import importlib
+import logging
 import os
+import errno
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtSql import QSqlDatabase
@@ -39,7 +41,36 @@ class Application(QApplication):
         global tests
         tests = importlib.import_module(settings.WORKFLOW_TESTS_MODULE)
 
-        # TODO init logging here
+        # init logging
+        try:
+            os.makedirs(os.path.dirname(settings.LOG_APP_FILE))
+        except OSError as e:
+            # Dir already exists continue
+            if e.errno not in [errno.EEXIST]:
+                raise e
+
+        logging.root.setLevel(logging.INFO)
+        logging.FileHandler(settings.LOG_APP_FILE)
+        LOGFORMAT = '%(asctime)s - %(levelname)s - [%(name)s] %(message)s'
+        logFormatter = logging.Formatter(LOGFORMAT)
+        fh = logging.FileHandler(settings.LOG_APP_FILE)
+        fh.setFormatter(logFormatter)
+        self.loggerMain = logging.getLogger("MAIN")
+        self.loggerMain.addHandler(fh)
+        self.loggerDb = logging.getLogger("DB")
+        self.loggerDb.addHandler(fh)
+
+        try:
+            os.makedirs(os.path.dirname(settings.LOG_ROUTERS_DIR))
+        except OSError as e:
+            # Dir already exists continue
+            if e.errno not in [errno.EEXIST]:
+                raise e
+
+        self.loggerMain.info("Application starting")
+        self.loggerMain.info("Using settings '%s'" % settings_module)
+        self.loggerMain.info("Using steps '%s'" % settings.WORKFLOW_STEPS_MODULE)
+        self.loggerMain.info("Using tests '%s'" % settings.WORKFLOW_TESTS_MODULE)
 
         # set the db connection
         self.connection = QSqlDatabase.addDatabase("QPSQL")
@@ -65,8 +96,7 @@ class Application(QApplication):
         self.testPlan = range(len(tests.TESTS))
 
         if not self.testPlan:
-            # TODO logging
-            print "No tests can be performed for router '%s'" % qApp.router.id
+            self.loggerMain.info("No tests can be performed for router '%s'" % qApp.router.id)
             return None
 
         # Note that runner needs to be a object member
@@ -84,9 +114,11 @@ class Application(QApplication):
 
         # Everything was performed. Skipping
         if not self.stepPlan:
-            # TODO logging
-            print "All steps were performed for router '%s'" % qApp.router.id
-            return
+            self.loggerMain.info(
+                "All steps were performed for router '%s (%s)'"
+                % (qApp.router.id, qApp.router.idHex)
+            )
+            return None
 
         # Note that runner needs to be a object member
         # otherwise it would be disposed its thread execution

@@ -70,7 +70,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def loadRouter(self, router):
         # Set title
-        self.serialNumberLabel.setText(router.id + " (%016x)" % int(router.id))
+        self.serialNumberLabel.setText("%s (%s)" % (router.id, router.idHex))
 
         # Update steps
         passed = router.performedSteps['passed']  # step passed at least once
@@ -175,6 +175,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def runSteps(self):
+        qApp.loggerMain.info("Starting to run steps.")
         runner = qApp.prepareStepRunner()
 
         if not runner:
@@ -202,15 +203,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot(int)
     def stepStarted(self, planIndex):
-        # TODO log
-        print "Starting step", workflow.WORKFLOW[qApp.stepPlan[planIndex]].name
+        name = workflow.WORKFLOW[qApp.stepPlan[planIndex]].name
+        qApp.loggerMain.info("Starting step '%s'" % name)
         self.currentProgressBar.setValue(0)
         self.updateStep(qApp.stepPlan[planIndex], MainWindow.WORK_STATE_RUNNING)
 
     @QtCore.pyqtSlot(int, bool)
     def stepFinished(self, planIndex, passed):
-        # TODO log
-        print "Finished step", workflow.WORKFLOW[qApp.stepPlan[planIndex]].name, passed
+        name = workflow.WORKFLOW[qApp.stepPlan[planIndex]].name
+        msg = "Step '%s' finished - passed %s" % (name, str(passed))
+        qApp.loggerMain.info(msg) if passed else qApp.loggerMain.error(msg)
         state = MainWindow.WORK_STATE_PASSED if passed else MainWindow.WORK_STATE_FAILED
         self.overallProgressBar.setValue(self.overallProgressBar.value() + 1)
         self.updateStep(qApp.stepPlan[planIndex], state)
@@ -218,7 +220,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot(bool)
     def stepsFinished(self, passed):
-        print "All steps finished"
+        msg = "All steps finished"
+        qApp.loggerMain.info(msg)
         self.currentProgressBar.setEnabled(False)
         self.currentProgressBar.setValue(0)
         self.overallProgressBar.setEnabled(False)
@@ -235,6 +238,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot()
     def runTests(self):
+        qApp.loggerMain.info("Starting to run tests.")
         runner = qApp.prepareTestRunner()
 
         if not runner:
@@ -258,15 +262,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot(int)
     def testStarted(self, planIndex):
-        # TODO log
-        print "Starting test", workflow.WORKFLOW[qApp.testPlan[planIndex]].name
+        name = tests.TESTS[qApp.testPlan[planIndex]].name
+        qApp.loggerMain.info("Starting test '%s'" % name)
         self.currentProgressBar.setValue(0)
         self.updateTest(qApp.testPlan[planIndex], MainWindow.WORK_STATE_RUNNING)
 
     @QtCore.pyqtSlot(int, bool)
     def testFinished(self, planIndex, passed):
-        # TODO log
-        print "Finished test", tests.TESTS[qApp.testPlan[planIndex]].name, passed
+        name = tests.TESTS[qApp.testPlan[planIndex]].name
+        msg = "Test '%s' finished - passed %s" % (name, str(passed))
+        qApp.loggerMain.info(msg) if passed else qApp.loggerMain.error(msg)
         state = MainWindow.WORK_STATE_PASSED if passed else MainWindow.WORK_STATE_FAILED
         self.overallProgressBar.setValue(self.overallProgressBar.value() + 1)
         self.updateTest(qApp.testPlan[planIndex], state)
@@ -274,7 +279,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot(bool)
     def testsFinished(self, passed):
-        print "All tests finished"
+        msg = "All tests finished"
+        qApp.loggerMain.info(msg)
         self.currentProgressBar.setEnabled(False)
         self.currentProgressBar.setValue(0)
         self.overallProgressBar.setEnabled(False)

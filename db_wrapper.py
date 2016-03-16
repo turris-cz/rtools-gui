@@ -7,6 +7,10 @@ from custom_exceptions import DbError
 
 class Router(object):
 
+    @property
+    def idHex(self):
+        return "%016x" % int(self.id)
+
     def __init__(self, routerId):
         self.performedSteps = dict(failed=set(), passed=set())
         self.id = str(routerId).strip()
@@ -30,8 +34,10 @@ class Router(object):
         for value in values:
             query.addBindValue(value)
 
-        # TODO logging db goes here
-        print re.sub(' +', ' ', re.sub('\n', ' ', query.executedQuery())).strip(), values
+        qApp.loggerDb.info(
+            "%s %s" %
+            (re.sub(' +', ' ', re.sub('\n', ' ', query.executedQuery())).strip(), values)
+        )
         if not query.exec_():
             raise DbError(qApp.connection.lastError().text())
 
@@ -42,7 +48,8 @@ class Router(object):
         query = self.executeQuery(sql, self.id)
         query.first()
         self.currentRun = query.record().value('id')
-        # TODO log run
+        qApp.loggerMain.info(
+            "Starting a run '%d' for router '%s (%s)'" % (self.currentRun, self.id, self.idHex))
 
     def createIfNeeded(self):
         sql = "SELECT * FROM routers WHERE id = ?;"
@@ -55,6 +62,7 @@ class Router(object):
         return False
 
     def loadSteps(self):
+        qApp.loggerMain.info("Loading performed steps.")
         sql = """ SELECT DISTINCT steps.step_name AS name, steps.passed as passed from routers
                   INNER JOIN runs ON runs.router = routers.id
                   INNER JOIN steps ON runs.id = steps.run
@@ -63,12 +71,13 @@ class Router(object):
         query = Router.executeQuery(sql, self.id)
         self.performedSteps = dict(failed=set(), passed=set())
         while query.next():
-            # TODO logging
-            print query.record().value('name'), query.record().value('passed')
             if query.record().value('passed'):
                 self.performedSteps['passed'].add(query.record().value('name'))
             else:
                 self.performedSteps['failed'].add(query.record().value('name'))
+
+        qApp.loggerMain.info("Passed steps: %s" % ", ".join(self.performedSteps['passed']))
+        qApp.loggerMain.info("Failed steps: %s" % ", ".join(self.performedSteps['failed']))
 
     def incStepAttempt(self):
         self.stepAttempt += 1
@@ -92,5 +101,9 @@ class Router(object):
         Router.executeQuery(sql, self.currentRun, name, self.testAttempt, passed)
 
     def setRunSuccessful(self):
+        qApp.loggerMain.info(
+            "Run '%d' was successful and router '%s(%s)' is alive" %
+            (self.currentRun, self.id, self.idHex)
+        )
         sql = "UPDATE runs SET success = true WHERE id = ?;"
         Router.executeQuery(sql, self.currentRun)

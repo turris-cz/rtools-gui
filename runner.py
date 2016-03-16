@@ -1,4 +1,9 @@
+import os
+
+from datetime import datetime
 from PyQt5 import QtCore
+
+from application import qApp, settings
 
 class Runner(QtCore.QObject):
     startWorker = QtCore.pyqtSignal()
@@ -9,8 +14,7 @@ class Runner(QtCore.QObject):
 
     def __init__(self, runlist):
         super(Runner, self).__init__()
-        # TODO log run list
-        print "RUNLIST", runlist
+        qApp.loggerMain.info("Runlist: %s" % ", ".join([e.name for e in runlist]))
         self.runlist = runlist
         self.current = 0
         self.result = True
@@ -47,7 +51,12 @@ class Runner(QtCore.QObject):
 
     def runSingle(self, i):
 
-        self.worker = self.runlist[i].getWorker('/tmp/output.txt')
+        filename = "%s-%08d-%s.txt" % (
+            qApp.router.id, qApp.router.currentRun, datetime.now().strftime("%Y-%m-%d-%H-%M")
+        )
+        dirname = settings.LOG_ROUTERS_DIR
+
+        self.worker = self.runlist[i].getWorker(os.path.join(dirname, filename))
         self.thread = QtCore.QThread(self)
         self.worker.finished.connect(self.runDone)
         self.worker.progress.connect(self.workerProgress)

@@ -21,6 +21,5 @@ SERIAL_CONSOLE_SETTINGS = {
     'baudrate': 115200,
 }
 
-# TODO logging goes here
-#LOGGING_APP_DIR = ...
-#LOGGING_ROUTERS_DIR = ...
+LOG_APP_FILE = '/tmp/rtools/application.log'
+LOG_ROUTERS_DIR = '/tmp/rtools/outputs/'
