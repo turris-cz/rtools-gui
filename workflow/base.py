@@ -11,17 +11,16 @@ class Base(object):
         return self._name
 
     @abc.abstractmethod
-    def getWorker(self, window):
+    def getWorker(self):
         pass
 
 
 class BaseWorker(QtCore.QObject):
-    timeout = 10
     progress = QtCore.pyqtSignal(int)
     finished = QtCore.pyqtSignal(bool)
 
     @abc.abstractmethod
     @QtCore.pyqtSlot()
-    def start():
+    def start(self):
         """ This function needs to emit finished signal """
         pass

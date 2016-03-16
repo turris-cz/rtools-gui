@@ -1,5 +1,6 @@
 import pexpect
 import sys
+import os
 
 from PyQt5 import QtCore
 
@@ -32,6 +33,54 @@ class SampleWorker(BaseWorker):
         child.expect(pexpect.EOF)
         self.finished.emit(True)
 
+class SerialReboot(Base):
+    _name = "SERIAL REBOOT"
+
+    def getWorker(self):
+        return SerialRebootWorker(settings.SERIAL_CONSOLE_SETTINGS)
+
+
+class SerialRebootWorker(BaseWorker):
+
+    def __init__(self, scSettings):
+        super(SerialRebootWorker, self).__init__()
+        self.scSettings = scSettings
+
+    @QtCore.pyqtSlot()
+    def start(self):
+        # TODO logging
+        with open('/tmp/output.txt', 'w') as log_file:
+
+            wrapper_path = os.path.join(sys.path[0], 'sc_wrapper.py')
+            exp = pexpect.spawn(
+                wrapper_path,
+                ['-b', str(self.scSettings['baudrate']), '-d', self.scSettings['device']],
+                logfile=log_file
+            )
+            exp.sendline('\n')
+            exp.expect('root@turris:/#')
+            exp.sendline('reboot')
+            self.progress.emit(5)
+            plan = [
+                'Router Turris successfully started.',
+                'fuse init',
+                'procd: - init -',
+                'ncompressing Kernel Image ... OK',
+                'BOOT NAND',
+            ]
+            while True:
+                res = exp.expect(plan)
+                if res == 0:  # first is a final success
+                    break
+                else:
+                    self.progress.emit(20)
+                    # remove from plan (avoid going in boot cyrcles)
+                    del plan[res]
+
+            exp.terminate()
+
+        self.finished.emit(True)
+
 
 WORKFLOW = (
     Sample("POWER"),
@@ -40,4 +89,5 @@ WORKFLOW = (
     Sample("REBOOT"),
     Sample("REFLASH"),
     Sample("RTC"),
+    SerialReboot(),
 )

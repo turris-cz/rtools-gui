@@ -16,6 +16,11 @@ STEP_SETTINGS = {
     }
 }
 
+SERIAL_CONSOLE_SETTINGS = {
+    'device': "/dev/ttyUSB0",
+    'baudrate': 115200,
+}
+
 # TODO logging goes here
 #LOGGING_APP_DIR = ...
 #LOGGING_ROUTERS_DIR = ...

@@ -10,6 +10,7 @@ Requirements
   * python-pyqt5
   * libqt5sql5-psql
   * python-pyqt5.qtsql
+  * python-pyqt5.qtserialport
 * pexpect
 
 Howto run it
