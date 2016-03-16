@@ -1,10 +1,8 @@
 import time
-from workflow.base import Base, BaseWorker
+from workflow.base import BaseTest, BaseWorker
 
 
-class SimpleTest(Base):
-
-    continueOnFailure = True
+class SimpleTest(BaseTest):
 
     def __init__(self, name, result):
         self._name = name

@@ -22,6 +22,9 @@ class Base(object):
         setattr(worker, 'logfile', logfile)
         return worker
 
+class BaseTest(Base):
+    continueOnFailure = True
+
 
 class BaseWorker(QtCore.QObject):
     progress = QtCore.pyqtSignal(int)
