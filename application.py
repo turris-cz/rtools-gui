@@ -1,6 +1,7 @@
 import importlib
 import logging
 import os
+import sys
 import errno
 
 from PyQt5.QtWidgets import QApplication
@@ -51,14 +52,19 @@ class Application(QApplication):
 
         logging.root.setLevel(logging.INFO)
         logging.FileHandler(settings.LOG_APP_FILE)
-        LOGFORMAT = '%(asctime)s - %(levelname)s - [%(name)s] %(message)s'
-        logFormatter = logging.Formatter(LOGFORMAT)
-        fh = logging.FileHandler(settings.LOG_APP_FILE)
-        fh.setFormatter(logFormatter)
+        STDOUTFORMAT = '%(levelname)s %(message)s'
+        FILEFORMAT = '%(asctime)s - %(levelname)s - [%(name)s] %(message)s'
+        fileFormatter = logging.Formatter(FILEFORMAT)
+        fileHandler = logging.FileHandler(settings.LOG_APP_FILE)
+        fileHandler.setFormatter(fileFormatter)
+        stdoutHandler = logging.StreamHandler(sys.stdout)
+        stdoutFormatter = logging.Formatter(STDOUTFORMAT)
+        stdoutHandler.setFormatter(stdoutFormatter)
         self.loggerMain = logging.getLogger("MAIN")
-        self.loggerMain.addHandler(fh)
+        self.loggerMain.addHandler(fileHandler)
+        self.loggerMain.addHandler(stdoutHandler)
         self.loggerDb = logging.getLogger("DB")
-        self.loggerDb.addHandler(fh)
+        self.loggerDb.addHandler(fileHandler)
 
         try:
             os.makedirs(os.path.dirname(settings.LOG_ROUTERS_DIR))
