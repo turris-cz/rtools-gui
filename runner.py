@@ -6,16 +6,23 @@ from PyQt5 import QtCore
 from application import qApp, settings
 
 class Runner(QtCore.QObject):
+    TYPE_STEPS = 'steps'
+    TYPE_TESTS = 'tests'
+
     startWorker = QtCore.pyqtSignal()
     runsFinished = QtCore.pyqtSignal(bool)
     runStarted = QtCore.pyqtSignal(int)
     runFinished = QtCore.pyqtSignal(int, bool)
     runProgress = QtCore.pyqtSignal(int)
 
-    def __init__(self, runlist):
+    def __init__(self, routerId, runlist, runId, typeName, attempt):
         super(Runner, self).__init__()
         qApp.loggerMain.info("Runlist: %s" % ", ".join([e.name for e in runlist]))
+        self.routerId = routerId
         self.runlist = runlist
+        self.runId = runId
+        self.typeName = typeName
+        self.attempt = attempt
         self.current = 0
         self.result = True
 
@@ -51,8 +58,9 @@ class Runner(QtCore.QObject):
 
     def runSingle(self, i):
 
-        filename = "%s-%08d-%s.txt" % (
-            qApp.router.id, qApp.router.currentRun, datetime.now().strftime("%Y-%m-%d-%H-%M")
+        filename = "%s-%08d-%s-%04d-%s.txt" % (
+            self.routerId, self.runId, self.typeName, self.attempt,
+            datetime.now().strftime("%Y-%m-%d-%H-%M")
         )
         dirname = settings.LOG_ROUTERS_DIR
 

@@ -96,12 +96,15 @@ class Application(QApplication):
         self.testPlan = range(len(tests.TESTS))
 
         if not self.testPlan:
-            self.loggerMain.info("No tests can be performed for router '%s'" % qApp.router.id)
+            self.loggerMain.info("No tests can be performed for router '%s'" % self.router.id)
             return None
 
         # Note that runner needs to be a object member
         # otherwise it would be disposed its thread execution
-        self.testRunner = Runner([tests.TESTS[i] for i in self.testPlan])
+        self.testRunner = Runner(
+            self.router.id, [tests.TESTS[i] for i in self.testPlan], self.router.currentRun,
+            Runner.TYPE_TESTS, self.router.testAttempt
+        )
 
         return self.testRunner
 
@@ -116,13 +119,16 @@ class Application(QApplication):
         if not self.stepPlan:
             self.loggerMain.info(
                 "All steps were performed for router '%s (%s)'"
-                % (qApp.router.id, qApp.router.idHex)
+                % (self.router.id, self.router.idHex)
             )
             return None
 
         # Note that runner needs to be a object member
         # otherwise it would be disposed its thread execution
         from runner import Runner
-        self.stepRunner = Runner([workflow.WORKFLOW[i] for i in self.stepPlan])
+        self.stepRunner = Runner(
+            self.router.id, [workflow.WORKFLOW[i] for i in self.stepPlan],
+            self.router.currentRun, Runner.TYPE_STEPS, self.router.stepAttempt
+        )
 
         return self.stepRunner
