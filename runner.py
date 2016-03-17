@@ -1,4 +1,5 @@
 import os
+import sys
 
 from datetime import datetime
 from PyQt5 import QtCore
@@ -18,19 +19,51 @@ class Runner(QtCore.QObject):
     def __init__(self, routerId, runlist, runId, typeName, attempt):
         super(Runner, self).__init__()
         qApp.loggerMain.info("Runlist: %s" % ", ".join([e.name for e in runlist]))
+
+        # set the variables
         self.routerId = routerId
         self.runlist = runlist
         self.runId = runId
         self.typeName = typeName
         self.attempt = attempt
+
+        logname = "%s-%08d-%s-%04d-%s.txt" % (
+            self.routerId, self.runId, self.typeName, self.attempt,
+            datetime.now().strftime("%Y-%m-%d-%H-%M")
+        )
+        self.logFile = os.path.join(settings.LOG_ROUTERS_DIR, logname)
+
+    def performRuns(self):
         self.current = 0
         self.passedCount = 0
         self.result = True
 
-    def performRuns(self):
-        self.current = 0
-        self.result = True
-        self.runSingle(self.current)
+        # prepare the console pipe process
+        qApp.loggerMain.info("Starting serial console pipe process.")
+        pipePath = os.path.join(sys.path[0], 'sc_pipe.py')
+        self.pipeProcess = QtCore.QProcess()
+        self.pipeProcess.start(
+            pipePath, [
+                '-b', str(settings.SERIAL_CONSOLE_SETTINGS['baudrate']),
+                '-d', settings.SERIAL_CONSOLE_SETTINGS['device'],
+                '-l', self.logFile,
+            ]
+        )
+
+        if self.pipeProcess.waitForStarted(500):  # wait for 0.5s to start the process
+            # start the runs
+            self.runSingle(self.current)
+            qApp.loggerMain.info("Serial console pipe process started.")
+            return True
+        else:
+            qApp.loggerMain.error("Failed to start serial console pipe process. Run terminated!")
+            return False
+
+    def finish(self):
+        self.runsFinished.emit(self.passedCount, len(self.runlist))
+        # Force kill the process
+        self.pipeProcess.kill()
+        qApp.loggerMain.info("Terminating serial console pipe process.")
 
     @QtCore.pyqtSlot(bool)
     def runDone(self, result):
@@ -42,7 +75,7 @@ class Runner(QtCore.QObject):
 
         if not result and not self.runlist[self.current].continueOnFailure:
             self.runFinished.emit(self.current, False)
-            self.runsFinished.emit(self.passedCount, len(self.runlist))
+            self.finish()
             return
 
         self.runFinished.emit(self.current, result)
@@ -54,7 +87,7 @@ class Runner(QtCore.QObject):
             self.runSingle(self.current)
         else:
             # All finished
-            self.runsFinished.emit(self.passedCount, len(self.runlist))
+            self.finish()
 
     @QtCore.pyqtSlot(int)
     def workerProgress(self, value):
@@ -62,13 +95,7 @@ class Runner(QtCore.QObject):
 
     def runSingle(self, i):
 
-        filename = "%s-%08d-%s-%04d-%s.txt" % (
-            self.routerId, self.runId, self.typeName, self.attempt,
-            datetime.now().strftime("%Y-%m-%d-%H-%M")
-        )
-        dirname = settings.LOG_ROUTERS_DIR
-
-        self.worker = self.runlist[i].getWorker(os.path.join(dirname, filename))
+        self.worker = self.runlist[i].getWorker(self.logFile)
         self.thread = QtCore.QThread(self)
         self.worker.finished.connect(self.runDone)
         self.worker.progress.connect(self.workerProgress)

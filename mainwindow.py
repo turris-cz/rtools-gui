@@ -188,14 +188,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         runner.runFinished.connect(self.stepFinished)
         runner.runsFinished.connect(self.stepsFinished)
 
-        # update progress bars
-        self.currentProgressBar.setEnabled(True)
-        self.overallProgressBar.setEnabled(True)
-        self.overallProgressBar.setMaximum(len(qApp.stepPlan))
-        self.overallProgressBar.setValue(0)
-
         # start runner
-        runner.performRuns()
+        if runner.performRuns():
+            # update progress bars
+            self.currentProgressBar.setEnabled(True)
+            self.overallProgressBar.setEnabled(True)
+            self.overallProgressBar.setMaximum(len(qApp.stepPlan))
+            self.overallProgressBar.setValue(0)
 
     @QtCore.pyqtSlot(int)
     def updateProgress(self, value):
@@ -251,14 +250,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         runner.runFinished.connect(self.testFinished)
         runner.runsFinished.connect(self.testsFinished)
 
-        # update progress bars
-        self.currentProgressBar.setEnabled(True)
-        self.overallProgressBar.setEnabled(True)
-        self.overallProgressBar.setMaximum(len(qApp.testPlan))
-        self.overallProgressBar.setValue(0)
-
         # start runner
-        runner.performRuns()
+        if runner.performRuns():
+            # update progress bars
+            self.currentProgressBar.setEnabled(True)
+            self.overallProgressBar.setEnabled(True)
+            self.overallProgressBar.setMaximum(len(qApp.testPlan))
+            self.overallProgressBar.setValue(0)
 
     @QtCore.pyqtSlot(int)
     def testStarted(self, planIndex):

@@ -35,22 +35,13 @@ class SerialReboot(Base):
     _name = "SERIAL REBOOT"
 
     def createWorker(self):
-        return SerialRebootWorker(settings.SERIAL_CONSOLE_SETTINGS)
+        return SerialRebootWorker()
 
 
 class SerialRebootWorker(BaseWorker):
 
-    def __init__(self, scSettings):
-        super(SerialRebootWorker, self).__init__()
-        self.scSettings = scSettings
-
     def perform(self):
-        wrapper_path = os.path.join(sys.path[0], 'sc_wrapper.py')
-        exp = pexpect.spawn(
-            wrapper_path,
-            ['-b', str(self.scSettings['baudrate']), '-d', self.scSettings['device']],
-            logfile=self.log
-        )
+        exp = pexpect.spawn(os.path.join(sys.path[0], 'sc_connector.py'))
         exp.sendline('\n')
         exp.expect('root@turris:/#')
         exp.sendline('reboot')
