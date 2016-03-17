@@ -10,7 +10,7 @@ class Runner(QtCore.QObject):
     TYPE_TESTS = 'tests'
 
     startWorker = QtCore.pyqtSignal()
-    runsFinished = QtCore.pyqtSignal(bool)
+    runsFinished = QtCore.pyqtSignal(int, int)
     runStarted = QtCore.pyqtSignal(int)
     runFinished = QtCore.pyqtSignal(int, bool)
     runProgress = QtCore.pyqtSignal(int)
@@ -24,6 +24,7 @@ class Runner(QtCore.QObject):
         self.typeName = typeName
         self.attempt = attempt
         self.current = 0
+        self.passedCount = 0
         self.result = True
 
     def performRuns(self):
@@ -36,9 +37,12 @@ class Runner(QtCore.QObject):
         # stop the thread
         self.thread.quit()
 
+        if result:
+            self.passedCount += 1
+
         if not result and not self.runlist[self.current].continueOnFailure:
             self.runFinished.emit(self.current, False)
-            self.runsFinished.emit(False)
+            self.runsFinished.emit(self.passedCount, len(self.runlist))
             return
 
         self.runFinished.emit(self.current, result)
@@ -50,7 +54,7 @@ class Runner(QtCore.QObject):
             self.runSingle(self.current)
         else:
             # All finished
-            self.runsFinished.emit(self.result)
+            self.runsFinished.emit(self.passedCount, len(self.runlist))
 
     @QtCore.pyqtSlot(int)
     def workerProgress(self, value):

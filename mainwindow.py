@@ -211,16 +211,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot(int, bool)
     def stepFinished(self, planIndex, passed):
         name = workflow.WORKFLOW[qApp.stepPlan[planIndex]].name
-        msg = "Step '%s' finished - passed %s" % (name, str(passed))
+        msg = "Step '%s' finished - %s" % (name, ("PASSED" if passed else "FAILED"))
         qApp.loggerMain.info(msg) if passed else qApp.loggerMain.error(msg)
         state = MainWindow.WORK_STATE_PASSED if passed else MainWindow.WORK_STATE_FAILED
         self.overallProgressBar.setValue(self.overallProgressBar.value() + 1)
         self.updateStep(qApp.stepPlan[planIndex], state)
         qApp.router.storeStep(workflow.WORKFLOW[qApp.stepPlan[planIndex]].name, passed)
 
-    @QtCore.pyqtSlot(bool)
-    def stepsFinished(self, passed):
-        msg = "All steps finished"
+    @QtCore.pyqtSlot(int, int)
+    def stepsFinished(self, passedCount, totalCount):
+        msg = "Steps finished (%d/%d succeeded)" % (passedCount, totalCount)
         qApp.loggerMain.info(msg)
         self.currentProgressBar.setEnabled(False)
         self.currentProgressBar.setValue(0)
@@ -270,21 +270,21 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot(int, bool)
     def testFinished(self, planIndex, passed):
         name = tests.TESTS[qApp.testPlan[planIndex]].name
-        msg = "Test '%s' finished - passed %s" % (name, str(passed))
+        msg = "Test '%s' finished - passed %s" % (name, ("PASSED" if passed else "FAILED"))
         qApp.loggerMain.info(msg) if passed else qApp.loggerMain.error(msg)
         state = MainWindow.WORK_STATE_PASSED if passed else MainWindow.WORK_STATE_FAILED
         self.overallProgressBar.setValue(self.overallProgressBar.value() + 1)
         self.updateTest(qApp.testPlan[planIndex], state)
         qApp.router.storeTest(tests.TESTS[qApp.testPlan[planIndex]].name, passed)
 
-    @QtCore.pyqtSlot(bool)
-    def testsFinished(self, passed):
-        msg = "All tests finished"
+    @QtCore.pyqtSlot(int, int)
+    def testsFinished(self, passedCount, totalCount):
+        msg = "Tests finished (%d/%d succeeded)" % (passedCount, totalCount)
         qApp.loggerMain.info(msg)
         self.currentProgressBar.setEnabled(False)
         self.currentProgressBar.setValue(0)
         self.overallProgressBar.setEnabled(False)
         self.overallProgressBar.setValue(0)
         qApp.router.incTestAttempt()
-        if passed:
+        if passedCount == totalCount:
             qApp.router.setRunSuccessful()
