@@ -82,6 +82,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.updateStep(i, MainWindow.WORK_STATE_FAILED)
             else:
                 self.updateStep(i, MainWindow.WORK_STATE_UNKNOWN)
+        for i in range(len(tests.TESTS)):
+            self.updateTest(i, MainWindow.WORK_STATE_UNKNOWN)
 
     def cleanErrorMessage(self):
         self.errorLabel.setText("")
