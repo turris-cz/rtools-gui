@@ -26,6 +26,7 @@ class Runner(QtCore.QObject):
         self.runId = runId
         self.typeName = typeName
         self.attempt = attempt
+        self.running = False
 
         logname = "%s-%08d-%s-%04d-%s.txt" % (
             self.routerId, self.runId, self.typeName, self.attempt,
@@ -54,6 +55,7 @@ class Runner(QtCore.QObject):
             # start the runs
             self.runSingle(self.current)
             qApp.loggerMain.info("Serial console pipe process started.")
+            self.running = True
             return True
         else:
             qApp.loggerMain.error("Failed to start serial console pipe process. Run terminated!")
@@ -64,6 +66,7 @@ class Runner(QtCore.QObject):
         # Force kill the process
         self.pipeProcess.kill()
         qApp.loggerMain.info("Terminating serial console pipe process.")
+        self.running = False
 
     @QtCore.pyqtSlot(bool)
     def runDone(self, result):

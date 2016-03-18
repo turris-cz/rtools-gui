@@ -89,15 +89,22 @@ class Application(QApplication):
         self.router = None
 
     def useRouter(self, serialNumber):
-        # TODO log setting the router here
 
         from db_wrapper import Router
         self.router = Router(serialNumber)
 
         return self.router
 
+    def _canStartRunner(self):
+        if hasattr(self, 'runner') and self.runner and self.runner.running:
+            self.loggerMain.error("Other runner is already running!")
+            return False
+        return True
+
     def prepareTestRunner(self):
-        from runner import Runner
+        if not self._canStartRunner():
+            return None
+
         # Plan all tests
         self.testPlan = range(len(tests.TESTS))
 
@@ -107,14 +114,18 @@ class Application(QApplication):
 
         # Note that runner needs to be a object member
         # otherwise it would be disposed its thread execution
-        self.testRunner = Runner(
+        from runner import Runner
+        self.runner = Runner(
             self.router.id, [tests.TESTS[i] for i in self.testPlan], self.router.currentRun,
             Runner.TYPE_TESTS, self.router.testAttempt
         )
 
-        return self.testRunner
+        return self.runner
 
     def prepareStepRunner(self):
+        if not self._canStartRunner():
+            return None
+
         # filter workflow (skipped passed)
         self.stepPlan = [
             i for i in range(len(workflow.WORKFLOW))
@@ -132,9 +143,9 @@ class Application(QApplication):
         # Note that runner needs to be a object member
         # otherwise it would be disposed its thread execution
         from runner import Runner
-        self.stepRunner = Runner(
+        self.runner = Runner(
             self.router.id, [workflow.WORKFLOW[i] for i in self.stepPlan],
             self.router.currentRun, Runner.TYPE_STEPS, self.router.stepAttempt
         )
 
-        return self.stepRunner
+        return self.runner
