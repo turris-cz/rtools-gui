@@ -86,6 +86,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def cleanErrorMessage(self):
         self.errorLabel.setText("")
 
+    def _updateProgressBars(self, enabled, overallMax=None):
+            self.currentProgressBar.setEnabled(enabled)
+            self.overallProgressBar.setEnabled(enabled)
+            if overallMax:
+                self.overallProgressBar.setMaximum(overallMax)
+                self.overallProgressBar.setValue(0)
+
     def _statusToWidget(self, parent, status):
         if status == MainWindow.WORK_STATE_UNKNOWN:
             widget = QtWidgets.QLabel(parent)
@@ -190,11 +197,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # start runner
         if runner.performRuns():
-            # update progress bars
-            self.currentProgressBar.setEnabled(True)
-            self.overallProgressBar.setEnabled(True)
-            self.overallProgressBar.setMaximum(len(qApp.stepPlan))
-            self.overallProgressBar.setValue(0)
+            self._updateProgressBars(True, len(qApp.stepPlan))
 
     @QtCore.pyqtSlot(int)
     def updateProgress(self, value):
@@ -221,10 +224,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def stepsFinished(self, passedCount, totalCount):
         msg = "Steps finished (%d/%d succeeded)" % (passedCount, totalCount)
         qApp.loggerMain.info(msg)
-        self.currentProgressBar.setEnabled(False)
-        self.currentProgressBar.setValue(0)
-        self.overallProgressBar.setEnabled(False)
-        self.overallProgressBar.setValue(0)
+        self._updateProgressBars(False)
         qApp.router.incStepAttempt()
 
     def closeEvent(self, event):
@@ -252,11 +252,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # start runner
         if runner.performRuns():
-            # update progress bars
-            self.currentProgressBar.setEnabled(True)
-            self.overallProgressBar.setEnabled(True)
-            self.overallProgressBar.setMaximum(len(qApp.testPlan))
-            self.overallProgressBar.setValue(0)
+            self._updateProgressBars(True, len(qApp.testPlan))
 
     @QtCore.pyqtSlot(int)
     def testStarted(self, planIndex):
@@ -279,10 +275,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def testsFinished(self, passedCount, totalCount):
         msg = "Tests finished (%d/%d succeeded)" % (passedCount, totalCount)
         qApp.loggerMain.info(msg)
-        self.currentProgressBar.setEnabled(False)
-        self.currentProgressBar.setValue(0)
-        self.overallProgressBar.setEnabled(False)
-        self.overallProgressBar.setValue(0)
+        self._updateProgressBars(False)
         qApp.router.incTestAttempt()
         if passedCount == totalCount:
             qApp.router.setRunSuccessful()
