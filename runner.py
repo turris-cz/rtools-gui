@@ -96,12 +96,18 @@ class Runner(QtCore.QObject):
     def workerProgress(self, value):
         return self.runProgress.emit(value)
 
+    @QtCore.pyqtSlot(str)
+    def firwareObtained(self, firmware):
+        qApp.loggerMain.info("Firmware obtained - %s" % firmware)
+        qApp.router.storeFirmware(firmware)
+
     def runSingle(self, i):
 
         self.worker = self.runlist[i].getWorker(self.logFile)
         self.thread = QtCore.QThread(self)
         self.worker.finished.connect(self.runDone)
         self.worker.progress.connect(self.workerProgress)
+        self.worker.firmware.connect(self.firwareObtained)
         self.startWorker.connect(self.worker.start)
         self.worker.moveToThread(self.thread)
         # Start the thread event loop

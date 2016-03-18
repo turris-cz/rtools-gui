@@ -126,3 +126,9 @@ class Router(object):
     def canStartSteps(self):
         # at least one step is missing
         return len({e.name for e in workflow.WORKFLOW} - self.performedSteps['passed']) != 0
+
+    def storeFirmware(self, firmware):
+        sql = """ INSERT INTO last_seen_firmware (id, firmware)
+                  VALUES (?, ?);
+              """
+        Router.executeQuery(sql, self.id, firmware)

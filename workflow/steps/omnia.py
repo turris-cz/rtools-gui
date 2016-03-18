@@ -2,7 +2,7 @@ import pexpect
 import sys
 import os
 
-from workflow.base import Base, BaseWorker
+from workflow.base import Base, BaseWorker, spawnPexpectSerialConsole
 from application import settings
 
 
@@ -41,9 +41,8 @@ class SerialReboot(Base):
 class SerialRebootWorker(BaseWorker):
 
     def perform(self):
-        exp = pexpect.spawn(os.path.join(sys.path[0], 'sc_connector.py'))
-        exp.sendline('\n')
-        exp.expect('root@turris:/#')
+        exp = spawnPexpectSerialConsole()
+        self.expectSystemConsole(exp)
         exp.sendline('reboot')
         self.progress.emit(5)
         plan = [

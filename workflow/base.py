@@ -1,7 +1,12 @@
 import abc
+import os
 import pexpect
+import sys
+
 from PyQt5 import QtCore
 
+def spawnPexpectSerialConsole():
+    return pexpect.spawn(os.path.join(sys.path[0], 'sc_connector.py'))
 
 class Base(object):
     __metaclass__ = abc.ABCMeta
@@ -29,6 +34,7 @@ class BaseTest(Base):
 class BaseWorker(QtCore.QObject):
     progress = QtCore.pyqtSignal(int)
     finished = QtCore.pyqtSignal(bool)
+    firmware = QtCore.pyqtSignal(str)
 
     @abc.abstractmethod
     def perform(self):
@@ -53,3 +59,11 @@ class BaseWorker(QtCore.QObject):
                 self.log.write("\n!!!!!!!!!! %s !!!!!!!!!!\n" % self.name)
 
         self.finished.emit(True if retval else False)  # Boolean needs to be emitted
+
+    def expectSystemConsole(self, exp):
+        exp.sendline('\n')
+        exp.expect('root@turris:/#')
+
+    def expectLastRetval(self, exp, retval):
+        exp.sendline('echo "###$?###"')
+        exp.expect('###%d###' % retval)
