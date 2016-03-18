@@ -92,6 +92,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         for i in range(len(tests.TESTS)):
             self.updateTest(i, MainWindow.WORK_STATE_UNKNOWN)
 
+        # update buttons
+        self.startTestsButton.setEnabled(qApp.router.canStartTests)
+        self.startStepsButton.setEnabled(qApp.router.canStartSteps)
+
     def cleanErrorMessage(self):
         self.errorLabel.setText("")
 
@@ -168,8 +172,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def exitRunningMode(self):
         self.backButton.setEnabled(True)
-        self.startTestsButton.setEnabled(True)
-        self.startStepsButton.setEnabled(True)
+        self.startTestsButton.setEnabled(qApp.router.canStartTests)
+        self.startStepsButton.setEnabled(qApp.router.canStartSteps)
         self.inRunningMode = False
 
     @QtCore.pyqtSlot()

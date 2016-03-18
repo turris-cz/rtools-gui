@@ -106,7 +106,7 @@ class Application(QApplication):
             return None
 
         # Plan all tests
-        self.testPlan = range(len(tests.TESTS))
+        self.testPlan = self.router.getTestPlan()
 
         if not self.testPlan:
             self.loggerMain.info("No tests can be performed for router '%s'" % self.router.id)
@@ -126,11 +126,7 @@ class Application(QApplication):
         if not self._canStartRunner():
             return None
 
-        # filter workflow (skipped passed)
-        self.stepPlan = [
-            i for i in range(len(workflow.WORKFLOW))
-            if not workflow.WORKFLOW[i].name in self.router.performedSteps['passed']
-        ]
+        self.stepPlan = self.router.getStepPlan()
 
         # Everything was performed. Skipping
         if not self.stepPlan:
