@@ -31,6 +31,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         super(MainWindow, self).__init__()
         self.setupUi(self)  # create gui
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
+        self.inRunningMode = False
 
         # set icons for back and forward buttons
         self.scanButton.setIcon(
@@ -64,9 +65,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.testsLayout.addItem(spacer, tests_len, 1)
 
         # open db connection
+        qApp.loggerMain.info("Opening db connection.")
         if not qApp.connection.open():
-            # TODO display a message perhaps
+            qApp.loggerMain.error("Connecting to db fails.")
+            QtWidgets.QMessageBox.critical(
+                self, "Chyba databáze",
+                "<p>Nepodařilo se připojit do databáze. Zavírám aplikaci...</p>"
+            )
             raise DbError(qApp.connection.lastError().text())
+        qApp.loggerMain.info("Connected to database.")
 
     def loadRouter(self, router):
         # Set title
@@ -153,6 +160,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def updateTest(self, i, status):
         self._updateElement(self.testsLayout, i, status)
 
+    def enterRunningMode(self):
+        self.backButton.setEnabled(False)
+        self.startTestsButton.setEnabled(False)
+        self.startStepsButton.setEnabled(False)
+        self.inRunningMode = True
+
+    def exitRunningMode(self):
+        self.backButton.setEnabled(True)
+        self.startTestsButton.setEnabled(True)
+        self.startStepsButton.setEnabled(True)
+        self.inRunningMode = False
+
     @QtCore.pyqtSlot()
     def switchToBarcode(self):
         # clear the error message
@@ -200,6 +219,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # start runner
         if runner.performRuns():
             self._updateProgressBars(True, len(qApp.stepPlan))
+            self.enterRunningMode()
 
     @QtCore.pyqtSlot(int)
     def updateProgress(self, value):
@@ -228,11 +248,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qApp.loggerMain.info(msg)
         self._updateProgressBars(False)
         qApp.router.incStepAttempt()
+        self.exitRunningMode()
 
     def closeEvent(self, event):
 
+        if self.inRunningMode:
+            if QtWidgets.QMessageBox.question(
+                self, "Pracuji",
+                "<p>Program nyní provádí kritickou činnost a nebylo by dobré ho ukončovat.</p>"
+                "<p>Přejete si přesto program ukončit?",
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel
+            ) != QtWidgets.QMessageBox.Ok:
+                event.ignore()
+                return
+            else:
+                qApp.loggerMain.warn("closign the application in the middle of a run")
+
         # close the database
         if qApp.connection.isOpen():
+            qApp.loggerMain.info("Closing db connection.")
             qApp.connection.close()
 
         event.accept()
@@ -255,6 +289,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # start runner
         if runner.performRuns():
             self._updateProgressBars(True, len(qApp.testPlan))
+            self.enterRunningMode()
 
     @QtCore.pyqtSlot(int)
     def testStarted(self, planIndex):
@@ -281,3 +316,4 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qApp.router.incTestAttempt()
         if passedCount == totalCount:
             qApp.router.setRunSuccessful()
+        self.exitRunningMode()
