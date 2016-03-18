@@ -81,6 +81,6 @@ if __name__ == '__main__':
     QLocalServer.removeServer("serial-input")
     inputServer.listen("serial-input") or sys.exit(1)
 
-    with open(options.logFile, "a") as logFile:
+    with open(options.logFile, "a", 0) as logFile:
         watcher = Watcher(sc, inputServer, logFile)
         sys.exit(app.exec_())
