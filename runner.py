@@ -3,6 +3,7 @@ import sys
 
 from datetime import datetime
 from PyQt5 import QtCore
+from PyQt5.QtNetwork import QLocalSocket
 
 from application import qApp, settings
 
@@ -34,6 +35,12 @@ class Runner(QtCore.QObject):
         )
         self.logFile = os.path.join(settings.LOG_ROUTERS_DIR, logname)
 
+    def _quitRunningScPipe(self):
+        # sc_pipe should listen on this socket and when a client connects it should quit
+        socket = QLocalSocket()
+        socket.connectToServer("stop-server")
+        socket.disconnectFromServer()
+
     def performRuns(self):
         self.current = 0
         self.passedCount = 0
@@ -41,6 +48,7 @@ class Runner(QtCore.QObject):
 
         # prepare the console pipe process
         qApp.loggerMain.info("Starting serial console pipe process.")
+        self._quitRunningScPipe()
         pipePath = os.path.join(sys.path[0], 'sc_pipe.py')
         self.pipeProcess = QtCore.QProcess()
         self.pipeProcess.start(

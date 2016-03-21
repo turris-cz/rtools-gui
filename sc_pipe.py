@@ -58,7 +58,10 @@ if __name__ == '__main__':
 
     # Parse the command line options
     optparser = optparse.OptionParser(
-        "usage: %prog --device <device> --baudrate <baudrate> --log-file <file>\n"
+        "usage: %prog"
+        "--device <device> "
+        "--baudrate <baudrate> "
+        "--log-file <file> "
     )
     optparser.add_option("-d", "--device", dest='dev', type='string', help='device')
     optparser.add_option("-b", "--baudrate", dest='rate', type='int', help='baudrate')
@@ -80,6 +83,12 @@ if __name__ == '__main__':
     inputServer = QLocalServer()
     QLocalServer.removeServer("serial-input")
     inputServer.listen("serial-input") or sys.exit(1)
+
+    # init stop server
+    stopServer = QLocalServer()
+    QLocalServer.removeServer("stop-server")
+    stopServer.listen("stop-server") or sys.exit(1)
+    stopServer.newConnection.connect(app.quit)
 
     with open(options.logFile, "a", 0) as logFile:
         watcher = Watcher(sc, inputServer, logFile)
