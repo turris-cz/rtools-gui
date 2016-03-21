@@ -227,7 +227,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot(int)
     def updateProgress(self, value):
-        self.currentProgressBar.setValue(self.currentProgressBar.value() + value)
+        self.currentProgressBar.setValue(value)
 
     @QtCore.pyqtSlot(int)
     def stepStarted(self, planIndex):

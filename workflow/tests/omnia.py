@@ -23,9 +23,9 @@ class SimpleTestWorker(BaseWorker):
 
     def perform(self):
 
-        for i in range(0, 100, 10):
+        for i in range(10, 101, 10):
             time.sleep(0.05)
-            self.progress.emit(10)
+            self.progress.emit(i)
             time.sleep(0.05)
 
         return self.result
@@ -43,19 +43,19 @@ class FirmwareTestWorker(BaseWorker):
         self.progress.emit(1)
 
         self.expectSystemConsole(exp)
-        self.progress.emit(29)
+        self.progress.emit(30)
 
         exp.sendline('cat /etc/git-version')
         pattern = r'[a-fA-F0-9]{40}'
         exp.expect(pattern)
         firmware = re.search(pattern, exp.match.string).group(0)  # matches the whole string
-        self.progress.emit(30)
+        self.progress.emit(60)
 
         self.expectLastRetval(exp, 0)
-        self.progress.emit(30)
+        self.progress.emit(90)
 
         self.firmware.emit(firmware)
-        self.progress.emit(10)
+        self.progress.emit(100)
 
         exp.terminate(force=True)
         return True
@@ -78,20 +78,20 @@ class SerialNumberWorker(BaseWorker):
         self.progress.emit(1)
 
         self.expectSystemConsole(exp)
-        self.progress.emit(29)
+        self.progress.emit(30)
 
         exp.sendline('atsha204cmd serial-number')
         pattern = r'[a-fA-F0-9]{16}'
         exp.expect(pattern)
         serial = re.search(pattern, exp.match.string).group(0)  # matches the whole string
-        self.progress.emit(30)
+        self.progress.emit(60)
 
         self.expectLastRetval(exp, 0)
-        self.progress.emit(30)
+        self.progress.emit(90)
 
         if self.serial.lower() != serial.lower():
             raise RunFailed("Serial number doesn't match '%s' != '%s'" % (self.serial, serial))
-        self.progress.emit(10)
+        self.progress.emit(100)
 
         exp.terminate(force=True)
         return True

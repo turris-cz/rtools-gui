@@ -1,6 +1,4 @@
 import pexpect
-import sys
-import os
 
 from workflow.base import Base, BaseWorker, spawnPexpectSerialConsole
 from application import settings
@@ -21,13 +19,15 @@ class SampleWorker(BaseWorker):
 
     def perform(self):
         exp = pexpect.spawn(self.scriptPath, logfile=self.log)
+        self.progress.emit(2)
         exp.expect("Phase 1")
-        self.progress.emit(1)
+        self.progress.emit(34)
         exp.expect("Phase 2")
-        self.progress.emit(20)
+        self.progress.emit(66)
         exp.expect("Phase 3")
-        self.progress.emit(20)
+        self.progress.emit(98)
         exp.expect(pexpect.EOF)
+        self.progress.emit(100)
         exp.terminate(force=True)
         return True
 
@@ -46,20 +46,22 @@ class SerialRebootWorker(BaseWorker):
         exp.sendline('reboot')
         self.progress.emit(5)
         plan = [
-            'Router Turris successfully started.',
-            'fuse init',
-            'procd: - init -',
-            'ncompressing Kernel Image ... OK',
-            'BOOT NAND',
+            ('Router Turris successfully started.', 99),
+            ('fuse init', 75),
+            ('procd: - init -', 55),
+            ('ncompressing Kernel Image ... OK', 40),
+            ('BOOT NAND', 20),
         ]
         while True:
-            res = exp.expect(plan)
+            res = exp.expect([e[0] for e in plan])
+            self.progress.emit(plan[res][1])
             if res == 0:  # first is a final success
                 break
             else:
-                self.progress.emit(20)
                 # remove from plan (avoid going in boot cyrcles)
                 del plan[res]
+
+        self.progress.emit(100)
         exp.terminate(force=True)
         return True
 
