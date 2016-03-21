@@ -42,16 +42,17 @@ class BaseWorker(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def start(self):
+        self.expected = []
         with open(self.logfile, 'a') as self.log:
             self.log.write("\n########## %s ##########\n" % self.name)
             try:
                 # open log file
                 retval = self.perform()
             except pexpect.TIMEOUT:
-                self.log.write("\n>>>>>>>>>> TIMEOUT <<<<<<<<<<\n")
+                self.log.write("\n>>>>>>>>>> TIMEOUT '%s' <<<<<<<<<<\n" % str(self.expected))
                 retval = False
-            except Exception:
-                self.log.write("\n>>>>>>>>>> ERROR <<<<<<<<<<\n")
+            except Exception as e:
+                self.log.write("\n>>>>>>>>>> ERROR '%s' <<<<<<<<<<\n" % e.message)
                 retval = False
             if retval:
                 self.log.write("\n---------- %s ----------\n" % self.name)
@@ -60,10 +61,16 @@ class BaseWorker(QtCore.QObject):
 
         self.finished.emit(True if retval else False)  # Boolean needs to be emitted
 
+    def expect(self, exp, *args, **kwargs):
+        self.expected = args[0]
+        res = exp.expect(*args, **kwargs)
+        self.expected = []
+        return res
+
     def expectSystemConsole(self, exp):
         exp.sendline('\n')
-        exp.expect('root@turris:/#')
+        self.expect(exp, 'root@turris:/#')
 
     def expectLastRetval(self, exp, retval):
         exp.sendline('echo "###$?###"')
-        exp.expect('###%d###' % retval)
+        self.expect(exp, '###%d###' % retval)

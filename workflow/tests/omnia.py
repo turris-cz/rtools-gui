@@ -47,7 +47,7 @@ class FirmwareTestWorker(BaseWorker):
 
         exp.sendline('cat /etc/git-version')
         pattern = r'[a-fA-F0-9]{40}'
-        exp.expect(pattern)
+        self.expect(exp, pattern)
         firmware = re.search(pattern, exp.match.string).group(0)  # matches the whole string
         self.progress.emit(60)
 
@@ -82,7 +82,7 @@ class SerialNumberWorker(BaseWorker):
 
         exp.sendline('atsha204cmd serial-number')
         pattern = r'[a-fA-F0-9]{16}'
-        exp.expect(pattern)
+        self.expect(exp, pattern)
         serial = re.search(pattern, exp.match.string).group(0)  # matches the whole string
         self.progress.emit(60)
 

@@ -20,13 +20,13 @@ class SampleWorker(BaseWorker):
     def perform(self):
         exp = pexpect.spawn(self.scriptPath, logfile=self.log)
         self.progress.emit(2)
-        exp.expect("Phase 1")
+        self.expect(exp, "Phase 1")
         self.progress.emit(34)
-        exp.expect("Phase 2")
+        self.expect(exp, "Phase 2")
         self.progress.emit(66)
-        exp.expect("Phase 3")
+        self.expect(exp, "Phase 3")
         self.progress.emit(98)
-        exp.expect(pexpect.EOF)
+        self.expect(exp, pexpect.EOF)
         self.progress.emit(100)
         exp.terminate(force=True)
         return True
@@ -53,7 +53,7 @@ class SerialRebootWorker(BaseWorker):
             ('BOOT NAND', 20),
         ]
         while True:
-            res = exp.expect([e[0] for e in plan])
+            res = self.expect(exp, [e[0] for e in plan])
             self.progress.emit(plan[res][1])
             if res == 0:  # first is a final success
                 break
