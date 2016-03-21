@@ -2,6 +2,7 @@ import abc
 import os
 import pexpect
 import sys
+import time
 
 from PyQt5 import QtCore
 
@@ -43,21 +44,32 @@ class BaseWorker(QtCore.QObject):
     @QtCore.pyqtSlot()
     def start(self):
         self.expected = []
-        with open(self.logfile, 'a') as self.log:
+        with open(self.logfile, 'a') as self.log:  # open the log file
+
+            # Write header
             self.log.write("\n########## %s ##########\n" % self.name)
+            self.log.flush()
+
+            error_msg = ""
             try:
-                # open log file
                 retval = self.perform()
             except pexpect.TIMEOUT:
-                self.log.write("\n>>>>>>>>>> TIMEOUT '%s' <<<<<<<<<<\n" % str(self.expected))
+                error_msg = "\n>>>>>>>>>> TIMEOUT '%s' <<<<<<<<<<\n" % str(self.expected)
                 retval = False
             except Exception as e:
-                self.log.write("\n>>>>>>>>>> ERROR '%s' <<<<<<<<<<\n" % e.message)
+                error_msg = "\n>>>>>>>>>> ERROR '%s' <<<<<<<<<<\n" % e.message
                 retval = False
+
+            # Wait for some time before the console output is flushed
+            time.sleep(0.3)
+
+            # Write the tail
             if retval:
                 self.log.write("\n---------- %s ----------\n" % self.name)
             else:
+                self.log.write(error_msg)
                 self.log.write("\n!!!!!!!!!! %s !!!!!!!!!!\n" % self.name)
+            self.log.flush()
 
         self.finished.emit(True if retval else False)  # Boolean needs to be emitted
 

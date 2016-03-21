@@ -90,9 +90,10 @@ class SerialNumberWorker(BaseWorker):
         self.progress.emit(90)
 
         if self.serial.lower() != serial.lower():
+            exp.terminate(force=True)
             raise RunFailed("Serial number doesn't match '%s' != '%s'" % (self.serial, serial))
-        self.progress.emit(100)
 
+        self.progress.emit(100)
         exp.terminate(force=True)
         return True
 
