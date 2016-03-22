@@ -27,19 +27,23 @@ class Router(object):
 
     @staticmethod
     def executeQuery(sql, *values):
+
+        queryText = "%s %s" % \
+            (re.sub(' +', ' ', re.sub('\n', ' ', sql)).strip(), values)
+
         query = QtSql.QSqlQuery(qApp.connection.database())
         if not query.prepare(sql):
-            raise DbError("Wrong sql '%s'" % sql)
+            qApp.loggerDb.error("Query failed '%s'" % queryText)
+            raise DbError("Failed to perform a query.")
 
         for value in values:
             query.addBindValue(value)
 
-        qApp.loggerDb.info(
-            "%s %s" %
-            (re.sub(' +', ' ', re.sub('\n', ' ', query.executedQuery())).strip(), values)
-        )
         if not query.exec_():
+            qApp.loggerDb.error("Query failed '%s'" % queryText)
             raise DbError(qApp.connection.lastError().text())
+
+        qApp.loggerDb.info("Query passed '%s'" % queryText)
 
         return query
 
