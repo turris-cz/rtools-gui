@@ -23,3 +23,5 @@ SERIAL_CONSOLE_SETTINGS = {
 
 LOG_APP_FILE = '/tmp/rtools/application.log'
 LOG_ROUTERS_DIR = '/tmp/rtools/outputs/'
+
+DB_RECOVER_QUERY_FILE = '/tmp/rtools/recover-queries.json'

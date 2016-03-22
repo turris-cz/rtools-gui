@@ -9,6 +9,7 @@ from utils import serialNumberValidator, MAX_SERIAL_LEN
 
 # Include settings
 from application import workflow, tests, qApp
+from db_wrapper import restoreRecovery
 
 def _removeItemFromGridLayout(layout, row, column):
     item = layout.itemAtPosition(row, column)
@@ -74,6 +75,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             )
             raise DbError(qApp.connection.lastError().text())
         qApp.loggerMain.info("Connected to database.")
+
+        # perform queries which weren't performed last time
+        restoreRecovery()
 
     def loadRouter(self, router):
         # Set title
@@ -254,6 +258,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qApp.router.incStepAttempt()
         self.exitRunningMode()
 
+        # when connection fails during the run go back to scan mode
+        # it would probably fail after a new code is scanned
+        if qApp.router.dbFailed:
+            self.switchToBarcode()
+
     def closeEvent(self, event):
 
         if self.inRunningMode:
@@ -321,3 +330,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if passedCount == totalCount:
             qApp.router.setRunSuccessful()
         self.exitRunningMode()
+
+        # when connection fails during the run go back to scan mode
+        # it would probably fail after a new code is scanned
+        if qApp.router.dbFailed:
+            self.switchToBarcode()

@@ -12,7 +12,7 @@ from PyQt5.QtSql import QSqlDatabase
 # custom qApp
 qApp = None
 
-# settins module
+# settings module
 settings = None
 
 # workflow module
