@@ -18,12 +18,12 @@ STEP_SETTINGS = {
 
 SERIAL_CONSOLE = {
     'tester': {
-        'device': "/dev/ttyUSB1",
+        'device': "/dev/ttyTESTER",
         'baudrate': 115200,
         'mock': True,
     },
     'router': {
-        'device': "/dev/ttyUSB0",
+        'device': "/dev/ttyROUTER",
         'baudrate': 115200,
     },
 }
