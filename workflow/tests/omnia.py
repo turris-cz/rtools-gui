@@ -1,7 +1,7 @@
 import time
 import re
 
-from application import qApp
+from application import qApp, settings
 from workflow.base import BaseTest, BaseWorker, spawnPexpectSerialConsole
 from custom_exceptions import RunFailed
 
@@ -39,7 +39,7 @@ class FirmwareTest(BaseTest):
 
 class FirmwareTestWorker(BaseWorker):
     def perform(self):
-        exp = spawnPexpectSerialConsole()
+        exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
         self.progress.emit(1)
 
         self.expectSystemConsole(exp)
@@ -74,7 +74,7 @@ class SerialNumberWorker(BaseWorker):
         self.serial = serial
 
     def perform(self):
-        exp = spawnPexpectSerialConsole()
+        exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
         self.progress.emit(1)
 
         self.expectSystemConsole(exp)
@@ -98,6 +98,29 @@ class SerialNumberWorker(BaseWorker):
         return True
 
 
+class MockTest(BaseTest):
+    _name = "MOCK"
+
+    def createWorker(self):
+        return MockTestWorker()
+
+
+class MockTestWorker(BaseWorker):
+
+    def perform(self):
+
+        exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+        self.progress.emit(1)
+        exp.sendline('ls')
+        self.expect(exp, '\.')
+        self.progress.emit(50)
+        self.expectLastRetval(exp, 0)
+        self.progress.emit(100)
+        exp.terminate(force=True)
+
+        return True
+
+
 TESTS = (
     SimpleTest("USB", True),
     SimpleTest("PCIA", True),
@@ -106,4 +129,5 @@ TESTS = (
     SimpleTest("CLOCK", False),
     FirmwareTest(),
     SerialNumberTest(),
+    MockTest(),
 )

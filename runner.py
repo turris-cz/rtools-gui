@@ -28,6 +28,7 @@ class Runner(QtCore.QObject):
         self.typeName = typeName
         self.attempt = attempt
         self.running = False
+        self.pipeProcesses = []
 
         logname = "%s-%08d-%s-%04d-%s.txt" % (
             self.routerId, self.runId, self.typeName, self.attempt,
@@ -35,45 +36,66 @@ class Runner(QtCore.QObject):
         )
         self.logFile = os.path.join(settings.LOG_ROUTERS_DIR, logname)
 
-    def _quitRunningScPipe(self):
+    def _quitRunningScPipe(self, name):
         # sc_pipe should listen on this socket and when a client connects it should quit
         socket = QLocalSocket()
-        socket.connectToServer("stop-server")
+        socket.connectToServer(name)
         socket.disconnectFromServer()
+
+    def _startPipeProcess(self, scName, logFile):
+        scSettings = settings.SERIAL_CONSOLE[scName]
+
+        # prepare the console pipe process
+        self._quitRunningScPipe("stop-server" + scSettings['device'].replace('/','-'))
+        if scSettings.get('mock', False):
+            pipePath = os.path.join(sys.path[0], 'mock', 'sc_pipe_mock.py')
+        else:
+            pipePath = os.path.join(sys.path[0], 'sc_pipe.py')
+        pipeProcess = QtCore.QProcess()
+        pipeProcess.start(
+            pipePath, [
+                '-b', str(scSettings['baudrate']),
+                '-d', scSettings['device'],
+                '-l', logFile,
+            ]
+        )
+        qApp.loggerMain.info("Starting %s serial console pipe process. (%s %s)" %
+            (scName, pipePath, " ".join(pipeProcess.arguments())))
+
+        if pipeProcess.waitForStarted(500):  # wait for 0.5s to start the process
+            qApp.loggerMain.info(
+                "The %s serial console pipe process started. (PID=%d)"
+                % (scName, pipeProcess.pid())
+            )
+            self.pipeProcesses.append(pipeProcess)
+            return True
+        else:
+            qApp.loggerMain.error(
+                "Failed to start %s serial console pipe process. Run terminated!" % scName)
+            return False
+
 
     def performRuns(self):
         self.current = 0
         self.passedCount = 0
         self.result = True
+        self.pipeProcesses = []
 
-        # prepare the console pipe process
-        qApp.loggerMain.info("Starting serial console pipe process.")
-        self._quitRunningScPipe()
-        pipePath = os.path.join(sys.path[0], 'sc_pipe.py')
-        self.pipeProcess = QtCore.QProcess()
-        self.pipeProcess.start(
-            pipePath, [
-                '-b', str(settings.SERIAL_CONSOLE_SETTINGS['baudrate']),
-                '-d', settings.SERIAL_CONSOLE_SETTINGS['device'],
-                '-l', self.logFile,
-            ]
-        )
-
-        if self.pipeProcess.waitForStarted(500):  # wait for 0.5s to start the process
+        # prepare the console pipe processes
+        if self._startPipeProcess("router", self.logFile) \
+            and self._startPipeProcess("tester", self.logFile):
             # start the runs
             self.runSingle(self.current)
-            qApp.loggerMain.info("Serial console pipe process started.")
             self.running = True
             return True
         else:
-            qApp.loggerMain.error("Failed to start serial console pipe process. Run terminated!")
             return False
 
     def finish(self):
         self.runsFinished.emit(self.passedCount, len(self.runlist))
-        # Force kill the process
-        self.pipeProcess.kill()
-        qApp.loggerMain.info("Terminating serial console pipe process.")
+        qApp.loggerMain.info("Terminating serial console pipe processes.")
+        # Force kill the processes
+        [e.kill() for e in self.pipeProcesses]
         self.running = False
 
     @QtCore.pyqtSlot(bool)

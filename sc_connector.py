@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import optparse
 
 from PyQt5.QtCore import (
     QCoreApplication, QSocketNotifier, QObject, pyqtSlot
@@ -10,9 +11,10 @@ from PyQt5.QtNetwork import QLocalServer, QLocalSocket
 
 class Watcher(QObject):
 
-    def __init__(self, server):
+    def __init__(self, server, device):
         super(Watcher, self).__init__()
         self.server = server
+        self.device = device
         self.server.newConnection.connect(self.outputClientConnected)
 
     @pyqtSlot(int)
@@ -20,7 +22,7 @@ class Watcher(QObject):
         data = sys.stdin.readline()
 
         socket = QLocalSocket()
-        socket.connectToServer("serial-input")
+        socket.connectToServer("serial-input" + self.device.replace('/','-'))
         socket.write(data)
         socket.flush()
         socket.disconnectFromServer()
@@ -49,6 +51,16 @@ class Watcher(QObject):
 
 if __name__ == '__main__':
 
+    # Parse the command line options
+    optparser = optparse.OptionParser(
+        "usage: %prog"
+        "--device <device>"
+    )
+    optparser.add_option("-d", "--device", dest='dev', type='string', help='device')
+
+    (options, args) = optparser.parse_args()
+    options.dev or optparser.error("device not set")
+
     app = QCoreApplication(sys.argv)
 
     # load stdin notifier
@@ -56,10 +68,10 @@ if __name__ == '__main__':
 
     # init output server
     outputServer = QLocalServer()
-    QLocalServer.removeServer("serial-output")
-    outputServer.listen("serial-output") or sys.exit(1)
+    QLocalServer.removeServer("serial-output" + options.dev.replace('/','-'))
+    outputServer.listen("serial-output" + options.dev.replace('/','-')) or sys.exit(1)
 
-    watcher = Watcher(outputServer)
+    watcher = Watcher(outputServer, options.dev)
     notifier.activated.connect(watcher.stdinRead)
 
     sys.exit(app.exec_())

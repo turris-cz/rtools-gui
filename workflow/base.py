@@ -6,8 +6,8 @@ import time
 
 from PyQt5 import QtCore
 
-def spawnPexpectSerialConsole():
-    return pexpect.spawn(os.path.join(sys.path[0], 'sc_connector.py'))
+def spawnPexpectSerialConsole(device):
+    return pexpect.spawn(os.path.join(sys.path[0], 'sc_connector.py'), ["-d", device])
 
 class Base(object):
     __metaclass__ = abc.ABCMeta

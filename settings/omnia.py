@@ -16,9 +16,16 @@ STEP_SETTINGS = {
     }
 }
 
-SERIAL_CONSOLE_SETTINGS = {
-    'device': "/dev/ttyUSB0",
-    'baudrate': 115200,
+SERIAL_CONSOLE = {
+    'tester': {
+        'device': "/dev/ttyUSB1",
+        'baudrate': 115200,
+        'mock': True,
+    },
+    'router': {
+        'device': "/dev/ttyUSB0",
+        'baudrate': 115200,
+    },
 }
 
 LOG_APP_FILE = '/tmp/rtools/application.log'

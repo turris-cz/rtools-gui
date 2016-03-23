@@ -41,7 +41,7 @@ class SerialReboot(Base):
 class SerialRebootWorker(BaseWorker):
 
     def perform(self):
-        exp = spawnPexpectSerialConsole()
+        exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
         self.expectSystemConsole(exp)
         exp.sendline('reboot')
         self.progress.emit(5)

@@ -4,26 +4,40 @@ import sys
 import optparse
 
 from PyQt5.QtCore import (
-    QCoreApplication, QObject, pyqtSlot, QIODevice
+    QCoreApplication, QObject, pyqtSlot, QIODevice, QTimer
 )
 from PyQt5.QtNetwork import QLocalServer, QLocalSocket
 from PyQt5.QtSerialPort import QSerialPort
 
 
+PLAN = {
+    'ls': {
+        'output': ".",
+        'timeout': 1000,
+    },
+    'echo "###$?###"': {
+        'output': '###0###',
+        'timeout': 2000,
+    },
+}
+
+def generatePlanFunction(key, watcher):
+    def perform():
+        watcher.serialConsoleReady(PLAN[key]['output'] + '\n')
+
+    return perform
+
 class Watcher(QObject):
 
-    def __init__(self, sc, server, logFile, device):
+    def __init__(self, server, logFile, device):
         super(Watcher, self).__init__()
         self.logFile = logFile
-        self.sc = sc
-        self.sc.readyRead.connect(self.serialConsoleReady)
         self.server = server
         self.device = device
         self.server.newConnection.connect(self.inputClientConnected)
 
-    @pyqtSlot()
-    def serialConsoleReady(self):
-        data = self.sc.readAll()
+    @pyqtSlot(str)
+    def serialConsoleReady(self, data):
         self.logFile.write(data)
         self.logFile.flush()
 
@@ -32,6 +46,7 @@ class Watcher(QObject):
         socket.write(data)
         socket.flush()
         socket.disconnectFromServer()
+
 
     @pyqtSlot()
     def inputClientConnected(self):
@@ -51,8 +66,14 @@ class Watcher(QObject):
 
     @pyqtSlot()
     def inputClientReadReady(self):
-        data = self.sender().readAll()
-        self.sc.writeData(data)
+        data = str(self.sender().readAll())
+
+        self.logFile.write(data)
+        self.logFile.flush()
+
+        data = data.strip()
+        if data in PLAN:
+            QTimer.singleShot(PLAN[data]['timeout'], generatePlanFunction(data, self))
 
 
 if __name__ == '__main__':
@@ -75,11 +96,6 @@ if __name__ == '__main__':
 
     app = QCoreApplication(sys.argv)
 
-    # init serial console
-    sc = QSerialPort(options.dev)
-    sc.setBaudRate(options.rate)
-    sc.open(QIODevice.ReadWrite) or sys.exit(1)
-
     # init input server
     inputServer = QLocalServer()
     QLocalServer.removeServer("serial-input" + options.dev.replace('/','-'))
@@ -92,5 +108,6 @@ if __name__ == '__main__':
     stopServer.newConnection.connect(app.quit)
 
     with open(options.logFile, "a", 0) as logFile:
-        watcher = Watcher(sc, inputServer, logFile, options.dev)
+        logFile.write("THIS IS MOCK SCRIPT OUTPUT NOT ACTUAL SERIAL CONSOLE OUTPUT\n\n")
+        watcher = Watcher(inputServer, logFile, options.dev)
         sys.exit(app.exec_())
