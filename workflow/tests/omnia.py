@@ -13,94 +13,91 @@ class SimpleTest(BaseTest):
         self.result = result
 
     def createWorker(self):
-        return SimpleTestWorker(self.result)
+        return self.Worker(self.result)
 
+    class Worker(BaseWorker):
+        def __init__(self, result):
+            super(SimpleTest.Worker, self).__init__()
+            self.result = result
 
-class SimpleTestWorker(BaseWorker):
-    def __init__(self, result):
-        super(SimpleTestWorker, self).__init__()
-        self.result = result
+        def perform(self):
 
-    def perform(self):
+            for i in range(10, 101, 10):
+                time.sleep(0.05)
+                self.progress.emit(i)
+                time.sleep(0.05)
 
-        for i in range(10, 101, 10):
-            time.sleep(0.05)
-            self.progress.emit(i)
-            time.sleep(0.05)
-
-        return self.result
+            return self.result
 
 
 class SerialNumberTest(BaseTest):
     _name = 'SERIAL NUMBER'
 
     def createWorker(self):
-        return SerialNumberWorker(qApp.router.idHex)
+        return self.Worker(qApp.router.idHex)
 
+    class Worker(BaseWorker):
 
-class SerialNumberWorker(BaseWorker):
+        def __init__(self, serial):
+            super(SerialNumberTest.Worker, self).__init__()
+            self.serial = serial
 
-    def __init__(self, serial):
-        super(SerialNumberWorker, self).__init__()
-        self.serial = serial
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
 
-    def perform(self):
-        exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
-        self.progress.emit(1)
+            self.expectSystemConsole(exp)
+            self.progress.emit(20)
 
-        self.expectSystemConsole(exp)
-        self.progress.emit(20)
+            exp.sendline('atsha204cmd serial-number')
+            pattern = r'[a-fA-F0-9]{16}'
+            self.expect(exp, pattern)
+            serial = re.search(pattern, exp.match.string).group(0)  # matches the whole string
+            self.progress.emit(40)
 
-        exp.sendline('atsha204cmd serial-number')
-        pattern = r'[a-fA-F0-9]{16}'
-        self.expect(exp, pattern)
-        serial = re.search(pattern, exp.match.string).group(0)  # matches the whole string
-        self.progress.emit(40)
+            self.expectLastRetval(exp, 0)
+            self.progress.emit(60)
 
-        self.expectLastRetval(exp, 0)
-        self.progress.emit(60)
+            if self.serial.lower() != serial.lower():
+                exp.terminate(force=True)
+                raise RunFailed("Serial number doesn't match '%s' != '%s'" % (self.serial, serial))
 
-        if self.serial.lower() != serial.lower():
+            # try storing the firmware if the serial matches
+            exp.sendline('cat /etc/git-version')
+            pattern = r'[a-fA-F0-9]{40}'
+            self.expect(exp, pattern)
+            firmware = re.search(pattern, exp.match.string).group(0)  # matches the whole string
+            self.progress.emit(80)
+
+            self.expectLastRetval(exp, 0)
+            self.progress.emit(90)
+
+            self.firmware.emit(firmware)
+            self.progress.emit(100)
             exp.terminate(force=True)
-            raise RunFailed("Serial number doesn't match '%s' != '%s'" % (self.serial, serial))
-
-        # try storing the firmware if the serial matches
-        exp.sendline('cat /etc/git-version')
-        pattern = r'[a-fA-F0-9]{40}'
-        self.expect(exp, pattern)
-        firmware = re.search(pattern, exp.match.string).group(0)  # matches the whole string
-        self.progress.emit(80)
-
-        self.expectLastRetval(exp, 0)
-        self.progress.emit(90)
-
-        self.firmware.emit(firmware)
-        self.progress.emit(100)
-        exp.terminate(force=True)
-        return True
+            return True
 
 
 class MockTest(BaseTest):
     _name = "MOCK"
 
     def createWorker(self):
-        return MockTestWorker()
+        return self.Worker()
 
+    class Worker(BaseWorker):
 
-class MockTestWorker(BaseWorker):
+        def perform(self):
 
-    def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.progress.emit(1)
+            exp.sendline('ls')
+            self.expect(exp, '\.')
+            self.progress.emit(50)
+            self.expectLastRetval(exp, 0)
+            self.progress.emit(100)
+            exp.terminate(force=True)
 
-        exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-        self.progress.emit(1)
-        exp.sendline('ls')
-        self.expect(exp, '\.')
-        self.progress.emit(50)
-        self.expectLastRetval(exp, 0)
-        self.progress.emit(100)
-        exp.terminate(force=True)
-
-        return True
+            return True
 
 
 TESTS = (
