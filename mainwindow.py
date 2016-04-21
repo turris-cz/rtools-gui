@@ -314,7 +314,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot(int, bool)
     def testFinished(self, planIndex, passed):
         name = tests.TESTS[qApp.testPlan[planIndex]].name
-        msg = "Test '%s' finished - passed %s" % (name, ("PASSED" if passed else "FAILED"))
+        msg = "Test '%s' finished - %s" % (name, ("PASSED" if passed else "FAILED"))
         qApp.loggerMain.info(msg) if passed else qApp.loggerMain.error(msg)
         state = MainWindow.WORK_STATE_PASSED if passed else MainWindow.WORK_STATE_FAILED
         self.overallProgressBar.setValue(self.overallProgressBar.value() + 1)
