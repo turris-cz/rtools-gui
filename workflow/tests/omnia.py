@@ -31,37 +31,6 @@ class SimpleTestWorker(BaseWorker):
         return self.result
 
 
-class FirmwareTest(BaseTest):
-    _name = 'FIRMWARE'
-
-    def createWorker(self):
-        return FirmwareTestWorker()
-
-
-class FirmwareTestWorker(BaseWorker):
-    def perform(self):
-        exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
-        self.progress.emit(1)
-
-        self.expectSystemConsole(exp)
-        self.progress.emit(30)
-
-        exp.sendline('cat /etc/git-version')
-        pattern = r'[a-fA-F0-9]{40}'
-        self.expect(exp, pattern)
-        firmware = re.search(pattern, exp.match.string).group(0)  # matches the whole string
-        self.progress.emit(60)
-
-        self.expectLastRetval(exp, 0)
-        self.progress.emit(90)
-
-        self.firmware.emit(firmware)
-        self.progress.emit(100)
-
-        exp.terminate(force=True)
-        return True
-
-
 class SerialNumberTest(BaseTest):
     _name = 'SERIAL NUMBER'
 
@@ -80,21 +49,32 @@ class SerialNumberWorker(BaseWorker):
         self.progress.emit(1)
 
         self.expectSystemConsole(exp)
-        self.progress.emit(30)
+        self.progress.emit(20)
 
         exp.sendline('atsha204cmd serial-number')
         pattern = r'[a-fA-F0-9]{16}'
         self.expect(exp, pattern)
         serial = re.search(pattern, exp.match.string).group(0)  # matches the whole string
-        self.progress.emit(60)
+        self.progress.emit(40)
 
         self.expectLastRetval(exp, 0)
-        self.progress.emit(90)
+        self.progress.emit(60)
 
         if self.serial.lower() != serial.lower():
             exp.terminate(force=True)
             raise RunFailed("Serial number doesn't match '%s' != '%s'" % (self.serial, serial))
 
+        # try storing the firmware if the serial matches
+        exp.sendline('cat /etc/git-version')
+        pattern = r'[a-fA-F0-9]{40}'
+        self.expect(exp, pattern)
+        firmware = re.search(pattern, exp.match.string).group(0)  # matches the whole string
+        self.progress.emit(80)
+
+        self.expectLastRetval(exp, 0)
+        self.progress.emit(90)
+
+        self.firmware.emit(firmware)
         self.progress.emit(100)
         exp.terminate(force=True)
         return True
@@ -129,7 +109,6 @@ TESTS = (
     SimpleTest("THERMOMETER", False),
     SimpleTest("GPIO", True),
     SimpleTest("CLOCK", False),
-    FirmwareTest(),
     SerialNumberTest(),
     MockTest(),
 )
