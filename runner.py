@@ -57,6 +57,7 @@ class Runner(QtCore.QObject):
                 '-b', str(scSettings['baudrate']),
                 '-d', scSettings['device'],
                 '-l', logFile,
+                '-p', scName,
             ]
         )
         qApp.loggerMain.info("Starting %s serial console pipe process. (%s %s)" %
@@ -84,6 +85,8 @@ class Runner(QtCore.QObject):
         # prepare the console pipe processes
         if self._startPipeProcess("router", self.logFile) \
             and self._startPipeProcess("tester", self.logFile):
+            # wait a second before starting the process
+            QtCore.QThread.sleep(1)
             # start the runs
             self.runSingle(self.current)
             self.running = True

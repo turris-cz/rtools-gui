@@ -12,7 +12,7 @@ from PyQt5.QtSerialPort import QSerialPort
 
 class Watcher(QObject):
 
-    def __init__(self, sc, server, logFile, device):
+    def __init__(self, sc, server, logFile, device, prefix):
         super(Watcher, self).__init__()
         self.logFile = logFile
         self.sc = sc
@@ -20,11 +20,12 @@ class Watcher(QObject):
         self.server = server
         self.device = device
         self.server.newConnection.connect(self.inputClientConnected)
+        self.prefix = prefix
 
     @pyqtSlot()
     def serialConsoleReady(self):
         data = self.sc.readAll()
-        self.logFile.write(data)
+        self.logFile.write(data.data().replace('\n', "\n%s> " % self.prefix))
         self.logFile.flush()
 
         socket = QLocalSocket()
@@ -63,15 +64,18 @@ if __name__ == '__main__':
         "--device <device> "
         "--baudrate <baudrate> "
         "--log-file <file> "
+        "--prefix <prefix> "
     )
     optparser.add_option("-d", "--device", dest='dev', type='string', help='device')
     optparser.add_option("-b", "--baudrate", dest='rate', type='int', help='baudrate')
     optparser.add_option("-l", "--log-file", dest='logFile', type='string', help='logfile')
+    optparser.add_option("-p", "--prefix", dest='prefix', type='string', help='prefix')
 
     (options, args) = optparser.parse_args()
     options.dev or optparser.error("device not set")
     options.rate or optparser.error("baudrate not set")
     options.logFile or optparser.error("logfile not set")
+    prefix = options.prefix or ""
 
     app = QCoreApplication(sys.argv)
 
@@ -92,5 +96,5 @@ if __name__ == '__main__':
     stopServer.newConnection.connect(app.quit)
 
     with open(options.logFile, "a", 0) as logFile:
-        watcher = Watcher(sc, inputServer, logFile, options.dev)
+        watcher = Watcher(sc, inputServer, logFile, options.dev, prefix)
         sys.exit(app.exec_())

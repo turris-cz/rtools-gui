@@ -29,16 +29,18 @@ def generatePlanFunction(key, watcher):
 
 class Watcher(QObject):
 
-    def __init__(self, server, logFile, device):
+    def __init__(self, server, logFile, device, prefix):
         super(Watcher, self).__init__()
         self.logFile = logFile
         self.server = server
         self.device = device
         self.server.newConnection.connect(self.inputClientConnected)
+        self.prefix = prefix
 
     @pyqtSlot(str)
     def serialConsoleReady(self, data):
-        self.logFile.write(data)
+        file_data = data[:-1] if data[-1] == '\n' else data
+        self.logFile.write(file_data.replace('\n', "\n%s> " % self.prefix))
         self.logFile.flush()
 
         socket = QLocalSocket()
@@ -67,8 +69,9 @@ class Watcher(QObject):
     @pyqtSlot()
     def inputClientReadReady(self):
         data = str(self.sender().readAll())
+        data = "\n%s" % data
 
-        self.logFile.write(data)
+        self.logFile.write(data.replace('\n', "\n%s> " % self.prefix))
         self.logFile.flush()
 
         data = data.strip()
@@ -84,15 +87,18 @@ if __name__ == '__main__':
         "--device <device> "
         "--baudrate <baudrate> "
         "--log-file <file> "
+        "--prefix <prefix> "
     )
     optparser.add_option("-d", "--device", dest='dev', type='string', help='device')
     optparser.add_option("-b", "--baudrate", dest='rate', type='int', help='baudrate')
     optparser.add_option("-l", "--log-file", dest='logFile', type='string', help='logfile')
+    optparser.add_option("-p", "--prefix", dest='prefix', type='string', help='prefix')
 
     (options, args) = optparser.parse_args()
     options.dev or optparser.error("device not set")
     options.rate or optparser.error("baudrate not set")
     options.logFile or optparser.error("logfile not set")
+    prefix = options.prefix or ""
 
     app = QCoreApplication(sys.argv)
 
@@ -108,6 +114,8 @@ if __name__ == '__main__':
     stopServer.newConnection.connect(app.quit)
 
     with open(options.logFile, "a", 0) as logFile:
-        logFile.write("THIS IS MOCK SCRIPT OUTPUT NOT ACTUAL SERIAL CONSOLE OUTPUT\n\n")
-        watcher = Watcher(inputServer, logFile, options.dev)
+        initial_msg = "\nTHIS IS MOCK SCRIPT OUTPUT NOT ACTUAL SERIAL CONSOLE OUTPUT\n\n"
+        logFile.write(initial_msg.replace('\n', "\n%s> " % prefix))
+        logFile.flush()
+        watcher = Watcher(inputServer, logFile, options.dev, prefix)
         sys.exit(app.exec_())
