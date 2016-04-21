@@ -5,6 +5,7 @@ import sys
 from application import Application
 from guard import Guard
 
+
 def main(argv):
 
     with Guard():

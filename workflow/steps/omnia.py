@@ -12,6 +12,7 @@ class Sample(Base):
     def createWorker(self):
         return SampleWorker(settings.STEP_SETTINGS['sample']['script_path'])
 
+
 class SampleWorker(BaseWorker):
     def __init__(self, scriptPath):
         super(SampleWorker, self).__init__()
@@ -30,6 +31,7 @@ class SampleWorker(BaseWorker):
         self.progress.emit(100)
         exp.terminate(force=True)
         return True
+
 
 class SerialReboot(Base):
     _name = "SERIAL REBOOT"

@@ -21,6 +21,7 @@ workflow = None
 # tests module
 tests = None
 
+
 def _printException(type, value, tb):
     type = "%s.%s" % (type.__module__, type.__name__)
     trace = "\n".join(traceback.format_tb(tb))
@@ -28,6 +29,7 @@ def _printException(type, value, tb):
         "Exception occured:\n%s(\"%s\")\nTraceback:\n%s" % (type, value, trace))
     qApp.loggerMain.warn("Error occured. Exiting...")
     sys.exit(1)
+
 
 class Application(QApplication):
     def __init__(self, *args, **kwargs):

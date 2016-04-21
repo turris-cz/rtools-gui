@@ -29,7 +29,7 @@ class Watcher(QObject):
         self.logFile.flush()
 
         socket = QLocalSocket()
-        socket.connectToServer("serial-output" + self.device.replace('/','-'))
+        socket.connectToServer("serial-output" + self.device.replace('/', '-'))
         socket.write(data)
         socket.flush()
         socket.disconnectFromServer()
@@ -86,13 +86,13 @@ if __name__ == '__main__':
 
     # init input server
     inputServer = QLocalServer()
-    QLocalServer.removeServer("serial-input" + options.dev.replace('/','-'))
-    inputServer.listen("serial-input" + options.dev.replace('/','-')) or sys.exit(1)
+    QLocalServer.removeServer("serial-input" + options.dev.replace('/', '-'))
+    inputServer.listen("serial-input" + options.dev.replace('/', '-')) or sys.exit(1)
 
     # init stop server
     stopServer = QLocalServer()
-    QLocalServer.removeServer("stop-server" + options.dev.replace('/','-'))
-    stopServer.listen("stop-server" + options.dev.replace('/','-')) or sys.exit(1)
+    QLocalServer.removeServer("stop-server" + options.dev.replace('/', '-'))
+    stopServer.listen("stop-server" + options.dev.replace('/', '-')) or sys.exit(1)
     stopServer.newConnection.connect(app.quit)
 
     with open(options.logFile, "a", 0) as logFile:

@@ -1,8 +1,10 @@
 from PyQt5.QtCore import QSharedMemory, QSystemSemaphore
 
+
 class GuardFailed(Exception):
     def __init__(self, *args, **kwargs):
         super(GuardFailed, self).__init__("Another program instance is running.")
+
 
 class Guard(object):
 

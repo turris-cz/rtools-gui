@@ -7,6 +7,7 @@ from PyQt5.QtNetwork import QLocalSocket
 
 from application import qApp, settings
 
+
 class Runner(QtCore.QObject):
     TYPE_STEPS = 'steps'
     TYPE_TESTS = 'tests'
@@ -46,7 +47,7 @@ class Runner(QtCore.QObject):
         scSettings = settings.SERIAL_CONSOLE[scName]
 
         # prepare the console pipe process
-        self._quitRunningScPipe("stop-server" + scSettings['device'].replace('/','-'))
+        self._quitRunningScPipe("stop-server" + scSettings['device'].replace('/', '-'))
         if scSettings.get('mock', False):
             pipePath = os.path.join(sys.path[0], 'mock', 'sc_pipe_mock.py')
         else:
@@ -60,8 +61,10 @@ class Runner(QtCore.QObject):
                 '-p', scName,
             ]
         )
-        qApp.loggerMain.info("Starting %s serial console pipe process. (%s %s)" %
-            (scName, pipePath, " ".join(pipeProcess.arguments())))
+        qApp.loggerMain.info(
+            "Starting %s serial console pipe process. (%s %s)" %
+            (scName, pipePath, " ".join(pipeProcess.arguments()))
+        )
 
         if pipeProcess.waitForStarted(500):  # wait for 0.5s to start the process
             qApp.loggerMain.info(
@@ -75,7 +78,6 @@ class Runner(QtCore.QObject):
                 "Failed to start %s serial console pipe process. Run terminated!" % scName)
             return False
 
-
     def performRuns(self):
         self.current = 0
         self.passedCount = 0
@@ -84,7 +86,7 @@ class Runner(QtCore.QObject):
 
         # prepare the console pipe processes
         if self._startPipeProcess("router", self.logFile) \
-            and self._startPipeProcess("tester", self.logFile):
+                and self._startPipeProcess("tester", self.logFile):
             # wait a second before starting the process
             QtCore.QThread.sleep(1)
             # start the runs

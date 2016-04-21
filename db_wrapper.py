@@ -24,6 +24,7 @@ def writeRecovery(sql, *values):
         json.dump(jsonData, f)
         f.flush()
 
+
 def restoreRecovery():
 
     try:
@@ -64,6 +65,7 @@ def restoreRecovery():
         f.flush()
 
     qApp.loggerMain.info("All queries recovered.")
+
 
 class Router(object):
 

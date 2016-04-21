@@ -37,6 +37,7 @@ class FirmwareTest(BaseTest):
     def createWorker(self):
         return FirmwareTestWorker()
 
+
 class FirmwareTestWorker(BaseWorker):
     def perform(self):
         exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
@@ -66,6 +67,7 @@ class SerialNumberTest(BaseTest):
 
     def createWorker(self):
         return SerialNumberWorker(qApp.router.idHex)
+
 
 class SerialNumberWorker(BaseWorker):
 

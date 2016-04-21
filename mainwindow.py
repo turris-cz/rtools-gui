@@ -11,10 +11,12 @@ from utils import serialNumberValidator, MAX_SERIAL_LEN
 from application import workflow, tests, qApp
 from db_wrapper import restoreRecovery
 
+
 def _removeItemFromGridLayout(layout, row, column):
     item = layout.itemAtPosition(row, column)
     item and layout.removeItem(item)
     return item
+
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     WORK_STATE_FAILED = "F"

@@ -22,7 +22,7 @@ class Watcher(QObject):
         data = sys.stdin.readline()
 
         socket = QLocalSocket()
-        socket.connectToServer("serial-input" + self.device.replace('/','-'))
+        socket.connectToServer("serial-input" + self.device.replace('/', '-'))
         socket.write(data)
         socket.flush()
         socket.disconnectFromServer()
@@ -68,8 +68,8 @@ if __name__ == '__main__':
 
     # init output server
     outputServer = QLocalServer()
-    QLocalServer.removeServer("serial-output" + options.dev.replace('/','-'))
-    outputServer.listen("serial-output" + options.dev.replace('/','-')) or sys.exit(1)
+    QLocalServer.removeServer("serial-output" + options.dev.replace('/', '-'))
+    outputServer.listen("serial-output" + options.dev.replace('/', '-')) or sys.exit(1)
 
     watcher = Watcher(outputServer, options.dev)
     notifier.activated.connect(watcher.stdinRead)
