@@ -67,6 +67,43 @@ class UsbTest(BaseTest):
             return True
 
 
+class miniPCIeTest(BaseTest):
+    _name = 'miniPCIe'
+
+    def __init__(self, pci_count):
+        self.pci_count = pci_count
+
+    def createWorker(self):
+        return self.Worker(self.pci_count)
+
+    class Worker(BaseWorker):
+
+        def __init__(self, pci_count):
+            super(miniPCIeTest.Worker, self).__init__()
+            self.pci_count = pci_count
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+            exp.sendline('echo "###$(cat /sys/bus/pci/devices/*/vendor | grep -c 0x168c)###"')
+
+            pattern = r'###[0-9]+###'
+            self.expect(exp, pattern)
+            pci_count = re.search(pattern, exp.match.string).group(0)
+            self.progress.emit(50)
+
+            try:
+                pci_count = int(pci_count.strip().strip("#"))
+            except ValueError:
+                raise RunFailed("Failed to get number of connected mPCIe devices!")
+
+            if pci_count != self.pci_count:
+                raise RunFailed(
+                    "Wrong number of mPCIe devices '%d' != '%d'" % (pci_count, self.pci_count))
+            self.progress.emit(100)
+            return True
+
+
 class SerialNumberTest(BaseTest):
     _name = 'SERIAL NUMBER'
 
@@ -139,7 +176,7 @@ class MockTest(BaseTest):
 
 TESTS = (
     UsbTest(2),
-    SimpleTest("PCIA", True),
+    miniPCIeTest(3),
     SimpleTest("THERMOMETER", False),
     SimpleTest("GPIO", True),
     SimpleTest("CLOCK", False),
