@@ -30,6 +30,43 @@ class SimpleTest(BaseTest):
             return self.result
 
 
+class UsbTest(BaseTest):
+    _name = 'USB'
+
+    def __init__(self, usb_count):
+        self.usb_count = usb_count
+
+    def createWorker(self):
+        return self.Worker(self.usb_count)
+
+    class Worker(BaseWorker):
+
+        def __init__(self, usb_count):
+            super(UsbTest.Worker, self).__init__()
+            self.usb_count = usb_count
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+            exp.sendline('echo "###$(ls /dev/sd? 2> /dev/null | wc -l)###"')
+
+            pattern = r'###[0-9]+###'
+            self.expect(exp, pattern)
+            usb_count = re.search(pattern, exp.match.string).group(0)
+            self.progress.emit(50)
+
+            try:
+                usb_count = int(usb_count.strip().strip("#"))
+            except ValueError:
+                raise RunFailed("Failed to get number of connected usb devices!")
+
+            if usb_count != self.usb_count:
+                raise RunFailed(
+                    "Wrong number of usb devices '%d' != '%d'" % (usb_count, self.usb_count))
+            self.progress.emit(100)
+            return True
+
+
 class SerialNumberTest(BaseTest):
     _name = 'SERIAL NUMBER'
 
@@ -101,7 +138,7 @@ class MockTest(BaseTest):
 
 
 TESTS = (
-    SimpleTest("USB", True),
+    UsbTest(2),
     SimpleTest("PCIA", True),
     SimpleTest("THERMOMETER", False),
     SimpleTest("GPIO", True),

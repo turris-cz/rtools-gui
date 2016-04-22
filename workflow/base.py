@@ -57,10 +57,10 @@ class BaseWorker(QtCore.QObject):
             try:
                 retval = self.perform()
             except pexpect.TIMEOUT:
-                error_msg = "\n>>>>>>>>>> TIMEOUT '%s' <<<<<<<<<<\n" % str(self.expected)
+                error_msg = "\n>>>>>>>>>> TIMEOUT \"%s\" <<<<<<<<<<\n" % str(self.expected)
                 retval = False
             except Exception as e:
-                error_msg = "\n>>>>>>>>>> ERROR '%s' <<<<<<<<<<\n" % e.message
+                error_msg = "\n>>>>>>>>>> ERROR \"%s\" <<<<<<<<<<\n" % e.message
                 retval = False
 
             # Wait for some time before the console output is flushed
