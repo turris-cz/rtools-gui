@@ -52,7 +52,7 @@ class UsbTest(BaseTest):
 
             pattern = r'###[0-9]+###'
             self.expect(exp, pattern)
-            usb_count = re.search(pattern, exp.match.string).group(0)
+            usb_count = exp.match.group()
             self.progress.emit(50)
 
             try:
@@ -89,7 +89,7 @@ class miniPCIeTest(BaseTest):
 
             pattern = r'###[0-9]+###'
             self.expect(exp, pattern)
-            pci_count = re.search(pattern, exp.match.string).group(0)
+            pci_count = exp.match.group()
             self.progress.emit(50)
 
             try:
@@ -126,7 +126,7 @@ class SerialNumberTest(BaseTest):
             exp.sendline('atsha204cmd serial-number')
             pattern = r'[a-fA-F0-9]{16}'
             self.expect(exp, pattern)
-            serial = re.search(pattern, exp.match.string).group(0)  # matches the whole string
+            serial = exp.match.group()
             self.progress.emit(40)
 
             self.expectLastRetval(exp, 0)
@@ -140,7 +140,7 @@ class SerialNumberTest(BaseTest):
             exp.sendline('cat /etc/git-version')
             pattern = r'[a-fA-F0-9]{40}'
             self.expect(exp, pattern)
-            firmware = re.search(pattern, exp.match.string).group(0)  # matches the whole string
+            firmware = exp.match.group()
             self.progress.emit(80)
 
             self.expectLastRetval(exp, 0)
