@@ -76,6 +76,18 @@ class BaseWorker(QtCore.QObject):
 
         self.finished.emit(True if retval else False)  # Boolean needs to be emitted
 
+    def expectCommand(self, exp, cmd):
+        """ perform local command"""
+        exp.sendline(cmd)
+        self.expectLastRetval(exp, 0)
+
+    def expectLocalCommand(self, cmd):
+        """ perform local command"""
+        exp = pexpect.spawn("bash")
+        exp.sendline(cmd)
+        self.expectLastRetval(exp, 0)
+        exp.terminate(force=True)
+
     def expect(self, exp, *args, **kwargs):
         self.expected = args[0]
         res = exp.expect(*args, **kwargs)

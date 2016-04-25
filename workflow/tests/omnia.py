@@ -204,6 +204,74 @@ class ClockTest(BaseTest):
             return True
 
 
+class EthTest(BaseTest):
+    localDev = "ethTEST"
+
+    def __init__(self, device, socket, subnet):
+        self._name = "ETH %s" % socket
+        self.device = device
+        self.subnet = subnet
+        self.socket = socket
+
+    @property
+    def instructions(self):
+        return """
+            <h3>%(test_name)s</h3>
+            <p>Před tím, než budete pokračovat:</p>
+            <ul>
+                <li>Připojte ethernetový kabel do zdířky %(socket)s</li>
+            </ul>
+        """ % dict(test_name=self._name, socket=self.socket)
+
+    def createWorker(self):
+        return self.Worker(self.device, self.subnet)
+
+    class Worker(BaseWorker):
+        def __init__(self, device, subnet):
+            super(EthTest.Worker, self).__init__()
+            self.device = device
+            self.subnet = subnet
+
+        def perform(self):
+
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+            self.expectSystemConsole(exp)
+            self.progress.emit(10)
+
+            # initialize local device
+            self.expectLocalCommand("sudo ip address flush dev %s" % EthTest.localDev)
+            self.progress.emit(20)
+            self.expectLocalCommand(
+                "sudo ip address add 192.168.%d.1/24 dev %s" % (self.subnet, EthTest.localDev)
+            )
+            self.progress.emit(30)
+            self.expectLocalCommand("sudo ip link set dev %s up" % EthTest.localDev)
+            self.progress.emit(40)
+
+            # set ip on router
+            self.expectCommand(exp, "ip address flush dev %s" % self.device)
+            self.progress.emit(50)
+            self.expectCommand(
+                exp, "ip address add 192.168.%d.10/24 dev %s" % (self.subnet, self.device)
+            )
+            self.progress.emit(60)
+            self.expectCommand(exp, "ip link set dev %s up" % self.device)
+            self.progress.emit(70)
+
+            # ping test
+            self.expectCommand(exp, "ping 192.168.%d.1 -c 5" % self.subnet)
+            self.progress.emit(80)
+
+            # local cleanup
+            self.expectLocalCommand("sudo ip link set dev %s down" % EthTest.localDev)
+            self.progress.emit(90)
+            self.expectLocalCommand("sudo ip address flush dev %s" % EthTest.localDev)
+            self.progress.emit(100)
+
+            return True
+
+
 class MockTest(BaseTest):
     _name = "MOCK"
 
@@ -215,7 +283,7 @@ class MockTest(BaseTest):
             <ul>
                 <li>Připojte ethernetový kabel do zdířky ETH0</li>
             </ul>
-        """  % dict(test_name=self._name)
+        """ % dict(test_name=self._name)
 
     def createWorker(self):
         return self.Worker()
@@ -244,4 +312,7 @@ TESTS = (
     ClockTest(),
     SerialNumberTest(),
     MockTest(),
+    EthTest("eth2", "WAN", 167),
+    EthTest("br-lan", "LAN1", 166),
+    EthTest("br-lan", "LAN2", 165),
 )
