@@ -14,8 +14,10 @@ from db_wrapper import restoreRecovery
 
 def _removeItemFromGridLayout(layout, row, column):
     item = layout.itemAtPosition(row, column)
-    item and layout.removeItem(item)
-    return item
+    if item:
+        layout.removeItem(item)
+        item.widget().hide()
+        item.widget().deleteLater()
 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -152,8 +154,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def _updateElement(self, layout, i, status):
         if i < layout.rowCount():
-            item = _removeItemFromGridLayout(layout, i, 1)
-            item.widget().deleteLater()
+            _removeItemFromGridLayout(layout, i, 1)
             layout.addWidget(self._statusToWidget(layout.parentWidget(), status), i, 1)
         else:
             raise IndexError
@@ -225,6 +226,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         runner.runStarted.connect(self.stepStarted)
         runner.runFinished.connect(self.stepFinished)
         runner.runsFinished.connect(self.stepsFinished)
+        runner.printInstructions.connect(self.printInstructions)
 
         # start runner
         if runner.performRuns():
@@ -265,6 +267,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if qApp.router.dbFailed:
             self.switchToBarcode()
 
+    @QtCore.pyqtSlot(str)
+    def printInstructions(self, msg):
+        QtWidgets.QMessageBox.information(
+            self, "Instrukce", msg
+        )
+
     def closeEvent(self, event):
 
         if self.inRunningMode:
@@ -300,6 +308,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         runner.runStarted.connect(self.testStarted)
         runner.runFinished.connect(self.testFinished)
         runner.runsFinished.connect(self.testsFinished)
+        runner.printInstructions.connect(self.printInstructions)
 
         # start runner
         if runner.performRuns():

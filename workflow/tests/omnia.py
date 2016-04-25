@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 import locale
 import math
 import time
@@ -204,6 +206,16 @@ class ClockTest(BaseTest):
 
 class MockTest(BaseTest):
     _name = "MOCK"
+
+    @property
+    def instructions(self):
+        return """
+            <h3>%(test_name)s</h3>
+            <p>Před tím, než budete pokračovat:</p>
+            <ul>
+                <li>Připojte ethernetový kabel do zdířky ETH0</li>
+            </ul>
+        """  % dict(test_name=self._name)
 
     def createWorker(self):
         return self.Worker()

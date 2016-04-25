@@ -17,6 +17,7 @@ class Runner(QtCore.QObject):
     runStarted = QtCore.pyqtSignal(int)
     runFinished = QtCore.pyqtSignal(int, bool)
     runProgress = QtCore.pyqtSignal(int)
+    printInstructions = QtCore.pyqtSignal(str)
 
     def __init__(self, routerId, runlist, runId, typeName, attempt):
         super(Runner, self).__init__()
@@ -137,6 +138,10 @@ class Runner(QtCore.QObject):
         qApp.router.storeFirmware(firmware)
 
     def runSingle(self, i):
+
+        # Print instructions if needed
+        if hasattr(self.runlist[i], "instructions"):
+            self.printInstructions.emit(self.runlist[i].instructions)
 
         self.worker = self.runlist[i].getWorker(self.logFile)
         self.thread = QtCore.QThread(self)
