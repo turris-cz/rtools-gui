@@ -1,7 +1,9 @@
+import locale
+import math
 import time
-import re
 
 from application import qApp, settings
+from datetime import datetime
 from workflow.base import BaseTest, BaseWorker, spawnPexpectSerialConsole
 from custom_exceptions import RunFailed
 
@@ -152,6 +154,43 @@ class SerialNumberTest(BaseTest):
             return True
 
 
+class ClockTest(BaseTest):
+    _name = 'CLOCK'
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+
+            exp.sendline('hwclock')
+            pattern = r'[a-zA-z0-9\.\: ]* seconds'
+            self.expect(exp, pattern)
+            time = exp.match.group()
+            # we need to switch locale to en_US.UTF-8 to correctly parse the date
+            # note that setlocale and getlocale are not thread safe so don't use
+            # it outside of this thread
+            backup_locale = locale.getlocale(locale.LC_TIME)
+            locale.setlocale(locale.LC_TIME, "en_US.UTF-8")
+            time = datetime.strptime(time, '%a %b %d %H:%M:%S %Y 0.%f seconds')
+            locale.setlocale(locale.LC_TIME, backup_locale)
+            self.progress.emit(50)
+
+            # check whether the date diff matches +-1 day
+            diff_seconds = (time - datetime.utcnow()).total_seconds()
+            if math.fabs(diff_seconds) > 24 * 60 * 60:
+                raise RunFailed(
+                    "Router hwclock is too distant from the system time (%f seconds)"
+                    % diff_seconds
+                )
+
+            self.progress.emit(100)
+            return True
+
+
 class MockTest(BaseTest):
     _name = "MOCK"
 
@@ -179,7 +218,7 @@ TESTS = (
     miniPCIeTest(3),
     SimpleTest("THERMOMETER", False),
     SimpleTest("GPIO", True),
-    SimpleTest("CLOCK", False),
+    ClockTest(),
     SerialNumberTest(),
     MockTest(),
 )
