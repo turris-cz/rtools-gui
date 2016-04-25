@@ -50,6 +50,10 @@ class UsbTest(BaseTest):
         def perform(self):
             exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.progress.emit(1)
+
+            self.expectSystemConsole(exp)
+            self.progress.emit(20)
+
             exp.sendline('echo "###$(ls /dev/sd? 2> /dev/null | wc -l)###"')
 
             pattern = r'###[0-9]+###'
@@ -87,6 +91,10 @@ class miniPCIeTest(BaseTest):
         def perform(self):
             exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.progress.emit(1)
+
+            self.expectSystemConsole(exp)
+            self.progress.emit(20)
+
             exp.sendline('echo "###$(cat /sys/bus/pci/devices/*/vendor | grep -c 0x168c)###"')
 
             pattern = r'###[0-9]+###'
@@ -165,6 +173,9 @@ class ClockTest(BaseTest):
         def perform(self):
             exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.progress.emit(1)
+
+            self.expectSystemConsole(exp)
+            self.progress.emit(20)
 
             exp.sendline('hwclock')
             pattern = r'[a-zA-z0-9\.\: ]* seconds'
