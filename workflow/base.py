@@ -7,6 +7,24 @@ import time
 from PyQt5 import QtCore
 
 
+class PrefixFile(file):
+    def __init__(self, *args, **kwargs):
+        self.prefix = kwargs.get('prefix', "")
+        kwargs.pop("prefix", None)
+        super(PrefixFile, self).__init__(*args, **kwargs)
+
+    def write(self, string, *args, **kwargs):
+        res = string.replace("\n", "\n%s> " % self.prefix)
+        return super(PrefixFile, self).write(res, *args, **kwargs)
+
+    def writelines(self, stringSeq, *args, **kwargs):
+        res = []
+        for e in stringSeq:
+            res.append(e.replace("\n", "\n%s> " % self.prefix))
+
+        return super(PrefixFile, self).writelines(res, *args, **kwargs)
+
+
 def spawnPexpectSerialConsole(device):
     return pexpect.spawn(os.path.join(sys.path[0], 'sc_connector.py'), ["-d", device])
 
@@ -47,7 +65,10 @@ class BaseWorker(QtCore.QObject):
     @QtCore.pyqtSlot()
     def start(self):
         self.expected = []
-        with open(self.logfile, 'a') as self.log:  # open the log file
+
+        # Open log
+        with open(self.logfile, 'a') as self.log, \
+                PrefixFile(self.logfile, "a", prefix="local") as self.logLocal:
 
             # Write header
             self.log.write("\n########## %s ##########\n" % self.name)
@@ -62,6 +83,8 @@ class BaseWorker(QtCore.QObject):
             except Exception as e:
                 error_msg = "\n>>>>>>>>>> ERROR \"%s\" <<<<<<<<<<\n" % e.message
                 retval = False
+            finally:
+                self.logLocal.flush()
 
             # Wait for some time before the console output is flushed
             time.sleep(0.3)
@@ -83,7 +106,7 @@ class BaseWorker(QtCore.QObject):
 
     def expectLocalCommand(self, cmd):
         """ perform local command"""
-        exp = pexpect.spawn("bash")
+        exp = pexpect.spawn("sh", logfile=self.logLocal)
         exp.sendline(cmd)
         self.expectLastRetval(exp, 0)
         exp.terminate(force=True)
