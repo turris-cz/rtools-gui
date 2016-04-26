@@ -49,8 +49,9 @@ class Runner(QtCore.QObject):
 
         # prepare the console pipe process
         self._quitRunningScPipe("stop-server" + scSettings['device'].replace('/', '-'))
-        if scSettings.get('mock', False):
-            pipePath = os.path.join(sys.path[0], 'mock', 'sc_pipe_mock.py')
+        mock = scSettings.get('mock', None)
+        if mock:
+            pipePath = mock
         else:
             pipePath = os.path.join(sys.path[0], 'sc_pipe.py')
         pipeProcess = QtCore.QProcess()
