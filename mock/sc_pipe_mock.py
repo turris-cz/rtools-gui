@@ -9,34 +9,16 @@ from PyQt5.QtCore import (
 from PyQt5.QtNetwork import QLocalServer, QLocalSocket
 
 
-PLAN = {
-    'ls': {
-        'output': ".",
-        'timeout': 1000,
-    },
-    'echo "###$?###"': {
-        'output': '###0###',
-        'timeout': 2000,
-    },
-}
-
-
-def generatePlanFunction(key, watcher):
-    def perform():
-        watcher.serialConsoleReady(PLAN[key]['output'] + '\n')
-
-    return perform
-
-
 class Watcher(QObject):
 
-    def __init__(self, server, logFile, device, prefix):
+    def __init__(self, server, logFile, device, prefix, plan):
         super(Watcher, self).__init__()
         self.logFile = logFile
         self.server = server
         self.device = device
         self.server.newConnection.connect(self.inputClientConnected)
         self.prefix = prefix
+        self.plan = plan
 
     @pyqtSlot(str)
     def serialConsoleReady(self, data):
@@ -75,11 +57,12 @@ class Watcher(QObject):
         self.logFile.flush()
 
         data = data.strip()
-        if data in PLAN:
-            QTimer.singleShot(PLAN[data]['timeout'], generatePlanFunction(data, self))
+        if data in self.plan:
+            for timeout, output in self.plan[data]:
+                QTimer.singleShot(timeout, lambda: self.serialConsoleReady(output + '\n'))
 
 
-if __name__ == '__main__':
+def runMain(plan):
 
     # Parse the command line options
     optparser = optparse.OptionParser(
@@ -117,5 +100,5 @@ if __name__ == '__main__':
         initial_msg = "\nTHIS IS MOCK SCRIPT OUTPUT NOT ACTUAL SERIAL CONSOLE OUTPUT\n\n"
         logFile.write(initial_msg.replace('\n', "\n%s> " % prefix))
         logFile.flush()
-        watcher = Watcher(inputServer, logFile, options.dev, prefix)
+        watcher = Watcher(inputServer, logFile, options.dev, prefix, plan)
         sys.exit(app.exec_())

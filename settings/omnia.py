@@ -20,7 +20,7 @@ SERIAL_CONSOLE = {
     'tester': {
         'device': "/dev/ttyTESTER",
         'baudrate': 115200,
-        'mock': 'mock/sc_pipe_mock.py',
+        'mock': 'mock/sc_pipe_tester_mock.py',
     },
     'router': {
         'device': "/dev/ttyROUTER",
