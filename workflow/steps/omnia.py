@@ -66,7 +66,49 @@ class SerialReboot(Base):
             return True
 
 
+class Tester(Base):
+
+    def __init__(self, name, cmd):
+        self._name = name
+        self.cmd = cmd
+
+    def createWorker(self):
+        return self.Worker(self.name, self.cmd)
+
+    class Worker(BaseWorker):
+        def __init__(self, name, cmd):
+            super(Tester.Worker, self).__init__()
+            self.name = name
+            self.cmd = cmd
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            exp.sendline("\n")
+
+            progress = 0
+            res = None
+            self.progress.emit(progress)
+
+            exp.sendline(self.cmd)
+            while not res:
+                res = self.expect(exp, [r'\.', r'OK'])
+                if res == 0:
+                    progress += 10
+                    self.progress.emit(progress)
+
+            self.progress.emit(100)
+            exp.terminate(force=True)
+            return True
+
+
 WORKFLOW = (
+    Tester("INIT STATE 1", "SETINIT"),
+    Tester("POWER UP", "PWRUP"),
+    Tester("PROGRAM", "PROGRAM"),
+    Tester("BOOT VECTOR", "RSV"),
+    Tester("POWER DOWN", "PWRDOWN"),
+    Tester("INIT STATE 2", "SETINIT"),
+    Tester("HARDWARE START", "HWSTART"),
     Sample("POWER"),
     Sample("ATSHA"),
     Sample("UBOOT"),

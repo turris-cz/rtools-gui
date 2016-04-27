@@ -9,6 +9,12 @@ from PyQt5.QtCore import (
 from PyQt5.QtNetwork import QLocalServer, QLocalSocket
 
 
+def generatePlanFunction(watcher, output):
+    def perform():
+        watcher.serialConsoleReady(output)
+    return perform
+
+
 class Watcher(QObject):
 
     def __init__(self, server, logFile, device, prefix, plan):
@@ -59,7 +65,7 @@ class Watcher(QObject):
         data = data.strip()
         if data in self.plan:
             for timeout, output in self.plan[data]:
-                QTimer.singleShot(timeout, lambda: self.serialConsoleReady(output + '\n'))
+                QTimer.singleShot(timeout, generatePlanFunction(self, output + '\n'))
 
 
 def runMain(plan):
