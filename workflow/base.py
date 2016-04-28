@@ -124,3 +124,22 @@ class BaseWorker(QtCore.QObject):
     def expectLastRetval(self, exp, retval):
         exp.sendline('echo "###$?###"')
         self.expect(exp, '###%d###' % retval)
+
+    def expectWaitBooted(self, exp, progressStart, progressEnd):
+        progressDiff = progressEnd - progressStart
+        plan = [
+            ('Router Turris successfully started.', progressStart + progressDiff),
+            ('fuse init', progressStart + progressDiff * 75 / 100),
+            ('procd: - init -', progressStart + progressDiff * 55 / 100),
+            ('ncompressing Kernel Image ... OK', progressStart + progressDiff * 40 / 100),
+            ('BOOT NAND', progressStart + progressDiff * 20 / 100),
+        ]
+
+        while True:
+            res = self.expect(exp, [e[0] for e in plan])
+            self.progress.emit(plan[res][1])
+            if res == 0:  # first is a final success
+                break
+            else:
+                # remove from plan (avoid going in boot cyrcles)
+                del plan[res]

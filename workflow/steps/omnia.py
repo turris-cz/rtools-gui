@@ -1,4 +1,5 @@
 import pexpect
+import time
 
 from workflow.base import Base, BaseWorker, spawnPexpectSerialConsole
 from application import settings
@@ -45,22 +46,7 @@ class SerialReboot(Base):
             self.expectSystemConsole(exp)
             exp.sendline('reboot')
             self.progress.emit(5)
-            plan = [
-                ('Router Turris successfully started.', 99),
-                ('fuse init', 75),
-                ('procd: - init -', 55),
-                ('ncompressing Kernel Image ... OK', 40),
-                ('BOOT NAND', 20),
-            ]
-            while True:
-                res = self.expect(exp, [e[0] for e in plan])
-                self.progress.emit(plan[res][1])
-                if res == 0:  # first is a final success
-                    break
-                else:
-                    # remove from plan (avoid going in boot cyrcles)
-                    del plan[res]
-
+            self.expectWaitBooted(exp, 5, 99)
             self.progress.emit(100)
             exp.terminate(force=True)
             return True
@@ -101,6 +87,61 @@ class Tester(Base):
             return True
 
 
+class UbootCommands(Base):
+
+    def __init__(self, name, cmds, bootCheck=True):
+        self._name = name
+        self.cmds = cmds
+        self.bootCheck = bootCheck
+
+    def createWorker(self):
+        return self.Worker(self.name, self.cmds, self.bootCheck)
+
+    class Worker(BaseWorker):
+        def __init__(self, name, cmds, bootCheck):
+            super(UbootCommands.Worker, self).__init__()
+            self.name = name
+            self.cmds = cmds
+            self.bootCheck = bootCheck
+
+        def perform(self):
+            # perform tester DUT
+            testerExp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            routerExp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+
+            # reset using tester
+            testerExp.sendline("RESET")
+            self.expect(testerExp, "OK")
+            self.progress.emit(10)
+
+            # get into uboot shell
+            # unfortunatelly can't wait for "Hit any key to stop autoboot" msg (too small delay)
+            # so a several new line commands will be sent there
+
+            tries = 10  # 10s shall be enough
+            while True:
+                time.sleep(1)
+                routerExp.sendline('\n')
+                res = self.expect(routerExp, ['=>', ".+"] if tries > 0 else '=>')
+                if res == 0:
+                    break
+                else:
+                    tries -= 1
+            self.progress.emit(20)
+
+            # perform commands
+            cmds_progress = 80 if self.bootCheck else 30
+            for i in range(len(self.cmds)):
+                routerExp.sendline(self.cmds[i])
+                self.progress.emit(20 + (i + 1) * cmds_progress / len(self.cmds))
+
+            # wait for boot if specified
+            if self.bootCheck:
+                self.expectWaitBooted(routerExp, 50, 100)
+            return True
+
+
 WORKFLOW = (
     Tester("INIT STATE 1", "SETINIT"),
     Tester("POWER UP", "PWRUP"),
@@ -115,5 +156,6 @@ WORKFLOW = (
     Sample("REBOOT"),
     Sample("REFLASH"),
     Sample("RTC"),
+    UbootCommands("UBOOT X", ["boot"], True),
     SerialReboot(),
 )
