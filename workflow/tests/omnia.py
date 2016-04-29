@@ -272,38 +272,6 @@ class EthTest(BaseTest):
             return True
 
 
-class MockTest(BaseTest):
-    _name = "MOCK"
-
-    @property
-    def instructions(self):
-        return """
-            <h3>%(test_name)s</h3>
-            <p>Před tím, než budete pokračovat:</p>
-            <ul>
-                <li>Připojte ethernetový kabel do zdířky ETH0</li>
-            </ul>
-        """ % dict(test_name=self._name)
-
-    def createWorker(self):
-        return self.Worker()
-
-    class Worker(BaseWorker):
-
-        def perform(self):
-
-            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            self.progress.emit(1)
-            exp.sendline('ls')
-            self.expect(exp, '\.')
-            self.progress.emit(50)
-            self.expectLastRetval(exp, 0)
-            self.progress.emit(100)
-            exp.terminate(force=True)
-
-            return True
-
-
 TESTS = (
     UsbTest(2),
     miniPCIeTest(3),
@@ -311,7 +279,6 @@ TESTS = (
     SimpleTest("GPIO", True),
     ClockTest(),
     SerialNumberTest(),
-    MockTest(),
     EthTest("eth2", "WAN", 167),
     EthTest("br-lan", "LAN1", 166),
     EthTest("br-lan", "LAN2", 165),
