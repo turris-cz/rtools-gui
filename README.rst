@@ -18,5 +18,7 @@ Requirements
 Howto run it
 ------------
 ./rtools-gui.py
+./rtools-gui.py -t (tests only)
+./rtools-gui.py -s (steps only)
 
 note that a custom settings can be loaded by setting RTOOLS_SETTINGS env variable

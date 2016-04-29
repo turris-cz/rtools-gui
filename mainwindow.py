@@ -83,6 +83,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # perform queries which weren't performed last time
         restoreRecovery()
 
+        # tests/steps only
+        if qApp.tests_only:
+            qApp.loggerMain.info("Tests only option used.")
+            self.stepFrame.setVisible(False)
+            self.stepsStartWidget.setVisible(False)
+            self.titleLabel.setText("Testování")
+        if qApp.steps_only:
+            qApp.loggerMain.info("Steps only option used.")
+            self.testFrame.setVisible(False)
+            self.testsStartWidget.setVisible(False)
+            self.titleLabel.setText("Oživování")
+
     def loadRouter(self, router):
         # Set title
         self.serialNumberLabel.setText("%s (%s)" % (router.id, router.idHex))
