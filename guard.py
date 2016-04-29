@@ -8,15 +8,20 @@ class GuardFailed(Exception):
 
 class Guard(object):
 
+    def __init__(self, part=""):
+        self.part = part
+
     def __enter__(self):
-        self.status = QSharedMemory("rtools_gui_shmem")
-        self.lock = QSystemSemaphore("rtools_gui_lock", 1, QSystemSemaphore.Open)
+        mem_key = "rtools_gui_%s_shmem" % self.part if self.part else "rtools_gui_shmem"
+        sem_key = "rtools_gui_%s_lock" % self.part if self.part else "rtools_gui_lock"
+        self.status = QSharedMemory(mem_key)
+        self.lock = QSystemSemaphore(sem_key, 1, QSystemSemaphore.Open)
 
         if not self.lock.acquire():
             raise GuardFailed()
 
         # cleanup after crashed process
-        QSharedMemory("rtools_gui_shmem").attach()
+        QSharedMemory(mem_key).attach()
 
         if not self.status.create(1):
             self.lock.release()
