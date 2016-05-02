@@ -279,7 +279,7 @@ TESTS = (
     SimpleTest("GPIO", True),
     ClockTest(),
     SerialNumberTest(),
-    EthTest("eth2", "WAN", 167),
+    EthTest("eth1", "WAN", 167),
     EthTest("br-lan", "LAN1", 166),
     EthTest("br-lan", "LAN2", 165),
 )
