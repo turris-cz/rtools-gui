@@ -107,7 +107,7 @@ class BaseWorker(QtCore.QObject):
     def expectLocalCommand(self, cmd):
         """ perform local command"""
         exp = pexpect.spawn("sh", logfile=self.logLocal)
-        exp.sendline(cmd)
+        exp.sendline('\n' + cmd)
         self.expectLastRetval(exp, 0)
         exp.terminate(force=True)
 
