@@ -272,7 +272,46 @@ class EthTest(BaseTest):
             return True
 
 
+class SerialConsoleTest(BaseTest):
+    _name = "SERIAL CONSOLE"
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+            self.expectSystemConsole(exp)
+            self.progress.emit(10)
+
+            chars = ['^', '!', '+', '@']
+            batches = [
+                (500, 4),
+                (100, 4),
+                (20, 4),
+                (1, 4),
+            ]
+
+            steps = sum([e[1] for e in batches])
+
+            step = 1
+            for size, count in batches:
+                # generate string
+                data = "".join(chars) * (count * (size + 1) / len(chars))
+                for i in range(count):
+                    line = data[i * size:(i + 1) * size]
+                    exp.sendline('echo %s' % data)
+                    self.expect(exp, "".join(["\\%s" % e for e in line]))
+                    self.progress.emit(10 + step * (90.0 / steps))
+                    step += 1
+
+            return True
+
+
 TESTS = (
+    SerialConsoleTest(),
     UsbTest(2),
     miniPCIeTest(3),
     SimpleTest("THERMOMETER", False),
