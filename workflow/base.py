@@ -125,7 +125,7 @@ class BaseWorker(QtCore.QObject):
         exp.sendline('echo "###$?###"')
         self.expect(exp, '###%d###' % retval)
 
-    def expectWaitBooted(self, exp, progressStart, progressEnd):
+    def expectWaitBooted(self, exp, progressStart, progressEnd, timeout=60):
         progressDiff = progressEnd - progressStart
         plan = [
             ('Router Turris successfully started.', progressStart + progressDiff),
@@ -136,7 +136,7 @@ class BaseWorker(QtCore.QObject):
         ]
 
         while True:
-            res = self.expect(exp, [e[0] for e in plan])
+            res = self.expect(exp, [e[0] for e in plan], timeout=timeout)
             self.progress.emit(plan[res][1])
             if res == 0:  # first is a final success
                 break
