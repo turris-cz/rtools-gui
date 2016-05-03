@@ -10,30 +10,6 @@ from workflow.base import BaseTest, BaseWorker, spawnPexpectSerialConsole
 from custom_exceptions import RunFailed
 
 
-class SimpleTest(BaseTest):
-
-    def __init__(self, name, result):
-        self._name = name
-        self.result = result
-
-    def createWorker(self):
-        return self.Worker(self.result)
-
-    class Worker(BaseWorker):
-        def __init__(self, result):
-            super(SimpleTest.Worker, self).__init__()
-            self.result = result
-
-        def perform(self):
-
-            for i in range(10, 101, 10):
-                time.sleep(0.05)
-                self.progress.emit(i)
-                time.sleep(0.05)
-
-            return self.result
-
-
 class UsbTest(BaseTest):
     _name = 'USB'
 
@@ -314,8 +290,6 @@ TESTS = (
     SerialConsoleTest(),
     UsbTest(2),
     miniPCIeTest(3),
-    SimpleTest("THERMOMETER", False),
-    SimpleTest("GPIO", True),
     ClockTest(),
     SerialNumberTest(),
     EthTest("eth1", "WAN", 167),
