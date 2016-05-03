@@ -2,11 +2,11 @@
 
 import locale
 import math
-import time
+import pexpect
 
 from application import qApp, settings
 from datetime import datetime
-from workflow.base import BaseTest, BaseWorker, spawnPexpectSerialConsole
+from workflow.base import Base, BaseTest, BaseWorker, spawnPexpectSerialConsole
 from custom_exceptions import RunFailed
 
 
@@ -286,7 +286,53 @@ class SerialConsoleTest(BaseTest):
             return True
 
 
+class Booted(Base):
+    """
+    Wait till router is booted in serial console
+    It detects router stated and acts accordingly.
+
+    Note that this is not actually a test -> run is aborted if it fails
+    (no point to perform the tests when the router is not booted)
+    """
+    _name = "BOOTED"
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+
+            # determinate status
+            exp.sendline("\n")
+            res = self.expect(exp, [r'root@turris:/#', r'=>', pexpect.TIMEOUT], timeout=5)
+            if res == 0:
+                self.progress.emit(50)
+                # Read while something is printed to the console
+                # (booting is still in process, but the console is ready)
+                while 0 == self.expect(exp, [r'.', pexpect.TIMEOUT], timeout=10):
+                    pass
+                # Booted and serial console ready
+                self.progress.emit(100)
+                return True
+
+            elif res == 1:
+                # In uboot -> try to boot
+                exp.sendline("boot")
+                self.progress.emit(10)
+                booting_start = 10
+
+            else:
+                booting_start = 1
+
+            self.expectWaitBooted(exp, booting_start, 100)
+
+            return True
+
+
 TESTS = (
+    Booted(),
     SerialConsoleTest(),
     UsbTest(2),
     miniPCIeTest(3),
