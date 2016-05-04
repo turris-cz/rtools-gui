@@ -8,6 +8,8 @@ import traceback
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtSql import QSqlDatabase
 
+from utils import backupAppLog
+
 
 # custom qApp
 qApp = None
@@ -104,6 +106,8 @@ class Application(QApplication):
 
         # current router
         self.router = None
+
+        backupAppLog()
 
     def useRouter(self, serialNumber):
 

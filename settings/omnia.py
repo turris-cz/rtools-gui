@@ -32,3 +32,5 @@ LOG_APP_FILE = '/var/log/programmer/application.log'
 LOG_ROUTERS_DIR = '/var/log/programmer/runs/'
 
 DB_RECOVER_QUERY_FILE = '/tmp/rtools/recover-queries.json'
+
+BACKUP_SCRIPT = 'backup_log.sh'

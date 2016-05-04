@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QSizePolicy
 from ui.mainwindow import Ui_MainWindow
 
 from custom_exceptions import DbError
-from utils import serialNumberValidator, MAX_SERIAL_LEN
+from utils import serialNumberValidator, MAX_SERIAL_LEN, backupAppLog
 
 # Include settings
 from application import workflow, tests, qApp
@@ -303,6 +303,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if qApp.connection.isOpen():
             qApp.loggerMain.info("Closing db connection.")
             qApp.connection.close()
+
+        backupAppLog()
 
         event.accept()
 
