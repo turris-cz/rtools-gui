@@ -20,7 +20,7 @@ SERIAL_CONSOLE = {
     'tester': {
         'device': "/dev/ttyTESTER",
         'baudrate': 115200,
-        'mock': 'mock/sc_pipe_tester_mock.py',  #TODO remove before deploying
+        'mock': 'mock/sc_pipe_tester_mock.py',  # TODO remove before deploying
     },
     'router': {
         'device': "/dev/ttyROUTER",
@@ -28,7 +28,7 @@ SERIAL_CONSOLE = {
     },
 }
 
-LOG_APP_FILE = '/tmp/rtools/application.log'
-LOG_ROUTERS_DIR = '/tmp/rtools/outputs/'
+LOG_APP_FILE = '/var/log/programmer/application.log'
+LOG_ROUTERS_DIR = '/var/log/programmer/runs/'
 
 DB_RECOVER_QUERY_FILE = '/tmp/rtools/recover-queries.json'
