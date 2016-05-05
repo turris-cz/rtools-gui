@@ -10,7 +10,7 @@ DB = dict(
 WORKFLOW_STEPS_MODULE = 'workflow.steps.omnia'
 WORKFLOW_TESTS_MODULE = 'workflow.tests.omnia'
 
-STEP_SETTINGS = {
+SCRIPTS = {
     'sample': {
         'script_path': 'mock/sample.sh'
     }

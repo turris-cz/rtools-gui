@@ -11,7 +11,7 @@ class Sample(Base):
         self._name = name
 
     def createWorker(self):
-        return self.Worker(settings.STEP_SETTINGS['sample']['script_path'])
+        return self.Worker(settings.SCRIPTS['sample']['script_path'])
 
     class Worker(BaseWorker):
         def __init__(self, scriptPath):
