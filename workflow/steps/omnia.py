@@ -131,7 +131,7 @@ class UbootCommands(Base):
             self.progress.emit(20)
 
             # perform commands
-            cmds_progress = 80 if self.bootCheck else 30
+            cmds_progress = 30 if self.bootCheck else 80
             for i in range(len(self.cmds)):
                 routerExp.sendline(self.cmds[i])
                 self.progress.emit(20 + (i + 1) * cmds_progress / len(self.cmds))
@@ -139,6 +139,7 @@ class UbootCommands(Base):
             # wait for boot if specified
             if self.bootCheck:
                 self.expectWaitBooted(routerExp, 50, 100)
+
             return True
 
 
