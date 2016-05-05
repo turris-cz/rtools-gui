@@ -65,3 +65,123 @@ _________
 ``BACKUP_SCRIPT = 'backup_log.sh'``
   Path to a backup script. This script is use do backup application logs well as individual
   tests/steps outputs.
+
+
+Writing steps / tests
+---------------------
+
+To write a custom steps / tests you need to understand a underlying logic a bit.
+
+Running
+_______
+After the barcode is scanned db is checked for records about the serial number.
+It checks whether all steps are passed (`WORKFLOW_STEPS_MODULE`) if not the remains steps are planned for the next run.
+If all steps are passed the tests (`WORKFLOW_TESTS_MODULE`) could be planned.
+Once a step passes it can't be run again.
+If step fails the execution won't continues.
+
+Runner
+______
+Is resposible for running the planned tests / steps.
+It is listens for signels send from the tests / steps.
+It could trigger some actions (e.g. update progress bar, store firmware).
+The order of the execution depends on the `WORKFLOW` variable of the tests / steps module.
+
+Steps / Tests
+_____________
+Steps and tests are defined here::
+
+  workflow/
+
+The steps and tests are using the same superclass.
+It contains some commonf functions and it handles dome basic logic.
+
+The only difference between a test and a step is that test class contains ``continueOnFailure = True`` definition.
+
+A sample test class looks something like this::
+
+    class Sample(Base):
+        _name = 'SAMPLE'
+
+        def __init__(self, param1, param2, ...):
+            self.param1 = param1
+            self.param2 = param2
+            ...
+
+        def createWorker(self):
+            return self.Worker(self.param1, self.param2, ...)
+
+        class Worker(BaseWorker):
+            def __init__(self, param1, param2, ...):
+                super(Sample.Worker, self).__init__()
+                self.param1 = param1
+                self.param2 = param2
+                ...
+
+            def perform(self):
+                ...
+                return True
+
+Note the ``Worker`` class is a ``QObject`` which is moved to another ``QThread`` so it is not possible to communicate with e.g. ``Runner`` class directly.
+You are only able to emit a signal.
+
+When you want to display some instructions before the test / step is performed you can use this::
+
+    class Sample(Base):
+        _name = 'SAMPLE'
+
+        @property
+        def instructions(self):
+            return """<b>TO THIS BEFORE RUNNING THE TEST</b>"""
+
+To access a current settings variables you can simply do this::
+
+    from application import settings
+    settings.SERIAL_CONSOLE['router']['device']
+
+Pexpect is used to check and wait for the output of the serial consoles.
+Some of its calls are wrapped to have more reasonable output in logs or to avoid a redundant code.
+See the example::
+
+    def perform(self):
+        exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+        self.progress.emit(1)
+        exp.sendline('ls -al')
+        self.progress.emit(50)
+        self.expect(exp, r'\.\.')
+        self.progress.emit(100)
+
+Mocking
+_______
+
+Sometimes during the development it can be useful to mock some functionality.
+Note that some steps are irreversible and can't be repeated (atsha).
+
+You can specify your own settings for that::
+
+    RTOOLS_SETTINGS='settings.mock' ./rtools-gui.py
+
+Where you can alter a path to a local script::
+
+    SCRIPTS = {
+        'sample': {
+            'script_path': 'mock/sample.sh'
+        }
+    }
+
+Or mock the tester or router serial console output::
+
+    SERIAL_CONSOLE = {
+        'tester': {
+            'device': "/dev/ttyTESTER",
+            'baudrate': 115200,
+            'mock': 'mock/sc_pipe_tester_mock.py',
+        },
+        'router': {
+            'device': "/dev/ttyROUTER",
+            'baudrate': 115200,
+            'mock': 'mock/sc_pipe_router_mock.py.py',
+        },
+    }
+
+Note that the sample mock scripts / programs are not complete and you'd need to add some parts.
