@@ -57,3 +57,15 @@ CREATE OR REPLACE VIEW good_routers AS
     GROUP BY routers.id
     ORDER BY routers.id;
 ALTER VIEW good_routers OWNER TO omnia_flasher;
+
+CREATE OR REPLACE FUNCTION router_steps(router_id text)
+	RETURNS TABLE ("run_id" bigint, "run_start" timestamp, "attempt" int, "order" int, "time" timestamp, "name" text, "passed" boolean) AS
+	$$ SELECT runs.id, runs.start, steps.attempt, steps.step_order, steps.timestamp, steps.step_name, steps.passed FROM runs INNER JOIN steps ON runs.id = steps.run
+		WHERE runs.router = router_steps.router_id ORDER BY steps.id
+	$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION router_tests(router_id text)
+	RETURNS TABLE ("run_id" bigint, "run_start" timestamp, "attempt" int, "time" timestamp, "name" text, "passed" boolean) AS
+	$$ SELECT runs.id, runs.start, tests.attempt, tests.timestamp, tests.test_name, tests.result FROM runs INNER JOIN tests ON runs.id = tests.run
+		WHERE runs.router = router_tests.router_id ORDER BY tests.id
+	$$ LANGUAGE SQL;

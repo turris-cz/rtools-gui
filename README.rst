@@ -67,6 +67,22 @@ _________
   tests/steps outputs.
 
 
+Querying database
+-----------------
+
+If you want to get all successfully processed routers you can simply::
+
+    SELECT * FROM good_routers;
+
+If you want to list info about steps for a specific router you can::
+
+    SELECT * FROM router_steps('38654706684');
+
+Same for the tests::
+
+    SELECT * FROM router_tests('38654706684');
+
+
 Writing steps / tests
 ---------------------
 
