@@ -77,7 +77,7 @@ class Tester(Base):
 
             exp.sendline(self.cmd)
             while not res:
-                res = self.expect(exp, [r'\.', r'OK'])
+                res = self.expect(exp, [r'\.', r'OK\r\n'])
                 if res == 0:
                     progress += 10
                     self.progress.emit(progress)
