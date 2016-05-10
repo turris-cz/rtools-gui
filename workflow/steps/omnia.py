@@ -19,6 +19,7 @@ class Sample(Base):
             self.scriptPath = scriptPath
 
         def perform(self):
+            self.logLocal.write("\n")
             exp = pexpect.spawn(self.scriptPath, logfile=self.logLocal)
             self.progress.emit(2)
             self.expect(exp, "Phase 1")
