@@ -54,33 +54,38 @@ class SerialReboot(Base):
 
 class Tester(Base):
 
-    def __init__(self, name, cmd):
+    def __init__(self, name, cmds):
         self._name = name
-        self.cmd = cmd
+        self.cmds = cmds
 
     def createWorker(self):
-        return self.Worker(self.name, self.cmd)
+        return self.Worker(self.name, self.cmds)
 
     class Worker(BaseWorker):
-        def __init__(self, name, cmd):
+        def __init__(self, name, cmds):
             super(Tester.Worker, self).__init__()
             self.name = name
-            self.cmd = cmd
+            self.cmds = cmds
 
         def perform(self):
             exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
             exp.sendline("\n")
 
-            progress = 0
-            res = None
+            progress = 0.0
             self.progress.emit(progress)
 
-            exp.sendline(self.cmd)
-            while not res:
-                res = self.expect(exp, [r'\.', r'OK\r\n'])
-                if res == 0:
-                    progress += 10
-                    self.progress.emit(progress)
+            for cmd in self.cmds:
+                res = None
+                cmd_progress = progress
+                exp.sendline(cmd)
+                while not res:
+                    res = self.expect(exp, [r'\.', r'OK\r\n'])
+                    if res == 0:
+                        cmd_progress += 100.0 / len(self.cmds) / 10
+                        self.progress.emit(cmd_progress)
+
+                progress += 100.0 / len(self.cmds)
+                self.progress.emit(progress)
 
             self.progress.emit(100)
             exp.terminate(force=True)
@@ -144,13 +149,7 @@ class UbootCommands(Base):
 
 
 WORKFLOW = (
-    Tester("INIT STATE 1", "SETINIT"),
-    Tester("POWER UP", "PWRUP"),
-    Tester("PROGRAM", "PROGRAM"),
-    Tester("BOOT VECTOR", "RSV"),
-    Tester("POWER DOWN", "PWRDOWN"),
-    Tester("INIT STATE 2", "SETINIT"),
-    Tester("HARDWARE START", "HWSTART"),
+    Tester("TESTER ALL", ["PWRUP", "PROGRAM", "RSV", "PWRDOWN", "HWSTART", "RSV", "RESET"]),
     Sample("POWER"),
     Sample("ATSHA"),
     Sample("UBOOT"),
