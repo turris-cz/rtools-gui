@@ -33,19 +33,43 @@ class Sample(Base):
             exp.terminate(force=True)
             return True
 
+
 class Mcu(Base):
     _name = "MCU"
 
     def createWorker(self):
-        return self.Worker()
+        return self.Worker(settings.SCRIPTS['sample']['script_path'])  # TODO add real script
 
     class Worker(BaseWorker):
 
-        def perform(self):
-            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            exp.sendline("\n")
+        def __init__(self, scriptPath):
+            super(Mcu.Worker, self).__init__()
+            self.scriptPath = scriptPath
 
-            exp.terminate(force=True)
+        def perform(self):
+            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            expTester.sendline("\n")
+            self.progress.emit(0)
+
+            # Turn on MCU
+            self.expectTester(expTester, "MCUON", 0, 33)
+
+            # Run the mcu programming script
+            expLocal = pexpect.spawn("sh", logfile=self.logLocal)
+            expLocal.sendline('\n' + self.scriptPath)
+
+            # TODO progress + better termination detection (add 'echo FINISHED' 'echo FAILED')
+            # Wait for console
+            self.expect(expLocal, r'\$ ')
+
+            self.expectLastRetval(expLocal, 0)
+            self.progress.emit(66)
+            expLocal.terminate(force=True)
+
+            # Turn off MCU
+            self.expectTester(expTester, "MCUOFF", 66, 100)
+
+            expTester.terminate(force=True)
             return True
 
 
@@ -158,6 +182,7 @@ class UbootCommands(Base):
 
 WORKFLOW = (
     Tester("TESTER ALL", ["PWRUP", "PROGRAM", "RSV", "PWRDOWN", "HWSTART", "RSV", "RESETDUT"]),
+    Mcu(),
     Sample("POWER"),
     Sample("ATSHA"),
     Sample("UBOOT"),
