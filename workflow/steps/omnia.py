@@ -2,7 +2,7 @@ import pexpect
 import time
 
 from workflow.base import Base, BaseWorker, spawnPexpectSerialConsole
-from application import settings
+from application import qApp, settings
 
 
 class Sample(Base):
@@ -38,7 +38,7 @@ class Mcu(Base):
     _name = "MCU"
 
     def createWorker(self):
-        return self.Worker(settings.SCRIPTS['sample']['script_path'])  # TODO add real script
+        return self.Worker(settings.SCRIPTS['mcu']['script_path'])
 
     class Worker(BaseWorker):
 
@@ -54,8 +54,12 @@ class Mcu(Base):
             # Turn on MCU
             self.expectTester(expTester, "MCUON", 0, 33)
 
+            # Add \n into local console to split tester and local output
+            self.logLocal.write('\n')
             # Run the mcu programming script
             expLocal = pexpect.spawn("sh", logfile=self.logLocal)
+            # Wait for console
+            self.expect(expLocal, r'\$ ')
             expLocal.sendline('\n' + self.scriptPath)
 
             # TODO progress + better termination detection (add 'echo FINISHED' 'echo FAILED')
@@ -68,6 +72,93 @@ class Mcu(Base):
 
             # Turn off MCU
             self.expectTester(expTester, "MCUOFF", 66, 100)
+
+            expTester.terminate(force=True)
+            return True
+
+
+class Uboot(Base):
+    _name = "UBOOT"
+
+    def createWorker(self):
+        return self.Worker(settings.SCRIPTS['uboot_flashing']['script_path'])
+
+    class Worker(BaseWorker):
+
+        def __init__(self, scriptPath):
+            super(Uboot.Worker, self).__init__()
+            self.scriptPath = scriptPath
+
+        def perform(self):
+            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            expTester.sendline("\n")
+            self.progress.emit(0)
+
+            # Turn on MCU
+            self.expectTester(expTester, "CPUOFF", 0, 33)
+
+            # Add \n into local console to split tester and local output
+            self.logLocal.write('\n')
+            # Run the uboot flashing script
+            expLocal = pexpect.spawn("sh", logfile=self.logLocal)
+            # Wait for console
+            self.expect(expLocal, r'\$ ')
+            expLocal.sendline('\n' + self.scriptPath)
+
+            # TODO progress + better termination detection (add 'echo FINISHED' 'echo FAILED')
+            # Wait for console
+            self.expect(expLocal, r'\$ ')
+
+            self.expectLastRetval(expLocal, 0)
+            self.progress.emit(66)
+            expLocal.terminate(force=True)
+
+            # Turn off MCU
+            self.expectTester(expTester, "CPUON", 66, 100)
+
+            expTester.terminate(force=True)
+            return True
+
+
+class Atsha(Base):
+    _name = "ATSHA"
+
+    def createWorker(self):
+        return self.Worker(settings.SCRIPTS['atsha']['script_path'], qApp.router.idHex)
+
+    class Worker(BaseWorker):
+
+        def __init__(self, scriptPath, serial):
+            super(Atsha.Worker, self).__init__()
+            self.scriptPath = scriptPath
+            self.serial = serial
+
+        def perform(self):
+            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            expTester.sendline("\n")
+            self.progress.emit(0)
+
+            # Turn on MCU
+            self.expectTester(expTester, "CPUOFF", 0, 33)
+
+            # Add \n into local console to split tester and local output
+            self.logLocal.write('\n')
+            # Run the atsha programming script
+            expLocal = pexpect.spawn("sh", logfile=self.logLocal)
+            # Wait for console
+            self.expect(expLocal, r'\$ ')
+            expLocal.sendline('\n%s %s' % (self.scriptPath, self.serial))
+
+            # TODO progress + better termination detection (add 'echo FINISHED' 'echo FAILED')
+            # Wait for console
+            self.expect(expLocal, r'\$ ')
+
+            self.expectLastRetval(expLocal, 0)
+            self.progress.emit(66)
+            expLocal.terminate(force=True)
+
+            # Turn off MCU
+            self.expectTester(expTester, "CPUON", 66, 100)
 
             expTester.terminate(force=True)
             return True
@@ -183,9 +274,8 @@ class UbootCommands(Base):
 WORKFLOW = (
     Tester("TESTER ALL", ["PWRUP", "PROGRAM", "RSV", "PWRDOWN", "HWSTART", "RSV", "RESETDUT"]),
     Mcu(),
-    Sample("POWER"),
-    Sample("ATSHA"),
-    Sample("UBOOT"),
+    Uboot(),
+    Atsha(),
     Sample("REBOOT"),
     Sample("REFLASH"),
     Sample("RTC"),

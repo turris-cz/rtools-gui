@@ -13,7 +13,16 @@ WORKFLOW_TESTS_MODULE = 'workflow.tests.omnia'
 SCRIPTS = {
     'sample': {
         'script_path': 'mock/sample.sh'
-    }
+    },
+    'mcu': {
+        'script_path': 'mock/sample.sh'
+    },
+    'uboot_flashing': {
+        'script_path': 'mock/sample.sh'
+    },
+    'atsha': {
+        'script_path': 'mock/sample.sh'
+    },
 }
 
 SERIAL_CONSOLE = {
