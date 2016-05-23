@@ -143,3 +143,14 @@ class BaseWorker(QtCore.QObject):
             else:
                 # remove from plan (avoid going in boot cyrcles)
                 del plan[res]
+
+    def expectTester(self, exp, cmd, progressStart, progressEnd):
+        step = (progressEnd - progressStart) / 10.0  # tester prints 10 dots
+        current = progressStart
+        res = None
+        exp.sendline(cmd)
+        while not res:
+            res = self.expect(exp, [r'\.', r'OK\r\n'])
+            if res == 0:
+                current += step
+                self.progress.emit(current if current < progressEnd else progressEnd)

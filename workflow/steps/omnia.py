@@ -33,6 +33,21 @@ class Sample(Base):
             exp.terminate(force=True)
             return True
 
+class Mcu(Base):
+    _name = "MCU"
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            exp.sendline("\n")
+
+            exp.terminate(force=True)
+            return True
+
 
 class SerialReboot(Base):
     _name = "SERIAL REBOOT"
@@ -76,17 +91,9 @@ class Tester(Base):
             self.progress.emit(progress)
 
             for cmd in self.cmds:
-                res = None
-                cmd_progress = progress
-                exp.sendline(cmd)
-                while not res:
-                    res = self.expect(exp, [r'\.', r'OK\r\n'])
-                    if res == 0:
-                        cmd_progress += 100.0 / len(self.cmds) / 10
-                        self.progress.emit(cmd_progress)
-
-                progress += 100.0 / len(self.cmds)
-                self.progress.emit(progress)
+                nextProgress = progress + 100 / len(self.cmds)
+                self.expectTester(exp, cmd, progress, nextProgress)
+                progress = nextProgress
 
             self.progress.emit(100)
             exp.terminate(force=True)
