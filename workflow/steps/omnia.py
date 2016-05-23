@@ -150,7 +150,7 @@ class UbootCommands(Base):
 
 
 WORKFLOW = (
-    Tester("TESTER ALL", ["PWRUP", "PROGRAM", "RSV", "PWRDOWN", "HWSTART", "RSV", "RESET"]),
+    Tester("TESTER ALL", ["PWRUP", "PROGRAM", "RSV", "PWRDOWN", "HWSTART", "RSV", "RESETDUT"]),
     Sample("POWER"),
     Sample("ATSHA"),
     Sample("UBOOT"),
