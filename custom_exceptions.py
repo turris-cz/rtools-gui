@@ -4,3 +4,7 @@ class DbError(Exception):
 
 class RunFailed(Exception):
     pass
+
+
+class LocalCommandFailed(Exception):
+    pass

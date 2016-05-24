@@ -20,7 +20,7 @@ class Sample(Base):
 
         def perform(self):
             self.logLocal.write("\n")
-            exp = pexpect.spawn(self.scriptPath, logfile=self.logLocal)
+            exp = self.expectStartLocalCommand(self.scriptPath)
             self.progress.emit(2)
             self.expect(exp, "Phase 1")
             self.progress.emit(34)
@@ -57,18 +57,13 @@ class Mcu(Base):
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
             # Run the mcu programming script
-            expLocal = pexpect.spawn("sh", logfile=self.logLocal)
-            # Wait for console
-            self.expect(expLocal, r'\$ ')
-            expLocal.sendline('\n' + self.scriptPath)
+            expLocal = self.expectStartLocalCommand(self.scriptPath)
 
-            # TODO progress + better termination detection (add 'echo FINISHED' 'echo FAILED')
-            # Wait for console
-            self.expect(expLocal, r'\$ ')
+            # TODO progress
+            self.expect(expLocal, pexpect.EOF)
+            self.testExitStatus(expLocal)
 
-            self.expectLastRetval(expLocal, 0)
             self.progress.emit(66)
-            expLocal.terminate(force=True)
 
             # Turn off MCU
             self.expectTester(expTester, "MCUOFF", 66, 100)
@@ -100,18 +95,13 @@ class Uboot(Base):
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
             # Run the uboot flashing script
-            expLocal = pexpect.spawn("sh", logfile=self.logLocal)
-            # Wait for console
-            self.expect(expLocal, r'\$ ')
-            expLocal.sendline('\n' + self.scriptPath)
+            expLocal = self.expectStartLocalCommand(self.scriptPath)
 
-            # TODO progress + better termination detection (add 'echo FINISHED' 'echo FAILED')
-            # Wait for console
-            self.expect(expLocal, r'\$ ')
+            # TODO progress
+            self.expect(expLocal, pexpect.EOF)
+            self.testExitStatus(expLocal)
 
-            self.expectLastRetval(expLocal, 0)
             self.progress.emit(66)
-            expLocal.terminate(force=True)
 
             # Turn off MCU
             self.expectTester(expTester, "CPUON", 66, 100)
@@ -144,18 +134,13 @@ class Atsha(Base):
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
             # Run the atsha programming script
-            expLocal = pexpect.spawn("sh", logfile=self.logLocal)
-            # Wait for console
-            self.expect(expLocal, r'\$ ')
-            expLocal.sendline('\n%s %s' % (self.scriptPath, self.serial))
+            expLocal = self.expectStartLocalCommand('%s %s' % (self.scriptPath, self.serial))
 
-            # TODO progress + better termination detection (add 'echo FINISHED' 'echo FAILED')
-            # Wait for console
-            self.expect(expLocal, r'\$ ')
+            # TODO progress
+            self.expect(expLocal, pexpect.EOF)
+            self.testExitStatus(expLocal)
 
-            self.expectLastRetval(expLocal, 0)
             self.progress.emit(66)
-            expLocal.terminate(force=True)
 
             # Turn off MCU
             self.expectTester(expTester, "CPUON", 66, 100)

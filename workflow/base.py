@@ -1,10 +1,14 @@
 import abc
+import getpass
 import os
 import pexpect
+import socket
 import sys
 import time
 
 from PyQt5 import QtCore
+
+from custom_exceptions import LocalCommandFailed
 
 
 class PrefixFile(file):
@@ -100,16 +104,28 @@ class BaseWorker(QtCore.QObject):
         self.finished.emit(True if retval else False)  # Boolean needs to be emitted
 
     def expectCommand(self, exp, cmd):
-        """ perform local command"""
-        exp.sendline(cmd)
+        """ perform command"""
+        exp.sendline("\n" + cmd)  # add \n to separate outputs in log
         self.expectLastRetval(exp, 0)
 
-    def expectLocalCommand(self, cmd):
+    def expectStartLocalCommand(self, cmd, timeout=30):
         """ perform local command"""
-        exp = pexpect.spawn("sh", logfile=self.logLocal)
-        exp.sendline('\n' + cmd)
-        self.expectLastRetval(exp, 0)
-        exp.terminate(force=True)
+        self.logLocal.write("\n%s@%s # %s\n" % (getpass.getuser(), socket.gethostname(), cmd))
+        self.logLocal.flush()
+        return pexpect.spawn(
+            cmd, logfile=self.logLocal, env=dict(PS1='$(whoami)@$(hostname) # '),
+            timeout=timeout
+        )
+
+    def expectLocalCommand(self, cmd):
+        exp = self.expectStartLocalCommand(cmd)
+        self.expect(exp, pexpect.EOF)
+        self.testExitStatus(exp)
+
+    def testExitStatus(self, exp):
+        if not exp.isalive() and exp.exitstatus != 0:
+            raise LocalCommandFailed(
+                "cmd '%s' failed (status=%d)" % (" ".join(exp.args), exp.exitstatus))
 
     def expect(self, exp, *args, **kwargs):
         self.expected = args[0]
