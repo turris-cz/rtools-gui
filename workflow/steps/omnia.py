@@ -224,8 +224,7 @@ class UbootCommands(Base):
             self.progress.emit(1)
 
             # reset using tester
-            testerExp.sendline("RESET")
-            self.expect(testerExp, "OK")
+            self.expectTester(testerExp, "RESETDUT", 1, 10)
             self.progress.emit(10)
 
             # get into uboot shell
