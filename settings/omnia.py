@@ -29,7 +29,6 @@ SERIAL_CONSOLE = {
     'tester': {
         'device': "/dev/ttyTESTER",
         'baudrate': 115200,
-        'mock': 'mock/sc_pipe_tester_mock.py',  # TODO remove before deploying
     },
     'router': {
         'device': "/dev/ttyROUTER",
