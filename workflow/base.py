@@ -170,3 +170,7 @@ class BaseWorker(QtCore.QObject):
             if res == 0:
                 current += step
                 self.progress.emit(current if current < progressEnd else progressEnd)
+
+    def expectReinitTester(self, exp):
+        exp.sendline("RESETALL")
+        self.expect(exp, r'---OMNIA TESTER---')

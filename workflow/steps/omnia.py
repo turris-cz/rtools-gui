@@ -51,6 +51,13 @@ class Mcu(Base):
             expTester.sendline("\n")
             self.progress.emit(0)
 
+            # Reset the tester
+            self.expectReinitTester(expTester)
+            self.progress.emit(10)
+
+            self.expectTester(expTester, "PWRUP", 10, 20)
+            self.expectTester(expTester, "PROGRAM", 20, 30)
+
             # Turn on MCU
             self.expectTester(expTester, "MCUON", 0, 33)
 
@@ -168,38 +175,6 @@ class SerialReboot(Base):
             return True
 
 
-class Tester(Base):
-
-    def __init__(self, name, cmds):
-        self._name = name
-        self.cmds = cmds
-
-    def createWorker(self):
-        return self.Worker(self.name, self.cmds)
-
-    class Worker(BaseWorker):
-        def __init__(self, name, cmds):
-            super(Tester.Worker, self).__init__()
-            self.name = name
-            self.cmds = cmds
-
-        def perform(self):
-            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            exp.sendline("\n")
-
-            progress = 0.0
-            self.progress.emit(progress)
-
-            for cmd in self.cmds:
-                nextProgress = progress + 100 / len(self.cmds)
-                self.expectTester(exp, cmd, progress, nextProgress)
-                progress = nextProgress
-
-            self.progress.emit(100)
-            exp.terminate(force=True)
-            return True
-
-
 class UbootCommands(Base):
 
     def __init__(self, name, cmds, bootCheck=True):
@@ -256,7 +231,6 @@ class UbootCommands(Base):
 
 
 WORKFLOW = (
-    Tester("TESTER ALL", ["PWRUP", "PROGRAM", "RSV", "PWRDOWN", "HWSTART", "RSV", "RESETDUT"]),
     Mcu(),
     Uboot(),
     Atsha(),
