@@ -160,14 +160,17 @@ class BaseWorker(QtCore.QObject):
                 # remove from plan (avoid going in boot cyrcles)
                 del plan[res]
 
-    def expectTesterLineBreak(self, exp):
-        exp.sendline('\r\n')
+    def expectTesterConsoleInit(self, exp):
+        exp.sendline('UNKNOWN_COMMAND')
+        self.expect(exp, r'error')
+        exp.sendline('\n')
+        exp.sendline('\n')
 
     def expectTester(self, exp, cmd, progressStart, progressEnd):
         step = (progressEnd - progressStart) / 10.0  # tester prints 10 dots
         current = progressStart
         res = None
-        exp.sendline(cmd + "\r\n")
+        exp.sendline(cmd)
         while not res:
             res = self.expect(exp, [r'\.', r'OK\r\n'])
             if res == 0:
@@ -175,5 +178,5 @@ class BaseWorker(QtCore.QObject):
                 self.progress.emit(current if current < progressEnd else progressEnd)
 
     def expectReinitTester(self, exp):
-        exp.sendline("RESETALL\r\n")
+        exp.sendline("RESETALL")
         self.expect(exp, r'System ready... OK')
