@@ -20,6 +20,15 @@ PATHS = {
     'omnia_hw_ctrl': {
         'path': 'mock/sample.sh'
     },
+    'openocd_bin': {
+        'path': 'mock/sample.sh'
+    },
+    'openocd_scripts': {
+        'path': 'mock/'
+    },
+    'openocd_config': {
+        'path': 'mock/sample.sh'
+    },
     'uboot_flashing': {
         'path': 'mock/sample.sh'
     },

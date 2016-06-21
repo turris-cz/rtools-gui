@@ -38,13 +38,25 @@ class Mcu(Base):
     _name = "MCU"
 
     def createWorker(self):
-        return self.Worker(settings.PATHS['mcu']['path'])
+        return self.Worker(
+            settings.PATHS['openocd_bin']['path'],
+            settings.PATHS['openocd_scripts']['path'],
+            settings.PATHS['openocd_config']['path'],
+            settings.PATHS['bootloader_mcu']['path'],
+            settings.PATHS['omnia_hw_ctrl']['path'],
+        )
 
     class Worker(BaseWorker):
 
-        def __init__(self, scriptPath):
+        def __init__(self, path_bin, path_scripts, path_config, path_bootloader, path_hw_ctrl):
             super(Mcu.Worker, self).__init__()
-            self.scriptPath = scriptPath
+            self.command = \
+                'sudo %s -s %s -f %s -f target/stm32f0x.cfg -c "init" -c "sleep 200" ' \
+                '-c "reset halt" -c "sleep 100" -c "wait_halt 2"' \
+                '-c "flash write_image erase %s 0x08000000" ' \
+                '-c "flash write_image erase %s 0x08005000" ' \
+                '-c "sleep 100" -c "reset run" -c "shutdown"' \
+                % (path_bin, path_scripts, path_config, path_bootloader, path_hw_ctrl)
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
@@ -53,27 +65,22 @@ class Mcu(Base):
 
             # Reset the tester
             self.expectReinitTester(expTester)
-            self.progress.emit(10)
+            self.progress.emit(25)
 
-            self.expectTester(expTester, "PWRUPTEST", 10, 20)
-            self.expectTester(expTester, "PROGRAM", 20, 30)
-
-            # Turn on MCU
-            self.expectTester(expTester, "MCUON", 0, 33)
+            # Start programming mode
+            self.expectTester(expTester, "PROGRAM", 25, 50)
 
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
             # Run the mcu programming script
-            expLocal = self.expectStartLocalCommand(self.scriptPath)
+            expLocal = self.expectStartLocalCommand(self.command)
+            self.progress.emit(75)
 
             # TODO progress
             self.expect(expLocal, pexpect.EOF)
             self.testExitStatus(expLocal)
 
-            self.progress.emit(66)
-
-            # Turn off MCU
-            self.expectTester(expTester, "MCUOFF", 66, 100)
+            self.progress.emit(100)
 
             expTester.terminate(force=True)
             return True
