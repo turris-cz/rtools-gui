@@ -44,7 +44,7 @@ class PowerTest(Base):
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            expTester.sendline("\n")
+            self.expectTesterLineBreak()
             self.progress.emit(0)
 
             # Reset the tester
@@ -69,7 +69,7 @@ class RsvTest(Base):
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            expTester.sendline("\n")
+            self.expectTesterLineBreak()
             self.progress.emit(0)
 
             # Reset the tester
@@ -104,16 +104,16 @@ class Mcu(Base):
         def __init__(self, path_bin, path_scripts, path_config, path_bootloader, path_hw_ctrl):
             super(Mcu.Worker, self).__init__()
             self.command = \
-                'sudo %s -s %s -f %s -f target/stm32f0x.cfg -c "init" -c "sleep 200" ' \
-                '-c "reset halt" -c "sleep 100" -c "wait_halt 2"' \
-                '-c "flash write_image erase %s 0x08000000" ' \
-                '-c "flash write_image erase %s 0x08005000" ' \
-                '-c "sleep 100" -c "reset run" -c "shutdown"' \
+                "sudo %s -s %s -f %s -f target/stm32f0x.cfg -c 'init' -c 'sleep 200' " \
+                "-c 'reset halt' -c 'sleep 100' -c 'wait_halt 2'" \
+                "-c 'flash write_image erase %s 0x08000000' " \
+                "-c 'flash write_image erase %s 0x08005000' " \
+                "-c 'sleep 100' -c 'reset run' -c 'shutdown'" \
                 % (path_bin, path_scripts, path_config, path_bootloader, path_hw_ctrl)
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            expTester.sendline("\n")
+            self.expectTesterLineBreak()
             self.progress.emit(0)
 
             # Reset the tester
@@ -153,7 +153,7 @@ class Uboot(Base):
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            expTester.sendline("\n")
+            self.expectTesterLineBreak()
             self.progress.emit(0)
 
             # Turn on MCU
@@ -192,7 +192,7 @@ class Atsha(Base):
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            expTester.sendline("\n")
+            self.expectTesterLineBreak()
             self.progress.emit(0)
 
             # Turn on MCU
