@@ -11,7 +11,7 @@ class Sample(Base):
         self._name = name
 
     def createWorker(self):
-        return self.Worker(settings.SCRIPTS['sample']['script_path'])
+        return self.Worker(settings.PATHS['sample']['path'])
 
     class Worker(BaseWorker):
         def __init__(self, scriptPath):
@@ -38,7 +38,7 @@ class Mcu(Base):
     _name = "MCU"
 
     def createWorker(self):
-        return self.Worker(settings.SCRIPTS['mcu']['script_path'])
+        return self.Worker(settings.PATHS['mcu']['path'])
 
     class Worker(BaseWorker):
 
@@ -83,7 +83,7 @@ class Uboot(Base):
     _name = "UBOOT"
 
     def createWorker(self):
-        return self.Worker(settings.SCRIPTS['uboot_flashing']['script_path'])
+        return self.Worker(settings.PATHS['uboot_flashing']['path'])
 
     class Worker(BaseWorker):
 
@@ -121,7 +121,7 @@ class Atsha(Base):
     _name = "ATSHA"
 
     def createWorker(self):
-        return self.Worker(settings.SCRIPTS['atsha']['script_path'], qApp.router.idHex)
+        return self.Worker(settings.PATHS['atsha']['path'], qApp.router.idHex)
 
     class Worker(BaseWorker):
 

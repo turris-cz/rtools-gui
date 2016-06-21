@@ -10,18 +10,21 @@ DB = dict(
 WORKFLOW_STEPS_MODULE = 'workflow.steps.omnia'
 WORKFLOW_TESTS_MODULE = 'workflow.tests.omnia'
 
-SCRIPTS = {
+PATHS = {
     'sample': {
-        'script_path': 'mock/sample.sh'
+        'path': 'mock/sample.sh'
     },
-    'mcu': {
-        'script_path': 'mock/sample.sh'
+    'bootloader_mcu': {
+        'path': 'mock/sample.sh'
+    },
+    'omnia_hw_ctrl': {
+        'path': 'mock/sample.sh'
     },
     'uboot_flashing': {
-        'script_path': 'mock/sample.sh'
+        'path': 'mock/sample.sh'
     },
     'atsha': {
-        'script_path': 'mock/sample.sh'
+        'path': 'mock/sample.sh'
     },
 }
 

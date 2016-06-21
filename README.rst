@@ -46,7 +46,7 @@ _________
 ``WORKFLOW_TESTS_MODULE = 'workflow.tests.omnia'``
   Sets which tests shall be performed when the board is awaken.
 
-``SCRIPTS``
+``PATHS``
   Paths to the scripts which shall be executed during the steps/tests.
 
 ``SERIAL_CONSOLE``
@@ -179,9 +179,9 @@ You can specify your own settings for that::
 
 Where you can alter a path to a local script::
 
-    SCRIPTS = {
+    PATHS = {
         'sample': {
-            'script_path': 'mock/sample.sh'
+            'path': 'mock/sample.sh'
         }
     }
 
