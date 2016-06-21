@@ -82,6 +82,10 @@ if __name__ == '__main__':
     # init serial console
     sc = QSerialPort(options.dev)
     sc.setBaudRate(options.rate)
+    sc.setFlowControl(QSerialPort.NoFlowControl)
+    sc.setParity(QSerialPort.NoParity)
+    sc.setDataBits(QSerialPort.Data8)
+    sc.setStopBits(QSerialPort.OneStop)
     sc.open(QIODevice.ReadWrite) or sys.exit(1)
 
     # init input server
