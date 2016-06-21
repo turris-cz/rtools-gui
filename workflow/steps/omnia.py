@@ -34,6 +34,59 @@ class Sample(Base):
             return True
 
 
+class PowerTest(Base):
+    _name = "POWER TEST"
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+
+        def perform(self):
+            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            expTester.sendline("\n")
+            self.progress.emit(0)
+
+            # Reset the tester
+            self.expectReinitTester(expTester)
+            self.progress.emit(33)
+
+            # Perform tests
+            self.expectTester(expTester, "PWRUPTEST", 33, 66)
+            self.expectTester(expTester, "PWRDOWNTEST", 66, 99)
+
+            self.progress.emit(100)
+            return True
+
+
+class RsvTest(Base):
+    _name = "RSV TEST"
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+
+        def perform(self):
+            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            expTester.sendline("\n")
+            self.progress.emit(0)
+
+            # Reset the tester
+            self.expectReinitTester(expTester)
+            self.progress.emit(25)
+
+            # Start start omnia
+            self.expectTester(expTester, "HWSTART", 25, 50)
+            # RSV test
+            self.expectTester(expTester, "RSV", 50, 75)
+
+            # Reset the tester
+            self.expectReinitTester(expTester)
+            self.progress.emit(100)
+            return True
+
+
 class Mcu(Base):
     _name = "MCU"
 
@@ -238,12 +291,14 @@ class UbootCommands(Base):
 
 
 WORKFLOW = (
+    PowerTest(),
     Mcu(),
-    Uboot(),
-    Atsha(),
-    Sample("REBOOT"),
-    Sample("REFLASH"),
-    Sample("RTC"),
-    UbootCommands("UBOOT X", ["boot"], True),
-    SerialReboot(),
+    #Uboot(),
+    #Atsha(),
+    #Sample("REBOOT"),
+    #Sample("REFLASH"),
+    #Sample("RTC"),
+    #UbootCommands("UBOOT X", ["boot"], True),
+    #SerialReboot(),
+    RsvTest(),
 )
