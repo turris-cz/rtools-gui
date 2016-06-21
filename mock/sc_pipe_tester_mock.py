@@ -16,7 +16,7 @@ PLAN = {
         (1000, "."),
         (1100, "OK\n"),
     ],
-    'PWRUP': [
+    'PWRUPTEST': [
         (1, "."),
         (2, "."),
         (3, "."),
@@ -43,7 +43,7 @@ PLAN = {
         (900, ".."),
         (1100, "OK\n"),
     ],
-    'PWRDOWN': [
+    'PWRDOWNTEST': [
         (100, "........"),
         (900, ".."),
         (1100, "OK\n"),
@@ -53,7 +53,7 @@ PLAN = {
         (900, "..OK\n"),
     ],
     'RESETALL': [
-        (100, "Tester reset\n---OMNIA TESTER---\r\n"),
+        (100, "Tester reset\n---OMNIA TESTER---\r\nSystem ready... OK\n"),
     ],
     'RESETDUT': [
         (1, "..........OK\n"),

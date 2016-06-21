@@ -55,7 +55,7 @@ class Mcu(Base):
             self.expectReinitTester(expTester)
             self.progress.emit(10)
 
-            self.expectTester(expTester, "PWRUP", 10, 20)
+            self.expectTester(expTester, "PWRUPTEST", 10, 20)
             self.expectTester(expTester, "PROGRAM", 20, 30)
 
             # Turn on MCU

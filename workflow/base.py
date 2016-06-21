@@ -173,4 +173,4 @@ class BaseWorker(QtCore.QObject):
 
     def expectReinitTester(self, exp):
         exp.sendline("RESETALL")
-        self.expect(exp, r'---OMNIA TESTER---')
+        self.expect(exp, r'System ready... OK')
