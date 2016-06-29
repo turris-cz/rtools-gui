@@ -76,6 +76,9 @@ PLAN = {
     'SELFTEST': [
         (1, "..........OK\n"),
     ],
+    'UNKNOWN_COMMAND': [
+        (100, "...error...\n"),
+    ],
 }
 
 
