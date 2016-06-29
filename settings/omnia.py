@@ -32,6 +32,12 @@ PATHS = {
     'uboot_flashing': {
         'path': 'mock/sample.sh'
     },
+    'flashrom': {
+        'path': 'mock/sample.sh'
+    },
+    'uboot_image': {
+        'path': 'mock/sample.sh'
+    },
     'atsha': {
         'path': 'mock/sample.sh'
     },
@@ -47,6 +53,8 @@ SERIAL_CONSOLE = {
         'baudrate': 115200,
     },
 }
+
+SPI_SPEED = 8000
 
 LOG_APP_FILE = '/var/log/programmer/application.log'
 LOG_ROUTERS_DIR = '/var/log/programmer/runs/'

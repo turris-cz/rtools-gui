@@ -117,8 +117,8 @@ class BaseWorker(QtCore.QObject):
             timeout=timeout
         )
 
-    def expectLocalCommand(self, cmd):
-        exp = self.expectStartLocalCommand(cmd)
+    def expectLocalCommand(self, cmd, timeout=30):
+        exp = self.expectStartLocalCommand(cmd, timeout)
         self.expect(exp, pexpect.EOF)
         self.testExitStatus(exp)
 

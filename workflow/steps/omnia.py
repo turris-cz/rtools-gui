@@ -140,38 +140,51 @@ class Mcu(Base):
 
 
 class Uboot(Base):
-    _name = "UBOOT"
+    _name = "SPI UBOOT"
 
     def createWorker(self):
-        return self.Worker(settings.PATHS['uboot_flashing']['path'])
+        return self.Worker(
+            settings.PATHS['flashrom']['path'],
+            settings.PATHS['uboot_image']['path'],
+            settings.SPI_SPEED,
+        )
 
     class Worker(BaseWorker):
 
-        def __init__(self, scriptPath):
+        def __init__(self, path_flashrom, path_image, spi_speed):
             super(Uboot.Worker, self).__init__()
-            self.scriptPath = scriptPath
+            self.flash_image_command = \
+                "sudo %s -p linux_spi:dev=/dev/spidev0.0,spispeed=%d -w %s" \
+                % (path_flashrom, spi_speed, path_image)
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            self.expectTesterConsoleInit(expTester)
             self.progress.emit(0)
 
-            # Turn on MCU
-            self.expectTester(expTester, "CPUOFF", 0, 33)
+            self.expectTesterConsoleInit(expTester)
+            self.progress.emit(15)
+
+            # Start programming mode
+            self.expectTester(expTester, "PROGRAM", 15, 30)
 
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
-            # Run the uboot flashing script
-            expLocal = self.expectStartLocalCommand(self.scriptPath)
 
-            # TODO progress
-            self.expect(expLocal, pexpect.EOF)
-            self.testExitStatus(expLocal)
+            # Prepare SPI
+            self.expectLocalCommand("gpio export 21 out")
+            self.progress.emit(45)
+            self.expectLocalCommand("gpio mode 21 out")
+            self.progress.emit(60)
+            self.expectLocalCommand("gpio write 21 0")
+            self.progress.emit(75)
 
-            self.progress.emit(66)
+            # Flash uboot image
+            self.expectLocalCommand(self.flash_image_command, 60)
+            self.progress.emit(90)
 
-            # Turn off MCU
-            self.expectTester(expTester, "CPUON", 66, 100)
+            # Deactivate SPI
+            self.expectLocalCommand("gpio write 21 1")
+            self.progress.emit(100)
 
             expTester.terminate(force=True)
             return True
@@ -293,7 +306,7 @@ class UbootCommands(Base):
 WORKFLOW = (
     PowerTest(),
     Mcu(),
-    #Uboot(),
+    Uboot(),
     #Atsha(),
     #Sample("REBOOT"),
     #Sample("REFLASH"),
