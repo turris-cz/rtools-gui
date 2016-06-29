@@ -54,7 +54,7 @@ SERIAL_CONSOLE = {
     },
 }
 
-SPI_SPEED = 8000
+SPI_SPEED = 6000
 
 LOG_APP_FILE = '/var/log/programmer/application.log'
 LOG_ROUTERS_DIR = '/var/log/programmer/runs/'

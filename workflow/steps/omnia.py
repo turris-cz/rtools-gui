@@ -162,25 +162,42 @@ class Uboot(Base):
             self.progress.emit(0)
 
             self.expectTesterConsoleInit(expTester)
-            self.progress.emit(15)
+            self.progress.emit(5)
+            self.expectReinitTester(expTester)
+            self.progress.emit(10)
 
             # Start programming mode
-            self.expectTester(expTester, "PROGRAM", 15, 30)
+            self.expectTester(expTester, "PROGRAM", 10, 20)
+
+            # Put CPU in reset
+            self.expectTester(expTester, "CPUOFF", 20, 30)
 
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
 
             # Prepare SPI
             self.expectLocalCommand("gpio export 21 out")
-            self.progress.emit(45)
+            self.progress.emit(40)
             self.expectLocalCommand("gpio mode 21 out")
-            self.progress.emit(60)
+            self.progress.emit(45)
             self.expectLocalCommand("gpio write 21 0")
-            self.progress.emit(75)
+            self.progress.emit(50)
 
             # Flash uboot image
-            self.expectLocalCommand(self.flash_image_command, 60)
-            self.progress.emit(90)
+            expLocal = self.expectStartLocalCommand(self.flash_image_command, 90)
+            while True:
+                res = self.expect(expLocal, [
+                    pexpect.EOF,
+                    r'Calibrating delay loop...',
+                    r'Reading old flash chip contents...',
+                    r'Erasing and writing flash chip...',
+                    r'Verifying flash...',
+                ])
+                if res == 0:
+                    break
+                self.progress.emit(50 + 10 * res)
+            self.testExitStatus(expLocal)
+            self.progress.emit(95)
 
             # Deactivate SPI
             self.expectLocalCommand("gpio write 21 1")

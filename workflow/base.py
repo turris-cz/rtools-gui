@@ -172,7 +172,7 @@ class BaseWorker(QtCore.QObject):
         res = None
         exp.sendline(cmd)
         while not res:
-            res = self.expect(exp, [r'\.', r'OK\r\n'])
+            res = self.expect(exp, [r'\.', r'OK[\r\n]+'])
             if res == 0:
                 current += step
                 self.progress.emit(current if current < progressEnd else progressEnd)
