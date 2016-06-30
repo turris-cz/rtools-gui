@@ -141,9 +141,9 @@ class BaseWorker(QtCore.QObject):
         exp.sendline('echo "###$?###"')
         self.expect(exp, '###%d###' % retval)
 
-    def expectWaitBooted(self, exp, progressStart, progressEnd, timeout=60):
+    def expectWaitBooted(self, exp, progressStart=0, progressEnd=100, timeout=60, plan=None):
         progressDiff = progressEnd - progressStart
-        plan = [
+        plan = plan or [
             ('Router Turris successfully started.', progressStart + progressDiff),
             ('fuse init', progressStart + progressDiff * 75 / 100),
             ('procd: - init -', progressStart + progressDiff * 55 / 100),

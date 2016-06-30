@@ -276,24 +276,24 @@ class SerialReboot(Base):
 
 class UbootCommands(Base):
 
-    def __init__(self, name, cmds, bootCheck=True):
+    def __init__(self, name, cmds, bootPlan=None):
         self._name = name
         self.cmds = cmds
-        self.bootCheck = bootCheck
+        self.bootPlan = bootPlan
 
     def createWorker(self):
-        return self.Worker(self.name, self.cmds, self.bootCheck)
+        return self.Worker(self.name, self.cmds, self.bootPlan)
 
     class Worker(BaseWorker):
-        def __init__(self, name, cmds, bootCheck):
+        def __init__(self, name, cmds, bootPlan):
             super(UbootCommands.Worker, self).__init__()
             self.name = name
             self.cmds = cmds
-            self.bootCheck = bootCheck
+            self.bootPlan = bootPlan
 
         def perform(self):
-            testerExp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            routerExp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            expRouter = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.progress.emit(0)
 
             self.expectTesterConsoleInit(expTester)
@@ -302,7 +302,7 @@ class UbootCommands(Base):
             self.progress.emit(10)
 
             # reset using tester
-            self.expectTester(testerExp, "RESETDUT", 10, 15)
+            self.expectTester(expTester, "RESETDUT", 10, 15)
 
             # get into uboot shell
             # unfortunatelly can't wait for "Hit any key to stop autoboot" msg (too small delay)
@@ -311,8 +311,8 @@ class UbootCommands(Base):
             tries = 10  # 10s shall be enough
             while True:
                 time.sleep(1)
-                routerExp.sendline('\n')
-                res = self.expect(routerExp, ['=>', ".+"] if tries > 0 else '=>')
+                expRouter.sendline('\n')
+                res = self.expect(expRouter, [r'.*[\n\r]+=>.*', r'.+'] if tries > 0 else r'=>')
                 if res == 0:
                     break
                 else:
@@ -320,16 +320,17 @@ class UbootCommands(Base):
             self.progress.emit(20)
 
             # perform commands
-            cmds_progress = 30 if self.bootCheck else 80
+            cmds_progress = 80 if self.bootPlan is False else 30
             for i in range(len(self.cmds)):
-                routerExp.sendline(self.cmds[i])
+                expRouter.sendline(self.cmds[i])
                 self.progress.emit(20 + (i + 1) * cmds_progress / len(self.cmds))
                 # wait for some time just to be sure
                 time.sleep(0.1)
 
-            # wait for boot if specified
-            if self.bootCheck:
-                self.expectWaitBooted(routerExp, 50, 100)
+            # if boot plan is False continue otherwise wait for booted
+            if self.bootPlan is not False:
+                self.expectWaitBooted(expRouter, timeout=150, plan=self.bootPlan)
+            self.progress.emit(100)
 
             return True
 
@@ -339,7 +340,11 @@ WORKFLOW = (
     Mcu(),
     Uboot(),
     Atsha(),
-    UbootCommands("USB FLASHING", ["setenv rescue 3", "run rescueboot"], True),
+    UbootCommands("USB FLASHING", ["setenv rescue 3", "run rescueboot"], bootPlan=[
+        ('Router Turris successfully started.', 100),
+        ('Mode: Reflash...', 50),
+        ('Reflash succeeded.', 75),
+    ]),
     #Sample("REBOOT"),
     #Sample("REFLASH"),
     #Sample("RTC"),
