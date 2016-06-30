@@ -49,11 +49,11 @@ class PowerTest(Base):
 
             # Reset the tester
             self.expectReinitTester(expTester)
-            self.progress.emit(33)
+            self.progress.emit(50)
 
             # Perform tests
-            self.expectTester(expTester, "PWRUPTEST", 33, 66)
-            self.expectTester(expTester, "PWRDOWNTEST", 66, 99)
+            self.expectTester(expTester, "PWRUPTEST", 50, 99)
+            #self.expectTester(expTester, "PWRDOWNTEST", 66, 99)
 
             self.progress.emit(100)
             return True
