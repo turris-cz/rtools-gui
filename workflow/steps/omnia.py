@@ -358,7 +358,7 @@ class ClockSet(Base):
             self.expectWaitBooted(expRouter, 15, 80)
             self.expectSystemConsole(expRouter)
             self.progress.emit(85)
-            now = datetime.datetime.utc()
+            now = datetime.datetime.utcnow()
             expRouter.sendline("date -u -s '%04d-%02d-%02d %02d:%02d:%02d'" % (
                 now.year, now.month, now.day, now.hour, now.minute, now.second
             ))
@@ -388,7 +388,7 @@ WORKFLOW = (
         ('Mode: Reflash...', 50),
         ('Reflash succeeded.', 75),
     ]),
-    class ClockSet(),
+    ClockSet(),
     #Sample("REBOOT"),
     #Sample("REFLASH"),
     #Sample("RTC"),
