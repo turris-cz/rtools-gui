@@ -1,5 +1,6 @@
 import pexpect
 import time
+import datetime
 
 from workflow.base import Base, BaseWorker, spawnPexpectSerialConsole
 from application import qApp, settings
@@ -335,6 +336,48 @@ class UbootCommands(Base):
             return True
 
 
+class ClockSet(Base):
+    _name = "CLOCK SET"
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+        def perform(self):
+            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            expRouter = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(0)
+
+            self.expectTesterConsoleInit(expTester)
+            self.progress.emit(5)
+            self.expectReinitTester(expTester)
+            self.progress.emit(10)
+
+            # reset using tester
+            self.expectTester(expTester, "RESETDUT", 10, 15)
+            self.expectWaitBooted(expRouter, 15, 80)
+            self.expectSystemConsole(expRouter)
+            self.progress.emit(85)
+            now = datetime.datetime.utc()
+            expRouter.sendline("date -u -s '%04d-%02d-%02d %02d:%02d:%02d'" % (
+                now.year, now.month, now.day, now.hour, now.minute, now.second
+            ))
+            self.expectLastRetval(expRouter, 0)
+            self.progress.emit(90)
+
+            # Calling hwclock only once sometimes fails to set the clock and no error is
+            # displayed
+            # calling it twice sets the clock every time...
+            expRouter.sendline("hwclock -u -w")
+            self.expectLastRetval(expRouter, 0)
+            self.progress.emit(95)
+            expRouter.sendline("hwclock -u -w")
+            self.expectLastRetval(expRouter, 0)
+            self.progress.emit(100)
+
+            return True
+
+
 WORKFLOW = (
     PowerTest(),
     Mcu(),
@@ -345,6 +388,7 @@ WORKFLOW = (
         ('Mode: Reflash...', 50),
         ('Reflash succeeded.', 75),
     ]),
+    class ClockSet(),
     #Sample("REBOOT"),
     #Sample("REFLASH"),
     #Sample("RTC"),
