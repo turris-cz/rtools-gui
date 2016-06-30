@@ -50,10 +50,15 @@ class PowerTest(Base):
 
             # Reset the tester
             self.expectReinitTester(expTester)
-            self.progress.emit(50)
+            self.progress.emit(25)
+
+            # Put CPU in reset
+            self.expectTester(expTester, "CPUOFF", 25, 50)
+            # Switch off MCU
+            self.expectTester(expTester, "MCUOFF", 50, 75)
 
             # Perform tests
-            self.expectTester(expTester, "PWRUPTEST", 50, 99)
+            self.expectTester(expTester, "PWRUPTEST", 75, 99)
             #self.expectTester(expTester, "PWRDOWNTEST", 66, 99)
 
             self.progress.emit(100)
@@ -70,21 +75,27 @@ class RsvTest(Base):
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            expRouter = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.expectTesterConsoleInit(expTester)
             self.progress.emit(0)
 
             # Reset the tester
             self.expectReinitTester(expTester)
-            self.progress.emit(25)
+            self.progress.emit(10)
 
             # Start start omnia
-            self.expectTester(expTester, "HWSTART", 25, 50)
+            self.expectTester(expTester, "HWSTART", 10, 20)
+
+            # Wait till board is booted
+            self.expectWaitBooted(expRouter, 20, 80)
+
             # RSV test
-            self.expectTester(expTester, "RSV", 50, 75)
+            self.expectTester(expTester, "RSV", 80, 90)
 
             # Reset the tester
             self.expectReinitTester(expTester)
             self.progress.emit(100)
+
             return True
 
 
