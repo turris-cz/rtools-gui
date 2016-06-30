@@ -292,14 +292,17 @@ class UbootCommands(Base):
             self.bootCheck = bootCheck
 
         def perform(self):
-            # perform tester DUT
             testerExp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
             routerExp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
-            self.progress.emit(1)
+            self.progress.emit(0)
+
+            self.expectTesterConsoleInit(expTester)
+            self.progress.emit(5)
+            self.expectReinitTester(expTester)
+            self.progress.emit(10)
 
             # reset using tester
-            self.expectTester(testerExp, "RESETDUT", 1, 10)
-            self.progress.emit(10)
+            self.expectTester(testerExp, "RESETDUT", 10, 15)
 
             # get into uboot shell
             # unfortunatelly can't wait for "Hit any key to stop autoboot" msg (too small delay)
@@ -321,6 +324,8 @@ class UbootCommands(Base):
             for i in range(len(self.cmds)):
                 routerExp.sendline(self.cmds[i])
                 self.progress.emit(20 + (i + 1) * cmds_progress / len(self.cmds))
+                # wait for some time just to be sure
+                time.sleep(0.1)
 
             # wait for boot if specified
             if self.bootCheck:
@@ -334,6 +339,7 @@ WORKFLOW = (
     Mcu(),
     Uboot(),
     Atsha(),
+    UbootCommands("USB FLASHING", ["setenv rescue 3", "run rescueboot"], True),
     #Sample("REBOOT"),
     #Sample("REFLASH"),
     #Sample("RTC"),
