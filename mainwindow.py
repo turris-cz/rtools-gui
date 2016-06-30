@@ -116,6 +116,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.startTestsButton.setEnabled(qApp.router.canStartTests)
         self.startStepsButton.setEnabled(qApp.router.canStartSteps)
 
+        # update progress bars
+        self._updateProgressBars(False)
+        self.overallProgressBar.setValue(0)
+        self.currentProgressBar.setValue(0)
+
     def cleanErrorMessage(self):
         self.errorLabel.setText("")
 
