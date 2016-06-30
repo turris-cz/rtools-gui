@@ -211,36 +211,45 @@ class Atsha(Base):
     _name = "ATSHA"
 
     def createWorker(self):
-        return self.Worker(settings.PATHS['atsha']['path'], qApp.router.idHex)
+        return self.Worker(settings.PATHS['atsha']['path'], qApp.router.id)
 
     class Worker(BaseWorker):
 
         def __init__(self, scriptPath, serial):
             super(Atsha.Worker, self).__init__()
-            self.scriptPath = scriptPath
-            self.serial = serial
+            self.flashAtshaCmd = "%s %s" % (scriptPath, serial)
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            self.expectTesterConsoleInit(expTester)
             self.progress.emit(0)
 
-            # Turn on MCU
-            self.expectTester(expTester, "CPUOFF", 0, 33)
+            self.expectTesterConsoleInit(expTester)
+            self.progress.emit(10)
+            self.expectReinitTester(expTester)
+            self.progress.emit(20)
+
+            # Start programming mode
+            self.expectTester(expTester, "PROGRAM", 20, 35)
+
+            # Put CPU in reset
+            self.expectTester(expTester, "CPUOFF", 35, 50)
 
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
+
             # Run the atsha programming script
-            expLocal = self.expectStartLocalCommand('%s %s' % (self.scriptPath, self.serial))
-
-            # TODO progress
-            self.expect(expLocal, pexpect.EOF)
+            expLocal = self.expectStartLocalCommand(self.flashAtshaCmd, 90)
+            while True:
+                res = self.expect(expLocal, [
+                    pexpect.EOF,
+                    r'ATSHA204 programming...',
+                    r'ATSHA204 test...',
+                ])
+                if res == 0:
+                    break
+                self.progress.emit(50 + 20 * res)
             self.testExitStatus(expLocal)
-
-            self.progress.emit(66)
-
-            # Turn off MCU
-            self.expectTester(expTester, "CPUON", 66, 100)
+            self.progress.emit(100)
 
             expTester.terminate(force=True)
             return True
@@ -324,7 +333,7 @@ WORKFLOW = (
     PowerTest(),
     Mcu(),
     Uboot(),
-    #Atsha(),
+    Atsha(),
     #Sample("REBOOT"),
     #Sample("REFLASH"),
     #Sample("RTC"),
