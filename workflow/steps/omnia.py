@@ -267,6 +267,85 @@ class Atsha(Base):
             return True
 
 
+class RamSize(Base):
+    _name = "RAM SIZE"
+
+    def createWorker(self):
+        return self.Worker(settings.ROUTER_RAMSIZE)
+
+    class Worker(BaseWorker):
+
+        def __init__(self, ramsize):
+            super(RamSize.Worker, self).__init__()
+            # The only two valid options are `1` or `2`
+            self.ramsize = ramsize
+
+        def perform(self):
+            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.progress.emit(0)
+
+            self.expectTesterConsoleInit(expTester)
+            self.progress.emit(7)
+            self.expectReinitTester(expTester)
+            self.progress.emit(14)
+
+            # Start programming mode
+            self.expectTester(expTester, "PROGRAM", 14, 21)
+
+            # Put CPU in reset
+            self.expectTester(expTester, "CPUOFF", 21, 28)
+
+            # Add \n into local console to split tester and local output
+            self.logLocal.write('\n')
+
+            self.expectLocalCommand("i2cset -y 1 0x70 0 2 b")
+            self.progress.emit(35)
+
+            if self.ramsize == 2:
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x00 0x34 0xa0 i")
+                self.progress.emit(42)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x02 0x41 0x03 i")
+                self.progress.emit(49)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x04 0x02 0x00 i")
+                self.progress.emit(56)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x06 0x00 0x00 i")
+                self.progress.emit(63)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x08 0x00 0x00 i")
+                self.progress.emit(70)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0a 0x00 0x00 i")
+                self.progress.emit(77)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0c 0x7a 0x26 i")
+                self.progress.emit(84)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0e 0x57 0x97 i")
+                self.progress.emit(91)
+
+            elif self.ramsize == 1:
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x00 0x34 0xa0 i")
+                self.progress.emit(42)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x02 0x41 0x03 i")
+                self.progress.emit(49)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x04 0x01 0x00 i")
+                self.progress.emit(56)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x06 0x00 0x00 i")
+                self.progress.emit(63)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x08 0x00 0x00 i")
+                self.progress.emit(70)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0a 0x00 0x00 i")
+                self.progress.emit(77)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0c 0x99 0x21 i")
+                self.progress.emit(84)
+                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0e 0xd8 0x19 i")
+                self.progress.emit(91)
+
+            else:
+                raise ValueError("Ramsize could be only '1' or '2' (%d given)" % self.ramsize)
+
+            self.progress.emit(100)
+
+            expTester.terminate(force=True)
+            return True
+
+
 class SerialReboot(Base):
     _name = "SERIAL REBOOT"
 
@@ -394,6 +473,7 @@ WORKFLOW = (
     Mcu(),
     Uboot(),
     Atsha(),
+    RamSize(),
     UbootCommands("USB FLASHING", ["setenv rescue 3", "run rescueboot"], bootPlan=[
         ('Router Turris successfully started.', 100),
         ('Mode: Reflash...', 50),
