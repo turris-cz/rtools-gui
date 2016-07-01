@@ -1,4 +1,5 @@
 import math
+import time
 
 MAX_SERIAL = (2 ** 64 - 1)
 MAX_SERIAL_LEN = math.ceil(math.log10(MAX_SERIAL))
@@ -48,3 +49,24 @@ def backupFile(path):
 def backupAppLog():
     from application import settings
     backupFile(settings.LOG_APP_FILE)
+
+
+class PrefixFile(file):
+    def __init__(self, *args, **kwargs):
+        self.prefix = kwargs.get('prefix', "")
+        self.startTime = kwargs.get('startTime', time.time())
+        kwargs.pop("prefix", None)
+        kwargs.pop("startTime", None)
+        super(PrefixFile, self).__init__(*args, **kwargs)
+
+    def write(self, string, *args, **kwargs):
+        res = string.replace("\n", "\n%08.3f %s> " % (time.time() - self.startTime, self.prefix))
+        return super(PrefixFile, self).write(res, *args, **kwargs)
+
+    def writelines(self, stringSeq, *args, **kwargs):
+        res = []
+        for e in stringSeq:
+            res.append(
+                e.replace("\n", "\n%08.3f %s> " % (time.time() - self.startTime, self.prefix)))
+
+        return super(PrefixFile, self).writelines(res, *args, **kwargs)

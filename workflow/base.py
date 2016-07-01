@@ -9,24 +9,7 @@ import time
 from PyQt5 import QtCore
 
 from custom_exceptions import LocalCommandFailed
-
-
-class PrefixFile(file):
-    def __init__(self, *args, **kwargs):
-        self.prefix = kwargs.get('prefix', "")
-        kwargs.pop("prefix", None)
-        super(PrefixFile, self).__init__(*args, **kwargs)
-
-    def write(self, string, *args, **kwargs):
-        res = string.replace("\n", "\n%s> " % self.prefix)
-        return super(PrefixFile, self).write(res, *args, **kwargs)
-
-    def writelines(self, stringSeq, *args, **kwargs):
-        res = []
-        for e in stringSeq:
-            res.append(e.replace("\n", "\n%s> " % self.prefix))
-
-        return super(PrefixFile, self).writelines(res, *args, **kwargs)
+from utils import PrefixFile
 
 
 def spawnPexpectSerialConsole(device):
@@ -46,10 +29,11 @@ class Base(object):
     def createWorker(self):
         pass
 
-    def getWorker(self, logfile):
+    def getWorker(self, logfile, startTime):
         worker = self.createWorker()
         setattr(worker, 'name', self.name)
         setattr(worker, 'logfile', logfile)
+        setattr(worker, 'startTime', startTime)
         return worker
 
 
@@ -71,8 +55,8 @@ class BaseWorker(QtCore.QObject):
         self.expected = []
 
         # Open log
-        with open(self.logfile, 'a') as self.log, \
-                PrefixFile(self.logfile, "a", prefix="local") as self.logLocal:
+        with open(self.logfile, 'a') as self.log, PrefixFile(
+                self.logfile, "a", prefix="local", startTime=self.startTime) as self.logLocal:
 
             # Write header
             self.log.write("\n########## %s ##########\n" % self.name)

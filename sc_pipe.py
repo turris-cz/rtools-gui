@@ -2,6 +2,7 @@
 
 import sys
 import optparse
+import time
 
 from PyQt5.QtCore import (
     QCoreApplication, QObject, pyqtSlot, QIODevice
@@ -9,10 +10,12 @@ from PyQt5.QtCore import (
 from PyQt5.QtNetwork import QLocalServer, QLocalSocket
 from PyQt5.QtSerialPort import QSerialPort
 
+from utils import PrefixFile
+
 
 class Watcher(QObject):
 
-    def __init__(self, sc, server, logFile, device, prefix):
+    def __init__(self, sc, server, logFile, device):
         super(Watcher, self).__init__()
         self.logFile = logFile
         self.sc = sc
@@ -20,12 +23,11 @@ class Watcher(QObject):
         self.server = server
         self.device = device
         self.server.newConnection.connect(self.inputClientConnected)
-        self.prefix = prefix
 
     @pyqtSlot()
     def serialConsoleReady(self):
         data = self.sc.readAll()
-        self.logFile.write(data.data().replace('\n', "\n%s> " % self.prefix))
+        self.logFile.write(data.data())
         self.logFile.flush()
 
         socket = QLocalSocket()
@@ -65,11 +67,16 @@ if __name__ == '__main__':
         "--baudrate <baudrate> "
         "--log-file <file> "
         "--prefix <prefix> "
+        "--start-time <float> "
     )
     optparser.add_option("-d", "--device", dest='dev', type='string', help='device')
     optparser.add_option("-b", "--baudrate", dest='rate', type='int', help='baudrate')
     optparser.add_option("-l", "--log-file", dest='logFile', type='string', help='logfile')
     optparser.add_option("-p", "--prefix", dest='prefix', type='string', help='prefix')
+    optparser.add_option(
+        "-s", "--start-time", dest='startTime', type='float', help='startTime',
+        default=time.time()
+    )
 
     (options, args) = optparser.parse_args()
     options.dev or optparser.error("device not set")
@@ -99,6 +106,7 @@ if __name__ == '__main__':
     stopServer.listen("stop-server" + options.dev.replace('/', '-')) or sys.exit(1)
     stopServer.newConnection.connect(app.quit)
 
-    with open(options.logFile, "a", 0) as logFile:
-        watcher = Watcher(sc, inputServer, logFile, options.dev, prefix)
+    with PrefixFile(options.logFile, "a", 0, prefix=prefix, startTime=options.startTime) \
+            as logFile:
+        watcher = Watcher(sc, inputServer, logFile, options.dev)
         sys.exit(app.exec_())

@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 from datetime import datetime
 from PyQt5 import QtCore
@@ -32,6 +33,7 @@ class Runner(QtCore.QObject):
         self.attempt = attempt
         self.running = False
         self.pipeProcesses = []
+        self.startTime = time.time()
 
         logname = "%s-%08d-%s-%04d-%s.txt" % (
             self.routerId, self.runId, self.typeName, self.attempt,
@@ -62,6 +64,7 @@ class Runner(QtCore.QObject):
                 '-d', scSettings['device'],
                 '-l', logFile,
                 '-p', scName,
+                '-s', str(self.startTime),
             ]
         )
         qApp.loggerMain.info(
@@ -147,7 +150,7 @@ class Runner(QtCore.QObject):
         if hasattr(self.runlist[i], "instructions"):
             self.printInstructions.emit(self.runlist[i].instructions)
 
-        self.worker = self.runlist[i].getWorker(self.logFile)
+        self.worker = self.runlist[i].getWorker(self.logFile, self.startTime)
         self.thread = QtCore.QThread(self)
         self.worker.finished.connect(self.runDone)
         self.worker.progress.connect(self.workerProgress)
