@@ -331,6 +331,60 @@ class Booted(Base):
             return True
 
 
+class RamTest(BaseTest):
+    """
+    This test will try to test whether the router has flashed with given RAM size.
+
+    Note that if this test fails, a 'BOOTED' test should be performed.
+    So it is best to run this test as the last one.
+    """
+    _name = "RAM TEST"
+
+    def createWorker(self):
+        return self.Worker(settings.ROUTER_RAMSIZE)
+
+    class Worker(BaseWorker):
+        def __init__(self, ramsize):
+            super(RamTest.Worker, self).__init__()
+            # The only two valid options are `1` or `2`
+            self.ramsize = ramsize
+
+        def perform(self):
+            if self.ramsize not in (1, 2, ):
+                raise ValueError("Ramsize could be only '1' or '2' (%d given)" % self.ramsize)
+
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+
+            self.progress.emit(1)
+            self.expectSystemConsole(exp)
+            self.progress.emit(30)
+
+            mountCmd = 'mount /tmp/ -o remount,size=%dk' % (1000 * 1000 * self.ramsize * 0.80)
+            allocCmd = 'dd if=/dev/zero of=/tmp/ramtest.bin bs=1024 count=%d && ' \
+                'echo "RAM" "TEST" "PASSED"' % (1000 * 1000 * self.ramsize * 0.75)
+
+            # remount tmpfs
+            exp.sendline(mountCmd)
+            exp.sendline('\n')
+            self.expectLastRetval(exp, 0)
+            self.progress.emit(60)
+
+            # try to allocate space on tmpfs
+            exp.sendline(allocCmd)
+            self.expect(exp, r'RAM TEST PASSED')
+
+            self.progress.emit(95)
+
+            # a small cleanup
+            exp.sendline("rm /tmp/ramtest.bin")
+            exp.sendline('\n')
+            self.expectLastRetval(exp, 0)
+
+            self.progress.emit(100)
+
+            return True
+
+
 TESTS = (
     Booted(),
     SerialConsoleTest(),
@@ -341,4 +395,5 @@ TESTS = (
     EthTest("eth1", "WAN", 167),
     EthTest("br-lan", "LAN1", 166),
     EthTest("br-lan", "LAN2", 165),
+    RamTest(),
 )
