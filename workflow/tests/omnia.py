@@ -11,10 +11,10 @@ from custom_exceptions import RunFailed
 
 
 class UsbTest(BaseTest):
-    _name = 'USB'
 
-    def __init__(self, usb_count):
+    def __init__(self, usb_count, name):
         self.usb_count = usb_count
+        self._name = name
 
     def createWorker(self):
         return self.Worker(self.usb_count)
@@ -294,7 +294,7 @@ class Booted(Base):
     Note that this is not actually a test -> run is aborted if it fails
     (no point to perform the tests when the router is not booted)
     """
-    _name = "BOOTED"
+    _name = "BOOTED 1"
 
     def createWorker(self):
         return self.Worker()
@@ -329,6 +329,28 @@ class Booted(Base):
             self.expectWaitBooted(exp, booting_start, 100)
 
             return True
+
+
+class Booted2(Booted):
+    _name = "BOOTED 2"
+
+    @property
+    def instructions(self):
+        return """
+            <h3>%(test_name)s</h3>
+            <p>Před tím, než budete pokračovat:</p>
+            <ul>
+                <li>Odpojte napájení routeru</li>
+                <li>Odpojte eth kabely od routeru</li>
+                <li>Připojte SPF ETH redukci</li>
+                <li>Odpojte USB2 dongly z obou usb slotů</li>
+                <li>Zapojte USB3 dongly do obou usb slotů</li>
+                <li>Připojte napájení napájení do routeru.</li>
+            </ul>
+        """ % dict(test_name=self._name)
+
+    def createWorker(self):
+        return Booted.Worker()
 
 
 class RamTest(BaseTest):
@@ -388,12 +410,15 @@ class RamTest(BaseTest):
 TESTS = (
     Booted(),
     SerialConsoleTest(),
-    UsbTest(2),
+    UsbTest(2, "USB2"),
     miniPCIeTest(3),
     ClockTest(),
     SerialNumberTest(),
     EthTest("eth1", "WAN", 167),
     EthTest("br-lan", "LAN1", 166),
     EthTest("br-lan", "LAN2", 165),
+    Booted2(),
+    UsbTest(2, "USB3"),
+    EthTest("eth1", "WAN (SPF)", 164),
     RamTest(),
 )
