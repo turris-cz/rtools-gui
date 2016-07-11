@@ -275,11 +275,12 @@ class ClockTest(BaseTest):
 class EthTest(BaseTest):
     localDev = "ethTEST"
 
-    def __init__(self, device, socket, subnet):
+    def __init__(self, device, socket, subnet, reinitDevice=False):
         self._name = "ETH %s" % socket
         self.device = device
         self.subnet = subnet
         self.socket = socket
+        self.reinitDevice = reinitDevice
 
     @property
     def instructions(self):
@@ -292,13 +293,14 @@ class EthTest(BaseTest):
         """ % dict(test_name=self._name, socket=self.socket)
 
     def createWorker(self):
-        return self.Worker(self.device, self.subnet)
+        return self.Worker(self.device, self.subnet, self.reinitDevice)
 
     class Worker(BaseWorker):
-        def __init__(self, device, subnet):
+        def __init__(self, device, subnet, reinitDevice):
             super(EthTest.Worker, self).__init__()
             self.device = device
             self.subnet = subnet
+            self.reinitDevice = reinitDevice
 
         def perform(self):
 
@@ -318,6 +320,10 @@ class EthTest(BaseTest):
             self.progress.emit(40)
 
             # set ip on router
+            if self.reinitDevice:
+                self.expectCommand(exp, "ip link set dev %s down" % self.device)
+                self.progress.emit(45)
+
             self.expectCommand(exp, "ip address flush dev %s" % self.device)
             self.progress.emit(50)
             self.expectCommand(
@@ -512,6 +518,6 @@ TESTS = (
     EthTest("br-lan", "LAN2", 165),
     Booted2(),
     UsbTest(2, "USB3"),
-    EthTest("eth1", "WAN (SPF)", 164),
+    EthTest("eth1", "WAN (SPF)", 164, True),
     RamTest(),
 )
