@@ -92,6 +92,98 @@ class MiniPCIeTest(BaseTest):
             return True
 
 
+class GpioTest(BaseTest):
+    _name = 'GPIO'
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+        def testPins(self, exp, inputPins, outputPins, progressStart, progressEnd):
+            pinLen = len(inputPins.split(" ")) + len(outputPins.split(" "))
+            step = (progressEnd - progressStart) / 10.0
+            # Set in and outs
+            exp.sendline(
+                'for i in %s; do '
+                'echo in > /sys/class/gpio/gpio${i}/direction; '
+                'done' % inputPins
+            )
+            self.progress.emit(progressStart + step * 1)
+            self.expectLastRetval(exp, 0)
+            self.progress.emit(progressStart + step * 2)
+            exp.sendline(
+                'for i in %s; do '
+                'echo out > /sys/class/gpio/gpio${i}/direction; '
+                'done' % outputPins
+            )
+            self.progress.emit(progressStart + step * 3)
+            self.expectLastRetval(exp, 0)
+            self.progress.emit(progressStart + step * 4)
+
+            # Write values
+            exp.sendline(
+                'for i in %s; do '
+                'echo 1 > /sys/class/gpio/gpio${i}/value; '
+                'done' % outputPins
+            )
+            self.progress.emit(progressStart + step * 5)
+            self.expectLastRetval(exp, 0)
+            self.progress.emit(progressStart + step * 6)
+
+            # Read values
+            exp.sendline(
+                'for i in %s %s; do '
+                'cat /sys/class/gpio/gpio${i}/value; '
+                'done' % (inputPins, outputPins)
+            )
+            self.expect(exp, r'1[\s]+' * (pinLen))
+            self.progress.emit(progressStart + step * 7)
+
+            # Write values
+            exp.sendline(
+                'for i in %s; do '
+                'echo 0 > /sys/class/gpio/gpio${i}/value; '
+                'done' % outputPins
+            )
+            self.progress.emit(progressStart + step * 8)
+            self.expectLastRetval(exp, 0)
+            self.progress.emit(progressStart + step * 9)
+
+            # Read values
+            exp.sendline(
+                'for i in %s %s; do '
+                'cat /sys/class/gpio/gpio${i}/value; '
+                'done' % (inputPins, outputPins)
+            )
+            self.expect(exp, r'0[\s]+' * (pinLen))
+            self.progress.emit(progressStart + step * 10)
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+
+            self.expectSystemConsole(exp)
+            self.progress.emit(3)
+
+            pins1 = "18 34 36 44 51"
+            pins2 = "33 35 42 47 56"
+
+            # Init gpio ports
+            exp.sendline(
+                'for i in %s %s; do '
+                'echo $i > /sys/class/gpio/export; '
+                'done' % (pins1, pins2)
+            )
+            self.progress.emit(5)
+            self.expectLastRetval(exp, 0)
+            self.progress.emit(10)
+
+            self.testPins(exp, pins1, pins2, 10, 55)
+            self.testPins(exp, pins2, pins1, 55, 100)
+
+            return True
+
+
 class SerialNumberTest(BaseTest):
     _name = 'SERIAL NUMBER'
 
@@ -410,6 +502,7 @@ class RamTest(BaseTest):
 TESTS = (
     Booted(),
     SerialConsoleTest(),
+    GpioTest(),
     UsbTest(2, "USB2"),
     MiniPCIeTest(3),
     ClockTest(),
