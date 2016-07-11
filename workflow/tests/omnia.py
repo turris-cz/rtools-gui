@@ -51,8 +51,8 @@ class UsbTest(BaseTest):
             return True
 
 
-class miniPCIeTest(BaseTest):
-    _name = 'miniPCIe'
+class MiniPCIeTest(BaseTest):
+    _name = 'MINIPCIE'
 
     def __init__(self, pci_count):
         self.pci_count = pci_count
@@ -63,7 +63,7 @@ class miniPCIeTest(BaseTest):
     class Worker(BaseWorker):
 
         def __init__(self, pci_count):
-            super(miniPCIeTest.Worker, self).__init__()
+            super(MiniPCIeTest.Worker, self).__init__()
             self.pci_count = pci_count
 
         def perform(self):
@@ -411,7 +411,7 @@ TESTS = (
     Booted(),
     SerialConsoleTest(),
     UsbTest(2, "USB2"),
-    miniPCIeTest(3),
+    MiniPCIeTest(3),
     ClockTest(),
     SerialNumberTest(),
     EthTest("eth1", "WAN", 167),
