@@ -444,6 +444,8 @@ class Booted2(Booted):
                 <li>Připojte SPF ETH redukci</li>
                 <li>Odpojte USB2 dongly z obou usb slotů</li>
                 <li>Zapojte USB3 dongly do obou usb slotů</li>
+                <li>Odpojte zařízení z mPCI slotu nejblíže ke středu desky</li>
+                <li>Zapojte mSata kartu do mPCI slotu nejblíže ke středu desky</li>
                 <li>Připojte napájení napájení do routeru.</li>
             </ul>
         """ % dict(test_name=self._name)
@@ -521,6 +523,7 @@ TESTS = (
     EthTest("br-lan", "LAN2", 165),
     Booted2(),
     UsbTest(2, "USB3"),
+    MiniPCIeTest(3),
     EthTest("eth1", "WAN (SPF)", 164, True),
     RamTest(),
 )
