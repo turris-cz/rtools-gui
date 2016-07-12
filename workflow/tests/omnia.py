@@ -319,11 +319,12 @@ class EthTest(BaseTest):
             self.expectLocalCommand("sudo ip link set dev %s up" % EthTest.localDev)
             self.progress.emit(40)
 
-            # set ip on router
+            # reinit network if needed
             if self.reinitDevice:
-                self.expectCommand(exp, "ip link set dev %s down" % self.device)
+                self.expectCommand(exp, "/etc/init.d/network restart")
                 self.progress.emit(45)
 
+            # set ip on router
             self.expectCommand(exp, "ip address flush dev %s" % self.device)
             self.progress.emit(50)
             self.expectCommand(
