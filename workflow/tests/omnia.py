@@ -10,11 +10,11 @@ from workflow.base import Base, BaseTest, BaseWorker, spawnPexpectSerialConsole
 from custom_exceptions import RunFailed
 
 
-class UsbTest(BaseTest):
+class DiskTest(BaseTest):
 
     def __init__(self, usb_count, name):
         self.usb_count = usb_count
-        self._name = name
+        self._name = "DISK %s" % name
 
     def createWorker(self):
         return self.Worker(self.usb_count)
@@ -22,7 +22,7 @@ class UsbTest(BaseTest):
     class Worker(BaseWorker):
 
         def __init__(self, usb_count):
-            super(UsbTest.Worker, self).__init__()
+            super(DiskTest.Worker, self).__init__()
             self.usb_count = usb_count
 
         def perform(self):
@@ -54,8 +54,9 @@ class UsbTest(BaseTest):
 class MiniPCIeTest(BaseTest):
     _name = 'MINIPCIE'
 
-    def __init__(self, pci_count):
+    def __init__(self, pci_count, name):
         self.pci_count = pci_count
+        self._name = "MINIPCIE %s" % name
 
     def createWorker(self):
         return self.Worker(self.pci_count)
@@ -514,16 +515,16 @@ TESTS = (
     Booted(),
     SerialConsoleTest(),
     GpioTest(),
-    UsbTest(2, "USB2"),
-    MiniPCIeTest(3),
+    DiskTest(2, "2xUSB2"),
+    MiniPCIeTest(3, "3xPCI"),
     ClockTest(),
     SerialNumberTest(),
     EthTest("eth1", "WAN", 167),
     EthTest("br-lan", "LAN1", 166),
     EthTest("br-lan", "LAN2", 165),
     Booted2(),
-    UsbTest(2, "USB3"),
-    MiniPCIeTest(3),
+    DiskTest(3, "2xUSB3+MSATA"),
+    MiniPCIeTest(2, "2xPCI"),
     EthTest("eth1", "WAN (SPF)", 164, True),
     RamTest(),
 )
