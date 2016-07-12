@@ -144,6 +144,11 @@ class Runner(QtCore.QObject):
         qApp.loggerMain.info("Firmware obtained - %s" % firmware)
         qApp.router.storeFirmware(firmware)
 
+    @QtCore.pyqtSlot(int, str)
+    def ramObtained(self, ram, phase):
+        qApp.loggerMain.info("Ram obtained - %d" % ram)
+        qApp.router.storeRam(ram, phase)
+
     def runSingle(self, i):
 
         # Print instructions if needed
@@ -155,6 +160,7 @@ class Runner(QtCore.QObject):
         self.worker.finished.connect(self.runDone)
         self.worker.progress.connect(self.workerProgress)
         self.worker.firmware.connect(self.firwareObtained)
+        self.worker.ram.connect(self.ramObtained)
         self.startWorker.connect(self.worker.start)
         self.worker.moveToThread(self.thread)
         # Start the thread event loop

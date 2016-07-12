@@ -45,6 +45,7 @@ class BaseWorker(QtCore.QObject):
     progress = QtCore.pyqtSignal(int)
     finished = QtCore.pyqtSignal(bool)
     firmware = QtCore.pyqtSignal(str)
+    ram = QtCore.pyqtSignal(int, str)
 
     @abc.abstractmethod
     def perform(self):

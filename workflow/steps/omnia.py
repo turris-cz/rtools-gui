@@ -340,6 +340,7 @@ class RamSize(Base):
             else:
                 raise ValueError("Ramsize could be only '1' or '2' (%d given)" % self.ramsize)
 
+            self.ram.emit(self.ramsize, 'S')
             self.progress.emit(100)
 
             expTester.terminate(force=True)

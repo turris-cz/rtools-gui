@@ -211,3 +211,9 @@ class Router(object):
                   VALUES (?, ?);
               """
         self.executeQuery(sql, self.id, firmware, failOnError=False)
+
+    def storeRam(self, ram, phase):
+        sql = """ INSERT INTO last_seen_ram (id, size, phase)
+                  VALUES (?, ?, ?);
+              """
+        self.executeQuery(sql, self.id, ram, phase, failOnError=False)

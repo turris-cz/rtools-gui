@@ -493,6 +493,8 @@ class RamTest(BaseTest):
             exp.sendline(allocCmd)
             self.expect(exp, r'RAM TEST PASSED')
 
+            self.progress.emit(90)
+            self.ram.emit(self.ramsize, 'T')
             self.progress.emit(95)
 
             # a small cleanup
