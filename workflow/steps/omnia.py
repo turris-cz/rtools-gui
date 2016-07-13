@@ -277,23 +277,24 @@ class EepromFlash(Base):
 
     class Worker(BaseWorker):
 
-        def __init__(self, ramsize, region=None):
+        def __init__(self, ramsize, region):
             super(EepromFlash.Worker, self).__init__()
-            # The only two valid options are `1` or `2`
             self.ramsize = ramsize
             self.region = region
 
         @staticmethod
-        def makeImage(ramsize, region=None):
+        def makeImage(ramsize, region):
             magic = 0x0341a034
-            region = int(binascii.hexlify(region), 16) if region else 0x0000
-            data = struct.pack('III', magic, ramsize, region)
+            args = [magic, ramsize, region[0], region[1], "\0", "\0"]
+            data = struct.pack('IIcccc', *args)
             # add crc
-            data = struct.pack('IIII', magic, ramsize, region, binascii.crc32(data) % (1 << 32))
+            args.append(binascii.crc32(data) % (1 << 32))
+            data = struct.pack('IIccccI', *args)
             return data
 
         def perform(self):
 
+            # The only two valid options are `1` or `2` for ramsize
             if self.ramsize not in (1, 2, ):
                 raise ValueError("Ramsize could be only '1' or '2' (%d given)" % self.ramsize)
 

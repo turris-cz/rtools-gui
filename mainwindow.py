@@ -95,7 +95,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.titleLabel.setText("Oživování")
 
         # set ram and region labels
-        self.regionLabel.setText(settings.REGION.upper() if settings.REGION else "**")
+        self.regionLabel.setText(settings.REGION)
         self.ramLabel.setText("%dG" % settings.ROUTER_RAMSIZE)
 
     def loadRouter(self, router):
