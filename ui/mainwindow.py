@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/mainwindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.5.1
+# Created by: PyQt5 UI code generator 5.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(750, 800)
+        MainWindow.resize(750, 900)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/img/favicon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -19,11 +19,40 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.horizontalLayout_9 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_9.setObjectName("horizontalLayout_9")
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        self.label_3.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_3.setObjectName("label_3")
+        self.horizontalLayout_9.addWidget(self.label_3)
+        self.ramLabel = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        self.ramLabel.setFont(font)
+        self.ramLabel.setObjectName("ramLabel")
+        self.horizontalLayout_9.addWidget(self.ramLabel)
+        self.label_7 = QtWidgets.QLabel(self.centralwidget)
+        self.label_7.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_7.setObjectName("label_7")
+        self.horizontalLayout_9.addWidget(self.label_7)
+        self.regionLabel = QtWidgets.QLabel(self.centralwidget)
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        self.regionLabel.setFont(font)
+        self.regionLabel.setObjectName("regionLabel")
+        self.horizontalLayout_9.addWidget(self.regionLabel)
+        self.verticalLayout.addLayout(self.horizontalLayout_9)
+        self.line = QtWidgets.QFrame(self.centralwidget)
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.verticalLayout.addWidget(self.line)
         self.stackedWidget = QtWidgets.QStackedWidget(self.centralwidget)
         self.stackedWidget.setObjectName("stackedWidget")
         self.barcodePage = QtWidgets.QWidget()
         self.barcodePage.setObjectName("barcodePage")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.barcodePage)
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.titleLabel = QtWidgets.QLabel(self.barcodePage)
         font = QtGui.QFont()
@@ -83,6 +112,7 @@ class Ui_MainWindow(object):
         self.workPage = QtWidgets.QWidget()
         self.workPage.setObjectName("workPage")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.workPage)
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -212,6 +242,10 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Turris Omnia - Router Tool Gui"))
+        self.label_3.setText(_translate("MainWindow", "RAM:"))
+        self.ramLabel.setText(_translate("MainWindow", "?G"))
+        self.label_7.setText(_translate("MainWindow", "Region:"))
+        self.regionLabel.setText(_translate("MainWindow", "?"))
         self.titleLabel.setText(_translate("MainWindow", "Oživování a Testování"))
         self.label_2.setText(_translate("MainWindow", "Naskenujte kód:"))
         self.serialNumberLabel.setText(_translate("MainWindow", "#SERIAL NUMBER"))

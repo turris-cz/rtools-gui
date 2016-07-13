@@ -7,8 +7,7 @@ from ui.mainwindow import Ui_MainWindow
 from custom_exceptions import DbError
 from utils import serialNumberValidator, MAX_SERIAL_LEN, backupAppLog
 
-# Include settings
-from application import workflow, tests, qApp
+from application import workflow, tests, qApp, settings
 from db_wrapper import restoreRecovery
 
 
@@ -94,6 +93,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.testFrame.setVisible(False)
             self.testsStartWidget.setVisible(False)
             self.titleLabel.setText("Oživování")
+
+        # set ram and region labels
+        self.regionLabel.setText(settings.REGION.upper() if settings.REGION else "**")
+        self.ramLabel.setText("%dG" % settings.ROUTER_RAMSIZE)
 
     def loadRouter(self, router):
         # Set title
