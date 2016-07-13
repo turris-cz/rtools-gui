@@ -454,7 +454,7 @@ class Booted2(Booted):
             <ul>
                 <li>Odpojte napájení routeru</li>
                 <li>Odpojte eth kabely od routeru</li>
-                <li>Připojte SPF ETH redukci</li>
+                <li>Připojte SFP ETH redukci</li>
                 <li>Odpojte USB2 dongly z obou usb slotů</li>
                 <li>Zapojte USB3 dongly do obou usb slotů</li>
                 <li>Odpojte zařízení z mPCI slotu nejblíže ke středu desky</li>
@@ -537,6 +537,6 @@ TESTS = (
     Booted2(),
     DiskTest(3, "2xUSB3+MSATA"),
     MiniPCIeTest(2, "2xPCI"),
-    EthTest("eth1", "WAN (SPF)", 164, True),
+    EthTest("eth1", "WAN (SFP)", 164, True),
     RamTest(),
 )
