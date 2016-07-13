@@ -149,6 +149,11 @@ class Runner(QtCore.QObject):
         qApp.loggerMain.info("Ram obtained - %d" % ram)
         qApp.router.storeRam(ram, phase)
 
+    @QtCore.pyqtSlot(str, str)
+    def eepromObtained(self, eeprom, phase):
+        qApp.loggerMain.info("Eeprom obtained - %s" % eeprom)
+        qApp.router.storeEeprom(eeprom, phase)
+
     def runSingle(self, i):
 
         # Print instructions if needed
@@ -161,6 +166,7 @@ class Runner(QtCore.QObject):
         self.worker.progress.connect(self.workerProgress)
         self.worker.firmware.connect(self.firwareObtained)
         self.worker.ram.connect(self.ramObtained)
+        self.worker.eeprom.connect(self.eepromObtained)
         self.startWorker.connect(self.worker.start)
         self.worker.moveToThread(self.thread)
         # Start the thread event loop

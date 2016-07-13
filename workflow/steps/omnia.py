@@ -336,10 +336,18 @@ class EepromFlash(Base):
                 'sudo bash -c "echo -n -e %s > %s"' % (repr(image), devicePath))
             self.progress.emit(80)
 
+            # read eeprom and store it
+            expLocal = self.expectStartLocalCommand(
+                "echo $(sudo hexdump %s | head -n 1 | cut -d' ' -f2-)" % devicePath)
+            pattern = " ".join([r'[a-fA-F0-9]{4}'] * 8)
+            self.expect(expLocal, pattern)
+            self.eeprom.emit(expLocal.match.group(), 'S')
+            self.progress.emit(90)
+
             # cleanup
             self.expectLocalCommand(
                 "sudo bash -c 'echo 0x54 > /sys/class/i2c-adapter/i2c-1/delete_device'")
-            self.progress.emit(90)
+            self.progress.emit(95)
 
             self.ram.emit(self.ramsize, 'S')
             self.progress.emit(100)

@@ -59,6 +59,15 @@ CREATE TABLE last_seen_ram (
 );
 ALTER TABLE last_seen_ram OWNER TO omnia_flasher;
 
+CREATE TABLE last_seen_eeprom (
+    time timestamp NOT NULL DEFAULT current_timestamp,
+    id varchar(20) NOT NULL,
+    phase char(1) NOT NULL, -- tests/steps
+    eeprom text NOT NULL,
+    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
+);
+ALTER TABLE last_seen_eeprom OWNER TO omnia_flasher;
+
 CREATE OR REPLACE VIEW good_routers AS
     SELECT routers.id, MIN(runs.start) AS first_success, MAX(runs.start) AS last_success FROM routers
     INNER JOIN runs ON routers.id = runs.router

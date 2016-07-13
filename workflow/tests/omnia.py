@@ -211,7 +211,7 @@ class SerialNumberTest(BaseTest):
             self.progress.emit(40)
 
             self.expectLastRetval(exp, 0)
-            self.progress.emit(60)
+            self.progress.emit(50)
 
             if self.serial.lower() != serial.lower():
                 exp.terminate(force=True)
@@ -222,13 +222,25 @@ class SerialNumberTest(BaseTest):
             pattern = r'[a-fA-F0-9]{40}'
             self.expect(exp, pattern)
             firmware = exp.match.group()
-            self.progress.emit(80)
+            self.progress.emit(70)
 
             self.expectLastRetval(exp, 0)
+            self.progress.emit(80)
+
+            # read eeprom and store it
+            devicePath = '/sys/devices/platform/soc/soc:internal-regs/f1011000.i2c/i2c-0/i2c-1/1-0054/eeprom'
+            exp.sendline("hexdump %s | head -n 1 | cut -d' ' -f2-" % devicePath)
+            pattern = " ".join([r'[a-fA-F0-9]{4}'] * 8)
+            self.expect(exp, pattern)
+            eeprom = exp.match.group()
             self.progress.emit(90)
 
-            self.firmware.emit(firmware)
+            self.expectLastRetval(exp, 0)
             self.progress.emit(100)
+
+            self.firmware.emit(firmware)
+            self.eeprom.emit(eeprom, 'T')
+
             exp.terminate(force=True)
             return True
 

@@ -217,3 +217,9 @@ class Router(object):
                   VALUES (?, ?, ?);
               """
         self.executeQuery(sql, self.id, ram, phase, failOnError=False)
+
+    def storeEeprom(self, eeprom, phase):
+        sql = """ INSERT INTO last_seen_eeprom (id, eeprom, phase)
+                  VALUES (?, ?, ?);
+              """
+        self.executeQuery(sql, self.id, eeprom, phase, failOnError=False)
