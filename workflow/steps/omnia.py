@@ -320,14 +320,20 @@ class EepromFlash(Base):
             self.expectLocalCommand("i2cset -y 1 0x70 0 2 b")
             self.progress.emit(50)
 
-            self.expectLocalCommand(
-                "sudo bash -c 'echo 24c64 0x54 > /sys/class/i2c-adapter/i2c-1/new_device'")
+            # try to set i2c into a initial state (this can fail)
+            expLocal = self.expectStartLocalCommand(
+                "sudo bash -c 'echo 0x54 > /sys/class/i2c-adapter/i2c-1/delete_device'")
+            self.expect(expLocal, pexpect.EOF)
             self.progress.emit(60)
 
-            with open('/sys/devices/platform/soc/3f804000.i2c/i2c-1/1-0054/eeprom', 'w') as f:
-                image = self.makeImage(self.ramsize, self.region)
-                f.write(image)
-                self.logLocal.write('\nWriting "%s" into eeprom\n\n' % binascii.hexlify(image))
+            self.expectLocalCommand(
+                "sudo bash -c 'echo 24c64 0x54 > /sys/class/i2c-adapter/i2c-1/new_device'")
+            self.progress.emit(70)
+
+            image = self.makeImage(self.ramsize, self.region)
+            devicePath = '/sys/devices/platform/soc/3f804000.i2c/i2c-1/1-0054/eeprom'
+            self.expectLocalCommand(
+                'sudo bash -c "echo -n -e %s > %s"' % (repr(image), devicePath))
             self.progress.emit(80)
 
             # cleanup
