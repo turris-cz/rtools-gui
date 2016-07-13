@@ -1,6 +1,8 @@
 import pexpect
 import time
 import datetime
+import binascii
+import struct
 
 from workflow.base import Base, BaseWorker, spawnPexpectSerialConsole
 from application import qApp, settings
@@ -267,78 +269,71 @@ class Atsha(Base):
             return True
 
 
-class RamSize(Base):
-    _name = "RAM SIZE"
+class EepromFlash(Base):
+    _name = "EEPROM FLASH"
 
     def createWorker(self):
-        return self.Worker(settings.ROUTER_RAMSIZE)
+        return self.Worker(settings.ROUTER_RAMSIZE, settings.REGION)
 
     class Worker(BaseWorker):
 
-        def __init__(self, ramsize):
-            super(RamSize.Worker, self).__init__()
+        def __init__(self, ramsize, region=None):
+            super(EepromFlash.Worker, self).__init__()
             # The only two valid options are `1` or `2`
             self.ramsize = ramsize
+            self.region = region
+
+        @staticmethod
+        def makeImage(ramsize, region=None):
+            magic = 0x0341a034
+            region = int(binascii.hexlify(region), 16) if region else 0x0000
+            data = struct.pack('III', magic, ramsize, region)
+            # add crc
+            data = struct.pack('IIII', magic, ramsize, region, binascii.crc32(data) % (1 << 32))
+            return data
 
         def perform(self):
+
+            if self.ramsize not in (1, 2, ):
+                raise ValueError("Ramsize could be only '1' or '2' (%d given)" % self.ramsize)
+
+            if self.region is not None and len(self.region) != 2:
+                raise ValueError("Incorrect region (%s given)" % self.region)
+
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
             self.progress.emit(0)
 
             self.expectTesterConsoleInit(expTester)
-            self.progress.emit(7)
+            self.progress.emit(10)
             self.expectReinitTester(expTester)
-            self.progress.emit(14)
+            self.progress.emit(20)
 
             # Start programming mode
-            self.expectTester(expTester, "PROGRAM", 14, 21)
+            self.expectTester(expTester, "PROGRAM", 20, 30)
 
             # Put CPU in reset
-            self.expectTester(expTester, "CPUOFF", 21, 28)
+            self.expectTester(expTester, "CPUOFF", 30, 40)
 
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
 
             self.expectLocalCommand("i2cset -y 1 0x70 0 2 b")
-            self.progress.emit(35)
+            self.progress.emit(50)
 
-            if self.ramsize == 2:
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x00 0x34 0xa0 i")
-                self.progress.emit(42)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x02 0x41 0x03 i")
-                self.progress.emit(49)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x04 0x02 0x00 i")
-                self.progress.emit(56)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x06 0x00 0x00 i")
-                self.progress.emit(63)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x08 0x00 0x00 i")
-                self.progress.emit(70)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0a 0x00 0x00 i")
-                self.progress.emit(77)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0c 0x7a 0x26 i")
-                self.progress.emit(84)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0e 0x57 0x97 i")
-                self.progress.emit(91)
+            self.expectLocalCommand(
+                "sudo bash -c 'echo 24c64 0x54 > /sys/class/i2c-adapter/i2c-1/new_device'")
+            self.progress.emit(60)
 
-            elif self.ramsize == 1:
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x00 0x34 0xa0 i")
-                self.progress.emit(42)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x02 0x41 0x03 i")
-                self.progress.emit(49)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x04 0x01 0x00 i")
-                self.progress.emit(56)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x06 0x00 0x00 i")
-                self.progress.emit(63)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x08 0x00 0x00 i")
-                self.progress.emit(70)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0a 0x00 0x00 i")
-                self.progress.emit(77)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0c 0x99 0x21 i")
-                self.progress.emit(84)
-                self.expectLocalCommand("i2cset -y 1 0x54 0x00 0x0e 0xd8 0x19 i")
-                self.progress.emit(91)
+            with open('/sys/devices/platform/soc/3f804000.i2c/i2c-1/1-0054/eeprom', 'w') as f:
+                image = self.makeImage(self.ramsize, self.region)
+                f.write(image)
+                self.logLocal.write('\nWriting "%s" into eeprom\n\n' % binascii.hexlify(image))
+            self.progress.emit(80)
 
-            else:
-                raise ValueError("Ramsize could be only '1' or '2' (%d given)" % self.ramsize)
+            # cleanup
+            self.expectLocalCommand(
+                "sudo bash -c 'echo 0x54 > /sys/class/i2c-adapter/i2c-1/delete_device'")
+            self.progress.emit(90)
 
             self.ram.emit(self.ramsize, 'S')
             self.progress.emit(100)
@@ -474,7 +469,7 @@ WORKFLOW = (
     Mcu(),
     Uboot(),
     Atsha(),
-    RamSize(),
+    EepromFlash(),
     UbootCommands("USB FLASHING", ["setenv rescue 3", "run rescueboot"], bootPlan=[
         ('Router Turris successfully started.', 100),
         ('Mode: Reflash...', 50),
