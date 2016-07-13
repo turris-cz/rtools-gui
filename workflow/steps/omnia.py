@@ -338,7 +338,7 @@ class EepromFlash(Base):
 
             # read eeprom and store it
             expLocal = self.expectStartLocalCommand(
-                "echo $(sudo hexdump %s | head -n 1 | cut -d' ' -f2-)" % devicePath)
+                "bash -c \"sudo hexdump %s | head -n 1 | cut -d' ' -f2-\"" % devicePath)
             pattern = " ".join([r'[a-fA-F0-9]{4}'] * 8)
             self.expect(expLocal, pattern)
             self.eeprom.emit(expLocal.match.group(), 'S')
