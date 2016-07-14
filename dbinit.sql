@@ -68,6 +68,23 @@ CREATE TABLE last_seen_eeprom (
 );
 ALTER TABLE last_seen_eeprom OWNER TO omnia_flasher;
 
+CREATE TABLE last_seen_mcu (
+    time timestamp NOT NULL DEFAULT current_timestamp,
+    id varchar(20) NOT NULL,
+    bootloader_md5 char(32) NOT NULL,
+    image_md5 char(32) NOT NULL,
+    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
+);
+ALTER TABLE last_seen_mcu OWNER TO omnia_flasher;
+
+CREATE TABLE last_seen_uboot (
+    time timestamp NOT NULL DEFAULT current_timestamp,
+    id varchar(20) NOT NULL,
+    image_md5 char(32) NOT NULL,
+    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
+);
+ALTER TABLE last_seen_uboot OWNER TO omnia_flasher;
+
 CREATE OR REPLACE VIEW good_routers AS
     SELECT routers.id, MIN(runs.start) AS first_success, MAX(runs.start) AS last_success FROM routers
     INNER JOIN runs ON routers.id = runs.router

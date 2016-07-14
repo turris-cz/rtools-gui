@@ -1,5 +1,7 @@
 import math
 import time
+import hashlib
+
 
 MAX_SERIAL = (2 ** 64 - 1)
 MAX_SERIAL_LEN = math.ceil(math.log10(MAX_SERIAL))
@@ -70,3 +72,11 @@ class PrefixFile(file):
                 e.replace("\n", "\n%08.3f %s> " % (time.time() - self.startTime, self.prefix)))
 
         return super(PrefixFile, self).writelines(res, *args, **kwargs)
+
+
+def md5File(path):
+    md5Hash = hashlib.md5()
+    with open(path, "r") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            md5Hash.update(chunk)
+    return md5Hash.hexdigest()

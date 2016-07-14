@@ -223,3 +223,15 @@ class Router(object):
                   VALUES (?, ?, ?);
               """
         self.executeQuery(sql, self.id, eeprom, phase, failOnError=False)
+
+    def storeMcu(self, bootloader, image):
+        sql = """ INSERT INTO last_seen_mcu (id, bootloader_md5, image_md5)
+                  VALUES (?, ?, ?);
+              """
+        self.executeQuery(sql, self.id, bootloader, image, failOnError=False)
+
+    def storeUboot(self, image):
+        sql = """ INSERT INTO last_seen_uboot (id, image_md5)
+                  VALUES (?, ?);
+              """
+        self.executeQuery(sql, self.id, image, failOnError=False)

@@ -5,6 +5,7 @@ import binascii
 import struct
 
 from workflow.base import Base, BaseWorker, spawnPexpectSerialConsole
+from utils import md5File
 from application import qApp, settings
 
 
@@ -115,7 +116,7 @@ class Mcu(Base):
 
     class Worker(BaseWorker):
 
-        def __init__(self, path_bin, path_scripts, path_config, path_bootloader, path_hw_ctrl):
+        def __init__(self, pathBin, pathScripts, pathConfig, pathBootloader, pathHwCtrl):
             super(Mcu.Worker, self).__init__()
             self.command = \
                 "sudo %s -s %s -f %s -f target/stm32f0x.cfg -c 'init' -c 'sleep 200' " \
@@ -123,7 +124,9 @@ class Mcu(Base):
                 "-c 'flash write_image erase %s 0x08000000' " \
                 "-c 'flash write_image erase %s 0x08005000' " \
                 "-c 'sleep 100' -c 'reset run' -c 'shutdown'" \
-                % (path_bin, path_scripts, path_config, path_bootloader, path_hw_ctrl)
+                % (pathBin, pathScripts, pathConfig, pathBootloader, pathHwCtrl)
+            self.md5Bootloader = md5File(pathBootloader)
+            self.md5Image = md5File(pathHwCtrl)
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
@@ -149,6 +152,8 @@ class Mcu(Base):
 
             self.progress.emit(100)
 
+            self.mcu.emit(self.md5Bootloader, self.md5Image)
+
             expTester.terminate(force=True)
             return True
 
@@ -165,11 +170,12 @@ class Uboot(Base):
 
     class Worker(BaseWorker):
 
-        def __init__(self, path_flashrom, path_image, spi_speed):
+        def __init__(self, pathFlashrom, pathImage, spiSpeed):
             super(Uboot.Worker, self).__init__()
-            self.flash_image_command = \
+            self.flashImageCommand = \
                 "sudo %s -p linux_spi:dev=/dev/spidev0.0,spispeed=%d -w %s" \
-                % (path_flashrom, spi_speed, path_image)
+                % (pathFlashrom, spiSpeed, pathImage)
+            self.md5Image = md5File(pathImage)
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
@@ -198,7 +204,7 @@ class Uboot(Base):
             self.progress.emit(50)
 
             # Flash uboot image
-            expLocal = self.expectStartLocalCommand(self.flash_image_command, 90)
+            expLocal = self.expectStartLocalCommand(self.flashImageCommand, 90)
             while True:
                 res = self.expect(expLocal, [
                     pexpect.EOF,
@@ -216,6 +222,8 @@ class Uboot(Base):
             # Deactivate SPI
             self.expectLocalCommand("gpio write 21 1")
             self.progress.emit(100)
+
+            self.uboot.emit(self.md5Image)
 
             expTester.terminate(force=True)
             return True

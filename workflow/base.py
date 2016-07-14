@@ -47,6 +47,8 @@ class BaseWorker(QtCore.QObject):
     firmware = QtCore.pyqtSignal(str)
     ram = QtCore.pyqtSignal(int, str)
     eeprom = QtCore.pyqtSignal(str, str)
+    mcu = QtCore.pyqtSignal(str, str)
+    uboot = QtCore.pyqtSignal(str)
 
     @abc.abstractmethod
     def perform(self):

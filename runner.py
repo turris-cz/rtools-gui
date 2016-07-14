@@ -154,6 +154,17 @@ class Runner(QtCore.QObject):
         qApp.loggerMain.info("Eeprom obtained - %s" % eeprom)
         qApp.router.storeEeprom(eeprom, phase)
 
+    @QtCore.pyqtSlot(str, str)
+    def mcuObtained(self, bootloader, image):
+        qApp.loggerMain.info("MCU bootloader obtained - %s" % bootloader)
+        qApp.loggerMain.info("MCU image obtained - %s" % image)
+        qApp.router.storeMcu(bootloader, image)
+
+    @QtCore.pyqtSlot(str)
+    def ubootObtained(self, image):
+        qApp.loggerMain.info("Uboot image obtained - %s" % image)
+        qApp.router.storeUboot(image)
+
     def runSingle(self, i):
 
         # Print instructions if needed
@@ -167,6 +178,8 @@ class Runner(QtCore.QObject):
         self.worker.firmware.connect(self.firwareObtained)
         self.worker.ram.connect(self.ramObtained)
         self.worker.eeprom.connect(self.eepromObtained)
+        self.worker.mcu.connect(self.mcuObtained)
+        self.worker.uboot.connect(self.ubootObtained)
         self.startWorker.connect(self.worker.start)
         self.worker.moveToThread(self.thread)
         # Start the thread event loop
