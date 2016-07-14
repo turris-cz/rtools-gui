@@ -1,9 +1,10 @@
 # -*- coding: utf8 -*-
 
+import binascii
 import locale
 import math
 import pexpect
-import binascii
+import re
 
 from application import qApp, settings
 from datetime import datetime
@@ -278,7 +279,7 @@ class EepromTest(BaseTest):
             if storedRam != self.ramsize:
                 errors.append("Ramsize mismatch (%dG!=%dG)" % (self.ramsize, storedRam))
             if storedRegion != self.region:
-                errors.append("Region mismatch (%'s'!=%'s')" % (self.region, storedRegion))
+                errors.append("Region mismatch ('%s'!='%s')" % (self.region, storedRegion))
 
             if errors:
                 exp.terminate(force=True)
@@ -287,6 +288,42 @@ class EepromTest(BaseTest):
             self.progress.emit(100)
 
             # TODO parse and check
+
+            return True
+
+
+class RegionTest(BaseTest):
+    _name = 'REGION TEST'
+
+    def createWorker(self):
+        return self.Worker(settings.REGION)
+
+    class Worker(BaseWorker):
+        def __init__(self, region):
+            super(RegionTest.Worker, self).__init__()
+            self.region = region
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+
+            self.expectSystemConsole(exp)
+            self.progress.emit(40)
+
+            exp.sendline("echo '>''>>'$(cat /proc/cmdline)'<<<'")
+            self.expect(exp, r'^.*>>>(.*)<<<.*$')
+            cmdline = exp.match.group(1)
+
+            match = re.match(r'.*cfg80211.freg=(..).*', cmdline)
+            if not match:
+                exp.terminate(force=True)
+                raise RunFailed("Could not read region from the kernel command line")
+            elif match.group(1) != self.region:
+                exp.terminate(force=True)
+                raise RunFailed(
+                    "Region from the kernel commandline differs. ('%s'!='%s')"
+                    % (self.region, match.group(1))
+                )
 
             return True
 
@@ -578,6 +615,7 @@ TESTS = (
     ClockTest(),
     SerialNumberTest(),
     EepromTest(),
+    RegionTest(),
     EthTest("eth1", "WAN", 167),
     EthTest("br-lan", "LAN1", 166),
     EthTest("br-lan", "LAN2", 165),
