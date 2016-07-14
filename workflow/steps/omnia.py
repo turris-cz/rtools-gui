@@ -204,7 +204,7 @@ class Uboot(Base):
             self.progress.emit(50)
 
             # Flash uboot image
-            expLocal = self.expectStartLocalCommand(self.flashImageCommand, 90)
+            expLocal = self.expectStartLocalCommand(self.flashImageCommand, 120)
             while True:
                 res = self.expect(expLocal, [
                     pexpect.EOF,
