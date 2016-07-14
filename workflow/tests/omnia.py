@@ -3,6 +3,7 @@
 import locale
 import math
 import pexpect
+import binascii
 
 from application import qApp, settings
 from datetime import datetime
@@ -242,6 +243,51 @@ class SerialNumberTest(BaseTest):
             self.eeprom.emit(eeprom, 'T')
 
             exp.terminate(force=True)
+            return True
+
+
+class EepromTest(BaseTest):
+    _name = 'EEPROM TEST'
+
+    def createWorker(self):
+        return self.Worker(settings.ROUTER_RAMSIZE, settings.REGION)
+
+    class Worker(BaseWorker):
+        def __init__(self, ramsize, region):
+            super(EepromTest.Worker, self).__init__()
+            self.ramsize = ramsize
+            self.region = region
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+
+            self.expectSystemConsole(exp)
+            self.progress.emit(40)
+
+            devicePath = '/sys/devices/platform/soc/soc:internal-regs/f1011000.i2c/i2c-0/i2c-1/1-0054/eeprom'
+            exp.sendline("hexdump %s | head -n 1 | cut -d' ' -f2-" % devicePath)
+            pattern = " ".join([r'[a-fA-F0-9]{4}'] * 8)
+            self.expect(exp, pattern)
+            eeprom = exp.match.group().split(" ")
+            storedRam = int(eeprom[2], 16)
+            storedRegion = binascii.unhexlify(eeprom[4])[::-1]  # it is reversed
+            self.progress.emit(95)
+
+            errors = []
+            if storedRam != self.ramsize:
+                errors.append("Ramsize mismatch (%dG!=%dG)" % (self.ramsize, storedRam))
+            if storedRegion != self.region:
+                errors.append("Region mismatch (%'s'!=%'s')" % (self.region, storedRegion))
+
+            if errors:
+                exp.terminate(force=True)
+                raise RunFailed(", ".join(errors))
+
+            self.progress.emit(100)
+
+            # TODO parse and check
+
             return True
 
 
@@ -531,6 +577,7 @@ TESTS = (
     MiniPCIeTest(3, "3xPCI"),
     ClockTest(),
     SerialNumberTest(),
+    EepromTest(),
     EthTest("eth1", "WAN", 167),
     EthTest("br-lan", "LAN1", 166),
     EthTest("br-lan", "LAN2", 165),
