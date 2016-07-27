@@ -2,7 +2,7 @@ import re
 import json
 
 from PyQt5 import QtSql
-from application import qApp, tests, workflow, settings
+from application import qApp, settings
 
 from custom_exceptions import DbError
 
@@ -188,23 +188,23 @@ class Router(object):
         self.executeQuery(sql, self.currentRun, failOnError=False)
 
     def getTestPlan(self):
-        return range(len(tests.TESTS))
+        return range(len(qApp.tests.TESTS))
 
     def getStepPlan(self):
         # filter workflow (skipped passed)
         return [
-            i for i in range(len(workflow.WORKFLOW))
-            if not workflow.WORKFLOW[i].name in self.performedSteps['passed']
+            i for i in range(len(qApp.workflow.WORKFLOW))
+            if not qApp.workflow.WORKFLOW[i].name in self.performedSteps['passed']
         ]
 
     @property
     def canStartTests(self):
-        return self.performedSteps['passed'].issuperset({e.name for e in workflow.WORKFLOW})
+        return self.performedSteps['passed'].issuperset({e.name for e in qApp.workflow.WORKFLOW})
 
     @property
     def canStartSteps(self):
         # at least one step is missing
-        return len({e.name for e in workflow.WORKFLOW} - self.performedSteps['passed']) != 0
+        return len({e.name for e in qApp.workflow.WORKFLOW} - self.performedSteps['passed']) != 0
 
     def storeFirmware(self, firmware):
         sql = """ INSERT INTO last_seen_firmware (id, firmware)

@@ -17,14 +17,11 @@ qApp = None
 # settings module
 settings = None
 
-# workflow module
-workflow = None
-
-# tests module
-tests = None
-
 # db wrapper module
 db_wrapper = None
+
+# mock db wrapper module
+db_wrapper_mock = None
 
 
 def _printException(type, value, tb):
@@ -53,16 +50,18 @@ class Application(QApplication):
         settings = importlib.import_module(settings_module)
 
         # load workflow module
-        global workflow
-        workflow = importlib.import_module(settings.WORKFLOW_STEPS_MODULE)
+        self.workflow = importlib.import_module(settings.WORKFLOW_STEPS_MODULE)
 
         # load test module
-        global tests
-        tests = importlib.import_module(settings.WORKFLOW_TESTS_MODULE)
+        self.tests = importlib.import_module(settings.WORKFLOW_TESTS_MODULE)
 
         # load db module
         global db_wrapper
         db_wrapper = importlib.import_module(settings.DB_WRAPPER_MODULE)
+
+        # load mock db wrapper module
+        global db_wrapper_mock
+        db_wrapper_mock = importlib.import_module(settings.DB_WRAPPER_MOCK_MODULE)
 
         # store tests/steps only options
         self.tests_only = '-t' in args[0] or '--tests-only' in args[0]
@@ -103,6 +102,7 @@ class Application(QApplication):
         self.loggerMain.info("Using settings '%s'" % settings_module)
         self.loggerMain.info("Using steps '%s'" % settings.WORKFLOW_STEPS_MODULE)
         self.loggerMain.info("Using tests '%s'" % settings.WORKFLOW_TESTS_MODULE)
+        self.loggerMain.info("Using db wrapper '%s'" % settings.DB_WRAPPER_MODULE)
 
         # set the db connection
         self.connection = QSqlDatabase.addDatabase("QPSQL")
@@ -118,7 +118,31 @@ class Application(QApplication):
 
     def useRouter(self, serialNumber):
 
-        self.router = db_wrapper.Router(serialNumber)
+        if int(serialNumber) in settings.WORKSTATION_TESTING_SERIALS:
+            self.router = db_wrapper_mock.Router(serialNumber)
+
+            # load workflow module
+            self.workflow = importlib.import_module(settings.WORKFLOW_STEPS_WORKSTATION_MODULE)
+
+            # load test module
+            self.tests = importlib.import_module(settings.WORKFLOW_TESTS_WORKSTATION_MODULE)
+
+            self.loggerMain.info("Using steps '%s'" % settings.WORKFLOW_STEPS_WORKSTATION_MODULE)
+            self.loggerMain.info("Using tests '%s'" % settings.WORKFLOW_TESTS_WORKSTATION_MODULE)
+            self.loggerMain.info("Using db wrapper '%s'" % settings.DB_WRAPPER_MOCK_MODULE)
+
+        else:
+            self.router = db_wrapper.Router(serialNumber)
+
+            # load workflow module
+            self.workflow = importlib.import_module(settings.WORKFLOW_STEPS_MODULE)
+
+            # load test module
+            self.tests = importlib.import_module(settings.WORKFLOW_TESTS_MODULE)
+
+            self.loggerMain.info("Using steps '%s'" % settings.WORKFLOW_STEPS_MODULE)
+            self.loggerMain.info("Using tests '%s'" % settings.WORKFLOW_TESTS_MODULE)
+            self.loggerMain.info("Using db wrapper '%s'" % settings.DB_WRAPPER_MODULE)
 
         return self.router
 
@@ -143,7 +167,7 @@ class Application(QApplication):
         # otherwise it would be disposed its thread execution
         from runner import Runner
         self.runner = Runner(
-            self.router.id, [tests.TESTS[i] for i in self.testPlan], self.router.currentRun,
+            self.router.id, [self.tests.TESTS[i] for i in self.testPlan], self.router.currentRun,
             Runner.TYPE_TESTS, self.router.testAttempt
         )
 
@@ -167,7 +191,7 @@ class Application(QApplication):
         # otherwise it would be disposed its thread execution
         from runner import Runner
         self.runner = Runner(
-            self.router.id, [workflow.WORKFLOW[i] for i in self.stepPlan],
+            self.router.id, [self.workflow.WORKFLOW[i] for i in self.stepPlan],
             self.router.currentRun, Runner.TYPE_STEPS, self.router.stepAttempt
         )
 

@@ -9,7 +9,10 @@ DB = dict(
 # set the steps and tests modules
 WORKFLOW_STEPS_MODULE = 'workflow.steps.omnia'
 WORKFLOW_TESTS_MODULE = 'workflow.tests.omnia'
+WORKFLOW_STEPS_WORKSTATION_MODULE = 'workflow.steps.omnia_workstation_test'
+WORKFLOW_TESTS_WORKSTATION_MODULE = 'workflow.tests.omnia'
 DB_WRAPPER_MODULE = 'db_wrapper'
+DB_WRAPPER_MOCK_MODULE = 'mock.db_wrapper'
 
 PATHS = {
     'sample': {
@@ -67,3 +70,7 @@ import os
 DB_RECOVER_QUERY_FILE = os.path.expanduser('~/recover-queries.json')
 
 BACKUP_SCRIPT = 'backup_log.sh'
+
+WORKSTATION_TESTING_SERIALS = [
+    # Results of these serials won't be stored into the db
+]

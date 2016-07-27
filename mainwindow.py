@@ -7,7 +7,8 @@ from ui.mainwindow import Ui_MainWindow
 from custom_exceptions import DbError
 from utils import serialNumberValidator, MAX_SERIAL_LEN, backupAppLog
 
-from application import workflow, tests, qApp, settings, db_wrapper
+from application import qApp, settings
+from db_wrapper import restoreRecovery
 
 
 def _removeItemFromGridLayout(layout, row, column):
@@ -47,26 +48,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         )
         self.backButton.setIconSize(QtCore.QSize(20, 20))
 
-        # load the workflow into gui
-        workflow_len = len(workflow.WORKFLOW)
-        for i in range(workflow_len):
-            self.addStep(i, workflow.WORKFLOW[i].name)
-        # add spacers
-        spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        self.stepsLayout.addItem(spacer, workflow_len, 0)
-        spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        self.stepsLayout.addItem(spacer, workflow_len, 1)
-
-        # load the tests into gui
-        tests_len = len(tests.TESTS)
-        for i in range(tests_len):
-            self.addTest(i, tests.TESTS[i].name)
-        # add spacers
-        spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        self.testsLayout.addItem(spacer, tests_len, 0)
-        spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        self.testsLayout.addItem(spacer, tests_len, 1)
-
         # open db connection
         qApp.loggerMain.info("Opening db connection.")
         if not qApp.connection.open():
@@ -79,7 +60,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qApp.loggerMain.info("Connected to database.")
 
         # perform queries which weren't performed last time
-        db_wrapper.restoreRecovery()
+        restoreRecovery()
 
         # tests/steps only
         if qApp.tests_only:
@@ -97,21 +78,63 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.regionLabel.setText(settings.REGION)
         self.ramLabel.setText("%dG" % settings.ROUTER_RAMSIZE)
 
+        # set workstation label
+        self.workstationTestLabel.setHidden(True)
+
+    def loadWorkflows(self):
+        # clear the layouts first
+        item = self.stepsLayout.takeAt(0)
+        while item:
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+            item = self.stepsLayout.takeAt(0)
+
+        item = self.testsLayout.takeAt(0)
+        while item:
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+            item = self.testsLayout.takeAt(0)
+
+        # load the workflow into gui
+        workflow_len = len(qApp.workflow.WORKFLOW)
+        for i in range(workflow_len):
+            self.addStep(i, qApp.workflow.WORKFLOW[i].name)
+        # add spacers
+        spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.stepsLayout.addItem(spacer, workflow_len, 0)
+        spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.stepsLayout.addItem(spacer, workflow_len, 1)
+
+        # load the tests into gui
+        tests_len = len(qApp.tests.TESTS)
+        for i in range(tests_len):
+            self.addTest(i, qApp.tests.TESTS[i].name)
+        # add spacers
+        spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.testsLayout.addItem(spacer, tests_len, 0)
+        spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.testsLayout.addItem(spacer, tests_len, 1)
+
     def loadRouter(self, router):
         # Set title
         self.serialNumberLabel.setText("%s (%s)" % (router.id, router.idHex))
 
+        # Load the workflow
+        self.loadWorkflows()
+
         # Update steps
         passed = router.performedSteps['passed']  # step passed at least once
         failed = router.performedSteps['failed'] - passed
-        for i in range(len(workflow.WORKFLOW)):
-            if workflow.WORKFLOW[i].name in passed:
+        for i in range(len(qApp.workflow.WORKFLOW)):
+            if qApp.workflow.WORKFLOW[i].name in passed:
                 self.updateStep(i, MainWindow.WORK_STATE_PASSED)
-            elif workflow.WORKFLOW[i].name in failed:
+            elif qApp.workflow.WORKFLOW[i].name in failed:
                 self.updateStep(i, MainWindow.WORK_STATE_FAILED)
             else:
                 self.updateStep(i, MainWindow.WORK_STATE_UNKNOWN)
-        for i in range(len(tests.TESTS)):
+        for i in range(len(qApp.tests.TESTS)):
             self.updateTest(i, MainWindow.WORK_STATE_UNKNOWN)
 
         # update buttons
@@ -213,6 +236,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # switch to barcode
         self.stackedWidget.setCurrentWidget(self.barcodePage)
 
+        self.workstationTestLabel.setHidden(True)
+
         # TODO clean router structure
 
     @QtCore.pyqtSlot()
@@ -227,6 +252,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             # Set the router for the whole application
             self.loadRouter(qApp.useRouter(serialNumber))
+
+            if int(serialNumber) in settings.WORKSTATION_TESTING_SERIALS:
+                self.workstationTestLabel.setHidden(False)
+            else:
+                self.workstationTestLabel.setHidden(True)
 
         else:
             self.errorLabel.setText(u"'%s' je neplatné!" % serialNumber)
@@ -258,20 +288,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot(int)
     def stepStarted(self, planIndex):
-        name = workflow.WORKFLOW[qApp.stepPlan[planIndex]].name
+        name = qApp.workflow.WORKFLOW[qApp.stepPlan[planIndex]].name
         qApp.loggerMain.info("Starting step '%s'" % name)
         self.currentProgressBar.setValue(0)
         self.updateStep(qApp.stepPlan[planIndex], MainWindow.WORK_STATE_RUNNING)
 
     @QtCore.pyqtSlot(int, bool)
     def stepFinished(self, planIndex, passed):
-        name = workflow.WORKFLOW[qApp.stepPlan[planIndex]].name
+        name = qApp.workflow.WORKFLOW[qApp.stepPlan[planIndex]].name
         msg = "Step '%s' finished - %s" % (name, ("PASSED" if passed else "FAILED"))
         qApp.loggerMain.info(msg) if passed else qApp.loggerMain.error(msg)
         state = MainWindow.WORK_STATE_PASSED if passed else MainWindow.WORK_STATE_FAILED
         self.overallProgressBar.setValue(self.overallProgressBar.value() + 1)
         self.updateStep(qApp.stepPlan[planIndex], state)
-        qApp.router.storeStep(workflow.WORKFLOW[qApp.stepPlan[planIndex]].name, passed)
+        qApp.router.storeStep(qApp.workflow.WORKFLOW[qApp.stepPlan[planIndex]].name, passed)
 
     @QtCore.pyqtSlot(int, int)
     def stepsFinished(self, passedCount, totalCount):
@@ -338,20 +368,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     @QtCore.pyqtSlot(int)
     def testStarted(self, planIndex):
-        name = tests.TESTS[qApp.testPlan[planIndex]].name
+        name = qApp.tests.TESTS[qApp.testPlan[planIndex]].name
         qApp.loggerMain.info("Starting test '%s'" % name)
         self.currentProgressBar.setValue(0)
         self.updateTest(qApp.testPlan[planIndex], MainWindow.WORK_STATE_RUNNING)
 
     @QtCore.pyqtSlot(int, bool)
     def testFinished(self, planIndex, passed):
-        name = tests.TESTS[qApp.testPlan[planIndex]].name
+        name = qApp.tests.TESTS[qApp.testPlan[planIndex]].name
         msg = "Test '%s' finished - %s" % (name, ("PASSED" if passed else "FAILED"))
         qApp.loggerMain.info(msg) if passed else qApp.loggerMain.error(msg)
         state = MainWindow.WORK_STATE_PASSED if passed else MainWindow.WORK_STATE_FAILED
         self.overallProgressBar.setValue(self.overallProgressBar.value() + 1)
         self.updateTest(qApp.testPlan[planIndex], state)
-        qApp.router.storeTest(tests.TESTS[qApp.testPlan[planIndex]].name, passed)
+        qApp.router.storeTest(qApp.tests.TESTS[qApp.testPlan[planIndex]].name, passed)
 
     @QtCore.pyqtSlot(int, int)
     def testsFinished(self, passedCount, totalCount):

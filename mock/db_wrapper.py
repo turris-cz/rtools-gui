@@ -1,4 +1,4 @@
-from application import qApp, tests, workflow
+from application import qApp
 
 
 def writeRecovery(sql, *values):
@@ -61,10 +61,10 @@ class Router(object):
         )
 
     def getTestPlan(self):
-        return range(len(tests.TESTS))
+        return range(len(qApp.tests.TESTS))
 
     def getStepPlan(self):
-        return range(len(workflow.WORKFLOW))
+        return range(len(qApp.workflow.WORKFLOW))
 
     @property
     def canStartTests(self):
