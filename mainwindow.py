@@ -7,8 +7,7 @@ from ui.mainwindow import Ui_MainWindow
 from custom_exceptions import DbError
 from utils import serialNumberValidator, MAX_SERIAL_LEN, backupAppLog
 
-from application import workflow, tests, qApp, settings
-from db_wrapper import restoreRecovery
+from application import workflow, tests, qApp, settings, db_wrapper
 
 
 def _removeItemFromGridLayout(layout, row, column):
@@ -80,7 +79,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qApp.loggerMain.info("Connected to database.")
 
         # perform queries which weren't performed last time
-        restoreRecovery()
+        db_wrapper.restoreRecovery()
 
         # tests/steps only
         if qApp.tests_only:

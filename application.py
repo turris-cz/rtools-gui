@@ -23,6 +23,9 @@ workflow = None
 # tests module
 tests = None
 
+# db wrapper module
+db_wrapper = None
+
 
 def _printException(type, value, tb):
     type = "%s.%s" % (type.__module__, type.__name__)
@@ -56,6 +59,10 @@ class Application(QApplication):
         # load test module
         global tests
         tests = importlib.import_module(settings.WORKFLOW_TESTS_MODULE)
+
+        # load db module
+        global db_wrapper
+        db_wrapper = importlib.import_module(settings.DB_WRAPPER_MODULE)
 
         # store tests/steps only options
         self.tests_only = '-t' in args[0] or '--tests-only' in args[0]
@@ -111,8 +118,7 @@ class Application(QApplication):
 
     def useRouter(self, serialNumber):
 
-        from db_wrapper import Router
-        self.router = Router(serialNumber)
+        self.router = db_wrapper.Router(serialNumber)
 
         return self.router
 

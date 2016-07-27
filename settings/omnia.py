@@ -9,6 +9,7 @@ DB = dict(
 # set the steps and tests modules
 WORKFLOW_STEPS_MODULE = 'workflow.steps.omnia'
 WORKFLOW_TESTS_MODULE = 'workflow.tests.omnia'
+DB_WRAPPER_MODULE = 'db_wrapper'
 
 PATHS = {
     'sample': {
