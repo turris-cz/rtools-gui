@@ -58,7 +58,7 @@ SERIAL_CONSOLE = {
     },
 }
 
-SPI_SPEED = 6000
+SPI_SPEED = 5000
 
 ROUTER_RAMSIZE = 1  # only `1` or `2` (in GB)
 REGION = '**'  # ** or iso country code (e.g. us)
