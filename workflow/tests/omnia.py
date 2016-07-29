@@ -433,7 +433,10 @@ class EthTest(BaseTest):
             self.progress.emit(70)
 
             # ping test
-            self.expectCommand(exp, "ping 192.168.%d.1 -c 5" % self.subnet)
+            exp.sendline("ping 192.168.%d.1 -c 5" % self.subnet)
+            exp.sendline('echo "###$?###"')
+            self.expect(exp, r'###([0-9]+)###')
+            retval = exp.match.group(1)
             self.progress.emit(80)
 
             # local cleanup
@@ -441,6 +444,9 @@ class EthTest(BaseTest):
             self.progress.emit(90)
             self.expectLocalCommand("sudo ip address flush dev %s" % self.localDev)
             self.progress.emit(100)
+
+            if retval != "0":
+                raise RunFailed("Ping failed!")
 
             return True
 
