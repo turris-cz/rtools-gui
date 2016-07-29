@@ -371,9 +371,10 @@ class ClockTest(BaseTest):
 class EthTest(BaseTest):
     localDev = "ethTEST"
 
-    def __init__(self, device, socket, subnet, reinitDevice=False):
+    def __init__(self, routerDev, localDev, socket, subnet, reinitDevice=False):
         self._name = "ETH %s" % socket
-        self.device = device
+        self.routerDev = routerDev
+        self.localDev = localDev
         self.subnet = subnet
         self.socket = socket
         self.reinitDevice = reinitDevice
@@ -389,12 +390,13 @@ class EthTest(BaseTest):
         """ % dict(test_name=self._name, socket=self.socket)
 
     def createWorker(self):
-        return self.Worker(self.device, self.subnet, self.reinitDevice)
+        return self.Worker(self.routerDev, self.localDev, self.subnet, self.reinitDevice)
 
     class Worker(BaseWorker):
-        def __init__(self, device, subnet, reinitDevice):
+        def __init__(self, routerDev, localDev, subnet, reinitDevice):
             super(EthTest.Worker, self).__init__()
-            self.device = device
+            self.routerDev = routerDev
+            self.localDev = localDev
             self.subnet = subnet
             self.reinitDevice = reinitDevice
 
@@ -406,13 +408,13 @@ class EthTest(BaseTest):
             self.progress.emit(10)
 
             # initialize local device
-            self.expectLocalCommand("sudo ip address flush dev %s" % EthTest.localDev)
+            self.expectLocalCommand("sudo ip address flush dev %s" % self.localDev)
             self.progress.emit(20)
             self.expectLocalCommand(
-                "sudo ip address add 192.168.%d.1/24 dev %s" % (self.subnet, EthTest.localDev)
+                "sudo ip address add 192.168.%d.1/24 dev %s" % (self.subnet, self.localDev)
             )
             self.progress.emit(30)
-            self.expectLocalCommand("sudo ip link set dev %s up" % EthTest.localDev)
+            self.expectLocalCommand("sudo ip link set dev %s up" % self.localDev)
             self.progress.emit(40)
 
             # reinit network if needed
@@ -421,13 +423,13 @@ class EthTest(BaseTest):
                 self.progress.emit(45)
 
             # set ip on router
-            self.expectCommand(exp, "ip address flush dev %s" % self.device)
+            self.expectCommand(exp, "ip address flush dev %s" % self.routerDev)
             self.progress.emit(50)
             self.expectCommand(
-                exp, "ip address add 192.168.%d.10/24 dev %s" % (self.subnet, self.device)
+                exp, "ip address add 192.168.%d.10/24 dev %s" % (self.subnet, self.routerDev)
             )
             self.progress.emit(60)
-            self.expectCommand(exp, "ip link set dev %s up" % self.device)
+            self.expectCommand(exp, "ip link set dev %s up" % self.routerDev)
             self.progress.emit(70)
 
             # ping test
@@ -435,9 +437,9 @@ class EthTest(BaseTest):
             self.progress.emit(80)
 
             # local cleanup
-            self.expectLocalCommand("sudo ip link set dev %s down" % EthTest.localDev)
+            self.expectLocalCommand("sudo ip link set dev %s down" % self.localDev)
             self.progress.emit(90)
-            self.expectLocalCommand("sudo ip address flush dev %s" % EthTest.localDev)
+            self.expectLocalCommand("sudo ip address flush dev %s" % self.localDev)
             self.progress.emit(100)
 
             return True
@@ -616,12 +618,12 @@ TESTS = (
     SerialNumberTest(),
     EepromTest(),
     RegionTest(),
-    EthTest("eth1", "WAN", 167),
-    EthTest("br-lan", "LAN1", 166),
-    EthTest("br-lan", "LAN2", 165),
+    EthTest("eth1", "ethWAN", "WAN", 167),
+    EthTest("br-lan", "ethLAN1", "LAN1", 166),
+    EthTest("br-lan", "ethLAN2", "LAN2", 165),
     Booted2(),
     DiskTest(3, "2xUSB3+MSATA"),
     MiniPCIeTest(2, "2xPCI"),
-    EthTest("eth1", "WAN (SFP)", 164, True),
+    EthTest("eth1", "ethWAN", "WAN (SFP)", 164, True),
     RamTest(),
 )
