@@ -71,3 +71,5 @@ BACKUP_SCRIPT = 'backup_log.sh'
 WORKSTATION_TESTING_SERIALS = [
     # Results of these serials won't be stored into the db
 ]
+
+RERUN = 1
