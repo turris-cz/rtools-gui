@@ -506,7 +506,6 @@ class Booted(Base):
                 <li>Připojte WAN, LAN1 a LAN2 eth kabely k routeru.</li>
                 <li>Připojte 3 mPCI wifi karty do 3 slotů na desce.</li>
                 <li>Připojte GPIO testovací zařízení k desce.</li>
-                <li>Připojte SFP ETH redukci k routeru.</li>
                 <li>Připojte UART kabel k routeru.</li>
                 <li>Zapojte USB2 dongly do obou usb slotů</li>
                 <li>Připojte napájení napájení do routeru.</li>
