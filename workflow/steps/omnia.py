@@ -49,7 +49,6 @@ class RsvTest(Base):
 
         def perform(self):
             expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            expRouter = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.expectTesterConsoleInit(expTester)
             self.progress.emit(0)
 
@@ -58,10 +57,7 @@ class RsvTest(Base):
             self.progress.emit(10)
 
             # Start start omnia
-            self.expectTester(expTester, "HWSTART", 10, 20)
-
-            # Wait till board is booted
-            self.expectWaitBooted(expRouter, 20, 80)
+            self.expectTester(expTester, "HWSTART", 10, 80)
 
             # RSV test
             self.expectTester(expTester, "RSV", 80, 90)
@@ -439,8 +435,8 @@ class ClockSet(Base):
             return True
 
 
-class UsbFlashClockRsv(Base):
-    _name = "USB FLASH + CLOCK SET + RSV TEST"
+class UsbFlashClock(Base):
+    _name = "USB FLASH + CLOCK SET"
 
     def createWorker(self):
         return self.Worker()
@@ -476,46 +472,39 @@ class UsbFlashClockRsv(Base):
 
             # perform commands
             expRouter.sendline("setenv rescue 3")
-            self.progress.emit(7)
+            self.progress.emit(10)
             time.sleep(0.1)
             expRouter.sendline("run rescueboot")
-            self.progress.emit(15)
+            self.progress.emit(20)
             time.sleep(0.1)
 
             self.expect(expRouter, 'Mode: Reflash...', timeout=150)
-            self.progress.emit(23)
+            self.progress.emit(30)
 
             self.expect(expRouter, 'Reflash succeeded.', timeout=150)
-            self.progress.emit(33)
+            self.progress.emit(50)
 
             self.expect(expRouter, 'Router Turris successfully started.', timeout=150)
-            self.progress.emit(43)
+            self.progress.emit(60)
 
             self.expectSystemConsole(expRouter)
-            self.progress.emit(45)
+            self.progress.emit(70)
 
             now = datetime.datetime.utcnow()
             expRouter.sendline("date -u -s '%04d-%02d-%02d %02d:%02d:%02d'" % (
                 now.year, now.month, now.day, now.hour, now.minute, now.second
             ))
             self.expectLastRetval(expRouter, 0)
-            self.progress.emit(55)
+            self.progress.emit(80)
 
             # Calling hwclock only once sometimes fails to set the clock and no error is
             # displayed
             # calling it twice sets the clock every time...
             expRouter.sendline("hwclock -u -w")
             self.expectLastRetval(expRouter, 0)
-            self.progress.emit(65)
+            self.progress.emit(90)
             expRouter.sendline("hwclock -u -w")
             self.expectLastRetval(expRouter, 0)
-            self.progress.emit(75)
-
-            # RSV test
-            self.expectTester(expTester, "RSV", 75, 95)
-
-            # Reset the tester
-            self.expectReinitTester(expTester)
             self.progress.emit(100)
 
             return True
@@ -527,12 +516,12 @@ WORKFLOW = (
     Uboot(),
     Atsha(),
     EepromFlash(),
-    UsbFlashClockRsv(),
+    UsbFlashClock(),
     #UbootCommands("USB FLASHING", ["setenv rescue 3", "run rescueboot"], bootPlan=[
     #    ('Router Turris successfully started.', 100),
     #    ('Mode: Reflash...', 50),
     #    ('Reflash succeeded.', 75),
     #]),
     #ClockSet(),
-    #RsvTest(),
+    RsvTest(),
 )
