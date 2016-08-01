@@ -369,7 +369,6 @@ class ClockTest(BaseTest):
 
 
 class EthTest(BaseTest):
-    localDev = "ethTEST"
 
     def __init__(self, routerDev, localDev, socket, subnet, reinitDevice=False):
         self._name = "ETH %s" % socket
@@ -379,15 +378,15 @@ class EthTest(BaseTest):
         self.socket = socket
         self.reinitDevice = reinitDevice
 
-    @property
-    def instructions(self):
-        return """
-            <h3>%(test_name)s</h3>
-            <p>Před tím, než budete pokračovat:</p>
-            <ul>
-                <li>Připojte ethernetový kabel do zdířky %(socket)s</li>
-            </ul>
-        """ % dict(test_name=self._name, socket=self.socket)
+    # @property
+    # def instructions(self):
+    #     return """
+    #         <h3>%(test_name)s</h3>
+    #         <p>Před tím, než budete pokračovat:</p>
+    #         <ul>
+    #             <li>Připojte ethernetový kabel do zdířky %(socket)s</li>
+    #         </ul>
+    #     """ % dict(test_name=self._name, socket=self.socket)
 
     def createWorker(self):
         return self.Worker(self.routerDev, self.localDev, self.subnet, self.reinitDevice)
@@ -401,7 +400,6 @@ class EthTest(BaseTest):
             self.reinitDevice = reinitDevice
 
         def perform(self):
-
             exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.progress.emit(1)
             self.expectSystemConsole(exp)
@@ -499,6 +497,22 @@ class Booted(Base):
     """
     _name = "BOOTED 1"
 
+    @property
+    def instructions(self):
+        return """
+            <h3>%(test_name)s</h3>
+            <p>Před tím, než budete pokračovat:</p>
+            <ul>
+                <li>Připojte WAN, LAN1 a LAN2 eth kabely k routeru.</li>
+                <li>Připojte 3 mPCI wifi karty do 3 slotů na desce.</li>
+                <li>Připojte GPIO testovací zařízení k desce.</li>
+                <li>Připojte SFP ETH redukci k routeru.</li>
+                <li>Připojte UART kabel k routeru.</li>
+                <li>Zapojte USB2 dongly do obou usb slotů</li>
+                <li>Připojte napájení napájení do routeru.</li>
+            </ul>
+        """ % dict(test_name=self._name)
+
     def createWorker(self):
         return self.Worker()
 
@@ -545,7 +559,8 @@ class Booted2(Booted):
             <ul>
                 <li>Odpojte napájení routeru</li>
                 <li>Odpojte eth kabely od routeru</li>
-                <li>Připojte SFP ETH redukci</li>
+                <li>Připojte SFP ETH redukci k routeru</li>
+                <li>Připojte WAN do SFP ETH redukce</li>
                 <li>Odpojte USB2 dongly z obou usb slotů</li>
                 <li>Zapojte USB3 dongly do obou usb slotů</li>
                 <li>Odpojte zařízení z mPCI slotu nejblíže ke středu desky</li>
