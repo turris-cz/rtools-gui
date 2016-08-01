@@ -15,9 +15,6 @@ DB_WRAPPER_MODULE = 'db_wrapper'
 DB_WRAPPER_MOCK_MODULE = 'mock.db_wrapper'
 
 PATHS = {
-    'sample': {
-        'path': 'mock/sample.sh'
-    },
     'bootloader_mcu': {
         'path': 'mock/sample.sh'
     },

@@ -9,35 +9,6 @@ from utils import md5File
 from application import qApp, settings
 
 
-class Sample(Base):
-
-    def __init__(self, name):
-        self._name = name
-
-    def createWorker(self):
-        return self.Worker(settings.PATHS['sample']['path'])
-
-    class Worker(BaseWorker):
-        def __init__(self, scriptPath):
-            super(Sample.Worker, self).__init__()
-            self.scriptPath = scriptPath
-
-        def perform(self):
-            self.logLocal.write("\n")
-            exp = self.expectStartLocalCommand(self.scriptPath)
-            self.progress.emit(2)
-            self.expect(exp, "Phase 1")
-            self.progress.emit(34)
-            self.expect(exp, "Phase 2")
-            self.progress.emit(66)
-            self.expect(exp, "Phase 3")
-            self.progress.emit(98)
-            self.expect(exp, pexpect.EOF)
-            self.progress.emit(100)
-            exp.terminate(force=True)
-            return True
-
-
 class PowerTest(Base):
     _name = "POWER TEST"
 
@@ -365,25 +336,6 @@ class EepromFlash(Base):
             return True
 
 
-class SerialReboot(Base):
-    _name = "SERIAL REBOOT"
-
-    def createWorker(self):
-        return self.Worker()
-
-    class Worker(BaseWorker):
-
-        def perform(self):
-            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
-            self.expectSystemConsole(exp)
-            exp.sendline('reboot')
-            self.progress.emit(5)
-            self.expectWaitBooted(exp, 5, 99)
-            self.progress.emit(100)
-            exp.terminate(force=True)
-            return True
-
-
 class UbootCommands(Base):
 
     def __init__(self, name, cmds, bootPlan=None):
@@ -499,10 +451,5 @@ WORKFLOW = (
         ('Reflash succeeded.', 75),
     ]),
     ClockSet(),
-    #Sample("REBOOT"),
-    #Sample("REFLASH"),
-    #Sample("RTC"),
-    #UbootCommands("UBOOT X", ["boot"], True),
-    #SerialReboot(),
     RsvTest(),
 )
