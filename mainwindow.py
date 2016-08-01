@@ -106,6 +106,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.stepsLayout.addItem(spacer, workflow_len, 0)
         spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.stepsLayout.addItem(spacer, workflow_len, 1)
+        spacer = QtWidgets.QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.stepsLayout.addItem(spacer, workflow_len + 1, 0)
 
         # load the tests into gui
         tests_len = len(qApp.tests.TESTS)
@@ -116,6 +118,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.testsLayout.addItem(spacer, tests_len, 0)
         spacer = QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.testsLayout.addItem(spacer, tests_len, 1)
+        spacer = QtWidgets.QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.testsLayout.addItem(spacer, tests_len + 1, 0)
 
     def loadRouter(self, router):
         # Set title
