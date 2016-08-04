@@ -81,6 +81,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # set workstation label
         self.workstationTestLabel.setHidden(True)
 
+        # blink timer
+        self.blinkSwitch = True
+        self.blinkTimer = QtCore.QTimer()
+        self.blinkTimer.timeout.connect(self.blinkTitle)
+
     def loadWorkflows(self):
         # clear the layouts first
         item = self.stepsLayout.takeAt(0)
@@ -149,6 +154,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._updateProgressBars(False)
         self.overallProgressBar.setValue(0)
         self.currentProgressBar.setValue(0)
+
+    def blinkStart(self, success):
+        self.blinkResult = success
+        self.blinkTimer.start(500)
+        self.blinkSwitch = True
+
+    def blinkStop(self):
+        self.blinkTimer.stop()
+        self.serialNumberLabel.setStyleSheet("QLabel { }")
+
+    def blinkTitle(self):
+        if self.blinkSwitch:
+            color = "lightgreen" if self.blinkResult else "red"
+            self.serialNumberLabel.setStyleSheet("QLabel { background-color : %s; }" % color)
+            self.blinkSwitch = False
+        else:
+            self.serialNumberLabel.setStyleSheet("QLabel { }")
+            self.blinkSwitch = True
 
     def cleanErrorMessage(self):
         self.errorLabel.setText("")
@@ -242,6 +265,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.workstationTestLabel.setHidden(True)
 
+        self.blinkStop()
+
         # TODO clean router structure
 
     @QtCore.pyqtSlot()
@@ -281,6 +306,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         runner.runsFinished.connect(self.stepsFinished)
         runner.printInstructions.connect(self.printInstructions)
 
+        self.blinkStop()
+
         # start runner
         if runner.performRuns():
             self._updateProgressBars(True, len(qApp.stepPlan))
@@ -314,6 +341,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self._updateProgressBars(False)
         qApp.router.incStepAttempt()
         self.exitRunningMode()
+        self.blinkStart(passedCount == totalCount)
 
         # when connection fails during the run go back to scan mode
         # it would probably fail after a new code is scanned
@@ -365,6 +393,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         runner.runsFinished.connect(self.testsFinished)
         runner.printInstructions.connect(self.printInstructions)
 
+        self.blinkStop()
+
         # start runner
         if runner.performRuns():
             self._updateProgressBars(True, len(qApp.testPlan))
@@ -395,7 +425,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qApp.router.incTestAttempt()
         if passedCount == totalCount:
             qApp.router.setRunSuccessful()
+
         self.exitRunningMode()
+
+        self.blinkStart(passedCount == totalCount)
 
         # when connection fails during the run go back to scan mode
         # it would probably fail after a new code is scanned
