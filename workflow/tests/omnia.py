@@ -644,6 +644,6 @@ TESTS = (
     Booted2(),
     DiskTest(3, "2xUSB3+MSATA"),
     MiniPCIeTest(2, "2xPCI"),
-    EthTest("eth1", "ethWAN", "WAN (SFP)", 164, True),
+    EthTest("eth1", "ethWAN", "WAN (SFP)", 164),
     RamTest(),
 )
