@@ -83,6 +83,8 @@ class MiniPCIeTest(BaseTest):
             pci_count = exp.match.group()
             self.progress.emit(50)
 
+            self.expectCommand(exp, "rm -rf /etc/config/wireless")
+
             try:
                 pci_count = int(pci_count.strip().strip("#"))
             except ValueError:
