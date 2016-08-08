@@ -150,6 +150,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.startTestsButton.setEnabled(qApp.router.canStartTests)
         self.startStepsButton.setEnabled(qApp.router.canStartSteps)
 
+        # focus to buttons
+        if self.startTestsButton.isEnabled() and self.startTestsButton.isVisible():
+            self.startTestsButton.setFocus()
+        if self.startStepsButton.isEnabled() and self.startStepsButton.isVisible():
+            self.startStepsButton.setFocus()
+
         # update progress bars
         self._updateProgressBars(False)
         self.overallProgressBar.setValue(0)
@@ -343,6 +349,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.exitRunningMode()
         self.blinkStart(passedCount == totalCount)
 
+        # Handle focus
+        if passedCount == totalCount:
+            self.backButton.setFocus()
+        else:
+            self.startStepsButton.setFocus()
+
         # when connection fails during the run go back to scan mode
         # it would probably fail after a new code is scanned
         if qApp.router.dbFailed:
@@ -429,6 +441,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.exitRunningMode()
 
         self.blinkStart(passedCount == totalCount)
+
+        # Handle focus
+        if passedCount == totalCount:
+            self.backButton.setFocus()
+        else:
+            self.startTestsButton.setFocus()
 
         # when connection fails during the run go back to scan mode
         # it would probably fail after a new code is scanned
