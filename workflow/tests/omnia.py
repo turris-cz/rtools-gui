@@ -451,6 +451,52 @@ class EthTest(BaseTest):
             return True
 
 
+class EthSimpleTest(BaseTest):
+
+    def __init__(self, routerDev, socket, subnet):
+        self._name = "ETH %s" % socket
+        self.routerDev = routerDev
+        self.subnet = subnet
+        self.socket = socket
+
+    def createWorker(self):
+        return self.Worker(self.routerDev, self.subnet)
+
+    class Worker(BaseWorker):
+        def __init__(self, routerDev, subnet):
+            super(EthSimpleTest.Worker, self).__init__()
+            self.routerDev = routerDev
+            self.subnet = subnet
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+            self.expectSystemConsole(exp)
+            self.progress.emit(20)
+
+            # set ip on router
+            self.expectCommand(exp, "ip address flush dev %s" % self.routerDev)
+            self.progress.emit(40)
+            self.expectCommand(
+                exp, "ip address add 192.168.%d.10/24 dev %s" % (self.subnet, self.routerDev)
+            )
+            self.progress.emit(60)
+            self.expectCommand(exp, "ip link set dev %s up" % self.routerDev)
+            self.progress.emit(80)
+
+            # ping test
+            exp.sendline("ping 192.168.%d.1 -c 5" % self.subnet)
+            exp.sendline('echo "###$?###"')
+            self.expect(exp, r'###([0-9]+)###')
+            retval = exp.match.group(1)
+            self.progress.emit(100)
+
+            if retval != "0":
+                raise RunFailed("Ping failed!")
+
+            return True
+
+
 class SerialConsoleTest(BaseTest):
     _name = "SERIAL CONSOLE"
 
@@ -640,12 +686,19 @@ TESTS = (
     SerialNumberTest(),
     EepromTest(),
     RegionTest(),
-    EthTest("eth1", "ethWAN", "WAN", 167),
-    EthTest("br-lan", "ethLAN1", "LAN1", 166),
-    EthTest("br-lan", "ethLAN2", "LAN2", 165),
+    #EthTest("eth1", "ethWAN", "WAN", 167),
+    #EthTest("br-lan", "ethLAN1", "LAN1", 166),
+    #EthTest("br-lan", "ethLAN2", "LAN2", 165),
+    EthSimpleTest("eth1", "WAN", 168),
+    EthSimpleTest("br-lan", "LAN1", 167),
+    EthSimpleTest("br-lan", "LAN2", 166),
+    EthSimpleTest("br-lan", "LAN3", 165),
+    EthSimpleTest("br-lan", "LAN4", 164),
+    EthSimpleTest("br-lan", "LAN5", 163),
     Booted2(),
     DiskTest(3, "2xUSB3+MSATA"),
     MiniPCIeTest(2, "2xPCI"),
-    EthTest("eth1", "ethWAN", "WAN (SFP)", 164),
+    #EthTest("eth1", "ethWAN", "WAN (SFP)", 162),
+    EthSimpleTest("eth1", "WAN (SFP)", 162),
     RamTest(),
 )
