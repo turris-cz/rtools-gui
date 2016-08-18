@@ -699,6 +699,6 @@ TESTS = (
     DiskTest(3, "2xUSB3+MSATA"),
     MiniPCIeTest(2, "2xPCI"),
     #EthTest("eth1", "ethWAN", "WAN (SFP)", 162),
-    EthSimpleTest("eth1", "WAN (SFP)", 162),
+    EthSimpleTest("eth1", "WAN (SFP)", 168),
     RamTest(),
 )
