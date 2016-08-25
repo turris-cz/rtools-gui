@@ -8,7 +8,7 @@ import time
 
 from PyQt5 import QtCore
 
-from custom_exceptions import LocalCommandFailed
+from custom_exceptions import LocalCommandFailed, RunFailed
 from utils import PrefixFile
 
 
@@ -127,7 +127,14 @@ class BaseWorker(QtCore.QObject):
 
     def expectLastRetval(self, exp, retval):
         exp.sendline('echo "###$?###"')
-        self.expect(exp, '###%d###' % retval)
+        self.expect(exp, r'###([0-9]+)###')
+        try:
+            result = int(exp.match.group(1))
+        except ValueError:
+            raise RunFailed("Failed to get the retval of a command!")
+
+        if retval != result:
+            raise RunFailed("Last command exited with %d (expected %d)!" % (result, retval))
 
     def expectWaitBooted(self, exp, progressStart=0, progressEnd=100, timeout=60, plan=None):
         progressDiff = progressEnd - progressStart
