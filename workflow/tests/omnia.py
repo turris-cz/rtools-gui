@@ -85,6 +85,9 @@ class MiniPCIeTest(BaseTest):
 
             self.expectCommand(exp, "rm -rf /etc/config/wireless")
 
+            # this will print which pci slots are available into the console
+            self.expectCommand(exp, "grep -i -e 0x168c /sys/bus/pci/devices/*/vendor || true")
+
             try:
                 pci_count = int(pci_count.strip().strip("#"))
             except ValueError:
