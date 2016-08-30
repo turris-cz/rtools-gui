@@ -211,14 +211,23 @@ class SerialNumberTest(BaseTest):
             self.expectSystemConsole(exp)
             self.progress.emit(20)
 
-            exp.sendline('atsha204cmd serial-number')
-            pattern = r'[a-fA-F0-9]{16}'
-            self.expect(exp, pattern)
-            serial = exp.match.group()
-            self.progress.emit(40)
+            retries = 2  # try to retry 2 times
+            serial = 0
+            while True:
+                exp.sendline('atsha204cmd serial-number')
+                pattern = r'[a-fA-F0-9]{16}'
+                res = self.expect(exp, [pattern, pexpect.TIMEOUT], timeout=5)
+                if res == 0:
+                    serial = exp.match.group()
+                    self.progress.emit(40)
 
-            self.expectLastRetval(exp, 0)
-            self.progress.emit(50)
+                    self.expectLastRetval(exp, 0)
+                    self.progress.emit(50)
+                    break
+                else:
+                    retries -= 1
+                    if retries < 0:
+                        raise RunFailed("Failed to get serial number!")
 
             if self.serial.lower() != serial.lower():
                 exp.terminate(force=True)
