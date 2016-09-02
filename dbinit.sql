@@ -93,14 +93,34 @@ CREATE OR REPLACE VIEW good_routers AS
     ORDER BY routers.id;
 ALTER VIEW good_routers OWNER TO omnia_flasher;
 
+CREATE TABLE results (
+    id varchar(20) NOT NULL,
+    time timestamp NOT NULL DEFAULT current_timestamp,
+    phase char(1) NOT NULL, -- tests/steps
+    result boolean NOT NULL, -- true passed, false failed
+    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
+);
+ALTER TABLE results OWNER TO omnia_flasher;
+
 CREATE OR REPLACE FUNCTION router_steps(router_id text)
-	RETURNS TABLE ("run_id" bigint, "run_start" timestamp, "attempt" int, "order" int, "time" timestamp, "name" text, "passed" boolean) AS
-	$$ SELECT runs.id, runs.start, steps.attempt, steps.step_order, steps.timestamp, steps.step_name, steps.passed FROM runs INNER JOIN steps ON runs.id = steps.run
-		WHERE runs.router = router_steps.router_id ORDER BY steps.id
-	$$ LANGUAGE SQL;
+    RETURNS TABLE ("run_id" bigint, "run_start" timestamp, "attempt" int, "order" int, "time" timestamp, "name" text, "passed" boolean) AS
+    $$ SELECT runs.id, runs.start, steps.attempt, steps.step_order, steps.timestamp, steps.step_name, steps.passed FROM runs INNER JOIN steps ON runs.id = steps.run
+        WHERE runs.router = router_steps.router_id ORDER BY steps.id
+    $$ LANGUAGE SQL;
 
 CREATE OR REPLACE FUNCTION router_tests(router_id text)
-	RETURNS TABLE ("run_id" bigint, "run_start" timestamp, "attempt" int, "time" timestamp, "name" text, "passed" boolean) AS
-	$$ SELECT runs.id, runs.start, tests.attempt, tests.timestamp, tests.test_name, tests.result FROM runs INNER JOIN tests ON runs.id = tests.run
-		WHERE runs.router = router_tests.router_id ORDER BY tests.id
-	$$ LANGUAGE SQL;
+    RETURNS TABLE ("run_id" bigint, "run_start" timestamp, "attempt" int, "time" timestamp, "name" text, "passed" boolean) AS
+    $$ SELECT runs.id, runs.start, tests.attempt, tests.timestamp, tests.test_name, tests.result FROM runs INNER JOIN tests ON runs.id = tests.run
+        WHERE runs.router = router_tests.router_id ORDER BY tests.id
+    $$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION export_results()
+    RETURNS trigger AS
+    $$
+    BEGIN
+        COPY (SELECT to_char(time, 'YYYY-MM-DD HH24:MI:SS'),id,phase,result FROM results ORDER BY time) TO '/tmp/results.csv' WITH CSV DELIMITER ',';
+        RETURN NEW;
+    END;
+    $$ LANGUAGE 'plpgsql' SECURITY DEFINER;
+
+CREATE TRIGGER export_csv AFTER INSERT ON results EXECUTE PROCEDURE export_results();

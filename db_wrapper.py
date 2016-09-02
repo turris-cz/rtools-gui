@@ -235,3 +235,10 @@ class Router(object):
                   VALUES (?, ?);
               """
         self.executeQuery(sql, self.id, image, failOnError=False)
+
+    def storeResult(self, phase, result):
+        sql = """ INSERT INTO results (id, phase, result)
+                  VALUES (?, ?, ?);
+              """
+        self.executeQuery(
+            sql, self.id, phase, result, failOnError=False)

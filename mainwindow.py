@@ -349,6 +349,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.exitRunningMode()
         self.blinkStart(passedCount == totalCount)
 
+        # Store step results
+        qApp.router.storeResult('S', passedCount == totalCount)
+
         # Handle focus
         if passedCount == totalCount:
             self.backButton.setFocus()
@@ -439,8 +442,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             qApp.router.setRunSuccessful()
 
         self.exitRunningMode()
-
         self.blinkStart(passedCount == totalCount)
+
+        # Store step results
+        qApp.router.storeResult('T', passedCount == totalCount)
 
         # Handle focus
         if passedCount == totalCount:
