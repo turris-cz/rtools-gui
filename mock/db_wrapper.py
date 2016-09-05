@@ -88,3 +88,6 @@ class Router(object):
 
     def storeUboot(self, image):
         pass
+
+    def storeResult(self, phase, result):
+        pass
