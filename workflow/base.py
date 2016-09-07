@@ -160,6 +160,7 @@ class BaseWorker(QtCore.QObject):
         self.expect(exp, r'error')
         exp.sendline('\n')
         exp.sendline('\n')
+        time.sleep(0.5)
 
     def expectTester(self, exp, cmd, progressStart, progressEnd):
         step = (progressEnd - progressStart) / 10.0  # tester prints 10 dots
