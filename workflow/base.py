@@ -50,6 +50,7 @@ class BaseWorker(QtCore.QObject):
     mcu = QtCore.pyqtSignal(str, str)
     uboot = QtCore.pyqtSignal(str)
     setTitle = QtCore.pyqtSignal(str)
+    expTester = None
 
     @abc.abstractmethod
     def perform(self):
@@ -177,3 +178,10 @@ class BaseWorker(QtCore.QObject):
     def expectReinitTester(self, exp):
         exp.sendline("RESETALL")
         self.expect(exp, r'System ready... OK')
+
+    def resetAllCleanup(self):
+        # Try to set resetall
+        if self.expTester:
+            self.expTester.sendline("\n")
+            time.sleep(0.5)
+            self.expTester.sendline("RESETALL")

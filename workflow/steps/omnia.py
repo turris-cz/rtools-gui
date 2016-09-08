@@ -9,6 +9,20 @@ from utils import md5File
 from application import qApp, settings
 
 
+def resetallOnException(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            # Try to set resetall
+            args[0].resetAllCleanup()  # first arg should be self
+
+            # propagate the exception
+            raise e
+
+    return wrapper
+
+
 class PowerTest(Base):
     _name = "POWER TEST"
 
@@ -17,25 +31,27 @@ class PowerTest(Base):
 
     class Worker(BaseWorker):
 
+        @resetallOnException
         def perform(self):
-            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            self.expectTesterConsoleInit(expTester)
+            self.expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.expectTesterConsoleInit(self.expTester)
             self.progress.emit(0)
 
             # Reset the tester
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(25)
 
             # Put CPU in reset
-            self.expectTester(expTester, "CPUOFF", 25, 50)
+            self.expectTester(self.expTester, "CPUOFF", 25, 50)
             # Switch off MCU
-            self.expectTester(expTester, "MCUOFF", 50, 75)
+            self.expectTester(self.expTester, "MCUOFF", 50, 75)
 
             # Perform tests
-            self.expectTester(expTester, "PWRUPTEST", 75, 99)
-            #self.expectTester(expTester, "PWRDOWNTEST", 66, 99)
+            self.expectTester(self.expTester, "PWRUPTEST", 75, 99)
+            #self.expectTester(self.expTester, "PWRDOWNTEST", 66, 99)
 
             self.progress.emit(100)
+            self.expTester.terminate(force=True)
             return True
 
 
@@ -47,24 +63,26 @@ class RsvTest(Base):
 
     class Worker(BaseWorker):
 
+        @resetallOnException
         def perform(self):
-            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            self.expectTesterConsoleInit(expTester)
+            self.expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.expectTesterConsoleInit(self.expTester)
             self.progress.emit(0)
 
             # Reset the tester
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(10)
 
             # Start start omnia
-            self.expectTester(expTester, "HWSTART", 10, 80)
+            self.expectTester(self.expTester, "HWSTART", 10, 80)
 
             # RSV test
-            self.expectTester(expTester, "RSV", 80, 90)
+            self.expectTester(self.expTester, "RSV", 80, 90)
 
             # Reset the tester
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(100)
+            self.expTester.terminate(force=True)
 
             return True
 
@@ -97,17 +115,18 @@ class Mcu(Base):
             self.md5Bootloader = md5File(pathBootloader)
             self.md5Image = md5File(pathHwCtrl)
 
+        @resetallOnException
         def perform(self):
-            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
-            self.expectTesterConsoleInit(expTester)
+            self.expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.expectTesterConsoleInit(self.expTester)
             self.progress.emit(0)
 
             # Reset the tester
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(25)
 
             # Start programming mode
-            self.expectTester(expTester, "PROGRAM", 25, 50)
+            self.expectTester(self.expTester, "PROGRAM", 25, 50)
 
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
@@ -123,7 +142,7 @@ class Mcu(Base):
 
             self.mcu.emit(self.md5Bootloader, self.md5Image)
 
-            expTester.terminate(force=True)
+            self.expTester.terminate(force=True)
             return True
 
 
@@ -146,20 +165,21 @@ class Uboot(Base):
                 % (pathFlashrom, spiSpeed, pathImage)
             self.md5Image = md5File(pathImage)
 
+        @resetallOnException
         def perform(self):
-            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
             self.progress.emit(0)
 
-            self.expectTesterConsoleInit(expTester)
+            self.expectTesterConsoleInit(self.expTester)
             self.progress.emit(5)
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(10)
 
             # Start programming mode
-            self.expectTester(expTester, "PROGRAM", 10, 20)
+            self.expectTester(self.expTester, "PROGRAM", 10, 20)
 
             # Put CPU in reset
-            self.expectTester(expTester, "CPUOFF", 20, 30)
+            self.expectTester(self.expTester, "CPUOFF", 20, 30)
 
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
@@ -194,7 +214,7 @@ class Uboot(Base):
 
             self.uboot.emit(self.md5Image)
 
-            expTester.terminate(force=True)
+            self.expTester.terminate(force=True)
             return True
 
 
@@ -210,20 +230,21 @@ class Atsha(Base):
             super(Atsha.Worker, self).__init__()
             self.flashAtshaCmd = "%s %s" % (scriptPath, serial)
 
+        @resetallOnException
         def perform(self):
-            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
             self.progress.emit(0)
 
-            self.expectTesterConsoleInit(expTester)
+            self.expectTesterConsoleInit(self.expTester)
             self.progress.emit(10)
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(20)
 
             # Start programming mode
-            self.expectTester(expTester, "PROGRAM", 20, 35)
+            self.expectTester(self.expTester, "PROGRAM", 20, 35)
 
             # Put CPU in reset
-            self.expectTester(expTester, "CPUOFF", 35, 50)
+            self.expectTester(self.expTester, "CPUOFF", 35, 50)
 
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
@@ -242,7 +263,7 @@ class Atsha(Base):
             self.testExitStatus(expLocal)
             self.progress.emit(100)
 
-            expTester.terminate(force=True)
+            self.expTester.terminate(force=True)
             return True
 
 
@@ -269,8 +290,8 @@ class EepromFlash(Base):
             data = struct.pack('IIccccI', *args)
             return data
 
+        @resetallOnException
         def perform(self):
-
             # The only two valid options are `1` or `2` for ramsize
             if self.ramsize not in (1, 2, ):
                 raise ValueError("Ramsize could be only '1' or '2' (%d given)" % self.ramsize)
@@ -278,19 +299,19 @@ class EepromFlash(Base):
             if self.region is not None and len(self.region) != 2:
                 raise ValueError("Incorrect region (%s given)" % self.region)
 
-            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
             self.progress.emit(0)
 
-            self.expectTesterConsoleInit(expTester)
+            self.expectTesterConsoleInit(self.expTester)
             self.progress.emit(10)
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(20)
 
             # Start programming mode
-            self.expectTester(expTester, "PROGRAM", 20, 30)
+            self.expectTester(self.expTester, "PROGRAM", 20, 30)
 
             # Put CPU in reset
-            self.expectTester(expTester, "CPUOFF", 30, 40)
+            self.expectTester(self.expTester, "CPUOFF", 30, 40)
 
             # Add \n into local console to split tester and local output
             self.logLocal.write('\n')
@@ -330,7 +351,7 @@ class EepromFlash(Base):
             self.ram.emit(self.ramsize, 'S')
             self.progress.emit(100)
 
-            expTester.terminate(force=True)
+            self.expTester.terminate(force=True)
             return True
 
 
@@ -351,18 +372,19 @@ class UbootCommands(Base):
             self.cmds = cmds
             self.bootPlan = bootPlan
 
+        @resetallOnException
         def perform(self):
-            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
             expRouter = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.progress.emit(0)
 
-            self.expectTesterConsoleInit(expTester)
+            self.expectTesterConsoleInit(self.expTester)
             self.progress.emit(5)
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(10)
 
             # reset using tester
-            self.expectTester(expTester, "RESETDUT", 10, 15)
+            self.expectTester(self.expTester, "RESETDUT", 10, 15)
 
             # get into uboot shell
             # unfortunatelly can't wait for "Hit any key to stop autoboot" msg (too small delay)
@@ -392,6 +414,7 @@ class UbootCommands(Base):
                 self.expectWaitBooted(expRouter, timeout=150, plan=self.bootPlan)
             self.progress.emit(100)
 
+            self.expTester.terminate(force=True)
             return True
 
 
@@ -402,18 +425,20 @@ class ClockSet(Base):
         return self.Worker()
 
     class Worker(BaseWorker):
+
+        @resetallOnException
         def perform(self):
-            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
             expRouter = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.progress.emit(0)
 
-            self.expectTesterConsoleInit(expTester)
+            self.expectTesterConsoleInit(self.expTester)
             self.progress.emit(5)
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(10)
 
             # reset using tester
-            self.expectTester(expTester, "RESETDUT", 10, 15)
+            self.expectTester(self.expTester, "RESETDUT", 10, 15)
             self.expectWaitBooted(expRouter, 15, 80)
             self.expectSystemConsole(expRouter)
             self.progress.emit(85)
@@ -433,6 +458,7 @@ class ClockSet(Base):
             expRouter.sendline("hwclock -u -w")
             self.expectLastRetval(expRouter, 0)
             self.progress.emit(100)
+            self.expTester.terminate(force=True)
 
             return True
 
@@ -444,18 +470,20 @@ class UsbFlashClock(Base):
         return self.Worker()
 
     class Worker(BaseWorker):
+
+        @resetallOnException
         def perform(self):
-            expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
+            self.expTester = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['tester']['device'])
             expRouter = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.progress.emit(0)
 
-            self.expectTesterConsoleInit(expTester)
+            self.expectTesterConsoleInit(self.expTester)
             self.progress.emit(5)
-            self.expectReinitTester(expTester)
+            self.expectReinitTester(self.expTester)
             self.progress.emit(10)
 
             # reset using tester
-            self.expectTester(expTester, "RESETDUT", 10, 15)
+            self.expectTester(self.expTester, "RESETDUT", 10, 15)
 
             # get into uboot shell
             # unfortunatelly can't wait for "Hit any key to stop autoboot" msg (too small delay)
@@ -513,6 +541,7 @@ class UsbFlashClock(Base):
             expRouter.sendline("halt")
             self.expect(expRouter, "reboot: System halted")
             self.progress.emit(100)
+            self.expTester.terminate(force=True)
 
             expTester.terminate(force=True)
 
