@@ -18,7 +18,3 @@ WORKFLOW = [
 if omnia.settings.RERUN > 0:
     # rerun enabled
     WORKFLOW = WORKFLOW * omnia.settings.RERUN
-else:
-    # continue on error
-    for step in WORKFLOW:
-        step.continueOnFailure = True

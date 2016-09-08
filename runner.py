@@ -123,7 +123,9 @@ class Runner(QtCore.QObject):
         if result:
             self.passedCount += 1
 
-        if not result and not self.runlist[self.current].continueOnFailure:
+        if not result and (
+                settings.ALWAYS_STOP_ON_FAILURE or
+                not self.runlist[self.current].continueOnFailure):
             self.runFinished.emit(self.current, False)
             self.finish()
             return
