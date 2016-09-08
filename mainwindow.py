@@ -258,8 +258,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def exitRunningMode(self):
         self.backButton.setEnabled(True)
-        self.startTestsButton.setEnabled(qApp.router.canStartTests)
-        self.startStepsButton.setEnabled(qApp.router.canStartSteps)
+        if not settings.FORCE_RESCAN_BARCODE:
+            self.startTestsButton.setEnabled(qApp.router.canStartTests)
+            self.startStepsButton.setEnabled(qApp.router.canStartSteps)
         self.inRunningMode = False
 
     @QtCore.pyqtSlot()
@@ -356,7 +357,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qApp.router.storeResult('S', passedCount == totalCount)
 
         # Handle focus
-        if passedCount == totalCount:
+        if passedCount == totalCount or settings.FORCE_RESCAN_BARCODE:
             self.backButton.setFocus()
         else:
             self.startStepsButton.setFocus()
@@ -459,7 +460,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qApp.router.storeResult('T', passedCount == totalCount)
 
         # Handle focus
-        if passedCount == totalCount:
+        if passedCount == totalCount or settings.FORCE_RESCAN_BARCODE:
             self.backButton.setFocus()
         else:
             self.startTestsButton.setFocus()
