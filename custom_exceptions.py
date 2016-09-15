@@ -8,3 +8,6 @@ class RunFailed(Exception):
 
 class LocalCommandFailed(Exception):
     pass
+
+class IncorrectSerialNumber(Exception):
+    pass

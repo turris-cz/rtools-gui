@@ -4,7 +4,8 @@ import json
 from PyQt5 import QtSql
 from application import qApp, settings
 
-from custom_exceptions import DbError
+from custom_exceptions import DbError, IncorrectSerialNumber
+from utils import serialNumberNormalize, serialNumberValidator
 
 
 def writeRecovery(sql, *values):
@@ -75,7 +76,9 @@ class Router(object):
 
     def __init__(self, routerId):
         self.performedSteps = dict(failed=set(), passed=set())
-        self.id = str(routerId).strip()
+        if not serialNumberValidator(routerId):
+            raise IncorrectSerialNumber()
+        self.id = serialNumberNormalize(routerId)
         self.stepAttempt = 0
         self.testAttempt = 0
         self.dbFailed = False

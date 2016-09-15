@@ -4,8 +4,8 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QSizePolicy
 from ui.mainwindow import Ui_MainWindow
 
-from custom_exceptions import DbError
-from utils import serialNumberValidator, MAX_SERIAL_LEN, backupAppLog
+from custom_exceptions import DbError, IncorrectSerialNumber
+from utils import serialNumberValidator, serialNumberNormalize, MAX_SERIAL_LEN, backupAppLog
 
 from application import qApp, settings
 from db_wrapper import restoreRecovery
@@ -281,19 +281,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cleanErrorMessage()
 
         serialNumber = self.barcodeLineEdit.text()
-        if serialNumberValidator(serialNumber):
-
-            self.stackedWidget.setCurrentWidget(self.workPage)
-
+        try:
             # Set the router for the whole application
             self.loadRouter(qApp.useRouter(serialNumber))
+
+            self.stackedWidget.setCurrentWidget(self.workPage)
 
             if int(serialNumber) in settings.WORKSTATION_TESTING_SERIALS:
                 self.workstationTestLabel.setHidden(False)
             else:
                 self.workstationTestLabel.setHidden(True)
 
-        else:
+        except IncorrectSerialNumber:
             self.errorLabel.setText(u"'%s' je neplatné!" % serialNumber)
 
     @QtCore.pyqtSlot()

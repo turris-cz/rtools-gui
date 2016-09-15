@@ -29,6 +29,12 @@ def serialNumberValidator(sn):
     return True
 
 
+def serialNumberNormalize(sn):
+    # a valid serial number consists only from digits
+    # string like "+11223344" will be converted to "11223344"
+    return "".join([e for e in sn if e.isdigit()])
+
+
 def backupFile(path):
     from application import settings, qApp
     from PyQt5.QtCore import QProcess
