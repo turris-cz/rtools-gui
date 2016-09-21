@@ -15,7 +15,7 @@ def serialNumberValidator(sn):
         return False
 
     # it cannot be negative
-    if sn < 0:
+    if sn <= 0:
         return False
 
     # it cannot be bigger than MAX_SERIAL
