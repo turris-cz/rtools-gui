@@ -32,7 +32,8 @@ def serialNumberValidator(sn):
 def serialNumberNormalize(sn):
     # a valid serial number consists only from digits
     # string like "+11223344" will be converted to "11223344"
-    return "".join([e for e in sn if e.isdigit()])
+    # and "0011223344" -> "11223344"
+    return "%d" % int(sn)
 
 
 def backupFile(path):
