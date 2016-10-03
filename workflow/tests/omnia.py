@@ -83,7 +83,9 @@ class MiniPCIeTest(BaseTest):
             pci_count = exp.match.group()
             self.progress.emit(50)
 
+            # remove wifi configs
             self.expectCommand(exp, "rm -rf /etc/config/wireless")
+            self.expectCommand(exp, "sync")
 
             # this will print which pci slots are available into the console
             self.expectCommand(exp, "grep -i -e 0x168c /sys/bus/pci/devices/*/vendor || true")
@@ -677,6 +679,10 @@ class RamTest(BaseTest):
             self.progress.emit(90)
             self.ram.emit(self.ramsize, 'T')
             self.progress.emit(95)
+
+            # remove ssh configs
+            self.expectCommand(exp, "rm -rf /etc/ssh/ssh_host*")
+            self.expectCommand(exp, "sync")
 
             # a small cleanup
             exp.sendline("rm /tmp/ramtest.bin")
