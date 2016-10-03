@@ -505,7 +505,14 @@ class UsbFlashClock(Base):
             self.progress.emit(90)
             expRouter.sendline("hwclock -u -w")
             self.expectLastRetval(expRouter, 0)
+            self.progress.emit(95)
+
+            # for the first time try to halt properly
+            expRouter.sendline("halt")
+            self.expect(expRouter, "reboot: System halted")
             self.progress.emit(100)
+
+            self.expTester.terminate(force=True)
 
             return True
 
