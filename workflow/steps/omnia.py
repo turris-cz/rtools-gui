@@ -86,11 +86,13 @@ class Mcu(Base):
         def __init__(self, pathBin, pathScripts, pathConfig, pathBootloader, pathHwCtrl):
             super(Mcu.Worker, self).__init__()
             self.command = \
-                "sudo %s -s %s -f %s -f target/stm32f0x.cfg -c 'init' -c 'sleep 200' " \
-                "-c 'reset halt' -c 'sleep 100' -c 'wait_halt 2' -c 'adapter_khz 200' " \
+                "sudo %s -s %s -f %s -f target/stm32f0x.cfg -c 'init' -c 'sleep 500' " \
+                "-c 'reset halt' -c 'sleep 500' -c 'wait_halt 2' -c 'sleep 500'  -c 'adapter_khz 100' " \
                 "-c 'flash write_image erase %s 0x08000000' " \
+                "-c 'sleep 500' " \
                 "-c 'flash write_image erase %s 0x08005000' " \
-                "-c 'sleep 100' -c 'reset run' -c 'shutdown'" \
+                "-c 'sleep 500' -c 'reset run' -c 'shutdown' " \
+                "-c 'sleep 2000' " \
                 % (pathBin, pathScripts, pathConfig, pathBootloader, pathHwCtrl)
             self.md5Bootloader = md5File(pathBootloader)
             self.md5Image = md5File(pathHwCtrl)
