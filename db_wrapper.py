@@ -202,6 +202,8 @@ class Router(object):
 
     @property
     def canStartTests(self):
+        if not settings.CHECK_STEPS_BEFORE_TESTS:
+            return True
         return self.performedSteps['passed'].issuperset({e.name for e in qApp.workflow.WORKFLOW})
 
     @property
