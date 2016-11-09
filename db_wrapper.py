@@ -183,12 +183,13 @@ class Router(object):
             sql, self.currentRun, name, self.testAttempt, passed, failOnError=False)
 
     def setRunSuccessful(self):
-        qApp.loggerMain.info(
-            "Run '%d' was successful and router '%s(%s)' is alive" %
-            (self.currentRun, self.id, self.idHex)
-        )
-        sql = "UPDATE runs SET success = true WHERE id = ?;"
-        self.executeQuery(sql, self.currentRun, failOnError=False)
+        if settings.SET_SUCCESFUL:
+            qApp.loggerMain.info(
+                "Run '%d' was successful and router '%s(%s)' is alive" %
+                (self.currentRun, self.id, self.idHex)
+            )
+            sql = "UPDATE runs SET success = true WHERE id = ?;"
+            self.executeQuery(sql, self.currentRun, failOnError=False)
 
     def getTestPlan(self):
         return range(len(qApp.tests.TESTS))
