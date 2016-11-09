@@ -39,7 +39,9 @@ class Beacon(Base):
 
         def perform(self):
             self.progress.emit(1)
+            self.setTitle.emit(u"!!! Stiskněte tlačítko reset na routeru !!!")
             self.expectLocalCommand("%s %s" % (self.beacon_path, self.tty_path))
+            self.setTitle.emit(None)
             self.progress.emit(100)
 
             return True

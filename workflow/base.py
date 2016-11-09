@@ -49,6 +49,7 @@ class BaseWorker(QtCore.QObject):
     eeprom = QtCore.pyqtSignal(str, str)
     mcu = QtCore.pyqtSignal(str, str)
     uboot = QtCore.pyqtSignal(str)
+    setTitle = QtCore.pyqtSignal(str)
 
     @abc.abstractmethod
     def perform(self):

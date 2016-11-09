@@ -20,6 +20,7 @@ class Runner(QtCore.QObject):
     runFinished = QtCore.pyqtSignal(int, bool)
     runProgress = QtCore.pyqtSignal(int)
     printInstructions = QtCore.pyqtSignal(str)
+    setTitle = QtCore.pyqtSignal(str)
 
     def __init__(self, routerId, runlist, runId, typeName, attempt):
         super(Runner, self).__init__()
@@ -116,6 +117,9 @@ class Runner(QtCore.QObject):
         # stop the thread
         self.thread.quit()
 
+        # Reset the title
+        self.setTitle.emit(None)
+
         if result:
             self.passedCount += 1
 
@@ -165,6 +169,10 @@ class Runner(QtCore.QObject):
         qApp.loggerMain.info("Uboot image obtained - %s" % image)
         qApp.router.storeUboot(image)
 
+    @QtCore.pyqtSlot(str)
+    def setTitleObtained(self, text=None):
+        self.setTitle.emit(text)
+
     def runSingle(self, i):
 
         # Print instructions if needed
@@ -180,6 +188,7 @@ class Runner(QtCore.QObject):
         self.worker.eeprom.connect(self.eepromObtained)
         self.worker.mcu.connect(self.mcuObtained)
         self.worker.uboot.connect(self.ubootObtained)
+        self.worker.setTitle.connect(self.setTitleObtained)
         self.startWorker.connect(self.worker.start)
         self.worker.moveToThread(self.thread)
         # Start the thread event loop

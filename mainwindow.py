@@ -128,7 +128,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def loadRouter(self, router):
         # Set title
-        self.serialNumberLabel.setText("%s (%s)" % (router.id, router.idHex))
+        self.setTitle()
 
         # Load the workflow
         self.loadWorkflows()
@@ -368,6 +368,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self, "Instrukce", msg
         )
 
+    @QtCore.pyqtSlot(str)
+    def setTitle(self, text=None):
+        if not text:
+            self.serialNumberLabel.setText("%s (%s)" % (qApp.router.id, qApp.router.idHex))
+        else:
+            self.serialNumberLabel.setText(text)
+
     def closeEvent(self, event):
 
         if self.inRunningMode:
@@ -406,6 +413,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         runner.runFinished.connect(self.testFinished)
         runner.runsFinished.connect(self.testsFinished)
         runner.printInstructions.connect(self.printInstructions)
+        runner.setTitle.connect(self.setTitle)
 
         self.blinkStop()
 
