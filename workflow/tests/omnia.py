@@ -489,7 +489,7 @@ class Booted(Base):
                 <li>Připojte GPIO testovací zařízení k desce.</li>
                 <li>Připojte UART kabel k routeru.</li>
                 <li>Zapojte USB2 dongly do obou usb slotů</li>
-                <li>Připojte napájení napájení do routeru.</li>
+                <li>Připojte napájení do routeru.</li>
             </ul>
         """ % dict(test_name=self._name)
 
