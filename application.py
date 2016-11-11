@@ -8,6 +8,7 @@ import traceback
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtSql import QSqlDatabase
 
+from custom_exceptions import IncorrectSerialNumber
 from utils import backupAppLog
 
 
@@ -118,31 +119,35 @@ class Application(QApplication):
 
     def useRouter(self, serialNumber):
 
-        if int(serialNumber) in settings.WORKSTATION_TESTING_SERIALS:
-            self.router = db_wrapper_mock.Router(serialNumber)
+        try:
+            if int(serialNumber) in settings.WORKSTATION_TESTING_SERIALS:
+                self.router = db_wrapper_mock.Router(serialNumber)
 
-            # load workflow module
-            self.workflow = importlib.import_module(settings.WORKFLOW_STEPS_WORKSTATION_MODULE)
+                # load workflow module
+                self.workflow = importlib.import_module(settings.WORKFLOW_STEPS_WORKSTATION_MODULE)
 
-            # load test module
-            self.tests = importlib.import_module(settings.WORKFLOW_TESTS_WORKSTATION_MODULE)
+                # load test module
+                self.tests = importlib.import_module(settings.WORKFLOW_TESTS_WORKSTATION_MODULE)
 
-            self.loggerMain.info("Using steps '%s'" % settings.WORKFLOW_STEPS_WORKSTATION_MODULE)
-            self.loggerMain.info("Using tests '%s'" % settings.WORKFLOW_TESTS_WORKSTATION_MODULE)
-            self.loggerMain.info("Using db wrapper '%s'" % settings.DB_WRAPPER_MOCK_MODULE)
+                self.loggerMain.info("Using steps '%s'" % settings.WORKFLOW_STEPS_WORKSTATION_MODULE)
+                self.loggerMain.info("Using tests '%s'" % settings.WORKFLOW_TESTS_WORKSTATION_MODULE)
+                self.loggerMain.info("Using db wrapper '%s'" % settings.DB_WRAPPER_MOCK_MODULE)
 
-        else:
-            self.router = db_wrapper.Router(serialNumber)
+            else:
+                self.router = db_wrapper.Router(serialNumber)
 
-            # load workflow module
-            self.workflow = importlib.import_module(settings.WORKFLOW_STEPS_MODULE)
+                # load workflow module
+                self.workflow = importlib.import_module(settings.WORKFLOW_STEPS_MODULE)
 
-            # load test module
-            self.tests = importlib.import_module(settings.WORKFLOW_TESTS_MODULE)
+                # load test module
+                self.tests = importlib.import_module(settings.WORKFLOW_TESTS_MODULE)
 
-            self.loggerMain.info("Using steps '%s'" % settings.WORKFLOW_STEPS_MODULE)
-            self.loggerMain.info("Using tests '%s'" % settings.WORKFLOW_TESTS_MODULE)
-            self.loggerMain.info("Using db wrapper '%s'" % settings.DB_WRAPPER_MODULE)
+                self.loggerMain.info("Using steps '%s'" % settings.WORKFLOW_STEPS_MODULE)
+                self.loggerMain.info("Using tests '%s'" % settings.WORKFLOW_TESTS_MODULE)
+                self.loggerMain.info("Using db wrapper '%s'" % settings.DB_WRAPPER_MODULE)
+
+        except ValueError:
+            raise IncorrectSerialNumber
 
         return self.router
 
