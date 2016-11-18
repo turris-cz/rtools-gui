@@ -74,6 +74,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.testsStartWidget.setVisible(False)
             self.titleLabel.setText("Oživování")
 
+        # set the custom titles
+        if settings.CUSTOM_INIT_TITLE:
+            self.titleLabel.setText(settings.CUSTOM_INIT_TITLE)
+
         # set ram and region labels
         self.regionLabel.setText(settings.REGION)
         self.ramLabel.setText("%dG" % settings.ROUTER_RAMSIZE)

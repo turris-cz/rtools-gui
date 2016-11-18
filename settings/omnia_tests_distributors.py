@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 from omnia_tests import *
 
 
@@ -8,3 +10,5 @@ CHECK_STEPS_BEFORE_TESTS = False
 
 # The router should be already set as successful
 SET_SUCCESFUL = False
+
+CUSTOM_INIT_TITLE = u'Testování u distirbutorů'

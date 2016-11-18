@@ -1,3 +1,5 @@
+# -*- coding: utf8 -*-
+
 from omnia_tests_distributors import *
 
 # Don't open the serial port only local commands are used here
@@ -22,3 +24,5 @@ REFLASH = {
 
 
 LOG_APP_FILE = '/var/log/programmer/application-reflash-uboot.log'
+
+CUSTOM_INIT_TITLE = u'Aktualizace bootloaderu'
