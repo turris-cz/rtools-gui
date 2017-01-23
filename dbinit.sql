@@ -93,6 +93,23 @@ CREATE OR REPLACE VIEW good_routers AS
     ORDER BY routers.id;
 ALTER VIEW good_routers OWNER TO omnia_flasher;
 
+CREATE OR REPLACE VIEW never_passed_steps AS
+    SELECT DISTINCT router FROM runs INNER JOIN steps ON "steps"."run" = "runs"."id"
+    WHERE router NOT IN (
+        SELECT router FROM runs INNER JOIN steps ON "steps"."run" = "runs"."id"
+        WHERE passed = true
+        GROUP BY router HAVING COUNT(DISTINCT step_name) >= 7
+    );
+ALTER VIEW never_passed_steps OWNER TO omnia_flasher;
+
+CREATE OR REPLACE VIEW never_passed_tests AS
+    SELECT DISTINCT router FROM runs INNER JOIN tests ON "tests"."run" = "runs"."id"
+    WHERE router NOT IN (
+        SELECT DISTINCT router FROM runs INNER JOIN tests on "tests"."run" = "runs"."id"
+        WHERE success = true
+    );
+ALTER VIEW never_passed_tests OWNER TO omnia_flasher;
+
 CREATE TABLE results (
     id varchar(20) NOT NULL,
     time timestamp NOT NULL DEFAULT current_timestamp,
