@@ -17,6 +17,10 @@ Requirements
 
   - `python-pexpect`
 
+- prctl
+
+  - `python-prctl`
+
 Howto run it
 ------------
 

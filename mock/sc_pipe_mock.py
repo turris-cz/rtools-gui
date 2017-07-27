@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
-import sys
 import optparse
+import prctl
+import signal
+import sys
 import time
 
 from PyQt5.QtCore import (
@@ -71,6 +73,9 @@ class Watcher(QObject):
 
 
 def runMain(plan):
+
+    # kill process when parent dies
+    prctl.set_pdeathsig(signal.SIGTERM)
 
     # Parse the command line options
     optparser = optparse.OptionParser(
