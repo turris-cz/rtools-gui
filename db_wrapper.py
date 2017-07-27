@@ -1,5 +1,6 @@
-import re
 import json
+import socket
+import re
 
 from PyQt5 import QtSql
 from application import qApp, settings
@@ -27,7 +28,6 @@ def writeRecovery(sql, *values):
 
 
 def restoreRecovery():
-
     try:
         with open(settings.DB_RECOVER_QUERY_FILE) as f:
             jsonData = json.load(f)
@@ -124,8 +124,8 @@ class Router(object):
         return query
 
     def startRun(self):
-        sql = "INSERT INTO runs (router) VALUES (?) RETURNING id;"
-        query = self.executeQuery(sql, self.id)
+        sql = "INSERT INTO runs (router, hostname) VALUES (?, ?) RETURNING id;"
+        query = self.executeQuery(sql, self.id, socket.gethostname())
         query.first()
         self.currentRun = query.record().value('id')
         qApp.loggerMain.info(

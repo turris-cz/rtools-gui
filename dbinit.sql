@@ -14,6 +14,7 @@ CREATE TABLE runs (
     id bigserial NOT NULL PRIMARY KEY,
     start timestamp NOT NULL DEFAULT current_timestamp,
     router varchar(20) NOT NULL,
+    hostname varchar(50) NOT NULL,
     success boolean NOT NULL DEFAULT false,
     FOREIGN KEY (router) REFERENCES routers (id) ON DELETE CASCADE
 );
