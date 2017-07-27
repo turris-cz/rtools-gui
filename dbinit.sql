@@ -1,4 +1,5 @@
 CREATE ROLE omnia_flasher LOGIN PASSWORD 'poiuytrewq';
+ALTER ROLE omnia_flasher WITH SUPERUSER; -- needed for exporting csv
 
 CREATE DATABASE omnia_flashing WITH OWNER omnia_flasher;
 
