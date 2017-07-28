@@ -89,11 +89,10 @@ CREATE TABLE last_seen_uboot (
 ALTER TABLE last_seen_uboot OWNER TO omnia_flasher;
 
 CREATE OR REPLACE VIEW good_routers AS
-    SELECT routers.id, MIN(runs.start) AS first_success, MAX(runs.start) AS last_success FROM routers
-    INNER JOIN runs ON routers.id = runs.router
-    WHERE runs.success = true
-    GROUP BY routers.id
-    ORDER BY routers.id;
+    SELECT id, MIN(time) AS first_success, MAX(time) AS last_success FROM results
+    WHERE result = true and phase = 'T'
+    GROUP BY id
+    ORDER BY id;
 ALTER VIEW good_routers OWNER TO omnia_flasher;
 
 CREATE OR REPLACE VIEW never_passed_steps AS

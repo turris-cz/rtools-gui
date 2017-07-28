@@ -381,6 +381,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qApp.loggerMain.info(msg)
         self._updateProgressBars(False)
         qApp.router.incStepAttempt()
+
+        if passedCount == totalCount:
+            qApp.router.setRunSuccessful()
+
         self.exitRunningMode()
         self.blinkStart(passedCount == totalCount)
 
