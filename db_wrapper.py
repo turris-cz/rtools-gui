@@ -122,9 +122,6 @@ class Router(object):
             # When the router is not created get steps which passed
             self.loadSteps()
 
-        # everytime the record is loaded start a new run
-        self.startRun()
-
     def executeQuery(self, sql, *values, **kwargs):
         failOnError = kwargs.get('failOnError', True)
 
@@ -157,13 +154,14 @@ class Router(object):
 
         return query
 
-    def startRun(self):
-        sql = "INSERT INTO runs (router, hostname) VALUES (?, ?) RETURNING id;"
-        query = self.executeQuery(sql, self.id, socket.gethostname())
+    def startRun(self, runlist):
+        sql = "INSERT INTO runs (router, hostname, runlist) VALUES (?, ?, ?) RETURNING id;"
+        query = self.executeQuery(sql, self.id, socket.gethostname(), " ".join(runlist))
         query.first()
         self.currentRun = query.record().value('id')
         qApp.loggerMain.info(
             "Starting a run '%d' for router '%s (%s)'" % (self.currentRun, self.id, self.idHex))
+        return self.currentRun
 
     def createIfNeeded(self):
         sql = "SELECT * FROM routers WHERE id = ?;"

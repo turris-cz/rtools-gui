@@ -22,14 +22,16 @@ class Runner(QtCore.QObject):
     printInstructions = QtCore.pyqtSignal(str)
     setTitle = QtCore.pyqtSignal(str)
 
-    def __init__(self, routerId, runlist, runId, typeName, attempt):
+    def __init__(self, routerId, runlist, typeName, attempt):
         super(Runner, self).__init__()
         qApp.loggerMain.info("Runlist: %s" % ", ".join([e.name for e in runlist]))
+
+        # startRun
+        self.runId = qApp.router.startRun([e.name for e in runlist])
 
         # set the variables
         self.routerId = routerId
         self.runlist = runlist
-        self.runId = runId
         self.typeName = typeName
         self.attempt = attempt
         self.running = False

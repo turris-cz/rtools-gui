@@ -28,15 +28,13 @@ class Router(object):
         self.testAttempt = 0
         self.dbFailed = False
 
-        # everytime the record is loaded start a new run
-        self.startRun()
-
-    def startRun(self):
+    def startRun(self, runlist):
         self._current_run += 1
         qApp.loggerMain.info(
-            "Starting a mock run %d for router '%s (%s)'"
-            % (self._current_run, self.id, self.idHex)
+            "Starting a mock run %d for router '%s (%s): %s'"
+            % (self._current_run, self.id, self.idHex, runlist)
         )
+        return self._current_run
 
     def loadSteps(self):
         qApp.loggerMain.info("Mock - Passed steps: %s" % ", ".join(self.performedSteps['passed']))

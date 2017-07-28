@@ -172,7 +172,7 @@ class Application(QApplication):
         # otherwise it would be disposed its thread execution
         from runner import Runner
         self.runner = Runner(
-            self.router.id, [self.tests.TESTS[i] for i in self.testPlan], self.router.currentRun,
+            self.router.id, [self.tests.TESTS[i] for i in self.testPlan],
             Runner.TYPE_TESTS, self.router.testAttempt
         )
 
@@ -197,7 +197,7 @@ class Application(QApplication):
         from runner import Runner
         self.runner = Runner(
             self.router.id, [self.workflow.WORKFLOW[i] for i in self.stepPlan],
-            self.router.currentRun, Runner.TYPE_STEPS, self.router.stepAttempt
+            Runner.TYPE_STEPS, self.router.stepAttempt
         )
 
         return self.runner
