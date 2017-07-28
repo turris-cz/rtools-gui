@@ -32,6 +32,24 @@
      <number>0</number>
     </property>
     <item>
+     <widget class="QLabel" name="checkNeededLabel">
+      <property name="font">
+       <font>
+        <pointsize>20</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: orangered;</string>
+      </property>
+      <property name="text">
+       <string>Nutná kontrola stanoviště</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QLabel" name="workstationTestLabel">
       <property name="enabled">
        <bool>true</bool>
@@ -119,6 +137,39 @@
            <string>?</string>
           </property>
          </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="lastResultsLayout"/>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -336,8 +387,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>333</width>
-                    <height>573</height>
+                    <width>16</width>
+                    <height>16</height>
                    </rect>
                   </property>
                   <layout class="QGridLayout" name="stepsLayout">
@@ -403,8 +454,8 @@
                    <rect>
                     <x>0</x>
                     <y>0</y>
-                    <width>333</width>
-                    <height>573</height>
+                    <width>16</width>
+                    <height>16</height>
                    </rect>
                   </property>
                   <layout class="QGridLayout" name="testsLayout">
@@ -584,7 +635,7 @@
      <x>0</x>
      <y>0</y>
      <width>750</width>
-     <height>19</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>

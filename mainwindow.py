@@ -8,7 +8,7 @@ from custom_exceptions import DbError, IncorrectSerialNumber
 from utils import serialNumberValidator, serialNumberNormalize, MAX_SERIAL_LEN, backupAppLog
 
 from application import qApp, settings
-from db_wrapper import restoreRecovery
+from db_wrapper import restoreRecovery, getLastRunsResults
 
 
 def _removeItemFromGridLayout(layout, row, column):
@@ -61,6 +61,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # perform queries which weren't performed last time
         restoreRecovery()
+
+        # read last runs
+        self.drawLastAttempts(getLastRunsResults())
 
         # tests/steps only
         if qApp.tests_only:
@@ -173,6 +176,34 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def blinkStop(self):
         self.blinkTimer.stop()
         self.serialNumberLabel.setStyleSheet("QLabel { }")
+
+    def drawLastAttempts(self, attempts):
+        # clear layout
+        item = self.lastResultsLayout.takeAt(0)
+        while item:
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+            item = self.lastResultsLayout.takeAt(0)
+
+        # prepare to draw
+        to_draw = []
+        for attempt in attempts:
+            if attempt is None:
+                to_draw.append(MainWindow.WORK_STATE_UNKNOWN)
+            elif attempt is True:
+                to_draw.append(MainWindow.WORK_STATE_PASSED)
+            elif attempt is False:
+                to_draw.append(MainWindow.WORK_STATE_FAILED)
+
+        # prepare to status icons
+        for state in to_draw:
+            self.lastResultsLayout.addWidget(
+                self._statusToWidget(self.lastResultsLayout.parentWidget(), state))
+
+        # if all elements are False set the needed label to visible
+        self.checkNeededLabel.setVisible(
+            False if [e for e in attempts if e is not False] else True)
 
     def blinkTitle(self):
         if self.blinkSwitch:
@@ -367,6 +398,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if qApp.router.dbFailed:
             self.switchToBarcode()
 
+        # update attempts
+        self.drawLastAttempts(getLastRunsResults())
+
     @QtCore.pyqtSlot(str)
     def printInstructions(self, msg):
         QtWidgets.QMessageBox.information(
@@ -469,3 +503,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # it would probably fail after a new code is scanned
         if qApp.router.dbFailed:
             self.switchToBarcode()
+
+        # update attempts
+        self.drawLastAttempts(getLastRunsResults())

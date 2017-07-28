@@ -68,6 +68,40 @@ def restoreRecovery():
     qApp.loggerMain.info("All queries recovered.")
 
 
+def getLastRunsResults():
+    sql = "SELECT success FROM runs WHERE hostname = ? ORDER BY id DESC LIMIT ?;"
+    hostname = socket.gethostname()
+
+    queryText = "%s %s" % (
+        re.sub(' +', ' ', re.sub('\n', ' ', sql)).strip(),
+        [hostname, settings.WATCHED_RUN_COUNT]
+    )
+
+    query = QtSql.QSqlQuery(qApp.connection.database())
+
+    if not query.prepare(sql):
+        qApp.loggerDb.error("Query failed '%s'" % queryText)
+        raise DbError(qApp.connection.lastError().text())
+
+    query.addBindValue(hostname)
+    query.addBindValue(settings.WATCHED_RUN_COUNT)
+
+    if not query.exec_():
+        qApp.loggerDb.error("Query failed '%s'" % queryText)
+        raise DbError(qApp.connection.lastError().text())
+
+    qApp.loggerDb.info("Query passed '%s'" % queryText)
+
+    result = [None] * settings.WATCHED_RUN_COUNT
+    idx = 0
+    while query.next():
+        result[idx] = query.record().value('success')
+        idx += 1
+
+    qApp.loggerMain.info("Last run's results: %s" % repr(result))
+    return result
+
+
 class Router(object):
 
     @property
