@@ -56,49 +56,45 @@ class DiskTest(BaseTest):
 class MiniPCIeTest(BaseTest):
     _name = 'MINIPCIE'
 
-    def __init__(self, pci_count, name):
-        self.pci_count = pci_count
+    def __init__(self, name, slot_id):
+        self.slot_id = slot_id
         self._name = "MINIPCIE %s" % name
 
     def createWorker(self):
-        return self.Worker(self.pci_count)
+        return self.Worker(self.slot_id)
 
     class Worker(BaseWorker):
 
-        def __init__(self, pci_count):
+        def __init__(self, slot_id):
             super(MiniPCIeTest.Worker, self).__init__()
-            self.pci_count = pci_count
+            self.slot_id = slot_id
 
         def perform(self):
             exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
             self.progress.emit(1)
 
             self.expectSystemConsole(exp)
-            self.progress.emit(20)
+            self.progress.emit(25)
 
-            exp.sendline('echo "###$(cat /sys/bus/pci/devices/*/vendor | grep -c 0x168c)###"')
-
-            pattern = r'###[0-9]+###'
-            self.expect(exp, pattern)
-            pci_count = exp.match.group()
+            exp.sendline(
+                'cat /sys/bus/pci/devices/0000:%02d:00.0/vendor | grep -q 0x168c'
+                % self.slot_id
+            )
             self.progress.emit(50)
+
+            exp.sendline('echo "###$?###"')
+            self.expect(exp, r'###([0-9]+)###')
+            retval = exp.match.group(1)
 
             # remove wifi configs
             self.expectCommand(exp, "rm -rf /etc/config/wireless")
+            self.progress.emit(75)
             self.expectCommand(exp, "sync")
-
-            # this will print which pci slots are available into the console
-            self.expectCommand(exp, "grep -i -e 0x168c /sys/bus/pci/devices/*/vendor || true")
-
-            try:
-                pci_count = int(pci_count.strip().strip("#"))
-            except ValueError:
-                raise RunFailed("Failed to get number of connected mPCIe devices!")
-
-            if pci_count != self.pci_count:
-                raise RunFailed(
-                    "Wrong number of mPCIe devices '%d' != '%d'" % (pci_count, self.pci_count))
             self.progress.emit(100)
+
+            if not retval == "0":
+                raise RunFailed("Device was not found!")
+
             return True
 
 
@@ -671,7 +667,9 @@ TESTS = (
     ResetLed(),
     GpioTest(),
     DiskTest(2, "2xUSB2"),
-    MiniPCIeTest(3, "3xPCI"),
+    MiniPCIeTest("1-01", 0x01),
+    MiniPCIeTest("1-02", 0x02),
+    MiniPCIeTest("1-03", 0x03),
     ClockTest(),
     #EthTest("eth1", "ethWAN", "WAN", 167),
     #EthTest("br-lan", "ethLAN1", "LAN1", 166),
@@ -684,7 +682,8 @@ TESTS = (
     EthSimpleTest("br-lan", "LAN5", 163),
     Booted2(),
     DiskTest(3, "2xUSB3+MSATA"),
-    MiniPCIeTest(2, "2xPCI"),
+    MiniPCIeTest("2-02", 0x02),
+    MiniPCIeTest("2-03", 0x03),
     #EthTest("eth1", "ethWAN", "WAN (SFP)", 162),
     EthSimpleTest("eth1", "WAN (SFP)", 168),
     EepromTest(),

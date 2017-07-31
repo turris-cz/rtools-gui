@@ -39,7 +39,10 @@ class BootedMpci2(Booted):
 TESTS = (
     BootedMpci1(),
     DiskTest(1, "MSATA"),
-    MiniPCIeTest(2, "2xPCI"),
+    MiniPCIeTest("2-02", 0x02),
+    MiniPCIeTest("2-03", 0x03),
     BootedMpci2(),
-    MiniPCIeTest(3, "3xPCI"),
+    MiniPCIeTest("1-01", 0x01),
+    MiniPCIeTest("1-02", 0x02),
+    MiniPCIeTest("1-03", 0x03),
 )
