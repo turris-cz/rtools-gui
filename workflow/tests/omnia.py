@@ -613,9 +613,62 @@ class RamTest(BaseTest):
             return True
 
 
+class LedTest(BaseTest):
+
+    def __init__(self, color, colorText):
+        self._name = "LED %s" % color.upper()
+        self.color = color
+        self.colorText = colorText
+
+    def createWorker(self):
+        return self.Worker(self.color, self.colorText)
+
+    class Worker(BaseWorker):
+        def __init__(self, color, colorText):
+            super(LedTest.Worker, self).__init__()
+            self.color = color
+            self.colorText = colorText
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+            self.expectSystemConsole(exp)
+            self.progress.emit(20)
+
+            # set command
+            self.expectCommand(exp, "rainbow all enable %s intensity 100" % self.color)
+            self.progress.emit(40)
+            reply = self.waitForUserReply(
+                u"Svítí na všech diodách jasná <b>%s</b> barva?" % self.colorText)
+            self.progress.emit(100)
+
+            return True if reply else False
+
+
+class ResetLed(BaseTest):
+    _name = "LED RESET"
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+            self.expectSystemConsole(exp)
+            self.progress.emit(20)
+            self.expectCommand(exp, "/etc/init.d/rainbow restart")
+            self.progress.emit(100)
+
+            return True
+
 TESTS = (
     Booted(),
     SerialConsoleTest(),
+    LedTest("red", u"červená"),
+    LedTest("green", u"zelená"),
+    LedTest("blue", u"modrá"),
+    ResetLed(),
     GpioTest(),
     DiskTest(2, "2xUSB2"),
     MiniPCIeTest(3, "3xPCI"),

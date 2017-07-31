@@ -42,6 +42,7 @@ class BaseTest(Base):
 
 
 class BaseWorker(QtCore.QObject):
+    askUser = QtCore.pyqtSignal(str, dict, QtCore.QMutex, QtCore.QWaitCondition)
     progress = QtCore.pyqtSignal(int)
     finished = QtCore.pyqtSignal(bool)
     firmware = QtCore.pyqtSignal(str)
@@ -185,3 +186,12 @@ class BaseWorker(QtCore.QObject):
             self.expTester.sendline("\n")
             time.sleep(0.5)
             self.expTester.sendline("RESETALL")
+
+    def waitForUserReply(self, msg):
+        condition = QtCore.QWaitCondition()
+        mutex = QtCore.QMutex()
+        mutex.lock()
+        res = {}
+        self.askUser.emit(msg, res, mutex, condition)
+        condition.wait(mutex)
+        return res['result']

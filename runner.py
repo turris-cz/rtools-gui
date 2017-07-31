@@ -19,6 +19,7 @@ class Runner(QtCore.QObject):
     runStarted = QtCore.pyqtSignal(int)
     runFinished = QtCore.pyqtSignal(int, bool)
     runProgress = QtCore.pyqtSignal(int)
+    runAskUser = QtCore.pyqtSignal(str, dict, QtCore.QMutex, QtCore.QWaitCondition)
     printInstructions = QtCore.pyqtSignal(str)
     setTitle = QtCore.pyqtSignal(str)
 
@@ -147,6 +148,10 @@ class Runner(QtCore.QObject):
     def workerProgress(self, value):
         return self.runProgress.emit(value)
 
+    @QtCore.pyqtSlot(str, dict, QtCore.QMutex, QtCore.QWaitCondition)
+    def askUser(self, msg, result, mutext, condition):
+        return self.runAskUser.emit(msg, result, mutext, condition)
+
     @QtCore.pyqtSlot(str)
     def firwareObtained(self, firmware):
         qApp.loggerMain.info("Firmware obtained - %s" % firmware)
@@ -187,6 +192,7 @@ class Runner(QtCore.QObject):
         self.thread = QtCore.QThread(self)
         self.worker.finished.connect(self.runDone)
         self.worker.progress.connect(self.workerProgress)
+        self.worker.askUser.connect(self.askUser)
         self.worker.firmware.connect(self.firwareObtained)
         self.worker.ram.connect(self.ramObtained)
         self.worker.eeprom.connect(self.eepromObtained)

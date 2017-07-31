@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QSizePolicy
 from ui.mainwindow import Ui_MainWindow
 
 from custom_exceptions import DbError, IncorrectSerialNumber
-from utils import serialNumberValidator, serialNumberNormalize, MAX_SERIAL_LEN, backupAppLog
+from utils import MAX_SERIAL_LEN, backupAppLog
 
 from application import qApp, settings
 from db_wrapper import restoreRecovery, getLastRunsResults
@@ -342,6 +342,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # connect signals
         runner.runProgress.connect(self.updateProgress)
+        runner.runAskUser.connect(self.displayAskUser)
         runner.runStarted.connect(self.stepStarted)
         runner.runFinished.connect(self.stepFinished)
         runner.runsFinished.connect(self.stepsFinished)
@@ -357,6 +358,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.pyqtSlot(int)
     def updateProgress(self, value):
         self.currentProgressBar.setValue(value)
+
+    @QtCore.pyqtSlot(str, dict, QtCore.QMutex, QtCore.QWaitCondition)
+    def displayAskUser(self, msg, result, mutex, condition):
+        response = QtWidgets.QMessageBox.question(
+            self, u"Dotaz", msg,
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No
+        )
+        mutex.lock()
+        result['result'] = response == QtWidgets.QMessageBox.Yes
+        condition.wakeAll()
+        mutex.unlock()
 
     @QtCore.pyqtSlot(int)
     def stepStarted(self, planIndex):
@@ -452,6 +464,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # connect signals
         runner.runProgress.connect(self.updateProgress)
+        runner.runAskUser.connect(self.displayAskUser)
         runner.runStarted.connect(self.testStarted)
         runner.runFinished.connect(self.testFinished)
         runner.runsFinished.connect(self.testsFinished)
