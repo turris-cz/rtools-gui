@@ -673,9 +673,6 @@ TESTS = (
     DiskTest(2, "2xUSB2"),
     MiniPCIeTest(3, "3xPCI"),
     ClockTest(),
-    SerialNumberTest(),
-    EepromTest(),
-    RegionTest(),
     #EthTest("eth1", "ethWAN", "WAN", 167),
     #EthTest("br-lan", "ethLAN1", "LAN1", 166),
     #EthTest("br-lan", "ethLAN2", "LAN2", 165),
@@ -690,5 +687,8 @@ TESTS = (
     MiniPCIeTest(2, "2xPCI"),
     #EthTest("eth1", "ethWAN", "WAN (SFP)", 162),
     EthSimpleTest("eth1", "WAN (SFP)", 168),
+    EepromTest(),
+    RegionTest(),
+    SerialNumberTest(),
     RamTest(),
 )
