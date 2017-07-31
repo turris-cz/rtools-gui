@@ -658,6 +658,58 @@ class ResetLed(BaseTest):
 
             return True
 
+
+class USBTest(BaseTest):
+    USB2 = "2.00"
+    USB3 = "3.00"
+
+    _name = 'USB'
+
+    def __init__(self, name, usb_address, usb_version):
+        self.usb_address = usb_address
+        self._name = "USB %s" % name
+        self.usb_version = usb_version
+
+    def createWorker(self):
+        return self.Worker(self.usb_address, self.usb_version)
+
+    class Worker(BaseWorker):
+
+        def __init__(self, usb_address, usb_version):
+            super(USBTest.Worker, self).__init__()
+            self.usb_address = usb_address
+            self.usb_version = usb_version
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+
+            self.expectSystemConsole(exp)
+            self.progress.emit(50)
+
+            exp.sendline(
+                "echo '>''>>'$(cat /sys/bus/usb/devices/%s/version)'<<<'"
+                % self.usb_address
+            )
+
+            # read output
+            self.expect(exp, r'^.*>>>(.*)<<<.*$')
+            line = exp.match.group(1)
+
+            # get version
+            usb_version = re.search(r'\s*([23]\.[0-9][0-9])\s*', line)
+            if not usb_version:
+                raise RunFailed("USB device not found!")
+
+            self.progress.emit(100)
+
+            if not usb_version.group(1) == self.usb_version:
+                raise RunFailed(
+                    "USB version mismatched (%s!=%s)" % (usb_version.group(1), self.usb_version))
+
+            return True
+
+
 TESTS = (
     Booted(),
     SerialConsoleTest(),
@@ -666,6 +718,8 @@ TESTS = (
     LedTest("blue", u"modrá"),
     ResetLed(),
     GpioTest(),
+    USBTest("2.0-1", "2-1", USBTest.USB2),
+    USBTest("2.0-2", "4-1", USBTest.USB2),
     DiskTest(2, "2xUSB2"),
     MiniPCIeTest("1-01", 0x01),
     MiniPCIeTest("1-02", 0x02),
@@ -681,6 +735,8 @@ TESTS = (
     EthSimpleTest("br-lan", "LAN4", 164),
     EthSimpleTest("br-lan", "LAN5", 163),
     Booted2(),
+    USBTest("3.0-1", "3-1", USBTest.USB3),
+    USBTest("3.0-2", "5-1", USBTest.USB3),
     DiskTest(3, "2xUSB3+MSATA"),
     MiniPCIeTest("2-02", 0x02),
     MiniPCIeTest("2-03", 0x03),
