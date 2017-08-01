@@ -710,6 +710,40 @@ class USBTest(BaseTest):
             return True
 
 
+class MSATATest(BaseTest):
+
+    _name = 'MSATA'
+
+    def createWorker(self):
+        return self.Worker()
+
+    class Worker(BaseWorker):
+
+        def perform(self):
+            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
+            self.progress.emit(1)
+
+            self.expectSystemConsole(exp)
+            self.progress.emit(50)
+
+            exp.sendline(
+                "echo '>''>>'$(cat /sys/bus/scsi/devices/0:0:0:0/vendor)'<<<'"
+            )
+
+            # read output
+            self.expect(exp, r'^.*>>>(.*)<<<.*$')
+            line = exp.match.group(1)
+
+            # get version
+            usb_version = re.search(r'\s*ATA\s*', line)
+            if not usb_version:
+                raise RunFailed("MSATA device not found!")
+
+            self.progress.emit(100)
+
+            return True
+
+
 TESTS = (
     Booted(),
     SerialConsoleTest(),
@@ -737,6 +771,7 @@ TESTS = (
     Booted2(),
     USBTest("3.0-1", "3-1", USBTest.USB3),
     USBTest("3.0-2", "5-1", USBTest.USB3),
+    MSATATest(),
     DiskTest(3, "2xUSB3+MSATA"),
     MiniPCIeTest("2-02", 0x02),
     MiniPCIeTest("2-03", 0x03),
