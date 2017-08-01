@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-from workflow.tests.omnia import Booted, DiskTest, MiniPCIeTest
+from workflow.tests.omnia import Booted, MiniPCIeTest, MSATATest
 
 
 class BootedMpci1(Booted):
@@ -36,9 +36,10 @@ class BootedMpci2(Booted):
             <ul>
         """
 
+
 TESTS = (
     BootedMpci1(),
-    DiskTest(1, "MSATA"),
+    MSATATest(),
     MiniPCIeTest("2-02", 0x02),
     MiniPCIeTest("2-03", 0x03),
     BootedMpci2(),

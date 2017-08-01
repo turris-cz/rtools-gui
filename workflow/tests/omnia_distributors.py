@@ -5,7 +5,7 @@ from custom_exceptions import RunFailed
 from workflow.base import BaseTest, BaseWorker, spawnPexpectSerialConsole
 from workflow.tests.omnia import (
     Booted, Booted2, SerialConsoleTest, GpioTest, DiskTest, ClockTest,
-    SerialNumberTest, EepromTest, RegionTest, MiniPCIeTest, RamTest
+    SerialNumberTest, EepromTest, RegionTest, MiniPCIeTest, MSATATest, RamTest, USBTest
 )
 
 
@@ -126,10 +126,13 @@ class Booted2Mod(Booted2):
             </ul>
         """ % dict(test_name=self._name)
 
+
 TESTS = (
     BootedMod(),
     SerialConsoleTest(),
     GpioTest(),
+    USBTest("2.0-1", "2-1", USBTest.USB2),
+    USBTest("2.0-2", "4-1", USBTest.USB2),
     DiskTest(2, "2xUSB2"),
     MiniPCIeTest("1-01", 0x01),
     MiniPCIeTest("1-02", 0x02),
@@ -145,6 +148,9 @@ TESTS = (
     EthTest("br-lan", "ethTEST", "LAN1", 163),
     EthTest("br-lan", "ethTEST", "LAN0", 162),
     Booted2Mod(),
+    USBTest("3.0-1", "3-1", USBTest.USB3),
+    USBTest("3.0-2", "5-1", USBTest.USB3),
+    MSATATest(),
     DiskTest(3, "2xUSB3+MSATA"),
     MiniPCIeTest("2-02", 0x02),
     MiniPCIeTest("2-03", 0x03),

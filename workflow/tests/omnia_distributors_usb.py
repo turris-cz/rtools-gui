@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-from workflow.tests.omnia import Booted, DiskTest
+from workflow.tests.omnia import Booted, DiskTest, USBTest
 
 
 class BootedUsb(Booted):
@@ -43,5 +43,9 @@ class Usb3Test(DiskTest):
 TESTS = (
     BootedUsb(),
     Usb2Test(2, "2xUSB2"),
+    USBTest("2.0-1", "2-1", USBTest.USB2),
+    USBTest("2.0-2", "4-1", USBTest.USB2),
     Usb3Test(2, "2xUSB3"),
+    USBTest("3.0-1", "3-1", USBTest.USB3),
+    USBTest("3.0-2", "5-1", USBTest.USB3),
 )
