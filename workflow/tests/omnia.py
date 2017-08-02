@@ -477,17 +477,18 @@ class Booted(Base):
     @property
     def instructions(self):
         return """
-            <h3>%(test_name)s</h3>
+            <h3>První krok</h3>
             <p>Před tím, než budete pokračovat:</p>
             <ul>
-                <li>Připojte WAN, LAN1 a LAN2 eth kabely k routeru.</li>
-                <li>Připojte 3 mPCI wifi karty do 3 slotů na desce.</li>
-                <li>Připojte GPIO testovací zařízení k desce.</li>
-                <li>Připojte UART kabel k routeru.</li>
-                <li>Zapojte USB2 dongly do obou usb slotů</li>
-                <li>Připojte napájení do routeru.</li>
+                <li>Vytáhněte napájení (pokud je zapojeno)</li>
+                <li>Připojte 1x WAN a 5x LAN kabely</li>
+                <li>Připojte 3 miniPCI wifi karty (velké)</li>
+                <li>Připojte GPIO tester</li>
+                <li>Připojte 2x USB 2.0 flashky</li>
+                <li>Připojte UART kabel</li>
+                <li>Připojte napájení</li>
             </ul>
-        """ % dict(test_name=self._name)
+        """
 
     def createWorker(self):
         return self.Worker()
@@ -530,20 +531,19 @@ class Booted2(Booted):
     @property
     def instructions(self):
         return """
-            <h3>%(test_name)s</h3>
+            <h3>Druhý krok</h3>
             <p>Před tím, než budete pokračovat:</p>
             <ul>
-                <li>Odpojte napájení routeru</li>
-                <li>Odpojte eth kabely od routeru</li>
-                <li>Připojte SFP ETH redukci k routeru</li>
-                <li>Připojte WAN do SFP ETH redukce</li>
-                <li>Odpojte USB2 dongly z obou usb slotů</li>
-                <li>Zapojte USB3 dongly do obou usb slotů</li>
-                <li>Odpojte zařízení z mPCI slotu nejblíže ke středu desky</li>
-                <li>Zapojte mSata kartu do mPCI slotu nejblíže ke středu desky</li>
-                <li>Připojte napájení napájení do routeru.</li>
+                <li>Vytáhněte napájení</li>
+                <li>Odpojte WAN a LAN kabely</li>
+                <li>Odpojte 2x USB 2.0 flashky</li>
+                <li>Odpojte miniPCI wifi kartu nejblíže k procesoru</li>
+                <li>Připojte SFP redukci k routeru a do ní WAN kabel</li>
+                <li>Připojte 2x USB 3.0 flashky</li>
+                <li>Připojte mSATA kartu</li>
+                <li>Připojte napájení</li>
             </ul>
-        """ % dict(test_name=self._name)
+        """
 
     def createWorker(self):
         return Booted.Worker()
