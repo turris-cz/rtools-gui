@@ -88,13 +88,6 @@ CREATE TABLE last_seen_uboot (
 );
 ALTER TABLE last_seen_uboot OWNER TO omnia_flasher;
 
-CREATE OR REPLACE VIEW good_routers AS
-    SELECT id, MIN(time) AS first_success, MAX(time) AS last_success FROM results
-    WHERE result = true and phase = 'T'
-    GROUP BY id
-    ORDER BY id;
-ALTER VIEW good_routers OWNER TO omnia_flasher;
-
 CREATE OR REPLACE VIEW never_passed_steps AS
     SELECT DISTINCT router FROM runs INNER JOIN steps ON "steps"."run" = "runs"."id"
     WHERE router NOT IN (
@@ -120,6 +113,13 @@ CREATE TABLE results (
     FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
 );
 ALTER TABLE results OWNER TO omnia_flasher;
+
+CREATE OR REPLACE VIEW good_routers AS
+    SELECT id, MIN(time) AS first_success, MAX(time) AS last_success FROM results
+    WHERE result = true and phase = 'T'
+    GROUP BY id
+    ORDER BY id;
+ALTER VIEW good_routers OWNER TO omnia_flasher;
 
 CREATE OR REPLACE FUNCTION router_steps(router_id text)
     RETURNS TABLE ("run_id" bigint, "run_start" timestamp, "attempt" int, "order" int, "time" timestamp, "name" text, "passed" boolean) AS
