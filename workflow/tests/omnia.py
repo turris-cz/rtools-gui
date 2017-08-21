@@ -734,9 +734,9 @@ class MSATATest(BaseTest):
             self.expect(exp, r'^.*>>>(.*)<<<.*$')
             line = exp.match.group(1)
 
-            # get version
-            usb_version = re.search(r'\s*ATA\s*', line)
-            if not usb_version:
+            # get vendor
+            vendor = re.search(r'\s*ATA\s*', line)
+            if not vendor:
                 raise RunFailed("MSATA device not found!")
 
             self.progress.emit(100)
