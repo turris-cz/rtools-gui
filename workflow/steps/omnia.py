@@ -543,8 +543,6 @@ class UsbFlashClock(Base):
             self.progress.emit(100)
             self.expTester.terminate(force=True)
 
-            expTester.terminate(force=True)
-
             return True
 
 
