@@ -105,7 +105,7 @@ class Mcu(Base):
             super(Mcu.Worker, self).__init__()
             self.command = \
                 "sudo %s -s %s -f %s -f target/stm32f0x.cfg -c 'init' -c 'sleep 500' " \
-                "-c 'reset halt' -c 'sleep 500' -c 'wait_halt 2' -c 'sleep 500'  -c 'adapter_khz 100' " \
+                "-c 'reset halt' -c 'sleep 500' -c 'wait_halt 2' -c 'sleep 500' " \
                 "-c 'flash write_image erase %s 0x08000000' " \
                 "-c 'sleep 500' " \
                 "-c 'flash write_image erase %s 0x08005000' " \
