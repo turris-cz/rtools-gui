@@ -81,9 +81,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if settings.CUSTOM_INIT_TITLE:
             self.titleLabel.setText(settings.CUSTOM_INIT_TITLE)
 
-        # set ram and region labels
+        # set upper labels
         self.regionLabel.setText(settings.REGION)
         self.ramLabel.setText("%dG" % settings.ROUTER_RAMSIZE)
+        self.modeLabel.setText("%s" % settings.MODE_NAME)
 
         # set workstation label
         self.workstationTestLabel.setHidden(True)
