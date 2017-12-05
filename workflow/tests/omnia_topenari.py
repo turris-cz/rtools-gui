@@ -30,7 +30,7 @@ class Booted1Topenari(Booted):
             <ul>
                 <li>Vytáhněte napájení (pokud je zapojeno)</li>
                 <li>Připojte 1x WAN a 5x LAN kabely</li>
-                <li>Připojte 3 miniPCI wifi karty (velké)</li>
+                <li>Připojte 2 miniPCI wifi karty (malé) do dvou slotů blíže ke kraji desky</li>
                 <li>Připojte 2x USB 2.0 flashky</li>
                 <li>Připojte UART kabel</li>
                 <li>Připojte napájení</li>
@@ -62,7 +62,6 @@ TESTS = (
     USBTest("2.0-1", "2-1", USBTest.USB2),
     USBTest("2.0-2", "4-1", USBTest.USB2),
     DiskTest(2, "2x"),
-    MiniPCIeTest("1-01", 0x01),
     MiniPCIeTest("1-02", 0x02),
     MiniPCIeTest("1-03", 0x03),
     ClockTest(),
@@ -81,7 +80,6 @@ TESTS = (
     USBTest("3.0-2", "5-1", USBTest.USB3),
     USBTest("2.0-3", "1-1", USBTest.USB2),
     DiskTest(3, "3x"),
-    MiniPCIeTest("1-01", 0x01),
     MiniPCIeTest("1-02", 0x02),
     EepromTest(),
     RegionTest(),
