@@ -7,9 +7,24 @@ from application import settings
 
 from workflow.base import Base, BaseWorker, spawnPexpectSerialConsole
 from workflow.tests.omnia import (
-    SerialNumberTest, MiniPCIeTest, ClockTest
+    SerialNumberTest, MiniPCIeTest, ClockTest, Booted
 )
 from workflow.tests.omnia_distributors_reflash_system import Halt
+
+
+class BootedAfterAssembly(Booted):
+    _name = "BOOTED A"
+
+    @property
+    def instructions(self):
+        return """
+            <h3>%(test_name)s</h3>
+            <p>Před tím, než budete pokračovat:</p>
+            <ul>
+                <li>Připojte UART kabel k routeru.</li>
+                <li>Připojte napájení napájení do routeru.</li>
+            </ul>
+        """ % dict(test_name=self._name)
 
 
 class UsbFlash(Base):
@@ -69,7 +84,8 @@ class UsbFlash(Base):
 
 
 TESTS = (
-    UsbFlash(),
+    BootedAfterAssembly(),
+    #UsbFlash(),
     SerialNumberTest(),
     MiniPCIeTest("3-01", 0x01),
     MiniPCIeTest("3-02", 0x02),
