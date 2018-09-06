@@ -47,7 +47,7 @@ class Application(QApplication):
 
         # load the settings module
         global settings
-        settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings.omnia')
+        settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings.mox')
         settings = importlib.import_module(settings_module)
 
         # load workflow module

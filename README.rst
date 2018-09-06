@@ -1,7 +1,7 @@
 Router Tools GUI
 ================
 
-This piece of software is designed to be used for Turris Omnia provisioning.
+This piece of software is designed to be used for Turris Mox provisioning.
 
 Requirements
 ------------
@@ -33,7 +33,7 @@ Howto run it
 Settings
 --------
 
-By default the settings are included in for of a python file (`settings.omnia`).
+By default the settings are included in for of a python file (`settings.mox`).
 To load custom settings you cat simply set env variable `RTOOLS_SETTINGS`::
 
     RTOOLS_SETTINGS='settings.custom' ./rtools-gui.py
