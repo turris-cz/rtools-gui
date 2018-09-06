@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2
 
 from sc_pipe_mock import runMain
 
