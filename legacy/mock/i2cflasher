@@ -1,5 +1,0 @@
-#!/bin/bash
-
-# dummy script for flashing
-echo "sme v i2c"
-sleep 2
