@@ -1,3 +1,4 @@
+import io
 import math
 import time
 import hashlib
@@ -60,7 +61,7 @@ def backupAppLog():
     backupFile(settings.LOG_APP_FILE)
 
 
-class PrefixFile(file):
+class PrefixFile(io.StringIO):
     def __init__(self, *args, **kwargs):
         self.prefix = kwargs.get('prefix', "")
         self.startTime = kwargs.get('startTime', time.time())

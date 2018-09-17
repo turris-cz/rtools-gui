@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/mainwindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.7
+# Created by: PyQt5 UI code generator 5.10.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -105,7 +105,6 @@ class Ui_MainWindow(object):
         self.barcodePage = QtWidgets.QWidget()
         self.barcodePage.setObjectName("barcodePage")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.barcodePage)
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.titleLabel = QtWidgets.QLabel(self.barcodePage)
         font = QtGui.QFont()
@@ -165,7 +164,6 @@ class Ui_MainWindow(object):
         self.workPage = QtWidgets.QWidget()
         self.workPage.setObjectName("workPage")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.workPage)
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setObjectName("horizontalLayout_2")
@@ -337,4 +335,4 @@ class Ui_MainWindow(object):
         self.actionBarcode.setText(_translate("MainWindow", "&Barcode"))
         self.actionEnd.setText(_translate("MainWindow", "&Konec"))
 
-import icons_rc
+from qrc import icons
