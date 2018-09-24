@@ -15,4 +15,4 @@ config.log
 config.status
 *.cache
 
-moxtool
+moxtester
