@@ -2,13 +2,14 @@
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QSizePolicy
-from ui.mainwindow import Ui_MainWindow
+from ui.window import Ui_Window
 
 from custom_exceptions import DbError, IncorrectSerialNumber
 from utils import MAX_SERIAL_LEN, backupAppLog
 
 from application import qApp, settings
-from db_wrapper import restoreRecovery, getLastRunsResults
+from programmer import ProgrammerWidget
+from db_wrapper import getLastRunsResults
 
 
 def _removeItemFromGridLayout(layout, row, column):
@@ -19,80 +20,44 @@ def _removeItemFromGridLayout(layout, row, column):
         item.widget().deleteLater()
 
 
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    WORK_STATE_FAILED = "F"
-    WORK_STATE_UNKNOWN = "U"
-    WORK_STATE_PASSED = "P"
-    WORK_STATE_RUNNING = "R"
-    WORK_STATES = (
-        WORK_STATE_FAILED,
-        WORK_STATE_UNKNOWN,
-        WORK_STATE_PASSED,
-        WORK_STATE_RUNNING,
-    )
+class MainWindow(QtWidgets.QMainWindow, Ui_Window):
 
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setupUi(self)  # create gui
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
-        self.inRunningMode = False
 
-        # set icons for back and forward buttons
-        self.scanButton.setIcon(
-            QtWidgets.QApplication.style().standardIcon(QtWidgets.QStyle.SP_ArrowRight)
-        )
-        self.scanButton.setIconSize(QtCore.QSize(20, 20))
-
-        self.backButton.setIcon(
-            QtWidgets.QApplication.style().standardIcon(QtWidgets.QStyle.SP_ArrowLeft)
-        )
-        self.backButton.setIconSize(QtCore.QSize(20, 20))
+        self.programmers = [None]*4
+        for i in range(4):
+            self.programmers[i] = ProgrammerWidget(self, i)
+            self.programmersLayout.addWidget(self.programmers[i], i // 2, i % 2)
 
         # open db connection
-        qApp.loggerMain.info("Opening db connection.")
-        if not qApp.connection.open():
-            qApp.loggerMain.error("Connecting to db fails.")
-            QtWidgets.QMessageBox.critical(
-                self, "Chyba databáze",
-                "<p>Nepodařilo se připojit do databáze. Zavírám aplikaci...</p>"
-            )
-            raise DbError(qApp.connection.lastError().text())
-        qApp.loggerMain.info("Connected to database.")
+        #qApp.loggerMain.info("Opening db connection.")
+        #if not qApp.connection.open():
+            #qApp.loggerMain.error("Connecting to db fails.")
+            #QtWidgets.QMessageBox.critical(
+                #self, "Chyba databáze",
+                #"<p>Nepodařilo se připojit do databáze. Zavírám aplikaci...</p>"
+            #)
+            #raise DbError(qApp.connection.lastError().text())
+        #qApp.loggerMain.info("Connected to database.")
 
-        # perform queries which weren't performed last time
-        restoreRecovery()
+    def refocus(self):
+        self.barcodeLineEdit.setFocus()
 
-        # read last runs
-        self.drawLastAttempts(getLastRunsResults())
+    @QtCore.pyqtSlot()
+    def barcodeScanEnter(self):
+        serialNumber = int(self.barcodeLineEdit.text())
+        # TODO verify serial number and mask
+        self.programmers[serialNumber - 1].select()
+        self.barcodeLineEdit.clear()
 
-        # tests/steps only
-        if qApp.tests_only:
-            qApp.loggerMain.info("Tests only option used.")
-            self.stepFrame.setVisible(False)
-            self.stepsStartWidget.setVisible(False)
-            self.titleLabel.setText("Testování")
-        if qApp.steps_only:
-            qApp.loggerMain.info("Steps only option used.")
-            self.testFrame.setVisible(False)
-            self.testsStartWidget.setVisible(False)
-            self.titleLabel.setText("Oživování")
 
-        # set the custom titles
-        if settings.CUSTOM_INIT_TITLE:
-            self.titleLabel.setText(settings.CUSTOM_INIT_TITLE)
 
-        # set upper labels
-        self.regionLabel.setText(settings.REGION)
-        self.ramLabel.setText("%dG" % settings.ROUTER_RAMSIZE)
-        self.modeLabel.setText("%s" % settings.MODE_NAME)
 
-        # set workstation label
-        self.workstationTestLabel.setHidden(True)
 
-        # blink timer
-        self.blinkSwitch = True
-        self.blinkTimer = QtCore.QTimer()
-        self.blinkTimer.timeout.connect(self.blinkTitle)
+
 
     def loadWorkflows(self):
         # clear the layouts first

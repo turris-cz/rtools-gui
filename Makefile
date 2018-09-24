@@ -1,10 +1,13 @@
-all: qrc/icons.py ui/mainwindow.py
+UI = window programmer
+UI_PY_FILES = $(patsubst %,ui/%.py,$(UI))
+
+all: qrc/icons.py $(UI_PY_FILES)
 
 qrc/icons.py: qrc/icons.qrc
 	pyrcc5 $< -o $@
 
-ui/mainwindow.py: ui/mainwindow.ui
+$(UI_PY_FILES): %.py: %.ui
 	pyuic5 --import-from=qrc --resource-suffix= $< -o $@
 
 clean:
-	rm qrc/icons.py ui/mainwindow.py
+	rm -f qrc/icons.py $(UI_PY_FILES)
