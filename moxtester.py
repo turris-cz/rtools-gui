@@ -11,6 +11,38 @@ class MoxTester:
     "Class controlling one specific mox tester."
     BOOT_MODE_SPI = 0b01
     BOOT_MODE_UART = 0b10
+    CONF = {
+        "A": {
+            "interface": ftdi.INTERFACE_A,
+            "mode": ftdi.BITMODE_BITBANG,
+            "output_mask": 0x40
+        },
+        "B": {
+            "interface": ftdi.INTERFACE_B,
+            "mode": ftdi.BITMODE_BITBANG,
+            "output_mask": 0xE0
+        },
+        "C": {
+            "interface": ftdi.INTERFACE_C,
+            "mode": ftdi.BITMODE_BITBANG,
+            "output_mask": 0x00
+        },
+        "D": {
+            "interface": ftdi.INTERFACE_D,
+            "mode": ftdi.BITMODE_RESET,
+            "output_mask": 0x00
+        }
+    }
+
+    def __init_ctx__(self, dev, port_id):
+        self.ctx[port_id] = ftdi.new()
+        ftdi.set_interface(self.ctx[port_id], self.CONF[port_id]["interface"])
+        ftdi.usb_open_dev(self.ctx[port_id], dev)
+        if ftdi.set_bitmode(
+                self.ctx[port_id], self.CONF[port_id]["output_mask"],
+                self.CONF[port_id]["mode"]) < 0:
+            raise MoxTesterCommunicationException(
+                "Unable to set mode for port " + port_id)
 
     def __init__(self, chip_id):
         ctx = ftdi.new()
@@ -20,31 +52,16 @@ class MoxTester:
         dev = devs[1].dev
 
         self.ctx = dict()
-        ## CN1 (detection, power supply and JTAG) ##
-        self.ctx["A"] = ftdi.new()
-        ftdi.set_interface(self.ctx["A"], ftdi.INTERFACE_A)
-        ftdi.usb_open_dev(self.ctx["A"], dev)
-        if ftdi.set_bitmode(self.ctx["A"], 0x40, ftdi.BITMODE_BITBANG) < 0:
-            raise MoxTesterCommunicationException(
-                "Unable to set mode for port A")
-        self.power(False)  # Set power supply do disable
-        ## CN2 (boot mode, hardware reset and SPI) ##
-        self.ctx["B"] = ftdi.new()
-        ftdi.set_interface(self.ctx["B"], ftdi.INTERFACE_B)
-        ftdi.usb_open_dev(self.ctx["B"], dev)
-        # TODO probably also missmasking SPI
-        if ftdi.set_bitmode(self.ctx["B"], 0xE0, ftdi.BITMODE_BITBANG) < 0:
-            raise MoxTesterCommunicationException(
-                "Unable to set mode for port B")
-        ## CN3 (Unused GPIO) ##
-        # skipped for now
-        ## CN4 (UART) ##
-        self.ctx["D"] = ftdi.new()
-        ftdi.set_interface(self.ctx["D"], ftdi.INTERFACE_D)
-        ftdi.usb_open_dev(self.ctx["D"], dev)
-        if ftdi.set_bitmode(self.ctx["D"], 0x00, ftdi.BITMODE_RESET) < 0:
-            raise MoxTesterCommunicationException(
-                "Unable to set mode for port D")
+        # CN1 (detection, power supply and JTAG)
+        self.__init_ctx__(dev, "A")
+        self.power(False)
+        # CN2 (boot mode, hardware reset and SPI)
+        self.__init_ctx__(dev, "B")
+        self.set_boot_mode(self.BOOT_MODE_SPI)
+        # CN3 (Unused GPIO)
+        self.__init_ctx__(dev, "C")
+        # CN4 (UART)
+        self.__init_ctx__(dev, "D")
         if ftdi.set_baudrate(self.ctx["D"], 115200) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to set baudrate for D port")
@@ -76,7 +93,7 @@ class MoxTester:
         return bool(self._read(port, mask))
 
     def power(self, enabled):
-        "Set power state of board"
+        "Set power state of board. In default power is disabled."
         self._write_bits("A", 0x40, not enabled)
 
     def board_present(self):
@@ -88,11 +105,12 @@ class MoxTester:
         return not self._read_bits("A", 0x20)
 
     def set_boot_mode(self, mode):
-        "Set boot mode of board. BOOT_MODE_SPI or BOOT_MODE_UART expected."
+        """Set boot mode of board. BOOT_MODE_SPI or BOOT_MODE_UART expected.
+        In default BOOT_MODE_SPI is set."""
         if mode == self.BOOT_MODE_SPI:
-            self._write("B", 0xC0, 0x40)
-        elif mode == self.BOOT_MODE_UART:
             self._write("B", 0xC0, 0x80)
+        elif mode == self.BOOT_MODE_UART:
+            self._write("B", 0xC0, 0x40)
         else:
             raise MoxTesterInvalidMode(
                 "Trying to set invalid mode: {}".format(mode))
@@ -115,6 +133,9 @@ class MoxTesterUART(fdpexpect.fdspawn):
         self.moxtester = moxtester
         moxtester._uart = self
         self.ctx = moxtester.ctx["D"]
+        if ftdi.usb_purge_rx_buffer(self.ctx) < 0:
+            raise MoxTesterCommunicationException(
+                "UART RX buffer purge failed.")
 
         self.socks = socket.socketpair()
         self.threadexit = Event()
@@ -141,6 +162,7 @@ class MoxTesterUART(fdpexpect.fdspawn):
 
     def _input(self):
         chunk_size = self._chunk_size()
+        # TODO corrent logging!
         with io.FileIO("moxtester.log", "w") as log:
             while not self.threadexit.is_set():
                 ret, data = ftdi.read_data(self.ctx, chunk_size)
