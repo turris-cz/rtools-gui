@@ -1,4 +1,8 @@
+import io
+import sys
 import socket
+from time import sleep
+from threading import Thread, Event
 from pexpect import fdpexpect
 import ftdi1 as ftdi
 
@@ -11,6 +15,7 @@ class MoxTester:
     def __init__(self, chip_id):
         ctx = ftdi.new()
         devs = ftdi.usb_find_all(ctx, 0x0403, 0x6011)
+        # TODO handle no board connected
         # TODO use devs[1].next to found correct one with chip_id
         dev = devs[1].dev
 
@@ -34,17 +39,22 @@ class MoxTester:
         ## CN3 (Unused GPIO) ##
         # skipped for now
         ## CN4 (UART) ##
-        return
         self.ctx["D"] = ftdi.new()
         ftdi.set_interface(self.ctx["D"], ftdi.INTERFACE_D)
         ftdi.usb_open_dev(self.ctx["D"], dev)
         if ftdi.set_bitmode(self.ctx["D"], 0x00, ftdi.BITMODE_RESET) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to set mode for port D")
-        self.uart = None
+        if ftdi.set_baudrate(self.ctx["D"], 115200) < 0:
+            raise MoxTesterCommunicationException(
+                "Unable to set baudrate for D port")
+        self._uart = None
 
     def _read_pins(self, port):
-        return int.from_bytes(ftdi.read_pins(self.ctx[port])[1], 'big')
+        ret, value = ftdi.read_pins(self.ctx[port])
+        if ret < 0:
+            raise MoxTesterCommunicationException("Reading pins status failed")
+        return int.from_bytes(value, 'big')
 
     def _write(self, port, mask, data):
         "Write given data according to given mask"
@@ -91,8 +101,8 @@ class MoxTester:
         "Set hardware reset pin of board."
         self._write_bits("B", 0x20, enabled)
 
-    def open_uart(self):
-        "Returns File object for comunication with UART"
+    def uart(self):
+        "Returns fdpexpect object for comunication with UART"
         return MoxTesterUART(self)
 
 
@@ -100,12 +110,70 @@ class MoxTesterUART(fdpexpect.fdspawn):
     "UART access for Mox Tester."
 
     def __init__(self, moxtester):
+        if moxtester._uart is not None:
+            raise MoxTesterAlreadyInUse("UART port is already in use.")
         self.moxtester = moxtester
-        moxtester.uart = self
+        moxtester._uart = self
+        self.ctx = moxtester.ctx["D"]
 
         self.socks = socket.socketpair()
+        self.threadexit = Event()
+        self.inputthread = Thread(target=self._input, daemon=True)
+        self.inputthread.start()
+        self.outputthread = Thread(target=self._output, daemon=True)
+        self.outputthread.start()
         super().__init__(self.socks[1].fileno())
-        # TODO
+
+    def __del__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, tp, value, traceback):
+        self.close()
+
+    def _chunk_size(self):
+        ret, chunk_size = ftdi.read_data_get_chunksize(self.ctx)
+        if ret < 0:
+            raise MoxTesterCommunicationException("UART get chunk size failed")
+        return chunk_size
+
+    def _input(self):
+        chunk_size = self._chunk_size()
+        with io.FileIO("moxtester.log", "w") as log:
+            while not self.threadexit.is_set():
+                ret, data = ftdi.read_data(self.ctx, chunk_size)
+                if ret < 0:
+                    raise MoxTesterCommunicationException("UART Read failed")
+                elif ret > 0:
+                    self.socks[0].sendall(data[0:ret])
+                    log.write(data[0:ret])
+                else:
+                    # Sleep for short amount of time to not busyloop
+                    sleep(0.01)
+
+    def _output(self):
+        chunk_size = self._chunk_size()
+        while not self.threadexit.is_set():
+            try:
+                data = self.socks[0].recv(chunk_size)
+            except ConnectionResetError:
+                return
+            if ftdi.write_data(self.ctx, data) < 0:
+                raise MoxTesterCommunicationException("UART Write failed")
+
+    def close(self):
+        "Close UART connection"
+        if self.moxtester is None:
+            return
+        self.moxtester._uart = None
+        self.moxtester = None
+        self.threadexit.set()
+        self.socks[0].close()
+        self.socks[1].close()
+        self.inputthread.join()
+        self.outputthread.join()
 
 
 class MoxTesterException(Exception):
@@ -121,4 +189,10 @@ class MoxTesterCommunicationException(MoxTesterException):
 
 class MoxTesterInvalidMode(MoxTesterException):
     """Trying to set invalid mode."""
+    pass
+
+
+class MoxTesterAlreadyInUse(MoxTesterException):
+    """Tester it self or port is already instantiated and should be closed
+    before new one is opened."""
     pass

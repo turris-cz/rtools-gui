@@ -9,17 +9,19 @@ from moxtester import MoxTester
 def main():
     mxt = MoxTester(0)
     if not mxt.board_present():
-        print("Board not inserted")
-        return
-    print(mxt.power_supply_ok())
+       print("Board not inserted")
+       return
+
+    mxt.set_boot_mode(mxt.BOOT_MODE_UART)
     mxt.power(True)
-    st = False
-    while True:
-        print(st)
-        mxt.reset(st)
-        st = not st
-        sleep(5)
+    with mxt.uart() as uart:
+        uart.expect(['Hit any key to stop autoboot'])
+        uart.send('\n')
+        uart.expect(['=>'])
+        uart.send('help\n')
+        sleep(1)
     mxt.power(False)
+    return
 
 
 main()
