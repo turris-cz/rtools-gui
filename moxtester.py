@@ -28,7 +28,7 @@ class MoxTester:
         ftdi.set_interface(self.ctx["B"], ftdi.INTERFACE_B)
         ftdi.usb_open_dev(self.ctx["B"], dev)
         # TODO probably also missmasking SPI
-        if ftdi.set_bitmode(self.ctx["B"], 0xE0, ftdi.BITMODE_MPSSE) < 0:
+        if ftdi.set_bitmode(self.ctx["B"], 0xE0, ftdi.BITMODE_BITBANG) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to set mode for port B")
         ## CN3 (Unused GPIO) ##
