@@ -11,38 +11,6 @@ class MoxTester:
     "Class controlling one specific mox tester."
     BOOT_MODE_SPI = 0b01
     BOOT_MODE_UART = 0b10
-    CONF = {
-        "A": {
-            "interface": ftdi.INTERFACE_A,
-            "mode": ftdi.BITMODE_BITBANG,
-            "output_mask": 0x40
-        },
-        "B": {
-            "interface": ftdi.INTERFACE_B,
-            "mode": ftdi.BITMODE_BITBANG,
-            "output_mask": 0xE0
-        },
-        "C": {
-            "interface": ftdi.INTERFACE_C,
-            "mode": ftdi.BITMODE_BITBANG,
-            "output_mask": 0x00
-        },
-        "D": {
-            "interface": ftdi.INTERFACE_D,
-            "mode": ftdi.BITMODE_RESET,
-            "output_mask": 0x00
-        }
-    }
-
-    def __init_ctx__(self, dev, port_id):
-        self.ctx[port_id] = ftdi.new()
-        ftdi.set_interface(self.ctx[port_id], self.CONF[port_id]["interface"])
-        ftdi.usb_open_dev(self.ctx[port_id], dev)
-        if ftdi.set_bitmode(
-                self.ctx[port_id], self.CONF[port_id]["output_mask"],
-                self.CONF[port_id]["mode"]) < 0:
-            raise MoxTesterCommunicationException(
-                "Unable to set mode for port " + port_id)
 
     def __init__(self, chip_id):
         ctx = ftdi.new()
@@ -53,89 +21,106 @@ class MoxTester:
 
         self.ctx = dict()
         # CN1 (detection, power supply and JTAG)
-        self.__init_ctx__(dev, "A")
+        self._a = _BitBangInterface(dev, ftdi.INTERFACE_A, 0x40)
         self.power(False)
         # CN2 (boot mode, hardware reset and SPI)
-        self.__init_ctx__(dev, "B")
+        self._b = _BitBangInterface(dev, ftdi.INTERFACE_B, 0xE0)
+        self.reset(True)
         self.set_boot_mode(self.BOOT_MODE_SPI)
         # CN3 (Unused GPIO)
-        self.__init_ctx__(dev, "C")
+        self._c = _BitBangInterface(dev, ftdi.INTERFACE_C, 0x00)
         # CN4 (UART)
-        self.__init_ctx__(dev, "D")
-        if ftdi.set_baudrate(self.ctx["D"], 115200) < 0:
-            raise MoxTesterCommunicationException(
-                "Unable to set baudrate for D port")
+        self._d = _UARTInterface(dev, ftdi.INTERFACE_D)
         self._uart = None
-
-    def _read_pins(self, port):
-        ret, value = ftdi.read_pins(self.ctx[port])
-        if ret < 0:
-            raise MoxTesterCommunicationException("Reading pins status failed")
-        return int.from_bytes(value, 'big')
-
-    def _write(self, port, mask, data):
-        "Write given data according to given mask"
-        value = (self._read_pins(port) & (mask ^ 0xFF)) | (mask & data)
-        if ftdi.write_data(self.ctx[port], bytes([value])) < 0:
-            raise MoxTesterCommunicationException("Write failed")
-
-    def _write_bits(self, port, mask, bit_value):
-        "Write bits of given mask to 1 or 0 given by boolean bit_value."
-        self. _write(port, mask, mask if bit_value else 0x00)
-
-    def _read(self, port, mask):
-        "Reads single byte (int) masked with given mask."
-        return self._read_pins(port) & mask
-
-    def _read_bits(self, port, mask):
-        """Read bits of given mask and returns True if at least one of them is
-        set."""
-        return bool(self._read(port, mask))
 
     def power(self, enabled):
         "Set power state of board. In default power is disabled."
-        self._write_bits("A", 0x40, not enabled)
+        self._a.set(not enabled, 0x40)
 
     def board_present(self):
         "Check if board is inserted"
-        return not self._read_bits("A", 0x80)
+        return not self._a.is_set(0x80)
 
     def power_supply_ok(self):
         "Check if 1.8V power supply is working / 1.8V is available"
-        return not self._read_bits("A", 0x20)
+        return not self._a.is_set(0x20)
 
     def set_boot_mode(self, mode):
         """Set boot mode of board. BOOT_MODE_SPI or BOOT_MODE_UART expected.
         In default BOOT_MODE_SPI is set."""
         if mode == self.BOOT_MODE_SPI:
-            self._write("B", 0xC0, 0x80)
+            self._b.write(0x80, 0xC0)
         elif mode == self.BOOT_MODE_UART:
-            self._write("B", 0xC0, 0x40)
+            self._b.write(0x40, 0xC0)
         else:
             raise MoxTesterInvalidMode(
                 "Trying to set invalid mode: {}".format(mode))
 
     def reset(self, enabled):
         "Set hardware reset pin of board."
-        self._write_bits("B", 0x20, enabled)
+        self._b.set(not enabled, 0x20)
 
     def uart(self):
         "Returns fdpexpect object for comunication with UART"
-        return MoxTesterUART(self)
+        return self._d.pexpect()
 
 
-class MoxTesterUART(fdpexpect.fdspawn):
-    "UART access for Mox Tester."
+def _common_interface_ctx(device, interface):
+    ctx = ftdi.new()
+    ftdi.set_interface(ctx, interface)
+    ftdi.usb_open_dev(ctx, device)
+    return ctx
 
-    def __init__(self, moxtester):
-        if moxtester._uart is not None:
-            raise MoxTesterAlreadyInUse("UART port is already in use.")
-        self.moxtester = moxtester
-        moxtester._uart = self
-        self.ctx = moxtester.ctx["D"]
+
+class _BitBangInterface():
+    "FTDI interface in Bit Bang mode"
+
+    def __init__(self, device, interface, output_mask):
+        self.ctx = _common_interface_ctx(device, interface)
+        if ftdi.set_bitmode(self.ctx, output_mask, ftdi.BITMODE_BITBANG) < 0:
+            raise MoxTesterCommunicationException(
+                "Unable to set bitbang mode for port: " + str(interface))
+
+    def read(self, mask=0xFF):
+        """Read status of pins. It returns read byte. You can use mask to
+        automatically mask some bits. In default all bits are read and
+        returned."""
+        ret, value = ftdi.read_pins(self.ctx)
+        if ret < 0:
+            raise MoxTesterCommunicationException("Reading pins status failed")
+        return int.from_bytes(value, 'big') & mask
+
+    def write(self, data, mask=0xFF):
+        "Write pins status. Whole byte at once."
+        value = self.read(mask ^ 0xFF) | (data & mask)
+        if ftdi.write_data(self.ctx, bytes([value])) < 0:
+            raise MoxTesterCommunicationException("Write failed")
+
+    def is_set(self, mask=0xFF):
+        """Returns True if at least one of bits is set to 1. Mask can be used
+        to limit considered bits."""
+        return bool(self.read(mask))
+
+    def set(self, is_set, mask=0xFF):
+        """Sets given bits dependning on is_set boolean value. Bits can be
+        selected by mask."""
+        self.write(mask if is_set else 0x00, mask)
+
+
+class _UARTInterface():
+    "FTDI interface in Bit Bang mode"
+
+    def __init__(self, device, interface):
+        self.ctx = _common_interface_ctx(device, interface)
+        if ftdi.set_bitmode(self.ctx, 0x00, ftdi.BITMODE_RESET) < 0:
+            raise MoxTesterCommunicationException(
+                "Unable to reset bitmode for port: " + str(interface))
+        if ftdi.set_baudrate(self.ctx, 115200) < 0:
+            raise MoxTesterCommunicationException(
+                "Unable to set baudrate for port:" + str(interface))
         if ftdi.usb_purge_rx_buffer(self.ctx) < 0:
             raise MoxTesterCommunicationException(
-                "UART RX buffer purge failed.")
+                "UART RX buffer purge failed for port: " + str(interface))
 
         self.socks = socket.socketpair()
         self.threadexit = Event()
@@ -143,16 +128,13 @@ class MoxTesterUART(fdpexpect.fdspawn):
         self.inputthread.start()
         self.outputthread = Thread(target=self._output, daemon=True)
         self.outputthread.start()
-        super().__init__(self.socks[1].fileno())
 
     def __del__(self):
-        self.close()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, tp, value, traceback):
-        self.close()
+        self.threadexit.set()
+        self.socks[0].close()
+        self.socks[1].close()
+        self.inputthread.join()
+        self.outputthread.join()
 
     def _chunk_size(self):
         ret, chunk_size = ftdi.read_data_get_chunksize(self.ctx)
@@ -185,17 +167,9 @@ class MoxTesterUART(fdpexpect.fdspawn):
             if ftdi.write_data(self.ctx, data) < 0:
                 raise MoxTesterCommunicationException("UART Write failed")
 
-    def close(self):
-        "Close UART connection"
-        if self.moxtester is None:
-            return
-        self.moxtester._uart = None
-        self.moxtester = None
-        self.threadexit.set()
-        self.socks[0].close()
-        self.socks[1].close()
-        self.inputthread.join()
-        self.outputthread.join()
+    def pexpect(self):
+        "Returns fdpexpect handle."
+        return fdpexpect.fdspawn(self.socks[1].fileno())
 
 
 class MoxTesterException(Exception):
