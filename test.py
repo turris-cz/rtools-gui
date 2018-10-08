@@ -21,23 +21,9 @@ def main():
         uart.send('\n')
         uart.expect(['=>'])
         uart.send('help\n')
-        sleep(1)
-        mxt.reset(True)
-        mxt.set_boot_mode(mxt.BOOT_MODE_UART)
-        mxt.reset(False)
-        sleep(5)
+        uart.expect(['=>'])
     mxt.power(False)
     return
-
-    mxt.power(True)
-    mxt.reset(False)
-    while True:
-        mxt.set_boot_mode(mxt.BOOT_MODE_SPI)
-        print("spi")
-        sleep(3)
-        mxt.set_boot_mode(mxt.BOOT_MODE_UART)
-        print("uart")
-        sleep(3)
 
 
 main()

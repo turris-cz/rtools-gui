@@ -24,7 +24,7 @@ class MoxTester:
         self._a = _BitBangInterface(dev, ftdi.INTERFACE_A, 0x40)
         self.power(False)
         # CN2 (boot mode, hardware reset and SPI)
-        self._b = _BitBangInterface(dev, ftdi.INTERFACE_B, 0xE0)
+        self._b = _SPIInterface(dev, ftdi.INTERFACE_B, 0xE0)
         self.reset(True)
         self.set_boot_mode(self.BOOT_MODE_SPI)
         # CN3 (Unused GPIO)
@@ -47,11 +47,14 @@ class MoxTester:
 
     def set_boot_mode(self, mode):
         """Set boot mode of board. BOOT_MODE_SPI or BOOT_MODE_UART expected.
-        In default BOOT_MODE_SPI is set."""
+        In default BOOT_MODE_SPI is set.
+
+        NOTE: On current Mox Tester this does not work!
+        """
         if mode == self.BOOT_MODE_SPI:
-            self._b.write(0x80, 0xC0)
+            self._b.gpio_set(0x80, 0xC0)
         elif mode == self.BOOT_MODE_UART:
-            self._b.write(0x40, 0xC0)
+            self._b.gpio_set(0x40, 0xC0)
         else:
             raise MoxTesterInvalidMode(
                 "Trying to set invalid mode: {}".format(mode))
@@ -81,7 +84,7 @@ class _BitBangInterface():
             raise MoxTesterCommunicationException(
                 "Unable to set bitbang mode for port: " + str(interface))
 
-    def read(self, mask=0xFF):
+    def gpio(self, mask=0xFF):
         """Read status of pins. It returns read byte. You can use mask to
         automatically mask some bits. In default all bits are read and
         returned."""
@@ -90,21 +93,75 @@ class _BitBangInterface():
             raise MoxTesterCommunicationException("Reading pins status failed")
         return int.from_bytes(value, 'big') & mask
 
-    def write(self, data, mask=0xFF):
+    def gpio_set(self, data, mask=0xFF):
         "Write pins status. Whole byte at once."
-        value = self.read(mask ^ 0xFF) | (data & mask)
+        value = self.gpio(mask ^ 0xFF) | (data & mask)
         if ftdi.write_data(self.ctx, bytes([value])) < 0:
             raise MoxTesterCommunicationException("Write failed")
 
     def is_set(self, mask=0xFF):
         """Returns True if at least one of bits is set to 1. Mask can be used
         to limit considered bits."""
-        return bool(self.read(mask))
+        return bool(self.gpio(mask))
 
     def set(self, is_set, mask=0xFF):
         """Sets given bits dependning on is_set boolean value. Bits can be
         selected by mask."""
-        self.write(mask if is_set else 0x00, mask)
+        self.gpio_set(mask if is_set else 0x00, mask)
+
+
+class _MPSSEInterface():
+    "FTDI interface in MPSSE mode"
+
+    def __init__(self, device, interface, gpio_mask):
+        self.gpio_mask = gpio_mask & 0xF0  # Mask for GPIO
+        self.ctx = _common_interface_ctx(device, interface)
+        if ftdi.set_bitmode(self.ctx, 0x00, ftdi.BITMODE_MPSSE) < 0:
+            raise MoxTesterCommunicationException(
+                "Unable to set MPSSE mode for port: " + str(interface))
+
+    def _write(self, operation):
+        "Write given program to MPSSE"
+        if ftdi.write_data(self.ctx, bytes(operation)) < 0:
+            raise MoxTesterCommunicationException("Write failed")
+
+    def _read(self):
+        "Read single byte from input from MPSSE"
+        ret, data = ftdi.read_data(self.ctx, 1)
+        if ret < 0:
+            raise MoxTesterCommunicationException("MPSSE read failed")
+        return data[0]
+
+    def gpio(self, mask=0xF0):
+        """Read current GPIO state. You can limit pins by using mask.
+        Note that only four most significant bits are returned unmasked."""
+        self._write((ftdi.GET_BITS_LOW))
+        return self._read() & 0xF0 & mask
+
+    def gpio_set(self, value, mask=0xF0):
+        """Write GPIO state. You can limit pins by using mask. Note that only
+        four most significant bits are used."""
+        value = self.gpio(mask ^ 0xFF) | (value & mask)
+        self._write((ftdi.SET_BITS_LOW, value, self.gpio_mask))
+
+    def is_set(self, mask=0xF0):
+        """Returns True if at least one of bits is set to 1. Mask can be used
+        to limit considered bits."""
+        return bool(self.gpio(mask))
+
+    def set(self, is_set, mask=0xF0):
+        """Sets given bits dependning on is_set boolean value. Bits can be
+        selected by mask."""
+        self.gpio_set(mask if is_set else 0x00, mask)
+
+
+class _SPIInterface(_MPSSEInterface):
+    "FTDI interface in MPSSE mode with SPI functionality"
+
+    def __init__(self, device, interface, gpio_mask):
+        super().__init__(device, interface, gpio_mask)
+
+    # TODO
 
 
 class _UARTInterface():
