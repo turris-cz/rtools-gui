@@ -52,16 +52,17 @@ class MoxTester:
         NOTE: On current Mox Tester this does not work!
         """
         if mode == self.BOOT_MODE_SPI:
-            self._b.gpio_set(0x80, 0xC0)
+            self._b.gpio_set(0xC0, 0xC0)
         elif mode == self.BOOT_MODE_UART:
-            self._b.gpio_set(0x40, 0xC0)
+            #self._b.gpio_set(0x40, 0xC0)
+            self._b.gpio_set(0x00, 0xC0)
         else:
             raise MoxTesterInvalidMode(
                 "Trying to set invalid mode: {}".format(mode))
 
     def reset(self, enabled):
         "Set hardware reset pin of board."
-        self._b.set(not enabled, 0x20)
+        self._b.set(enabled, 0x20)
 
     def uart(self):
         "Returns fdpexpect object for comunication with UART"
@@ -113,8 +114,8 @@ class _BitBangInterface():
 class _MPSSEInterface():
     "FTDI interface in MPSSE mode"
 
-    def __init__(self, device, interface, gpio_mask):
-        self.gpio_mask = gpio_mask & 0xF0  # Mask for GPIO
+    def __init__(self, device, interface, output_mask):
+        self.output_mask = output_mask & 0xF0  # Mask for GPIO
         self.ctx = _common_interface_ctx(device, interface)
         if ftdi.set_bitmode(self.ctx, 0x00, ftdi.BITMODE_MPSSE) < 0:
             raise MoxTesterCommunicationException(
@@ -123,7 +124,7 @@ class _MPSSEInterface():
     def _write(self, operation):
         "Write given program to MPSSE"
         if ftdi.write_data(self.ctx, bytes(operation)) < 0:
-            raise MoxTesterCommunicationException("Write failed")
+            raise MoxTesterCommunicationException("MPSSE write failed")
 
     def _read(self):
         "Read single byte from input from MPSSE"
@@ -135,14 +136,16 @@ class _MPSSEInterface():
     def gpio(self, mask=0xF0):
         """Read current GPIO state. You can limit pins by using mask.
         Note that only four most significant bits are returned unmasked."""
-        self._write((ftdi.GET_BITS_LOW))
-        return self._read() & 0xF0 & mask
+        ret, value = ftdi.read_pins(self.ctx)
+        if ret < 0:
+            raise MoxTesterCommunicationException("Reading pins status failed")
+        return int.from_bytes(value, 'big') * 0xF0 & mask
 
     def gpio_set(self, value, mask=0xF0):
         """Write GPIO state. You can limit pins by using mask. Note that only
         four most significant bits are used."""
         value = self.gpio(mask ^ 0xFF) | (value & mask)
-        self._write((ftdi.SET_BITS_LOW, value, self.gpio_mask))
+        self._write((ftdi.SET_BITS_LOW, value, self.output_mask))
 
     def is_set(self, mask=0xF0):
         """Returns True if at least one of bits is set to 1. Mask can be used
