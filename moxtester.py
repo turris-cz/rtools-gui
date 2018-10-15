@@ -19,7 +19,11 @@ class MoxTester:
         # TODO use devs[1].next to found correct one with chip_id
         dev = devs[1].dev
 
-        self.ctx = dict()
+        # Reset device
+        ftdi.usb_open_dev(ctx, dev)
+        ftdi.usb_reset(ctx)
+        ftdi.deinit(ctx)
+
         # CN1 (detection, power supply and JTAG)
         self._a = _BitBangInterface(dev, ftdi.INTERFACE_A, 0x40)
         self.power(False)
@@ -73,17 +77,22 @@ def _common_interface_ctx(device, interface):
     ctx = ftdi.new()
     ftdi.set_interface(ctx, interface)
     ftdi.usb_open_dev(ctx, device)
+    if ftdi.usb_purge_buffers(ctx) < 0:
+        raise MoxTesterCommunicationException(
+            "Buffers purge failed for port: " + str(interface))
     return ctx
 
 
 class _BitBangInterface():
     "FTDI interface in Bit Bang mode"
 
-    def __init__(self, device, interface, output_mask):
+    def __init__(self, device, interface, output_mask, default_value=0x00):
         self.ctx = _common_interface_ctx(device, interface)
         if ftdi.set_bitmode(self.ctx, output_mask, ftdi.BITMODE_BITBANG) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to set bitbang mode for port: " + str(interface))
+        self.value = default_value
+        self.gpio_set(output_mask, self.value)
 
     def gpio(self, mask=0xFF):
         """Read status of pins. It returns read byte. You can use mask to
@@ -96,8 +105,8 @@ class _BitBangInterface():
 
     def gpio_set(self, data, mask=0xFF):
         "Write pins status. Whole byte at once."
-        value = self.gpio(mask ^ 0xFF) | (data & mask)
-        if ftdi.write_data(self.ctx, bytes([value])) < 0:
+        self.value = (self.value & (mask ^ 0xFF)) | (data & mask)
+        if ftdi.write_data(self.ctx, bytes([self.value])) < 0:
             raise MoxTesterCommunicationException("Write failed")
 
     def is_set(self, mask=0xFF):
@@ -114,12 +123,14 @@ class _BitBangInterface():
 class _MPSSEInterface():
     "FTDI interface in MPSSE mode"
 
-    def __init__(self, device, interface, output_mask):
+    def __init__(self, device, interface, output_mask, default_value=0x00):
         self.output_mask = output_mask & 0xF0  # Mask for GPIO
         self.ctx = _common_interface_ctx(device, interface)
         if ftdi.set_bitmode(self.ctx, 0x00, ftdi.BITMODE_MPSSE) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to set MPSSE mode for port: " + str(interface))
+        self.gpio_value = default_value
+        self.gpio_set(output_mask, self.gpio_value)
 
     def _write(self, operation):
         "Write given program to MPSSE"
@@ -139,13 +150,13 @@ class _MPSSEInterface():
         ret, value = ftdi.read_pins(self.ctx)
         if ret < 0:
             raise MoxTesterCommunicationException("Reading pins status failed")
-        return int.from_bytes(value, 'big') * 0xF0 & mask
+        return int.from_bytes(value, 'big') & mask
 
     def gpio_set(self, value, mask=0xF0):
         """Write GPIO state. You can limit pins by using mask. Note that only
         four most significant bits are used."""
-        value = self.gpio(mask ^ 0xFF) | (value & mask)
-        self._write((ftdi.SET_BITS_LOW, value, self.output_mask))
+        self.gpio_value = (self.gpio_value & (mask ^ 0xFF)) | (value & mask)
+        self._write((ftdi.SET_BITS_LOW, self.gpio_value, self.output_mask))
 
     def is_set(self, mask=0xF0):
         """Returns True if at least one of bits is set to 1. Mask can be used
@@ -178,9 +189,6 @@ class _UARTInterface():
         if ftdi.set_baudrate(self.ctx, 115200) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to set baudrate for port:" + str(interface))
-        if ftdi.usb_purge_rx_buffer(self.ctx) < 0:
-            raise MoxTesterCommunicationException(
-                "UART RX buffer purge failed for port: " + str(interface))
 
         self.socks = socket.socketpair()
         self.threadexit = Event()
