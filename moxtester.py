@@ -22,7 +22,7 @@ class MoxTester:
         # Reset device
         ftdi.usb_open_dev(ctx, dev)
         ftdi.usb_reset(ctx)
-        ftdi.deinit(ctx)
+        ftdi.usb_close(ctx)
 
         # CN1 (detection, power supply and JTAG)
         self._a = _BitBangInterface(dev, ftdi.INTERFACE_A, 0x40)
