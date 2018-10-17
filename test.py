@@ -8,6 +8,7 @@ from moxtester import MoxTester
 
 def main():
     mxt = MoxTester(0)
+    mxt.selftest()
 
     if not mxt.board_present():
         print("Board not inserted")

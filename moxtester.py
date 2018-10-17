@@ -1,5 +1,4 @@
 import io
-import sys
 import socket
 from time import sleep
 from threading import Thread, Event
@@ -37,6 +36,10 @@ class MoxTester:
         self._d = _UARTInterface(dev, ftdi.INTERFACE_D)
         self._uart = None
 
+    def selftest(self):
+        "Runs various self-test operations (such as SPI loopback test)"
+        self._b.spi_selftest()
+
     def power(self, enabled):
         "Set power state of board. In default power is disabled."
         self._a.set(not enabled, 0x40)
@@ -55,10 +58,11 @@ class MoxTester:
 
         NOTE: On current Mox Tester this does not work!
         """
+        # TODO lower bit is negated here because of hardware change on board
+        # durring development. Fix this to be consistent with final board.
         if mode == self.BOOT_MODE_SPI:
             self._b.gpio_set(0xC0, 0xC0)
         elif mode == self.BOOT_MODE_UART:
-            #self._b.gpio_set(0x40, 0xC0)
             self._b.gpio_set(0x00, 0xC0)
         else:
             raise MoxTesterInvalidMode(
@@ -134,15 +138,24 @@ class _MPSSEInterface():
 
     def _write(self, operation):
         "Write given program to MPSSE"
+        if not isinstance(operation, tuple) and not isinstance(operation, list):
+            raise MoxTesterException(
+                "MPSSE Invalid write type:" + str(type(operation)))
         if ftdi.write_data(self.ctx, bytes(operation)) < 0:
             raise MoxTesterCommunicationException("MPSSE write failed")
 
     def _read(self):
-        "Read single byte from input from MPSSE"
-        ret, data = ftdi.read_data(self.ctx, 1)
+        "Read input buffer as a single number"
+        ret, chunk_size = ftdi.read_data_get_chunksize(self.ctx)
+        if ret < 0:
+            raise MoxTesterCommunicationException("Get chunk size failed")
+        ret, data = ftdi.read_data(self.ctx, chunk_size)
         if ret < 0:
             raise MoxTesterCommunicationException("MPSSE read failed")
-        return data[0]
+        elif ret > 0:
+            return int.from_bytes(data[0:ret], 'big')
+        else:
+            return None
 
     def gpio(self, mask=0xF0):
         """Read current GPIO state. You can limit pins by using mask.
@@ -158,6 +171,12 @@ class _MPSSEInterface():
         self.gpio_value = (self.gpio_value & (mask ^ 0xFF)) | (value & mask)
         self._write((ftdi.SET_BITS_LOW, self.gpio_value, self.output_mask))
 
+    def update_output_mask(self, mask=0xF0):
+        """Update mask that is used to set output pins.
+        """
+        self.output_mask = mask
+        self.gpio_set(0x00, 0x00)  # Does no GPIO change except of orientation
+
     def is_set(self, mask=0xF0):
         """Returns True if at least one of bits is set to 1. Mask can be used
         to limit considered bits."""
@@ -171,11 +190,89 @@ class _MPSSEInterface():
 
 class _SPIInterface(_MPSSEInterface):
     "FTDI interface in MPSSE mode with SPI functionality"
+    SPI_READ = ftdi.MPSSE_DO_READ
+    SPI_WRITE = ftdi.MPSSE_DO_WRITE
+    SPI_SWAP = ftdi.MPSSE_DO_READ | ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_READ_NEG
 
-    def __init__(self, device, interface, gpio_mask):
-        super().__init__(device, interface, gpio_mask)
+    def __init__(self, device, interface, gpio_output_mask, gpio_default=0x00):
+        super().__init__(device, interface, gpio_output_mask, gpio_default)
+        if ftdi.set_line_property(
+                self.ctx, ftdi.BITS_8, ftdi.STOP_BIT_1, ftdi.NONE):
+            raise MoxTesterCommunicationException(
+                "Line property setup failed for interface: " + str(interface))
+        if ftdi.setflowctrl(self.ctx, ftdi.SIO_DISABLE_FLOW_CTRL) < 0:
+            raise MoxTesterCommunicationException(
+                "Flow control setup failed for interface: " + str(interface))
+        self.enabled = False
 
-    # TODO
+    def spi_enable(self, enable):
+        """Enables/Disables SPI outputs.
+        """
+        if enable:
+            self.update_output_mask((self.output_mask & 0xF0) | 0x0B)
+        else:
+            self.update_output_mask(self.output_mask & 0xF0)
+        self.enabled = enable
+
+    def spi_burst(self, burst):
+        """Send given burst to target device. Burst is table of pairs of
+        operations (either SPI_WRITE or SPI_READ). For SPI_WRITE second operand
+        has to be value of bytes type. For SPI_READ second operant has to be
+        number of bytes to be read."""
+        if not self.enabled:
+            raise MoxTesterSPIException("Not enabled")
+        operations = []
+        for operation in burst:
+            opcode = operation[0]
+            count = operation[1]
+            if count < 1 or count > 65536:
+                raise MoxTesterException(
+                    "SPI size not possible: " + str(count))
+            if opcode != self.SPI_READ and opcode != self.SPI_WRITE and \
+                    opcode != self.SPI_SWAP:
+                raise MoxTesterException(
+                    "SPI invalid operation: " + hex(opcode))
+            operations.append(opcode)
+            operations.append((count - 1) % 0xFF)
+            operations.append((count - 1) // 0xFF)
+            if opcode == self.SPI_WRITE or opcode == self.SPI_SWAP:
+                for i in range(count):
+                    operations.append((operation[2] >> 8*i) & 0xFF)
+        print(operations)
+        self.gpio_set(0x08, True)
+        self._write(operations)
+        self.gpio_set(0x08, False)
+        return self._read()
+
+    def spi_loopback(self, enable):
+        "Set SPI loopback. Note that this automaticaly disabled SPI output."
+        self._write((
+            ftdi.LOOPBACK_START if enable else ftdi.LOOPBACK_END,))
+        self.spi_enable(False)
+        self.enabled = enable
+
+    def spi_selftest(self):
+        """Runs self-test of SPI interface (checks loopback)
+        It sends bogus opcode. Respond should be "bad command" (0xFA) and
+        invalid opcode. All this is done in loopback mode to not distort
+        potential hardware.
+        """
+        self.spi_loopback(True)
+        ftdi.usb_purge_buffers(self.ctx)
+        self._write((0xAB,))
+        read = self._read()
+        if read != 0xFAAB:
+            raise MoxTesterSPITestFail(
+                "Invalid respond on bogus command " +
+                "(expected 0xfaab but received {})".format(hex(read)))
+        data = self.spi_burst((
+            (self.SPI_SWAP, 1, 0x42),
+            ))
+        if data != 0x42:
+            raise MoxTesterSPITestFail(
+                "Invalid value read on loopkback " +
+                "(expected 0x42 but received {})".format(hex(data)))
+        self.spi_loopback(False)
 
 
 class _UARTInterface():
