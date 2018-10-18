@@ -4,6 +4,7 @@ from time import sleep
 from threading import Thread, Event
 from pexpect import fdpexpect
 import ftdi1 as ftdi
+from moxtester_spiflash import SPIFlash
 
 
 class MoxTester:
@@ -75,6 +76,13 @@ class MoxTester:
     def uart(self):
         "Returns fdpexpect object for comunication with UART"
         return self._d.pexpect()
+
+    def spiflash(self):
+        """Return instance of SPIFlash to control flash.
+        Note that this automatically sets reset and power to enabled state when
+        entered.
+        """
+        return SPIFlash(self, self._b)
 
 
 def _common_interface_ctx(device, interface):
@@ -191,19 +199,22 @@ class _MPSSEInterface():
 class _SPIInterface(_MPSSEInterface):
     "FTDI interface in MPSSE mode with SPI functionality"
     SPI_READ = ftdi.MPSSE_DO_READ
-    SPI_WRITE = ftdi.MPSSE_DO_WRITE
+    SPI_WRITE = ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_WRITE_NEG
     SPI_SWAP = ftdi.MPSSE_DO_READ | ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_READ_NEG
 
     def __init__(self, device, interface, gpio_output_mask, gpio_default=0x00):
         super().__init__(device, interface, gpio_output_mask, gpio_default)
-        if ftdi.set_line_property(
-                self.ctx, ftdi.BITS_8, ftdi.STOP_BIT_1, ftdi.NONE):
-            raise MoxTesterCommunicationException(
-                "Line property setup failed for interface: " + str(interface))
         if ftdi.setflowctrl(self.ctx, ftdi.SIO_DISABLE_FLOW_CTRL) < 0:
             raise MoxTesterCommunicationException(
                 "Flow control setup failed for interface: " + str(interface))
         self.enabled = False
+        self._write((
+            ftdi.EN_DIV_5,  # Enable divide by 5 of internal clock
+            ftdi.DIS_3_PHASE,  # Disable 3 phase data clocking
+            ftdi.DIS_ADAPTIVE,  # Disable adaprive clocking
+            ftdi.TCK_DIVISOR, 0, 0,  # Set clock to 6MHz
+            ))
+        self.gpio_value = (self.gpio_value | 0xF0) | 0x09
 
     def spi_enable(self, enable):
         """Enables/Disables SPI outputs.
@@ -239,9 +250,9 @@ class _SPIInterface(_MPSSEInterface):
                 for i in range(count):
                     operations.append((operation[2] >> 8*i) & 0xFF)
         print(operations)
-        self.gpio_set(0x08, True)
+        self.set(False, 0x08)
         self._write(operations)
-        self.gpio_set(0x08, False)
+        self.set(True, 0x08)
         return self._read()
 
     def spi_loopback(self, enable):
@@ -286,6 +297,10 @@ class _UARTInterface():
         if ftdi.set_baudrate(self.ctx, 115200) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to set baudrate for port:" + str(interface))
+        if ftdi.set_line_property(
+                self.ctx, ftdi.BITS_8, ftdi.STOP_BIT_1, ftdi.NONE):
+            raise MoxTesterCommunicationException(
+                "Line property setup failed for interface: " + str(interface))
 
         self.socks = socket.socketpair()
         self.threadexit = Event()
@@ -353,7 +368,11 @@ class MoxTesterInvalidMode(MoxTesterException):
     pass
 
 
-class MoxTesterAlreadyInUse(MoxTesterException):
-    """Tester it self or port is already instantiated and should be closed
-    before new one is opened."""
+class MoxTesterSPIException(MoxTesterException):
+    """SPI generic exceptionn."""
+    pass
+
+
+class MoxTesterSPITestFail(MoxTesterSPIException):
+    """SPI test of Mox tester failed for some reason."""
     pass
