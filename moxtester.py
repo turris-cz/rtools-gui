@@ -213,9 +213,6 @@ class _MPSSEInterface():
 
 class _SPIInterface(_MPSSEInterface):
     "FTDI interface in MPSSE mode with SPI functionality"
-    SPI_READ = ftdi.MPSSE_DO_READ
-    SPI_WRITE = ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_WRITE_NEG
-    SPI_SWAP = ftdi.MPSSE_DO_READ | ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_READ_NEG
 
     def __init__(self, device, interface, gpio_output_mask, gpio_default=0x00):
         super().__init__(device, interface, gpio_output_mask, gpio_default)
@@ -229,45 +226,74 @@ class _SPIInterface(_MPSSEInterface):
             ftdi.DIS_ADAPTIVE,  # Disable adaprive clocking
             ftdi.TCK_DIVISOR, 0, 0,  # Set clock to 6MHz
             ))
-        self.gpio_value = (self.gpio_value | 0xF0) | 0x09
+        self.spi_burst_new()
 
     def spi_enable(self, enable):
         """Enables/Disables SPI outputs.
         """
         if enable:
+            self.gpio_value = (self.gpio_value & 0xF0) | 0x09
             self.update_output_mask((self.output_mask & 0xF0) | 0x0B)
         else:
+            self.gpio_value = self.gpio_value & 0xF0
             self.update_output_mask(self.output_mask & 0xF0)
         self.enabled = enable
 
-    def spi_burst(self, burst):
-        """Send given burst to target device. Burst is table of pairs of
-        operations (either SPI_WRITE or SPI_READ). For SPI_WRITE second operand
-        has to be value of bytes type. For SPI_READ second operant has to be
-        number of bytes to be read."""
-        if not self.enabled:
-            raise MoxTesterSPIException("Not enabled")
-        operations = []
-        for operation in burst:
-            opcode = operation[0]
-            count = operation[1]
-            if count < 1 or count > 65536:
-                raise MoxTesterException(
-                    "SPI size not possible: " + str(count))
-            if opcode != self.SPI_READ and opcode != self.SPI_WRITE and \
-                    opcode != self.SPI_SWAP:
-                raise MoxTesterException(
-                    "SPI invalid operation: " + hex(opcode))
-            operations.append(opcode)
-            operations.append((count - 1) % 0xFF)
-            operations.append((count - 1) // 0xFF)
-            if opcode == self.SPI_WRITE or opcode == self.SPI_SWAP:
-                for i in range(count):
-                    operations.append((operation[2] >> 8*i) & 0xFF)
-        self.set(False, 0x08)
-        self._write(operations)
-        self.set(True, 0x08)
-        return self._read()
+    def spi_burst_new(self):
+        """Drop currently lined up burst."""
+        self._burst = []
+        self._spi_cs(True)
+
+    def _spi_cs(self, select):
+        self._burst.append(ftdi.SET_BITS_LOW)
+        self._burst.append(
+            (self.gpio_value & 0xF0) | (0x01 if select else 0x09))
+        self._burst.append(self.output_mask)
+
+    def spi_burst_cs_reset(self):
+        """Add chip select reset to current burst.
+        This unsets and sets chip select pin. This is usable when device
+        requires you to unselect it to finish single command.
+        """
+        self._spi_cs(False)
+        self._spi_cs(True)
+
+    def spi_burst_read(self, size=1):
+        """Add byte read to burst. Number of bytes can be specified in size
+        argument."""
+        self._burst.append(ftdi.MPSSE_DO_READ)
+        self._burst.append((size - 1) % 0xFF)
+        self._burst.append((size - 1) // 0xFF)
+
+    def spi_burst_write_int(self, value, size=1):
+        """Write integer as a type of given size in bytes.
+        """
+        self._burst.append(ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_WRITE_NEG)
+        self._burst.append((size - 1) % 0xFF)
+        self._burst.append((size - 1) // 0xFF)
+        for i in range(size):
+            self._burst.append((value >> 8*i) & 0xFF)
+
+    def spi_burst_swap_int(self, value, size=1):
+        """Swap given amount of bytes with target device. This means that write
+        and read is executed together. First value is written and then it is
+        read."""
+        self._burst.append(
+            ftdi.MPSSE_DO_READ | ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_READ_NEG)
+        self._burst.append((size - 1) % 0xFF)
+        self._burst.append((size - 1) // 0xFF)
+        for i in range(size):
+            self._burst.append((value >> 8*i) & 0xFF)
+
+    def spi_burst(self):
+        """Run prepared burst and return read result.
+        Use spi_burst_* methods to add operations to single burst.
+        """
+        self._spi_cs(False)
+        self._write(self._burst)
+        data = self._read()
+        self.spi_burst_new()
+        return data
 
     def spi_loopback(self, enable):
         "Set SPI loopback. Note that this automaticaly disabled SPI output."
@@ -290,9 +316,9 @@ class _SPIInterface(_MPSSEInterface):
             raise MoxTesterSPITestFail(
                 "Invalid respond on bogus command " +
                 "(expected 0xfaab but received {})".format(hex(read)))
-        data = self.spi_burst((
-            (self.SPI_SWAP, 1, 0x42),
-            ))
+        self.spi_burst_new()
+        self.spi_burst_swap_int(0x42, 1)
+        data = self.spi_burst()
         if data != 0x42:
             raise MoxTesterSPITestFail(
                 "Invalid value read on loopkback " +
