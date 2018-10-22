@@ -7,7 +7,7 @@ from moxtester import MoxTester
 #print(fd.expect(['->', 'test']))
 
 def main():
-    mxt = MoxTester(0)
+    mxt = MoxTester(1)
     mxt.selftest()
 
     if not mxt.board_present():

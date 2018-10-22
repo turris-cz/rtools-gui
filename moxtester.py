@@ -14,15 +14,30 @@ class MoxTester:
 
     def __init__(self, chip_id):
         ctx = ftdi.new()
-        devs = ftdi.usb_find_all(ctx, 0x0403, 0x6011)
-        # TODO handle no board connected
-        # TODO use devs[1].next to found correct one with chip_id
-        dev = devs[1].dev
-
-        # Reset device
-        ftdi.usb_open_dev(ctx, dev)
-        ftdi.usb_reset(ctx)
-        ftdi.usb_close(ctx)
+        ret, devs = ftdi.usb_find_all(ctx, 0x0403, 0x6011)
+        if ret < 0:
+            raise MoxTesterCommunicationException("Unable to list USB devices")
+        dev = None
+        while dev is None and devs is not None:
+            # Ignore any device that fails open (those are in use)
+            if ftdi.usb_open_dev(ctx, devs.dev) == 0:
+                if ftdi.read_eeprom(ctx) < 0:
+                    raise MoxTesterCommunicationException("EEPROM read failed")
+                if ftdi.eeprom_decode(ctx, 0) < 0:
+                    raise MoxTesterCommunicationException(
+                        'EEPROM decode failed')
+                ret, chip_tp = ftdi.get_eeprom_value(ctx, ftdi.CHIP_TYPE)
+                if ret < 0:
+                    raise MoxTesterCommunicationException(
+                        "Reading chip type (id) failed")
+                if chip_tp == chip_id:
+                    dev = devs.dev  # Setting dev if correct device found
+                ftdi.usb_reset(ctx)
+                ftdi.usb_close(ctx)
+            devs = devs.next
+        if dev is None:
+            raise MoxTesterNotFoundException(
+                "There is no connected tester with id: " + str(chip_id))
 
         # CN1 (detection, power supply and JTAG)
         self._a = _BitBangInterface(dev, ftdi.INTERFACE_A, 0x40)
@@ -249,7 +264,6 @@ class _SPIInterface(_MPSSEInterface):
             if opcode == self.SPI_WRITE or opcode == self.SPI_SWAP:
                 for i in range(count):
                     operations.append((operation[2] >> 8*i) & 0xFF)
-        print(operations)
         self.set(False, 0x08)
         self._write(operations)
         self.set(True, 0x08)
@@ -354,6 +368,12 @@ class _UARTInterface():
 
 class MoxTesterException(Exception):
     """Generic exception raised from MoxTester class."""
+    pass
+
+
+class MoxTesterNotFoundException(MoxTesterException):
+    """Mox tester of provided id is not connected to this PC or is in use
+    already."""
     pass
 
 

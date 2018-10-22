@@ -33,6 +33,7 @@ def main():
     if ret < 0:
         exit('Unable to read value from EEPROM')
 
+    # NOTE: original 86
     if type_val > 0 and type_val < 4:
         print('Connected Mox Tester seems to have valid ID: ' + str(type_val))
         input("Press Enter to continue...")
