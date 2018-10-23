@@ -2,9 +2,6 @@
 from time import sleep
 from moxtester import MoxTester
 
-# with open('test', 'r') as file:
-#fd = fdpexpect.fdspawn(file)
-#print(fd.expect(['->', 'test']))
 
 def main():
     mxt = MoxTester(1)
@@ -14,21 +11,26 @@ def main():
         print("Board not inserted")
         return
 
-    #mxt.power(True)
-    #with mxt.uart() as uart:
-        #mxt.set_boot_mode(mxt.BOOT_MODE_SPI)
-        #mxt.reset(False)
-        #uart.expect(['Hit any key to stop autoboot'])
-        #uart.send('\n')
-        #uart.expect(['=>'])
-        #uart.send('help\n')
-        #uart.expect(['=>'])
-
+    print("SPI flash")
     with mxt.spiflash() as flash:
         flash.reset_device()
-        print(hex(flash.jedec_id()))
-        print(flash.read_data(0x00, 256))
+        with open('untrusted-flash-image.bin', 'rb') as file:
+            data = file.read()[0:1 << 16]
+            flash.write(0x0, data)
+            if not flash.verify(0x0, data):
+                exit("SPI image verification failed")
+    return
 
+    print("power up test")
+    mxt.set_boot_mode(mxt.BOOT_MODE_SPI)
+    mxt.power(True)
+    with mxt.uart() as uart:
+        mxt.reset(False)
+        uart.expect(['Hit any key to stop autoboot'])
+        uart.send('\n')
+        uart.expect(['=>'])
+        uart.send('help\n')
+        uart.expect(['=>'])
     mxt.power(False)
 
 

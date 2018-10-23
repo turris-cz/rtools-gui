@@ -1,4 +1,5 @@
 from time import sleep
+from moxtester_exceptions import MoxTesterSPIFLashUnalignedException
 
 
 class SPIFlash():
@@ -11,6 +12,9 @@ class SPIFlash():
     _JEDEC_ID = 0x9F
     _ENABLE_RESET = 0x66
     _RESET_DEVICE = 0x99
+    _CHIP_ERASE = 0x60  # 0xC7 seems to be also valid
+    _SECTOR_ERASE = 0x20
+    _PAGE_PROGRAM = 0x02
     _READ_DATA = 0x03
 
     def __init__(self, moxtester, spi_interface):
@@ -61,7 +65,6 @@ class SPIFlash():
         self.spi.spi_burst_cs_reset()
         self.spi.spi_burst_write_int(self._READ_STATUS_REGISTER_1)
         self.spi.spi_burst_read()
-        self.spi.spi_burst_cs_reset()
         return self.spi.spi_burst_int()
 
     def jedec_id(self):
@@ -71,12 +74,116 @@ class SPIFlash():
         self.spi.spi_burst_read(3)
         return self.spi.spi_burst_int()
 
+    def is_busy(self):
+        "Returns True or False depending on if SPI Flash is busy or not."
+        self.spi.spi_burst_new()
+        self.spi.spi_burst_write_int(self._READ_STATUS_REGISTER_1)
+        self.spi.spi_burst_read()
+        return bool(self.spi.spi_burst_int() & 0x01)
+
+    def busy_wait(self):
+        "Busy wait until SPI Flash is not busy."
+        while self.is_busy():
+            pass
+
     def read_data(self, address, size=1):
         """Read data from SPI flash from given address. At single read it is
         possible to read multiple bytes. Fot that purpose you can use size
         argument."""
+        # We have maximum amount of possible read bytes per single read so we
+        # have to do it multiple times
+        sectors = self._sectors_count(size, 0x10000)
+        data = bytes()
+        for i in range(sectors):
+            self.spi.spi_burst_new()
+            self.spi.spi_burst_write_int(self._READ_DATA)
+            self.spi.spi_burst_write_int(address + (0x10000*i), 3)
+            if i >= (sectors - 1) and size % 0x10000 != 0:
+                self.spi.spi_burst_read(size % 0x10000)
+            else:
+                self.spi.spi_burst_read(0x10000)
+            data = data + self.spi.spi_burst()
+        return data
+
+    def chip_erase(self):
+        """Erase content of chip."""
         self.spi.spi_burst_new()
-        self.spi.spi_burst_write_int(self._READ_DATA)
+        self.spi.spi_burst_write_int(self._WRITE_ENABLE)
+        self.spi.spi_burst_cs_reset()
+        self.spi.spi_burst_write_int(self._CHIP_ERASE)
+        self.spi.spi_burst()
+        self.busy_wait()
+
+    def sector_erase(self, address):
+        """Erase single 4KB sector."""
+        self.spi.spi_burst_new()
+        self.spi.spi_burst_write_int(self._WRITE_ENABLE)
+        self.spi.spi_burst_cs_reset()
+        self.spi.spi_burst_write_int(self._SECTOR_ERASE)
         self.spi.spi_burst_write_int(address, 3)
-        self.spi.spi_burst_read(size)
-        return self.spi.spi_burst()
+        self.spi.spi_burst()
+        self.busy_wait()
+
+    def write_page(self, address, data):
+        """Write data to single page (256B) in SPI Flash.
+        Page has to be erased before write is attempted.
+        """
+        self.spi.spi_burst_new()
+        self.spi.spi_burst_write_int(self._WRITE_ENABLE)
+        self.spi.spi_burst_cs_reset()
+        self.spi.spi_burst_write_int(self._PAGE_PROGRAM)
+        self.spi.spi_burst_write_int(address, 3)
+        self.spi.spi_burst_write(data)
+        self.spi.spi_burst()
+        self.busy_wait()
+
+    @staticmethod
+    def _sectors_count(data_len, sector_size):
+        """Returns number of sectors for given data to fit to if sector has
+        sector_size.
+        data_len: number of bytes of data
+        sector_size: number of bytes per sector"""
+        res = data_len // sector_size
+        if (data_len % sector_size) > 0:
+            res = res + 1
+        return res
+
+    def write_data(self, address, data):
+        """Write given data from given address of memory. You should wipe
+        target sector before calling this function. After wipe you can call
+        this multiple times but only on non-overlapping sections."""
+        for i in range(self._sectors_count(len(data), 0x100)):
+            #print(hex(address + (256*i)))
+            self.write_page(address + (256*i), data[(256*i):(256*(i+1))])
+
+    def write(self, address, data):
+        """Write data to given address. This method tries to be smart and does
+        as little as possible. It wipes memory at 4KB sectors and does that
+        only if data in memory does not match provided data."""
+        if address & 0xFFF != 0:
+            raise MoxTesterSPIFLashUnalignedException(
+                "Write has to be aligned to 4KB sector")
+        secnum = self._sectors_count(len(data), 0x1000)
+        for i in range(secnum):
+            secaddr = address + (i * 0x1000)
+            target = data[(i*0x1000):((i+1)*0x1000)]
+            current = self.read_data(secaddr, 0x1000)
+            print(hex(secaddr))
+            if target != current[0:len(target)]:
+                print("Updating")
+                self.sector_erase(secaddr)
+                self.write_data(secaddr, target)
+
+    def verify(self, address, data):
+        """Verify content of SPI Flash that from given address it contains
+        given data."""
+        current = self.read_data(address, len(data))
+        with open('current.bin', 'wb') as file:
+            file.write(current)
+        assert len(current) == len(data)
+        for x in range(len(current)):
+            if current[x] != data[x]:
+                print("Difference on: " + hex(x))
+                print(hex(current[x]) + " vs " + hex(data[x]))
+                exit("Go Fix it")
+        return data == current

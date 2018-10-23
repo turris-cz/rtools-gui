@@ -5,6 +5,12 @@ from threading import Thread, Event
 from pexpect import fdpexpect
 import ftdi1 as ftdi
 from moxtester_spiflash import SPIFlash
+from moxtester_exceptions import MoxTesterException
+from moxtester_exceptions import MoxTesterNotFoundException
+from moxtester_exceptions import MoxTesterCommunicationException
+from moxtester_exceptions import MoxTesterInvalidMode
+from moxtester_exceptions import MoxTesterSPIException
+from moxtester_exceptions import MoxTesterSPITestFail
 
 
 class MoxTester:
@@ -166,10 +172,7 @@ class _MPSSEInterface():
 
     def _write(self, operation):
         "Write given program to MPSSE"
-        if not isinstance(operation, tuple) and not isinstance(operation, list):
-            raise MoxTesterException(
-                "MPSSE Invalid write type:" + str(type(operation)))
-        if ftdi.write_data(self.ctx, bytes(operation)) < 0:
+        if ftdi.write_data(self.ctx, operation) < 0:
             raise MoxTesterCommunicationException("MPSSE write failed")
 
     def _read(self):
@@ -177,20 +180,16 @@ class _MPSSEInterface():
         ret, chunk_size = ftdi.read_data_get_chunksize(self.ctx)
         if ret < 0:
             raise MoxTesterCommunicationException("Get chunk size failed")
-        ret, data = ftdi.read_data(self.ctx, chunk_size)
-        if ret < 0:
-            raise MoxTesterCommunicationException("MPSSE read failed")
-        elif ret > 0:
-            return data[0:ret]
-        else:
-            return None
-
-    def _read_int(self):
-        "Read input buffer as a single number"
-        value = self._read()
-        if value is not None:
-            return int.from_bytes(value, 'big')
-        return value
+        data = bytes()
+        while True:
+            ret, new_data = ftdi.read_data(self.ctx, chunk_size)
+            if ret < 0:
+                raise MoxTesterCommunicationException("MPSSE read failed")
+            elif ret > 0:
+                data = data + new_data[0:ret]
+            else:
+                # No more data to be read so return what we have
+                return data
 
     def gpio(self, mask=0xF0):
         """Read current GPIO state. You can limit pins by using mask.
@@ -204,7 +203,8 @@ class _MPSSEInterface():
         """Write GPIO state. You can limit pins by using mask. Note that only
         four most significant bits are used."""
         self.gpio_value = (self.gpio_value & (mask ^ 0xFF)) | (value & mask)
-        self._write((ftdi.SET_BITS_LOW, self.gpio_value, self.output_mask))
+        self._write(bytes(
+            (ftdi.SET_BITS_LOW, self.gpio_value, self.output_mask)))
 
     def update_output_mask(self, mask=0xF0):
         """Update mask that is used to set output pins.
@@ -232,12 +232,12 @@ class _SPIInterface(_MPSSEInterface):
             raise MoxTesterCommunicationException(
                 "Flow control setup failed for interface: " + str(interface))
         self.enabled = False
-        self._write((
+        self._write(bytes((
             ftdi.EN_DIV_5,  # Enable divide by 5 of internal clock
             ftdi.DIS_3_PHASE,  # Disable 3 phase data clocking
             ftdi.DIS_ADAPTIVE,  # Disable adaprive clocking
             ftdi.TCK_DIVISOR, 0, 0,  # Set clock to 6MHz
-            ))
+            )))
         self.spi_burst_new()
 
     def spi_enable(self, enable):
@@ -253,14 +253,15 @@ class _SPIInterface(_MPSSEInterface):
 
     def spi_burst_new(self):
         """Drop currently lined up burst."""
-        self._burst = []
+        self._burst = bytes()
         self._spi_cs(True)
 
     def _spi_cs(self, select):
-        self._burst.append(ftdi.SET_BITS_LOW)
-        self._burst.append(
-            (self.gpio_value & 0xF0) | (0x01 if select else 0x09))
-        self._burst.append(self.output_mask)
+        self._burst = self._burst + bytes((
+            ftdi.SET_BITS_LOW,
+            (self.gpio_value & 0xF0) | (0x01 if select else 0x09),
+            self.output_mask,
+            ))
 
     def spi_burst_cs_reset(self):
         """Add chip select reset to current burst.
@@ -273,29 +274,37 @@ class _SPIInterface(_MPSSEInterface):
     def spi_burst_read(self, size=1):
         """Add byte read to burst. Number of bytes can be specified in size
         argument."""
-        self._burst.append(ftdi.MPSSE_DO_READ)
-        self._burst.append((size - 1) % 0xFF)
-        self._burst.append((size - 1) // 0xFF)
+        if size < 1 or size > (0x10000):
+            raise MoxTesterSPIException(
+                "Not supported size for single read: " + str(size))
+        self._burst = self._burst + bytes((
+            ftdi.MPSSE_DO_READ,
+            (size - 1) % 0x100,
+            (size - 1) // 0x100,
+            ))
 
-    def spi_burst_write_int(self, value, size=1):
+    def _spi_burst_write_common(self, size):
+        if size < 1 or size > (0x10000):
+            raise MoxTesterSPIException(
+                "Not supported size for single write: " + str(size))
+        self._burst = self._burst + bytes((
+            ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_WRITE_NEG,
+            (size - 1) % 0x100,
+            (size - 1) // 0x100,
+            ))
+
+    def spi_burst_write(self, data):
+        """Write bytes.
+        """
+        self._spi_burst_write_common(len(data))
+        self._burst = self._burst + data
+
+    def spi_burst_write_int(self, value, size=1, bigendian=True):
         """Write integer as a type of given size in bytes.
         """
-        self._burst.append(ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_WRITE_NEG)
-        self._burst.append((size - 1) % 0xFF)
-        self._burst.append((size - 1) // 0xFF)
-        for i in range(size):
-            self._burst.append((value >> 8*i) & 0xFF)
-
-    def spi_burst_swap_int(self, value, size=1):
-        """Swap given amount of bytes with target device. This means that write
-        and read is executed together. First value is written and then it is
-        read."""
-        self._burst.append(
-            ftdi.MPSSE_DO_READ | ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_READ_NEG)
-        self._burst.append((size - 1) % 0xFF)
-        self._burst.append((size - 1) // 0xFF)
-        for i in range(size):
-            self._burst.append((value >> 8*i) & 0xFF)
+        self._spi_burst_write_common(size)
+        self._burst = self._burst + value.to_bytes(
+            size, 'big' if bigendian else 'little')
 
     def spi_burst(self):
         """Run prepared burst and return read result.
@@ -318,8 +327,8 @@ class _SPIInterface(_MPSSEInterface):
 
     def spi_loopback(self, enable):
         "Set SPI loopback. Note that this automaticaly disabled SPI output."
-        self._write((
-            ftdi.LOOPBACK_START if enable else ftdi.LOOPBACK_END,))
+        self._write(bytes((
+            ftdi.LOOPBACK_START if enable else ftdi.LOOPBACK_END,)))
         self.spi_enable(False)
         self.enabled = enable
 
@@ -331,15 +340,17 @@ class _SPIInterface(_MPSSEInterface):
         """
         self.spi_loopback(True)
         ftdi.usb_purge_buffers(self.ctx)
-        self._write((0xAB,))
-        read = self._read_int()
+        self._write(bytes((0xAB,)))
+        read = int.from_bytes(self._read(), 'big')
         if read != 0xFAAB:
             raise MoxTesterSPITestFail(
                 "Invalid respond on bogus command " +
                 "(expected 0xfaab but received {})".format(hex(read)))
-        self.spi_burst_new()
-        self.spi_burst_swap_int(0x42, 1)
-        data = self.spi_burst_int()
+        self._write(bytes((
+            ftdi.MPSSE_DO_READ | ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_READ_NEG,
+            0, 0, 0x42,
+            )))
+        data = int.from_bytes(self._read(), 'big')
         if data != 0x42:
             raise MoxTesterSPITestFail(
                 "Invalid value read on loopkback " +
@@ -411,35 +422,3 @@ class _UARTInterface():
     def pexpect(self):
         "Returns fdpexpect handle."
         return fdpexpect.fdspawn(self.socks[1].fileno())
-
-
-class MoxTesterException(Exception):
-    """Generic exception raised from MoxTester class."""
-    pass
-
-
-class MoxTesterNotFoundException(MoxTesterException):
-    """Mox tester of provided id is not connected to this PC or is in use
-    already."""
-    pass
-
-
-class MoxTesterCommunicationException(MoxTesterException):
-    """Exception raised by MoxTester when problem is encountered durring tester
-    communication."""
-    pass
-
-
-class MoxTesterInvalidMode(MoxTesterException):
-    """Trying to set invalid mode."""
-    pass
-
-
-class MoxTesterSPIException(MoxTesterException):
-    """SPI generic exceptionn."""
-    pass
-
-
-class MoxTesterSPITestFail(MoxTesterSPIException):
-    """SPI test of Mox tester failed for some reason."""
-    pass
