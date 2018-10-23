@@ -168,7 +168,7 @@ class _MPSSEInterface():
             raise MoxTesterCommunicationException("MPSSE write failed")
 
     def _read(self):
-        "Read input buffer as a single number"
+        "Read input buffer as bytes"
         ret, chunk_size = ftdi.read_data_get_chunksize(self.ctx)
         if ret < 0:
             raise MoxTesterCommunicationException("Get chunk size failed")
@@ -176,9 +176,16 @@ class _MPSSEInterface():
         if ret < 0:
             raise MoxTesterCommunicationException("MPSSE read failed")
         elif ret > 0:
-            return int.from_bytes(data[0:ret], 'big')
+            return data[0:ret]
         else:
             return None
+
+    def _read_int(self):
+        "Read input buffer as a single number"
+        value = self._read()
+        if value is not None:
+            return int.from_bytes(value, 'big')
+        return value
 
     def gpio(self, mask=0xF0):
         """Read current GPIO state. You can limit pins by using mask.
@@ -295,6 +302,15 @@ class _SPIInterface(_MPSSEInterface):
         self.spi_burst_new()
         return data
 
+    def spi_burst_int(self):
+        """Run prepared burst and return read result as a single integer
+        number. Use spi_burst_* methods to add operations to single burst.
+        """
+        value = self.spi_burst()
+        if value is not None:
+            return int.from_bytes(value, 'big')
+        return value
+
     def spi_loopback(self, enable):
         "Set SPI loopback. Note that this automaticaly disabled SPI output."
         self._write((
@@ -311,14 +327,14 @@ class _SPIInterface(_MPSSEInterface):
         self.spi_loopback(True)
         ftdi.usb_purge_buffers(self.ctx)
         self._write((0xAB,))
-        read = self._read()
+        read = self._read_int()
         if read != 0xFAAB:
             raise MoxTesterSPITestFail(
                 "Invalid respond on bogus command " +
                 "(expected 0xfaab but received {})".format(hex(read)))
         self.spi_burst_new()
         self.spi_burst_swap_int(0x42, 1)
-        data = self.spi_burst()
+        data = self.spi_burst_int()
         if data != 0x42:
             raise MoxTesterSPITestFail(
                 "Invalid value read on loopkback " +
