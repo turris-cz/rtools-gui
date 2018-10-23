@@ -19,6 +19,9 @@ class SPIFlash():
 
     def __enter__(self):
         self.spi.spi_enable(True)
+        # Note: setting boot mode to UART is required because otherwise CPU has
+        # SPI ports configured as outputs and interferes with our SPI usage.
+        # This is happening even if CPU is in reset!
         self.moxtester.set_boot_mode(self.moxtester.BOOT_MODE_UART)
         self.moxtester.reset(True)
         self.moxtester.power(True)
