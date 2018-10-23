@@ -153,7 +153,6 @@ class SPIFlash():
         target sector before calling this function. After wipe you can call
         this multiple times but only on non-overlapping sections."""
         for i in range(self._sectors_count(len(data), 0x100)):
-            #print(hex(address + (256*i)))
             self.write_page(address + (256*i), data[(256*i):(256*(i+1))])
 
     def write(self, address, data):
@@ -168,9 +167,7 @@ class SPIFlash():
             secaddr = address + (i * 0x1000)
             target = data[(i*0x1000):((i+1)*0x1000)]
             current = self.read_data(secaddr, 0x1000)
-            print(hex(secaddr))
             if target != current[0:len(target)]:
-                print("Updating")
                 self.sector_erase(secaddr)
                 self.write_data(secaddr, target)
 
@@ -178,12 +175,5 @@ class SPIFlash():
         """Verify content of SPI Flash that from given address it contains
         given data."""
         current = self.read_data(address, len(data))
-        with open('current.bin', 'wb') as file:
-            file.write(current)
         assert len(current) == len(data)
-        for x in range(len(current)):
-            if current[x] != data[x]:
-                print("Difference on: " + hex(x))
-                print(hex(current[x]) + " vs " + hex(data[x]))
-                exit("Go Fix it")
         return data == current

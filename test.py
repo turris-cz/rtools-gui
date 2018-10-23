@@ -15,11 +15,10 @@ def main():
     with mxt.spiflash() as flash:
         flash.reset_device()
         with open('untrusted-flash-image.bin', 'rb') as file:
-            data = file.read()[0:1 << 16]
+            data = file.read()
             flash.write(0x0, data)
             if not flash.verify(0x0, data):
                 exit("SPI image verification failed")
-    return
 
     print("power up test")
     mxt.set_boot_mode(mxt.BOOT_MODE_SPI)
