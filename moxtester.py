@@ -94,8 +94,13 @@ class MoxTester:
 
     def spiflash(self):
         """Return instance of SPIFlash to control flash.
-        Note that this automatically sets reset and power to enabled state when
-        entered.
+        Object returned from this function has to be used with 'with'
+        statement. Note that entering 'with' statement automatically power ups
+        board, sets it to reset state, configures needed pins as output and
+        sets boot mode to UART.
+        On 'with' statement left it powers down device, sets boot mode to SPI
+        and configures all SPI pins as input. Note that device is left in reset
+        state.
         """
         return SPIFlash(self, self._b)
 

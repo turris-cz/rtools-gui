@@ -19,22 +19,24 @@ class SPIFlash():
 
     def __enter__(self):
         self.spi.spi_enable(True)
+        self.moxtester.set_boot_mode(self.moxtester.BOOT_MODE_UART)
         self.moxtester.reset(True)
         self.moxtester.power(True)
         return self
 
     def __exit__(self, etype, value, traceback):
         self.moxtester.power(False)
-        self.moxtester.reset(False)
+        self.moxtester.set_boot_mode(self.moxtester.BOOT_MODE_SPI)
+        # Note: left CPU in reset
         self.spi.spi_enable(False)
 
     def reset_device(self):
         """Reset SPI Flash device and suspends execution for time to ensure
         device reset completion."""
         self.spi.spi_burst_new()
-        self.spi.spi_burst_write_int(self._RESET_DEVICE)
-        self.spi.spi_burst_cs_reset()
         self.spi.spi_burst_write_int(self._ENABLE_RESET)
+        self.spi.spi_burst_cs_reset()
+        self.spi.spi_burst_write_int(self._RESET_DEVICE)
         self.spi.spi_burst()
         sleep(0.0001)  # This should be longer than 30us
 
