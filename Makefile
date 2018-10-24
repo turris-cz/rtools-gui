@@ -1,4 +1,4 @@
-UI = window programmer
+UI = mainwindow programmer
 UI_PY_FILES = $(patsubst %,ui/%.py,$(UI))
 
 all: qrc/icons.py $(UI_PY_FILES)

@@ -7,6 +7,7 @@ from ui.programmer import Ui_Programmer
 from utils import MAX_SERIAL_LEN
 
 from application import qApp, settings
+from moxtester import MoxTester, MoxTesterException
 
 
 class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
@@ -30,19 +31,34 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
         self.indexLabel.setText("Programátor: " + str(index + 1))
 
-        # TODO try to connect to programmer
-
-        self.inRunningMode = False
+        self.programmer = None
+        self.connectProgrammer()
 
     def select(self):
-        # TODO check of we have connected programmer
+        "Try to select this programmer for new board session"
+        if self.programmer is None:
+            self.mainWindow.display_msg(
+                "Programátor {} zřejmě není připojen".format(self.index))
+            return
+        # TODO check if we are not already running some
+        self.programmer.reset_tester()
+        if not self.programmer.board_present():
+            self.mainWindow.display_msg(
+                "Do programátoru {} není vložená deska".format(self.index))
+            return
         self.introWidget.setCurrentWidget(self.pageIntroSerial)
         self.barcodeLineEdit.setFocus()
 
     @QtCore.pyqtSlot()
     def connectProgrammer(self):
-        # TODO for now just switch to active
-        self.introWidget.setCurrentWidget(self.pageIntroReady)
+        try:
+            # TODO use real id (serial number like)
+            self.programmer = MoxTester(self.index)
+        except MoxTesterException:
+            # Ok this failed so we don't have programmer
+            pass
+        if self.programmer is not None:
+            self.introWidget.setCurrentWidget(self.pageIntroReady)
 
     @QtCore.pyqtSlot()
     def barcodeScanEnter(self):

@@ -2,7 +2,7 @@
 
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QSizePolicy
-from ui.window import Ui_Window
+from ui.mainwindow import Ui_MainWindow
 
 from custom_exceptions import DbError, IncorrectSerialNumber
 from utils import MAX_SERIAL_LEN, backupAppLog
@@ -20,12 +20,13 @@ def _removeItemFromGridLayout(layout, row, column):
         item.widget().deleteLater()
 
 
-class MainWindow(QtWidgets.QMainWindow, Ui_Window):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setupUi(self)  # create gui
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
+        self.error_label.setVisible(False)
 
         self.programmers = [None]*4
         for i in range(4):
@@ -44,16 +45,31 @@ class MainWindow(QtWidgets.QMainWindow, Ui_Window):
         #qApp.loggerMain.info("Connected to database.")
 
     def refocus(self):
+        "Set focus back to primary window input box."
         self.barcodeLineEdit.setFocus()
+
+    def display_msg(self, message):
+        """"Display given message in main window message box. You can pass None
+        as a message to clear error box."""
+        if message is None:
+            self.error_label.setVisible(False)
+        else:
+            self.error_label.setVisible(True)
+            self.error_label.setText(message)
 
     @QtCore.pyqtSlot()
     def barcodeScanEnter(self):
-        serialNumber = int(self.barcodeLineEdit.text())
-        # TODO verify serial number and mask
-        self.programmers[serialNumber - 1].select()
+        "Slot called when text is entered to primary text field in main window"
+        self.display_msg(None)
+        serial_number = int(self.barcodeLineEdit.text())
+        index = serial_number & 0xFFFFFF
+        if index < 0 or index > 3:
+            self.barcodeLineEdit.clear()
+            self.display_msg(
+                "Naskenovaný kód není validní pro volbu programátoru")
+            return
+        self.programmers[index].select()
         self.barcodeLineEdit.clear()
-
-
 
 
 
