@@ -19,44 +19,84 @@ class MoxTester:
     BOOT_MODE_UART = 0b10
 
     def __init__(self, chip_id):
-        ctx = ftdi.new()
-        ret, devs = ftdi.usb_find_all(ctx, 0x0403, 0x6011)
+        self.ctx = ftdi.new()
+        ret, devs = ftdi.usb_find_all(self.ctx, 0x0403, 0x6011)
         if ret < 0:
             raise MoxTesterCommunicationException("Unable to list USB devices")
-        dev = None
-        while dev is None and devs is not None:
+        self.dev = None
+        while self.dev is None and devs is not None:
             # Ignore any device that fails open (those are in use)
-            if ftdi.usb_open_dev(ctx, devs.dev) == 0:
-                if ftdi.read_eeprom(ctx) < 0:
+            if ftdi.usb_open_dev(self.ctx, devs.dev) == 0:
+                if ftdi.read_eeprom(self.ctx) < 0:
                     raise MoxTesterCommunicationException("EEPROM read failed")
-                if ftdi.eeprom_decode(ctx, 0) < 0:
+                if ftdi.eeprom_decode(self.ctx, 0) < 0:
                     raise MoxTesterCommunicationException(
                         'EEPROM decode failed')
-                ret, chip_tp = ftdi.get_eeprom_value(ctx, ftdi.CHIP_TYPE)
+                ret, chip_tp = ftdi.get_eeprom_value(self.ctx, ftdi.CHIP_TYPE)
                 if ret < 0:
                     raise MoxTesterCommunicationException(
                         "Reading chip type (id) failed")
                 if chip_tp == chip_id:
-                    dev = devs.dev  # Setting dev if correct device found
-                ftdi.usb_reset(ctx)
-                ftdi.usb_close(ctx)
+                    self.dev = devs.dev  # Setting dev if correct device found
+                if ftdi.usb_reset(self.ctx) != 0:
+                    raise MoxTesterCommunicationException(
+                        "FTDI USB device reset failed")
+                if ftdi.usb_close(self.ctx) != 0:
+                    raise MoxTesterCommunicationException(
+                        "FTDI USB device close failed")
             devs = devs.next
-        if dev is None:
+        if self.dev is None:
             raise MoxTesterNotFoundException(
                 "There is no connected tester with id: " + str(chip_id))
+        self._a = None
+        self._b = None
+        self._c = None
+        self._d = None
+        self.connect_tester()
 
+    def disconnect_tester(self):
+        """Disconnect this object from tester"""
+        self._a.__del__()
+        self._a = None
+        self._b.__del__()
+        self._b = None
+        self._c.__del__()
+        self._c = None
+        self._d.__del__()
+        self._d = None
+
+    def connect_tester(self):
+        """Reconnect to tester after disconnect"""
+        if self._a is not None or self._b is not None or self._c is not None \
+                or self._d is not None:
+            # TODO exception?
+            return
         # CN1 (detection, power supply and JTAG)
-        self._a = _BitBangInterface(dev, ftdi.INTERFACE_A, 0x40)
+        self._a = _BitBangInterface(self.dev, ftdi.INTERFACE_A, 0x40)
         self.power(False)
         # CN2 (boot mode, hardware reset and SPI)
-        self._b = _SPIInterface(dev, ftdi.INTERFACE_B, 0xE0)
+        self._b = _SPIInterface(self.dev, ftdi.INTERFACE_B, 0xE0)
         self.reset(True)
         self.set_boot_mode(self.BOOT_MODE_SPI)
         # CN3 (Unused GPIO)
-        self._c = _BitBangInterface(dev, ftdi.INTERFACE_C, 0x00)
+        self._c = _BitBangInterface(self.dev, ftdi.INTERFACE_C, 0x00)
         # CN4 (UART)
-        self._d = _UARTInterface(dev, ftdi.INTERFACE_D)
-        self._uart = None
+        self._d = _UARTInterface(self.dev, ftdi.INTERFACE_D)
+
+    def reset_tester(self):
+        """ReseteMoxTester device. It disconnects MoxTester from FTDI USB
+        device, restarts it and reconnects."""
+        self.disconnect_tester()
+        if ftdi.usb_open_dev(self.ctx, self.dev) != 0:
+            raise MoxTesterCommunicationException(
+                "Unable to open FTDI interface for reset")
+        if ftdi.usb_reset(self.ctx) != 0:
+            raise MoxTesterCommunicationException(
+                "Unable to reset FTDI USB device")
+        if ftdi.usb_close(self.ctx) != 0:
+            raise MoxTesterCommunicationException(
+                "Closing USB FTDI device failed")
+        self.connect_tester()
 
     def selftest(self):
         "Runs various self-test operations (such as SPI loopback test)"
@@ -111,21 +151,27 @@ class MoxTester:
         return SPIFlash(self, self._b)
 
 
-def _common_interface_ctx(device, interface):
-    ctx = ftdi.new()
-    ftdi.set_interface(ctx, interface)
-    ftdi.usb_open_dev(ctx, device)
-    if ftdi.usb_purge_buffers(ctx) < 0:
-        raise MoxTesterCommunicationException(
-            "Buffers purge failed for port: " + str(interface))
-    return ctx
+class _Interface():
+    "Common FTDI interface"
+
+    def __init__(self, device, interface):
+        self.ctx = ftdi.new()
+        ftdi.set_interface(self.ctx, interface)
+        ftdi.usb_open_dev(self.ctx, device)
+        if ftdi.usb_purge_buffers(self.ctx) < 0:
+            raise MoxTesterCommunicationException(
+                "Buffers purge failed for port: " + str(interface))
+
+    def __del__(self):
+        "Close connection to FTDI interface"
+        ftdi.deinit(self.ctx)
 
 
-class _BitBangInterface():
+class _BitBangInterface(_Interface):
     "FTDI interface in Bit Bang mode"
 
     def __init__(self, device, interface, output_mask, default_value=0x00):
-        self.ctx = _common_interface_ctx(device, interface)
+        super().__init__(device, interface)
         if ftdi.set_bitmode(self.ctx, output_mask, ftdi.BITMODE_BITBANG) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to set bitbang mode for port: " + str(interface))
@@ -158,17 +204,17 @@ class _BitBangInterface():
         self.gpio_set(mask if is_set else 0x00, mask)
 
 
-class _MPSSEInterface():
+class _MPSSEInterface(_Interface):
     "FTDI interface in MPSSE mode"
 
     def __init__(self, device, interface, output_mask, default_value=0x00):
+        super().__init__(device, interface)
         self.output_mask = output_mask & 0xF0  # Mask for GPIO
-        self.ctx = _common_interface_ctx(device, interface)
         if ftdi.set_bitmode(self.ctx, 0x00, ftdi.BITMODE_MPSSE) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to set MPSSE mode for port: " + str(interface))
         self.gpio_value = default_value
-        self.gpio_set(output_mask, self.gpio_value)
+        self.gpio_set(self.output_mask, self.gpio_value)
 
     def _write(self, operation):
         "Write given program to MPSSE"
@@ -238,6 +284,7 @@ class _SPIInterface(_MPSSEInterface):
             ftdi.DIS_ADAPTIVE,  # Disable adaprive clocking
             ftdi.TCK_DIVISOR, 0, 0,  # Set clock to 6MHz
             )))
+        self._burst = None
         self.spi_burst_new()
 
     def spi_enable(self, enable):
@@ -358,11 +405,11 @@ class _SPIInterface(_MPSSEInterface):
         self.spi_loopback(False)
 
 
-class _UARTInterface():
+class _UARTInterface(_Interface):
     "FTDI interface in Bit Bang mode"
 
     def __init__(self, device, interface):
-        self.ctx = _common_interface_ctx(device, interface)
+        super().__init__(device, interface)
         if ftdi.set_bitmode(self.ctx, 0x00, ftdi.BITMODE_RESET) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to reset bitmode for port: " + str(interface))
@@ -387,6 +434,7 @@ class _UARTInterface():
         self.socks[1].close()
         self.inputthread.join()
         self.outputthread.join()
+        super().__del__()
 
     def _chunk_size(self):
         ret, chunk_size = ftdi.read_data_get_chunksize(self.ctx)
@@ -396,7 +444,7 @@ class _UARTInterface():
 
     def _input(self):
         chunk_size = self._chunk_size()
-        # TODO corrent logging!
+        # TODO correct logging!
         with io.FileIO("moxtester.log", "w") as log:
             while not self.threadexit.is_set():
                 ret, data = ftdi.read_data(self.ctx, chunk_size)
