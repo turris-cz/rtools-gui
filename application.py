@@ -64,10 +64,6 @@ class Application(QApplication):
         global db_wrapper_mock
         db_wrapper_mock = importlib.import_module(settings.DB_WRAPPER_MOCK_MODULE)
 
-        # store tests/steps only options
-        self.tests_only = '-t' in args[0] or '--tests-only' in args[0]
-        self.steps_only = '-s' in args[0] or '--steps-only' in args[0]
-
         # init logging
         try:
             os.makedirs(os.path.dirname(settings.LOG_APP_FILE))

@@ -32,6 +32,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
         self.indexLabel.setText("Programátor: " + str(index + 1))
         self.intro_error(None)
+        self.steps = []  # List of steps elements
 
         self.workflow = None  # Current workflow for this programmer
         self.failed = False
@@ -110,3 +111,8 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         self.barcodeLineEdit.clear()
         self.introWidget.setCurrentWidget(self.pageIntroReady)
         self.mainWindow.refocus()
+
+    def updateSteps(self):
+        "Update steps from workflow"
+        for step in self.workflow.get_steps():
+            pass

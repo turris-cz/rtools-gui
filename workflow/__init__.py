@@ -1,19 +1,42 @@
 from PyQt5 import QtCore
 from .exceptions import WorkflowException
 from .exceptions import InvalidBoardNumberException
+from .a import ASTEPS
+
+_BOARD_MAP = {
+    0x30: {
+        "name": "Core (A)",
+        "steps": ASTEPS,
+        },
+    0x31: {
+        "name": "SFP (D)",
+        "steps": None,
+        },
+    0x32: {
+        "name": "PCI (B)",
+        "steps": None,
+        },
+    0x33: {
+        "name": "Topaz - 4x ethernet (C)",
+        "steps": None,
+        },
+    #0x34: {
+    #    "name": "Peridot - 8x ethernet (E)",
+    #    "steps": None,
+    #    },
+    #0x35: {
+    #    "name": "USB (F)",
+    #    "steps": None,
+    #    },
+    #0x36: {
+    #    "name": "PCI pass-trough (G)",
+    #    "steps": None,
+    #    },
+    }
 
 
 class WorkFlow(QtCore.QObject):
     "General class managing workflow for single programmer and board."
-    _BOARD_MAP = {
-        0x30: "Core (A)",
-        0x31: "SFP (D)",
-        0x32: "PCI (B)",
-        0x33: "Topaz - 4x ethernet (C)",
-        0x34: "Peridot - 8x ethernet (E)",
-        0x35: "USB (F)",
-        0x36: "PCI pass-trough (G)",
-        }
 
     singleProgressUpdate = QtCore.pyqtSignal(int)
     allProgressUpdate = QtCore.pyqtSignal(int)
@@ -33,12 +56,14 @@ class WorkFlow(QtCore.QObject):
             raise InvalidBoardNumberException(
                 "Serial number does not seems to have valid series for Mox: " + hex(self.series))
         self.board_id = (serial_number >> 24) & 0xff
-        if self.board_id not in self._BOARD_MAP:
+        if self.board_id not in _BOARD_MAP:
             raise InvalidBoardNumberException(
                 "Unsupported board ID in serial number: " + hex(self.board_id))
 
-        # TODO load steps
+        # Load steps
         self.steps = []
+        for step in _BOARD_MAP[self.board_id]['steps']:
+            self.steps.append(step(moxtester))
 
         self.thread = QtCore.QThread(self)
 
@@ -51,12 +76,19 @@ class WorkFlow(QtCore.QObject):
             * completed: boolean value if step was already once completed
             * success: boolean value if steap completed succesfully
         """
-        # TODO aggregate
-        return self.steps
+        steps = []
+        for step in self.steps:
+            steps.append({
+                'name': step.name(),
+                'description': step.description(),
+                'completed': False,
+                'success': False,
+                })
+        return steps
 
     def get_board_name(self):
         """Returns name of board"""
-        return self._BOARD_MAP[self.board_id]
+        return _BOARD_MAP[self.board_id]['name']
 
     def run(self):
         "Trigger workflow execution"
