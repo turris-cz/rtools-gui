@@ -1,0 +1,2116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="297mm"
+   height="210mm"
+   viewBox="0 0 297 210"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.2 2405546, 2018-03-11"
+   sodipodi:docname="boards.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="601.99789"
+     inkscape:cy="389.31071"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:snap-global="false"
+     inkscape:window-width="1916"
+     inkscape:window-height="1041"
+     inkscape:window-x="1920"
+     inkscape:window-y="37"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-87)">
+    <g
+       id="g1031"
+       transform="matrix(0.26458333,0,0,0.26458333,139.18484,118.11914)">
+      <rect
+         id="rect894"
+         style="fill:#ffffff;fill-opacity:1"
+         height="100pt"
+         width="132pt"
+         y="0pt"
+         x="0pt" />
+      <line
+         id="line896"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="14.666667"
+         y1="106.66666"
+         x1="14.666667" />
+      <line
+         id="line898"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="18"
+         y1="106.66666"
+         x1="18" />
+      <line
+         id="line900"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="23.333334"
+         y1="106.66666"
+         x1="23.333334" />
+      <line
+         id="line902"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="30"
+         y1="106.66666"
+         x1="30" />
+      <line
+         id="line904"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="36.666668"
+         y1="106.66666"
+         x1="36.666668" />
+      <line
+         id="line906"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="40"
+         y1="106.66666"
+         x1="40" />
+      <line
+         id="line908"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="43.333332"
+         y1="106.66666"
+         x1="43.333332" />
+      <line
+         id="line910"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="46"
+         y1="106.66666"
+         x1="46" />
+      <line
+         id="line912"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="50.666668"
+         y1="106.66666"
+         x1="50.666668" />
+      <line
+         id="line914"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="60"
+         y1="106.66666"
+         x1="60" />
+      <line
+         id="line916"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="64.666664"
+         y1="106.66666"
+         x1="64.666664" />
+      <line
+         id="line918"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="70"
+         y1="106.66666"
+         x1="70" />
+      <line
+         id="line920"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="72.666664"
+         y1="106.66666"
+         x1="72.666664" />
+      <line
+         id="line922"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="76.666664"
+         y1="106.66666"
+         x1="76.666664" />
+      <line
+         id="line924"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="81.333336"
+         y1="106.66666"
+         x1="81.333336" />
+      <line
+         id="line926"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="88"
+         y1="106.66666"
+         x1="88" />
+      <line
+         id="line928"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="92.666664"
+         y1="106.66666"
+         x1="92.666664" />
+      <line
+         id="line930"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="98"
+         y1="106.66666"
+         x1="98" />
+      <line
+         id="line932"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="102"
+         y1="106.66666"
+         x1="102" />
+      <line
+         id="line934"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="106.66666"
+         y1="106.66666"
+         x1="106.66666" />
+      <line
+         id="line936"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="112.66666"
+         y1="106.66666"
+         x1="112.66666" />
+      <line
+         id="line938"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="117.33334"
+         y1="106.66666"
+         x1="117.33334" />
+      <line
+         id="line940"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="123.33334"
+         y1="106.66666"
+         x1="123.33334" />
+      <line
+         id="line942"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="127.33334"
+         y1="106.66666"
+         x1="127.33334" />
+      <line
+         id="line944"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="131.33333"
+         y1="106.66666"
+         x1="131.33333" />
+      <line
+         id="line946"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="136"
+         y1="106.66666"
+         x1="136" />
+      <line
+         id="line948"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="140.66667"
+         y1="106.66666"
+         x1="140.66667" />
+      <line
+         id="line950"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="146.66667"
+         y1="106.66666"
+         x1="146.66667" />
+      <line
+         id="line952"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="154"
+         y1="106.66666"
+         x1="154" />
+      <line
+         id="line954"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="158"
+         y1="106.66666"
+         x1="158" />
+      <line
+         id="line956"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="161.33333"
+         y1="106.66666"
+         x1="161.33333" />
+      <text
+         id="text958"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="21pt">5</text>
+      <text
+         id="text960"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="28pt">6</text>
+      <text
+         id="text962"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="35pt">6</text>
+      <text
+         id="text964"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="42pt">3</text>
+      <text
+         id="text966"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="49pt">9</text>
+      <text
+         id="text968"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="56pt">8</text>
+      <text
+         id="text970"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="63pt">8</text>
+      <text
+         id="text972"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="70pt">1</text>
+      <text
+         id="text974"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="77pt">2</text>
+      <text
+         id="text976"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="84pt">1</text>
+      <text
+         id="text978"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="91pt">6</text>
+    </g>
+    <g
+       id="g1170"
+       transform="matrix(0.26458333,0,0,0.26458333,60.340326,174.24755)">
+      <rect
+         id="rect1033"
+         style="fill:#ffffff;fill-opacity:1"
+         height="100pt"
+         width="132pt"
+         y="0pt"
+         x="0pt" />
+      <line
+         id="line1035"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="14.666667"
+         y1="106.66666"
+         x1="14.666667" />
+      <line
+         id="line1037"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="18"
+         y1="106.66666"
+         x1="18" />
+      <line
+         id="line1039"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="23.333334"
+         y1="106.66666"
+         x1="23.333334" />
+      <line
+         id="line1041"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="30"
+         y1="106.66666"
+         x1="30" />
+      <line
+         id="line1043"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="36.666668"
+         y1="106.66666"
+         x1="36.666668" />
+      <line
+         id="line1045"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="40"
+         y1="106.66666"
+         x1="40" />
+      <line
+         id="line1047"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="43.333332"
+         y1="106.66666"
+         x1="43.333332" />
+      <line
+         id="line1049"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="47.333332"
+         y1="106.66666"
+         x1="47.333332" />
+      <line
+         id="line1051"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="50.666668"
+         y1="106.66666"
+         x1="50.666668" />
+      <line
+         id="line1053"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="58"
+         y1="106.66666"
+         x1="58" />
+      <line
+         id="line1055"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="62"
+         y1="106.66666"
+         x1="62" />
+      <line
+         id="line1057"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="69.333336"
+         y1="106.66666"
+         x1="69.333336" />
+      <line
+         id="line1059"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="74"
+         y1="106.66666"
+         x1="74" />
+      <line
+         id="line1061"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="78.666664"
+         y1="106.66666"
+         x1="78.666664" />
+      <line
+         id="line1063"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="84.666664"
+         y1="106.66666"
+         x1="84.666664" />
+      <line
+         id="line1065"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="87.333336"
+         y1="106.66666"
+         x1="87.333336" />
+      <line
+         id="line1067"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="90.666664"
+         y1="106.66666"
+         x1="90.666664" />
+      <line
+         id="line1069"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="98"
+         y1="106.66666"
+         x1="98" />
+      <line
+         id="line1071"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="102"
+         y1="106.66666"
+         x1="102" />
+      <line
+         id="line1073"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="106.66666"
+         y1="106.66666"
+         x1="106.66666" />
+      <line
+         id="line1075"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="112.66666"
+         y1="106.66666"
+         x1="112.66666" />
+      <line
+         id="line1077"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="117.33334"
+         y1="106.66666"
+         x1="117.33334" />
+      <line
+         id="line1079"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="123.33334"
+         y1="106.66666"
+         x1="123.33334" />
+      <line
+         id="line1081"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="128.66667"
+         y1="106.66666"
+         x1="128.66667" />
+      <line
+         id="line1083"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="131.33333"
+         y1="106.66666"
+         x1="131.33333" />
+      <line
+         id="line1085"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="136"
+         y1="106.66666"
+         x1="136" />
+      <line
+         id="line1087"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="142"
+         y1="106.66666"
+         x1="142" />
+      <line
+         id="line1089"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="146.66667"
+         y1="106.66666"
+         x1="146.66667" />
+      <line
+         id="line1091"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="154"
+         y1="106.66666"
+         x1="154" />
+      <line
+         id="line1093"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="158"
+         y1="106.66666"
+         x1="158" />
+      <line
+         id="line1095"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="161.33333"
+         y1="106.66666"
+         x1="161.33333" />
+      <text
+         id="text1097"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="21pt">5</text>
+      <text
+         id="text1099"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="28pt">6</text>
+      <text
+         id="text1101"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="35pt">6</text>
+      <text
+         id="text1103"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="42pt">5</text>
+      <text
+         id="text1105"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="49pt">6</text>
+      <text
+         id="text1107"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="56pt">6</text>
+      <text
+         id="text1109"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="63pt">5</text>
+      <text
+         id="text1111"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="70pt">8</text>
+      <text
+         id="text1113"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="77pt">4</text>
+      <text
+         id="text1115"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="84pt">3</text>
+      <text
+         id="text1117"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="91pt">2</text>
+    </g>
+    <g
+       id="g1309"
+       transform="matrix(0.26458333,0,0,0.26458333,139.91635,176.22227)">
+      <rect
+         id="rect1172"
+         style="fill:#ffffff;fill-opacity:1"
+         height="100pt"
+         width="132pt"
+         y="0pt"
+         x="0pt" />
+      <line
+         id="line1174"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="14.666667"
+         y1="106.66666"
+         x1="14.666667" />
+      <line
+         id="line1176"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="18"
+         y1="106.66666"
+         x1="18" />
+      <line
+         id="line1178"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="23.333334"
+         y1="106.66666"
+         x1="23.333334" />
+      <line
+         id="line1180"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="30"
+         y1="106.66666"
+         x1="30" />
+      <line
+         id="line1182"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="36.666668"
+         y1="106.66666"
+         x1="36.666668" />
+      <line
+         id="line1184"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="40"
+         y1="106.66666"
+         x1="40" />
+      <line
+         id="line1186"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="43.333332"
+         y1="106.66666"
+         x1="43.333332" />
+      <line
+         id="line1188"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="50"
+         y1="106.66666"
+         x1="50" />
+      <line
+         id="line1190"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="53.333332"
+         y1="106.66666"
+         x1="53.333332" />
+      <line
+         id="line1192"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="58"
+         y1="106.66666"
+         x1="58" />
+      <line
+         id="line1194"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="63.333332"
+         y1="106.66666"
+         x1="63.333332" />
+      <line
+         id="line1196"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="66.666664"
+         y1="106.66666"
+         x1="66.666664" />
+      <line
+         id="line1198"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="72.666664"
+         y1="106.66666"
+         x1="72.666664" />
+      <line
+         id="line1200"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="78"
+         y1="106.66666"
+         x1="78" />
+      <line
+         id="line1202"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="84"
+         y1="106.66666"
+         x1="84" />
+      <line
+         id="line1204"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="87.333336"
+         y1="106.66666"
+         x1="87.333336" />
+      <line
+         id="line1206"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="90"
+         y1="106.66666"
+         x1="90" />
+      <line
+         id="line1208"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="97.333336"
+         y1="106.66666"
+         x1="97.333336" />
+      <line
+         id="line1210"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="102"
+         y1="106.66666"
+         x1="102" />
+      <line
+         id="line1212"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="106.66666"
+         y1="106.66666"
+         x1="106.66666" />
+      <line
+         id="line1214"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="112.66666"
+         y1="106.66666"
+         x1="112.66666" />
+      <line
+         id="line1216"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="118"
+         y1="106.66666"
+         x1="118" />
+      <line
+         id="line1218"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="122"
+         y1="106.66666"
+         x1="122" />
+      <line
+         id="line1220"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="126.66666"
+         y1="106.66666"
+         x1="126.66666" />
+      <line
+         id="line1222"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="131.33333"
+         y1="106.66666"
+         x1="131.33333" />
+      <line
+         id="line1224"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="134"
+         y1="106.66666"
+         x1="134" />
+      <line
+         id="line1226"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="140"
+         y1="106.66666"
+         x1="140" />
+      <line
+         id="line1228"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="146.66667"
+         y1="106.66666"
+         x1="146.66667" />
+      <line
+         id="line1230"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="154"
+         y1="106.66666"
+         x1="154" />
+      <line
+         id="line1232"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="158"
+         y1="106.66666"
+         x1="158" />
+      <line
+         id="line1234"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="161.33333"
+         y1="106.66666"
+         x1="161.33333" />
+      <text
+         id="text1236"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="21pt">5</text>
+      <text
+         id="text1238"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="28pt">6</text>
+      <text
+         id="text1240"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="35pt">6</text>
+      <text
+         id="text1242"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="42pt">7</text>
+      <text
+         id="text1244"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="49pt">3</text>
+      <text
+         id="text1246"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="56pt">4</text>
+      <text
+         id="text1248"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="63pt">3</text>
+      <text
+         id="text1250"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="70pt">5</text>
+      <text
+         id="text1252"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="77pt">6</text>
+      <text
+         id="text1254"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="84pt">4</text>
+      <text
+         id="text1256"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="91pt">8</text>
+    </g>
+    <g
+       id="g1448"
+       transform="matrix(0.26458333,0,0,0.26458333,216.96027,176.91844)">
+      <rect
+         id="rect1311"
+         style="fill:#ffffff;fill-opacity:1"
+         height="100pt"
+         width="132pt"
+         y="0pt"
+         x="0pt" />
+      <line
+         id="line1313"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="14.666667"
+         y1="106.66666"
+         x1="14.666667" />
+      <line
+         id="line1315"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="18"
+         y1="106.66666"
+         x1="18" />
+      <line
+         id="line1317"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="23.333334"
+         y1="106.66666"
+         x1="23.333334" />
+      <line
+         id="line1319"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="30"
+         y1="106.66666"
+         x1="30" />
+      <line
+         id="line1321"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="36.666668"
+         y1="106.66666"
+         x1="36.666668" />
+      <line
+         id="line1323"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="40"
+         y1="106.66666"
+         x1="40" />
+      <line
+         id="line1325"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="43.333332"
+         y1="106.66666"
+         x1="43.333332" />
+      <line
+         id="line1327"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="46.666668"
+         y1="106.66666"
+         x1="46.666668" />
+      <line
+         id="line1329"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="51.333332"
+         y1="106.66666"
+         x1="51.333332" />
+      <line
+         id="line1331"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="58.666668"
+         y1="106.66666"
+         x1="58.666668" />
+      <line
+         id="line1333"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="64"
+         y1="106.66666"
+         x1="64" />
+      <line
+         id="line1335"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="69.333336"
+         y1="106.66666"
+         x1="69.333336" />
+      <line
+         id="line1337"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="72.666664"
+         y1="106.66666"
+         x1="72.666664" />
+      <line
+         id="line1339"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="76"
+         y1="106.66666"
+         x1="76" />
+      <line
+         id="line1341"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="82"
+         y1="106.66666"
+         x1="82" />
+      <line
+         id="line1343"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="89.333336"
+         y1="106.66666"
+         x1="89.333336" />
+      <line
+         id="line1345"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="94"
+         y1="106.66666"
+         x1="94" />
+      <line
+         id="line1347"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="98"
+         y1="106.66666"
+         x1="98" />
+      <line
+         id="line1349"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="102"
+         y1="106.66666"
+         x1="102" />
+      <line
+         id="line1351"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="106.66666"
+         y1="106.66666"
+         x1="106.66666" />
+      <line
+         id="line1353"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="112.66666"
+         y1="106.66666"
+         x1="112.66666" />
+      <line
+         id="line1355"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="117.33334"
+         y1="106.66666"
+         x1="117.33334" />
+      <line
+         id="line1357"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="122"
+         y1="106.66666"
+         x1="122" />
+      <line
+         id="line1359"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="127.33334"
+         y1="106.66666"
+         x1="127.33334" />
+      <line
+         id="line1361"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="131.33333"
+         y1="106.66666"
+         x1="131.33333" />
+      <line
+         id="line1363"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="135.33333"
+         y1="106.66666"
+         x1="135.33333" />
+      <line
+         id="line1365"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="140"
+         y1="106.66666"
+         x1="140" />
+      <line
+         id="line1367"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="146.66667"
+         y1="106.66666"
+         x1="146.66667" />
+      <line
+         id="line1369"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="154"
+         y1="106.66666"
+         x1="154" />
+      <line
+         id="line1371"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="158"
+         y1="106.66666"
+         x1="158" />
+      <line
+         id="line1373"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="161.33333"
+         y1="106.66666"
+         x1="161.33333" />
+      <text
+         id="text1375"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="21pt">5</text>
+      <text
+         id="text1377"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="28pt">6</text>
+      <text
+         id="text1379"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="35pt">6</text>
+      <text
+         id="text1381"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="42pt">9</text>
+      <text
+         id="text1383"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="49pt">0</text>
+      <text
+         id="text1385"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="56pt">2</text>
+      <text
+         id="text1387"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="63pt">1</text>
+      <text
+         id="text1389"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="70pt">2</text>
+      <text
+         id="text1391"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="77pt">8</text>
+      <text
+         id="text1393"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="84pt">6</text>
+      <text
+         id="text1395"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="91pt">4</text>
+    </g>
+    <g
+       id="g1587"
+       transform="matrix(0.26458333,0,0,0.26458333,64.0821,233.57958)">
+      <rect
+         id="rect1450"
+         style="fill:#ffffff;fill-opacity:1"
+         height="100pt"
+         width="132pt"
+         y="0pt"
+         x="0pt" />
+      <line
+         id="line1452"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="14.666667"
+         y1="106.66666"
+         x1="14.666667" />
+      <line
+         id="line1454"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="18"
+         y1="106.66666"
+         x1="18" />
+      <line
+         id="line1456"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="23.333334"
+         y1="106.66666"
+         x1="23.333334" />
+      <line
+         id="line1458"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="30"
+         y1="106.66666"
+         x1="30" />
+      <line
+         id="line1460"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="36.666668"
+         y1="106.66666"
+         x1="36.666668" />
+      <line
+         id="line1462"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="40"
+         y1="106.66666"
+         x1="40" />
+      <line
+         id="line1464"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="43.333332"
+         y1="106.66666"
+         x1="43.333332" />
+      <line
+         id="line1466"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="46.666668"
+         y1="106.66666"
+         x1="46.666668" />
+      <line
+         id="line1468"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="54"
+         y1="106.66666"
+         x1="54" />
+      <line
+         id="line1470"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="58"
+         y1="106.66666"
+         x1="58" />
+      <line
+         id="line1472"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="61.333332"
+         y1="106.66666"
+         x1="61.333332" />
+      <line
+         id="line1474"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="66"
+         y1="106.66666"
+         x1="66" />
+      <line
+         id="line1476"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="73.333336"
+         y1="106.66666"
+         x1="73.333336" />
+      <line
+         id="line1478"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="78.666664"
+         y1="106.66666"
+         x1="78.666664" />
+      <line
+         id="line1480"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="84"
+         y1="106.66666"
+         x1="84" />
+      <line
+         id="line1482"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="87.333336"
+         y1="106.66666"
+         x1="87.333336" />
+      <line
+         id="line1484"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="93.333336"
+         y1="106.66666"
+         x1="93.333336" />
+      <line
+         id="line1486"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="98"
+         y1="106.66666"
+         x1="98" />
+      <line
+         id="line1488"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="102"
+         y1="106.66666"
+         x1="102" />
+      <line
+         id="line1490"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="106.66666"
+         y1="106.66666"
+         x1="106.66666" />
+      <line
+         id="line1492"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="112.66666"
+         y1="106.66666"
+         x1="112.66666" />
+      <line
+         id="line1494"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="116.66666"
+         y1="106.66666"
+         x1="116.66666" />
+      <line
+         id="line1496"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="122"
+         y1="106.66666"
+         x1="122" />
+      <line
+         id="line1498"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="126.66666"
+         y1="106.66666"
+         x1="126.66666" />
+      <line
+         id="line1500"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="132"
+         y1="106.66666"
+         x1="132" />
+      <line
+         id="line1502"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="139.33333"
+         y1="106.66666"
+         x1="139.33333" />
+      <line
+         id="line1504"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="143.33333"
+         y1="106.66666"
+         x1="143.33333" />
+      <line
+         id="line1506"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="146.66667"
+         y1="106.66666"
+         x1="146.66667" />
+      <line
+         id="line1508"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="154"
+         y1="106.66666"
+         x1="154" />
+      <line
+         id="line1510"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="158"
+         y1="106.66666"
+         x1="158" />
+      <line
+         id="line1512"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="161.33333"
+         y1="106.66666"
+         x1="161.33333" />
+      <text
+         id="text1514"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="21pt">5</text>
+      <text
+         id="text1516"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="28pt">6</text>
+      <text
+         id="text1518"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="35pt">7</text>
+      <text
+         id="text1520"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="42pt">0</text>
+      <text
+         id="text1522"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="49pt">6</text>
+      <text
+         id="text1524"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="56pt">9</text>
+      <text
+         id="text1526"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="63pt">9</text>
+      <text
+         id="text1528"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="70pt">0</text>
+      <text
+         id="text1530"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="77pt">0</text>
+      <text
+         id="text1532"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="84pt">8</text>
+      <text
+         id="text1534"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="91pt">0</text>
+    </g>
+    <g
+       id="g1726"
+       transform="matrix(0.26458333,0,0,0.26458333,141.85753,235.71773)">
+      <rect
+         id="rect1589"
+         style="fill:#ffffff;fill-opacity:1"
+         height="100pt"
+         width="132pt"
+         y="0pt"
+         x="0pt" />
+      <line
+         id="line1591"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="14.666667"
+         y1="106.66666"
+         x1="14.666667" />
+      <line
+         id="line1593"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="18"
+         y1="106.66666"
+         x1="18" />
+      <line
+         id="line1595"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="23.333334"
+         y1="106.66666"
+         x1="23.333334" />
+      <line
+         id="line1597"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="30"
+         y1="106.66666"
+         x1="30" />
+      <line
+         id="line1599"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="36.666668"
+         y1="106.66666"
+         x1="36.666668" />
+      <line
+         id="line1601"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="40"
+         y1="106.66666"
+         x1="40" />
+      <line
+         id="line1603"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="43.333332"
+         y1="106.66666"
+         x1="43.333332" />
+      <line
+         id="line1605"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="48"
+         y1="106.66666"
+         x1="48" />
+      <line
+         id="line1607"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="55.333332"
+         y1="106.66666"
+         x1="55.333332" />
+      <line
+         id="line1609"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="58"
+         y1="106.66666"
+         x1="58" />
+      <line
+         id="line1611"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="64"
+         y1="106.66666"
+         x1="64" />
+      <line
+         id="line1613"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="67.333336"
+         y1="106.66666"
+         x1="67.333336" />
+      <line
+         id="line1615"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="72.666664"
+         y1="106.66666"
+         x1="72.666664" />
+      <line
+         id="line1617"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="79.333336"
+         y1="106.66666"
+         x1="79.333336" />
+      <line
+         id="line1619"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="82.666664"
+         y1="106.66666"
+         x1="82.666664" />
+      <line
+         id="line1621"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="88.666664"
+         y1="106.66666"
+         x1="88.666664" />
+      <line
+         id="line1623"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="94.666664"
+         y1="106.66666"
+         x1="94.666664" />
+      <line
+         id="line1625"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="99.333336"
+         y1="106.66666"
+         x1="99.333336" />
+      <line
+         id="line1627"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="102"
+         y1="106.66666"
+         x1="102" />
+      <line
+         id="line1629"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="106.66666"
+         y1="106.66666"
+         x1="106.66666" />
+      <line
+         id="line1631"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="112.66666"
+         y1="106.66666"
+         x1="112.66666" />
+      <line
+         id="line1633"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="117.33334"
+         y1="106.66666"
+         x1="117.33334" />
+      <line
+         id="line1635"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="123.33334"
+         y1="106.66666"
+         x1="123.33334" />
+      <line
+         id="line1637"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="127.33334"
+         y1="106.66666"
+         x1="127.33334" />
+      <line
+         id="line1639"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="131.33333"
+         y1="106.66666"
+         x1="131.33333" />
+      <line
+         id="line1641"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="137.33333"
+         y1="106.66666"
+         x1="137.33333" />
+      <line
+         id="line1643"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="143.33333"
+         y1="106.66666"
+         x1="143.33333" />
+      <line
+         id="line1645"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="146.66667"
+         y1="106.66666"
+         x1="146.66667" />
+      <line
+         id="line1647"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="154"
+         y1="106.66666"
+         x1="154" />
+      <line
+         id="line1649"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="158"
+         y1="106.66666"
+         x1="158" />
+      <line
+         id="line1651"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="161.33333"
+         y1="106.66666"
+         x1="161.33333" />
+      <text
+         id="text1653"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="21pt">5</text>
+      <text
+         id="text1655"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="28pt">6</text>
+      <text
+         id="text1657"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="35pt">7</text>
+      <text
+         id="text1659"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="42pt">2</text>
+      <text
+         id="text1661"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="49pt">3</text>
+      <text
+         id="text1663"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="56pt">7</text>
+      <text
+         id="text1665"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="63pt">6</text>
+      <text
+         id="text1667"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="70pt">7</text>
+      <text
+         id="text1669"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="77pt">2</text>
+      <text
+         id="text1671"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="84pt">9</text>
+      <text
+         id="text1673"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="91pt">6</text>
+    </g>
+    <g
+       id="g1865"
+       transform="matrix(0.26458333,0,0,0.26458333,215.89119,234.91593)">
+      <rect
+         id="rect1728"
+         style="fill:#ffffff;fill-opacity:1"
+         height="100pt"
+         width="132pt"
+         y="0pt"
+         x="0pt" />
+      <line
+         id="line1730"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="14.666667"
+         y1="106.66666"
+         x1="14.666667" />
+      <line
+         id="line1732"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="18"
+         y1="106.66666"
+         x1="18" />
+      <line
+         id="line1734"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="23.333334"
+         y1="106.66666"
+         x1="23.333334" />
+      <line
+         id="line1736"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="30"
+         y1="106.66666"
+         x1="30" />
+      <line
+         id="line1738"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="36.666668"
+         y1="106.66666"
+         x1="36.666668" />
+      <line
+         id="line1740"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="40"
+         y1="106.66666"
+         x1="40" />
+      <line
+         id="line1742"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="43.333332"
+         y1="106.66666"
+         x1="43.333332" />
+      <line
+         id="line1744"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="50.666668"
+         y1="106.66666"
+         x1="50.666668" />
+      <line
+         id="line1746"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="55.333332"
+         y1="106.66666"
+         x1="55.333332" />
+      <line
+         id="line1748"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="58"
+         y1="106.66666"
+         x1="58" />
+      <line
+         id="line1750"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="63.333332"
+         y1="106.66666"
+         x1="63.333332" />
+      <line
+         id="line1752"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="68"
+         y1="106.66666"
+         x1="68" />
+      <line
+         id="line1754"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="72.666664"
+         y1="106.66666"
+         x1="72.666664" />
+      <line
+         id="line1756"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="78.666664"
+         y1="106.66666"
+         x1="78.666664" />
+      <line
+         id="line1758"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="83.333336"
+         y1="106.66666"
+         x1="83.333336" />
+      <line
+         id="line1760"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="88"
+         y1="106.66666"
+         x1="88" />
+      <line
+         id="line1762"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="92.666664"
+         y1="106.66666"
+         x1="92.666664" />
+      <line
+         id="line1764"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="96.666664"
+         y1="106.66666"
+         x1="96.666664" />
+      <line
+         id="line1766"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="102"
+         y1="106.66666"
+         x1="102" />
+      <line
+         id="line1768"
+         style="stroke:#000000;stroke-width:3.8499999pt"
+         y2="13.333333"
+         x2="106.66666"
+         y1="106.66666"
+         x1="106.66666" />
+      <line
+         id="line1770"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="112.66666"
+         y1="106.66666"
+         x1="112.66666" />
+      <line
+         id="line1772"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="117.33334"
+         y1="106.66666"
+         x1="117.33334" />
+      <line
+         id="line1774"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="123.33334"
+         y1="106.66666"
+         x1="123.33334" />
+      <line
+         id="line1776"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="128.66667"
+         y1="106.66666"
+         x1="128.66667" />
+      <line
+         id="line1778"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="132"
+         y1="106.66666"
+         x1="132" />
+      <line
+         id="line1780"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="135.33333"
+         y1="106.66666"
+         x1="135.33333" />
+      <line
+         id="line1782"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="140.66667"
+         y1="106.66666"
+         x1="140.66667" />
+      <line
+         id="line1784"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="146.66667"
+         y1="106.66666"
+         x1="146.66667" />
+      <line
+         id="line1786"
+         style="stroke:#000000;stroke-width:2.84999996pt"
+         y2="13.333333"
+         x2="154"
+         y1="106.66666"
+         x1="154" />
+      <line
+         id="line1788"
+         style="stroke:#000000;stroke-width:0.84999999pt"
+         y2="13.333333"
+         x2="158"
+         y1="106.66666"
+         x1="158" />
+      <line
+         id="line1790"
+         style="stroke:#000000;stroke-width:1.85000002pt"
+         y2="13.333333"
+         x2="161.33333"
+         y1="106.66666"
+         x1="161.33333" />
+      <text
+         id="text1792"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="21pt">5</text>
+      <text
+         id="text1794"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="28pt">6</text>
+      <text
+         id="text1796"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="35pt">7</text>
+      <text
+         id="text1798"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="42pt">4</text>
+      <text
+         id="text1800"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="49pt">0</text>
+      <text
+         id="text1802"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="56pt">5</text>
+      <text
+         id="text1804"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="63pt">4</text>
+      <text
+         id="text1806"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="70pt">4</text>
+      <text
+         id="text1808"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="77pt">5</text>
+      <text
+         id="text1810"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="84pt">1</text>
+      <text
+         id="text1812"
+         style="font-size:14.66666698px;font-family:Helvetica;fill:#000000"
+         y="90pt"
+         x="91pt">2</text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="158.49083"
+       y="118.19669"
+       id="text1869"><tspan
+         sodipodi:role="line"
+         id="tspan1867"
+         x="158.49083"
+         y="118.19669"
+         style="stroke-width:0.26458332">A</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="79.913589"
+       y="173.78874"
+       id="text1873"><tspan
+         sodipodi:role="line"
+         id="tspan1871"
+         x="79.913589"
+         y="173.78874"
+         style="stroke-width:0.26458332">D</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="152.6109"
+       y="176.19417"
+       id="text1877"><tspan
+         sodipodi:role="line"
+         id="tspan1875"
+         x="152.6109"
+         y="176.19417"
+         style="stroke-width:0.26458332">B</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="237.54002"
+       y="175.31482"
+       id="text1881"><tspan
+         sodipodi:role="line"
+         id="tspan1879"
+         x="237.54002"
+         y="175.31482"
+         style="stroke-width:0.26458332">C</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="82.051743"
+       y="234.99348"
+       id="text1885"><tspan
+         sodipodi:role="line"
+         id="tspan1883"
+         x="82.051743"
+         y="234.99348"
+         style="stroke-width:0.26458332">E</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="162.76714"
+       y="236.86435"
+       id="text1889"><tspan
+         sodipodi:role="line"
+         id="tspan1887"
+         x="162.76714"
+         y="236.86435"
+         style="stroke-width:0.26458332">F</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="233.59357"
+       y="234.7262"
+       id="text1893"><tspan
+         sodipodi:role="line"
+         id="tspan1891"
+         x="233.59357"
+         y="234.7262"
+         style="stroke-width:0.26458332">G</tspan></text>
+  </g>
+</svg>
