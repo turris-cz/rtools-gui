@@ -31,7 +31,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.programmers = [None]*4
         for i in range(4):
             self.programmers[i] = ProgrammerWidget(self, i)
-            self.programmersLayout.addWidget(self.programmers[i], i // 2, i % 2)
+            self.programmersLayout.addWidget(
+                self.programmers[i], i // 2, i % 2)
 
         # open db connection
         #qApp.loggerMain.info("Opening db connection.")
@@ -62,8 +63,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         "Slot called when text is entered to primary text field in main window"
         self.display_msg(None)
         serial_number = int(self.barcodeLineEdit.text())
-        index = serial_number & 0xFFFFFF
-        if index < 0 or index > 3:
+        index = serial_number & 0xFFFFFFFF
+        if (serial_number >> 32) != 0xFFFFFFFF or index < 0 or index > 3:
             self.barcodeLineEdit.clear()
             self.display_msg(
                 "Naskenovaný kód není validní pro volbu programátoru")

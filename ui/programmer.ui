@@ -186,7 +186,7 @@
          <widget class="QWidget" name="pageIntroReady">
           <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
-            <widget class="QLabel" name="label_6">
+            <widget class="QLabel" name="introMessageLabel">
              <property name="font">
               <font>
                <family>Sans</family>
@@ -198,6 +198,25 @@
              </property>
              <property name="text">
               <string>Programátor připraven</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="introErrorLabel">
+             <property name="font">
+              <font>
+               <family>Sans</family>
+               <pointsize>20</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(255, 0, 0);</string>
+             </property>
+             <property name="text">
+              <string>#ERROR#</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -246,7 +265,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="typeLabel">
            <property name="font">
             <font>
              <family>Sans</family>
