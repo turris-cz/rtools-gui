@@ -34,6 +34,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         self.intro_error(None)
 
         self.workflow = None  # Current workflow for this programmer
+        self.failed = False
         self.programmer = None  # Handle for MoxTester
         self.connectProgrammer()
 
@@ -50,7 +51,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             self.mainWindow.display_msg(
                 "Programátor {} zřejmě není připojen".format(self.index + 1))
             return
-        if self.workflow is not None:
+        if self.workflow is not None and not self.failed:
             self.mainWindow.display_msg(
                 "Programátor {} je aktuálně obsazen".format(self.index + 1))
             return
@@ -59,6 +60,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             self.mainWindow.display_msg(
                 "Do programátoru {} není vložená deska".format(self.index + 1))
             return
+        self.contentWidget.setCurrentWidget(self.pageIntro)
         self.introWidget.setCurrentWidget(self.pageIntroSerial)
         self.barcodeLineEdit.setFocus()
 
@@ -93,10 +95,13 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             self.introWidget.setCurrentWidget(self.pageIntroReady)
             return
 
+        self.failed = False
         self.serialNumberLabel.setText(hex(serial_number))
         self.typeLabel.setText(self.workflow.get_board_name())
         # TODO load workflow to gui
         self.contentWidget.setCurrentWidget(self.pageWork)
+        # TODO start workflow
+        self.failed = True  # For now as we do nothing
 
     @QtCore.pyqtSlot()
     def barcodeAbandon(self):
