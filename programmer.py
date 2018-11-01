@@ -1,8 +1,9 @@
 # -*- coding: utf8 -*-
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSizePolicy
 from ui.programmer import Ui_Programmer
+import qrc.icons
 
 from utils import MAX_SERIAL_LEN
 
@@ -32,7 +33,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
         self.indexLabel.setText("Programátor: " + str(index + 1))
         self.intro_error(None)
-        self.steps = []  # List of steps elements
+        self._steps = []  # List of steps elements
 
         self.workflow = None  # Current workflow for this programmer
         self.failed = False
@@ -97,12 +98,66 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             return
 
         self.failed = False
+        # Connect workflow signals to our slots
+        self.workflow.singleProgressUpdate.connect(self.singleProgressUpdate)
+        self.workflow.allProgressUpdate.connect(self.allProgressUpdate)
+        self.workflow.setStepState.connect(self.stepStateUpdate)
+        self.workflow.uartLogUpdate.connect(self.uartOutput)
+
+        # Update GUI
         self.serialNumberLabel.setText(hex(serial_number))
         self.typeLabel.setText(self.workflow.get_board_name())
-        # TODO load workflow to gui
         self.contentWidget.setCurrentWidget(self.pageWork)
-        # TODO start workflow
+        self._steps = []
+        self.ProgressContent.layout().takeAt(0)  # Drop all step widgets
+        for step in self.workflow.get_steps():
+            self._new_step(step)
+        # Add spacers
+        self.ProgressContent.layout().addItem(
+            QtWidgets.QSpacerItem(
+                0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum),
+            len(self._steps), 0
+            )
+        self.ProgressContent.layout().addItem(
+            QtWidgets.QSpacerItem(
+                0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding),
+            len(self._steps), 1
+            )
+        self.ProgressContent.layout().addItem(
+            QtWidgets.QSpacerItem(
+                0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum),
+            len(self._steps), 4
+            )
+
+        self.workflow.run()
+        # TODO remove
         self.failed = True  # For now as we do nothing
+
+    def _new_step(self, step):
+        icon = QtWidgets.QLabel(self.ProgressContent)
+        icon.setMinimumSize(16, 16)
+        icon.setMaximumSize(16, 16)
+        self.ProgressContent.layout().addWidget(icon, len(self._steps), 1)
+        label = QtWidgets.QLabel(self.ProgressContent)
+        label.setText(step['name'])
+        self.ProgressContent.layout().addWidget(label, len(self._steps), 2)
+        self._steps.append({
+            "icon": icon,
+            "label": label,
+            })
+        self._update_step(len(self._steps) - 1, step['state'])
+
+    def _update_step(self, index, state):
+        _STATE_TO_PIX = {
+            WorkFlow.STEP_UNKNOWN: ":/img/icons/unknown.png",
+            WorkFlow.STEP_RUNNING: ":/img/icons/run.png",
+            WorkFlow.STEP_FAILED: ":/img/icons/fail.png",
+            WorkFlow.STEP_OK: ":/img/icons/ok.png",
+            WorkFlow.STEP_UNSTABLE: ":/img/icons/unstable.png",
+        }
+        self._steps[index]['icon'].setPixmap(
+            QtGui.QPixmap(_STATE_TO_PIX[state])
+            )
 
     @QtCore.pyqtSlot()
     def barcodeAbandon(self):
@@ -112,7 +167,32 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         self.introWidget.setCurrentWidget(self.pageIntroReady)
         self.mainWindow.refocus()
 
-    def updateSteps(self):
-        "Update steps from workflow"
-        for step in self.workflow.get_steps():
-            pass
+    @QtCore.pyqtSlot()
+    def singleProgressUpdate(self, progress):
+        """Called to update single step progress bar. Progress is int from 0 to
+        100."""
+        # TODO
+        pass
+
+    @QtCore.pyqtSlot()
+    def allProgressUpdate(self, progress):
+        """Called to update all stepts progress bar. Progress is int from 0 to
+        number of steps.
+        """
+        # TODO
+        pass
+
+    @QtCore.pyqtSlot()
+    def stepStateUpdate(self, step, state):
+        """Set state of one of steps. state is string and can be one of
+        supported steps from workflow.
+        """
+        # TODO
+        pass
+
+    @QtCore.pyqtSlot()
+    def uartOutput(self, line):
+        """Update UART log with given new line.
+        """
+        # TODO
+        pass

@@ -10,15 +10,15 @@ _BOARD_MAP = {
         },
     0x31: {
         "name": "SFP (D)",
-        "steps": None,
+        "steps": [],
         },
     0x32: {
         "name": "PCI (B)",
-        "steps": None,
+        "steps": [],
         },
     0x33: {
         "name": "Topaz - 4x ethernet (C)",
-        "steps": None,
+        "steps": [],
         },
     #0x34: {
     #    "name": "Peridot - 8x ethernet (E)",
@@ -37,12 +37,15 @@ _BOARD_MAP = {
 
 class WorkFlow(QtCore.QObject):
     "General class managing workflow for single programmer and board."
+    STEP_UNKNOWN="unknown" # Step was not run yet
+    STEP_RUNNING="running" # Currently executing
+    STEP_FAILED="failed" # Execution failed
+    STEP_OK="ok" # Execution exited normally
+    STEP_UNSTABLE="unstable" # Step that previous run successfully but should run again
 
     singleProgressUpdate = QtCore.pyqtSignal(int)
     allProgressUpdate = QtCore.pyqtSignal(int)
-    setRunning = QtCore.pyqtSignal(int)
-    setFailed = QtCore.pyqtSignal(int)
-    setCompleted = QtCore.pyqtSignal(int)
+    setStepState = QtCore.pyqtSignal(int, str)
     uartLogUpdate = QtCore.pyqtSignal(str)
 
     def __init__(self, db_connection, moxtester, serial_number):
@@ -73,16 +76,14 @@ class WorkFlow(QtCore.QObject):
             * name: name of single step
             * description: long description of what is happening when this step
               is being executed
-            * completed: boolean value if step was already once completed
-            * success: boolean value if steap completed succesfully
+            * state: value signaling step state which is one of STEP_ constants
         """
         steps = []
         for step in self.steps:
             steps.append({
                 'name': step.name(),
                 'description': step.description(),
-                'completed': False,
-                'success': False,
+                'state': self.STEP_UNKNOWN,
                 })
         return steps
 
@@ -93,4 +94,3 @@ class WorkFlow(QtCore.QObject):
     def run(self):
         "Trigger workflow execution"
         # TODO
-        pass
