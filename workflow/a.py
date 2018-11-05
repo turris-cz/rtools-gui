@@ -1,9 +1,14 @@
 "Module implementing steps for A module"
 from .generic import Step
+from time import sleep
 
 
 class OTPProgramming(Step):
     "Program OTP memory"
+
+    def run(self):
+        # TODO
+        sleep(1)
 
     @staticmethod
     def name():
@@ -21,6 +26,11 @@ class OTPProgramming(Step):
 
 class SPIProgramming(Step):
     "Program SPI Flash memory"
+
+    def run(self):
+        print("Run spi programming")
+        # TODO
+        sleep(1)
 
     @staticmethod
     def name():
@@ -40,6 +50,10 @@ class SPIProgramming(Step):
 class TestBootUp(Step):
     "Try to boot Mox to u-boot"
 
+    def run(self):
+        # TODO
+        sleep(1)
+
     @staticmethod
     def name():
         return "Test bootu Moxe"
@@ -56,6 +70,10 @@ class TestBootUp(Step):
 class TimeSetup(Step):
     "Set current time and verify this setting"
 
+    def run(self):
+        # TODO
+        sleep(1)
+
     @staticmethod
     def name():
         return "Nastavení aktuálního času"
@@ -71,6 +89,10 @@ class TimeSetup(Step):
 
 class PeripheryTest(Step):
     "Test USB, Wan and so on"
+
+    def run(self):
+        # TODO
+        sleep(1)
 
     @staticmethod
     def name():

@@ -5,6 +5,10 @@ class Step():
     def __init__(self, moxtester):
         self.moxtester = moxtester
 
+    def run(self):
+        "Run this step"
+        raise NotImplementedError()
+
     @staticmethod
     def name():
         "Returns name of this test. In Czech of course."

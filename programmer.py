@@ -36,7 +36,6 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         self._steps = []  # List of steps elements
 
         self.workflow = None  # Current workflow for this programmer
-        self.failed = False
         self.programmer = None  # Handle for MoxTester
         self.connectProgrammer()
 
@@ -53,7 +52,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             self.mainWindow.display_msg(
                 "Programátor {} zřejmě není připojen".format(self.index + 1))
             return
-        if self.workflow is not None and not self.failed:
+        if self.workflow is not None:
             self.mainWindow.display_msg(
                 "Programátor {} je aktuálně obsazen".format(self.index + 1))
             return
@@ -97,21 +96,24 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             self.introWidget.setCurrentWidget(self.pageIntroReady)
             return
 
-        self.failed = False
         # Connect workflow signals to our slots
-        self.workflow.singleProgressUpdate.connect(self.singleProgressUpdate)
-        self.workflow.allProgressUpdate.connect(self.allProgressUpdate)
+        self.workflow.singleProgressUpdate.connect(
+            self.currentProgress.setValue)
+        self.workflow.allProgressUpdate.connect(self.totalProgress.setValue)
         self.workflow.setStepState.connect(self.stepStateUpdate)
         self.workflow.uartLogUpdate.connect(self.uartOutput)
+        self.workflow.workflow_exit.connect(self.workflowExit)
 
         # Update GUI
         self.serialNumberLabel.setText(hex(serial_number))
         self.typeLabel.setText(self.workflow.get_board_name())
         self.contentWidget.setCurrentWidget(self.pageWork)
+        self.progressWidget.setCurrentWidget(self.progressProgress)
         self._steps = []
         self.ProgressContent.layout().takeAt(0)  # Drop all step widgets
         for step in self.workflow.get_steps():
             self._new_step(step)
+        self.totalProgress.setMaximum(len(self._steps))  # Set max to progress bar
         # Add spacers
         self.ProgressContent.layout().addItem(
             QtWidgets.QSpacerItem(
@@ -129,9 +131,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             len(self._steps), 4
             )
 
-        self.workflow.run()
-        # TODO remove
-        self.failed = True  # For now as we do nothing
+        self.workflow.run()  # And lastly start worklow
 
     def _new_step(self, step):
         icon = QtWidgets.QLabel(self.ProgressContent)
@@ -145,19 +145,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             "icon": icon,
             "label": label,
             })
-        self._update_step(len(self._steps) - 1, step['state'])
-
-    def _update_step(self, index, state):
-        _STATE_TO_PIX = {
-            WorkFlow.STEP_UNKNOWN: ":/img/icons/unknown.png",
-            WorkFlow.STEP_RUNNING: ":/img/icons/run.png",
-            WorkFlow.STEP_FAILED: ":/img/icons/fail.png",
-            WorkFlow.STEP_OK: ":/img/icons/ok.png",
-            WorkFlow.STEP_UNSTABLE: ":/img/icons/unstable.png",
-        }
-        self._steps[index]['icon'].setPixmap(
-            QtGui.QPixmap(_STATE_TO_PIX[state])
-            )
+        self.stepStateUpdate(len(self._steps) - 1, step['state'], None)
 
     @QtCore.pyqtSlot()
     def barcodeAbandon(self):
@@ -167,32 +155,39 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         self.introWidget.setCurrentWidget(self.pageIntroReady)
         self.mainWindow.refocus()
 
-    @QtCore.pyqtSlot()
-    def singleProgressUpdate(self, progress):
-        """Called to update single step progress bar. Progress is int from 0 to
-        100."""
-        # TODO
-        pass
-
-    @QtCore.pyqtSlot()
-    def allProgressUpdate(self, progress):
-        """Called to update all stepts progress bar. Progress is int from 0 to
-        number of steps.
-        """
-        # TODO
-        pass
-
-    @QtCore.pyqtSlot()
-    def stepStateUpdate(self, step, state):
+    @QtCore.pyqtSlot(int, str, str)
+    def stepStateUpdate(self, step, state, msg):
         """Set state of one of steps. state is string and can be one of
         supported steps from workflow.
         """
-        # TODO
-        pass
+        _STATE_TO_PIX = {
+            WorkFlow.STEP_UNKNOWN: ":/img/icons/unknown.png",
+            WorkFlow.STEP_RUNNING: ":/img/icons/run.png",
+            WorkFlow.STEP_FAILED: ":/img/icons/fail.png",
+            WorkFlow.STEP_OK: ":/img/icons/ok.png",
+            WorkFlow.STEP_UNSTABLE: ":/img/icons/unstable.png",
+        }
+        self._steps[step]['icon'].setPixmap(
+            QtGui.QPixmap(_STATE_TO_PIX[state])
+            )
+        # TODO show warnings somewhere
 
-    @QtCore.pyqtSlot()
+    @QtCore.pyqtSlot(str)
     def uartOutput(self, line):
         """Update UART log with given new line.
         """
         # TODO
         pass
+
+    @QtCore.pyqtSlot(str)
+    def workflowExit(self, error):
+        """Slot called when workflow exits. If workflow exited with error then
+        error is string with error message. If error is None then there was no
+        error.
+        """
+        self.workflow = None
+        if not error:
+            self.contentWidget.setCurrentWidget(self.pageIntro)
+        else:
+            self.progressWidget.setCurrentWidget(self.progressError)
+            self.progressErrorLabel.setText(error)

@@ -44,9 +44,10 @@ class WorkFlow(QtCore.QObject):
     STEP_UNSTABLE="unstable" # Step that previous run successfully but should run again
 
     singleProgressUpdate = QtCore.pyqtSignal(int)
-    allProgressUpdate = QtCore.pyqtSignal(int)
-    setStepState = QtCore.pyqtSignal(int, str)
+    allProgressUpdate = QtCore.pyqtSignal(int, int)
+    setStepState = QtCore.pyqtSignal(int, str, str)
     uartLogUpdate = QtCore.pyqtSignal(str)
+    workflow_exit = QtCore.pyqtSignal(str)
 
     def __init__(self, db_connection, moxtester, serial_number):
         super().__init__()
@@ -93,4 +94,27 @@ class WorkFlow(QtCore.QObject):
 
     def run(self):
         "Trigger workflow execution"
-        # TODO
+        self.moveToThread(self.thread)
+        self.thread.started.connect(self._run)
+        self.thread.start()
+
+    def _run(self):
+        "Workflow executor"
+        self.allProgressUpdate.emit(0, len(self.steps))
+        for i in range(len(self.steps)):
+            step = self.steps[i]
+            try:
+                self.setStepState.emit(i, self.STEP_RUNNING, "")
+                msg = step.run()
+                self.allProgressUpdate.emit(i + 1, len(self.steps))
+                if msg is None:
+                    self.setStepState.emit(i, self.STEP_OK, "")
+                else:
+                    self.setStepState.emit(i, self.STEP_WARNING, msg)
+            except Exception as e:
+                self.setStepState.emit(i, self.STEP_FAILED, str(e))
+                self.workflow_exit.emit(str(e))
+                self.thread.quit()
+                return
+        self.workflow_exit.emit(None)
+        self.thread.quit()
