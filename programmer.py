@@ -95,6 +95,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             self.intro_error(str(e))
             self.introWidget.setCurrentWidget(self.pageIntroReady)
             return
+        self.intro_error(None)
 
         # Connect workflow signals to our slots
         self.workflow.singleProgressUpdate.connect(
