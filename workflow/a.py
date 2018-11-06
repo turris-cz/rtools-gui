@@ -140,13 +140,18 @@ class TestUSB(Step):
     def run(self):
         self.set_progress(0)
         with self.moxtester.uart() as uart:
-            uart.sendline('usb start')
+            uart.sendline('gpio set GPIO20')
             self.set_progress(20)
             uart.expect(['=>'])
+            uart.sendline('usb start')
             self.set_progress(50)
+            uart.expect(['=>'])
+            self.set_progress(60)
             uart.sendline('usb dev')
             self.set_progress(70)
-            uart.expect(['IDE device 0: '])
+            value = uart.expect(['IDE device 0: ', 'no usb devices available'])
+            if value != 1:
+                FatalWorkflowException('USB device was not found')
         self.set_progress(100)
 
     @staticmethod
