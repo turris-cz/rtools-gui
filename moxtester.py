@@ -71,17 +71,11 @@ class MoxTester:
                 or self._d is not None:
             # TODO exception?
             return
-        # CN1 (detection, power supply and JTAG)
         self._a = _BitBangInterface(self.dev, ftdi.INTERFACE_A, 0x40)
-        self.power(False)
-        # CN2 (boot mode, hardware reset and SPI)
         self._b = _SPIInterface(self.dev, ftdi.INTERFACE_B, 0xE0)
-        self.reset(True)
-        self.set_boot_mode(self.BOOT_MODE_SPI)
-        # CN3 (Unused GPIO)
         self._c = _BitBangInterface(self.dev, ftdi.INTERFACE_C, 0x00)
-        # CN4 (UART)
         self._d = _UARTInterface(self.dev, ftdi.INTERFACE_D)
+        self.default()
 
     def reset_tester(self):
         """ReseteMoxTester device. It disconnects MoxTester from FTDI USB
@@ -97,6 +91,12 @@ class MoxTester:
             raise MoxTesterCommunicationException(
                 "Closing USB FTDI device failed")
         self.connect_tester()
+
+    def default(self):
+        """Return tester state to default"""
+        self.power(False)
+        self.reset(True)
+        self.set_boot_mode(self.BOOT_MODE_SPI)
 
     def selftest(self):
         "Runs various self-test operations (such as SPI loopback test)"
