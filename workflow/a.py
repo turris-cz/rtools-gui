@@ -1,4 +1,5 @@
 "Module implementing steps for A module"
+from datetime import datetime
 from .generic import Step
 from time import sleep
 
@@ -8,7 +9,7 @@ class OTPProgramming(Step):
 
     def run(self):
         # TODO
-        sleep(1)
+        pass
 
     @staticmethod
     def name():
@@ -19,18 +20,13 @@ class OTPProgramming(Step):
         return """Programování odpovídajících údajů do jednorázově
         zapisovatelné paměti."""
 
-    @staticmethod
-    def substeps():
-        return None
-
 
 class SPIProgramming(Step):
     "Program SPI Flash memory"
 
     def run(self):
-        print("Run spi programming")
         # TODO
-        sleep(1)
+        pass
 
     @staticmethod
     def name():
@@ -42,17 +38,20 @@ class SPIProgramming(Step):
         záchranného image do SPI Flash paměti. Tento krok také provádí
         kontrolu."""
 
-    @staticmethod
-    def substeps():
-        return None
-
 
 class TestBootUp(Step):
     "Try to boot Mox to u-boot"
 
     def run(self):
-        # TODO
-        sleep(1)
+        self.moxtester.power(True)
+        with self.moxtester.uart() as uart:
+            self.moxtester.reset(False)
+            self.set_progress(40)
+            uart.expect(['Hit any key to stop autoboot'])
+            self.set_progress(90)
+            uart.send('\n')
+            uart.expect(['=>'])
+            self.set_progress(100)
 
     @staticmethod
     def name():
@@ -62,17 +61,20 @@ class TestBootUp(Step):
     def description():
         return """Otestování, že MOX nabootuje bootloader (u-boot)"""
 
-    @staticmethod
-    def substeps():
-        return None
-
 
 class TimeSetup(Step):
     "Set current time and verify this setting"
 
     def run(self):
-        # TODO
-        sleep(1)
+        with self.moxtester.uart() as uart:
+            now = datetime.utcnow()
+            date = "{:02}{:02}{:02}{:02}{:04}.{:02}".format(
+                now.month, now.day, now.hour,
+                now.minute, now.year, now.second
+                )
+            uart.send('date ' + date)
+            uart.expect(['=>'])
+            # TODO verify date
 
     @staticmethod
     def name():
@@ -82,17 +84,13 @@ class TimeSetup(Step):
     def description():
         return """Nastavení a kontrola času v RTC."""
 
-    @staticmethod
-    def substeps():
-        return None
-
 
 class PeripheryTest(Step):
     "Test USB, Wan and so on"
 
     def run(self):
         # TODO
-        sleep(1)
+        pass
 
     @staticmethod
     def name():
@@ -101,10 +99,6 @@ class PeripheryTest(Step):
     @staticmethod
     def description():
         return """Otestování periferií Moxe."""
-
-    @staticmethod
-    def substeps():
-        return None
 
 
 # All steps for MOX A in order

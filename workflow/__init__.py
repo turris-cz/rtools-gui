@@ -67,7 +67,7 @@ class WorkFlow(QtCore.QObject):
         # Load steps
         self.steps = []
         for step in _BOARD_MAP[self.board_id]['steps']:
-            self.steps.append(step(moxtester))
+            self.steps.append(step(moxtester, self.singleProgressUpdate.emit))
 
         self.thread = QtCore.QThread(self)
 
@@ -98,6 +98,12 @@ class WorkFlow(QtCore.QObject):
         self.thread.started.connect(self._run)
         self.thread.start()
 
+    def _run_exit(self, error=None):
+        "Helper function for _run cleanup"
+        self.workflow_exit.emit(None if error is None else str(error))
+        self.moxtester.default()  # Return moxtester to default safe setting
+        self.thread.quit()
+
     def _run(self):
         "Workflow executor"
         self.allProgressUpdate.emit(0, len(self.steps))
@@ -113,8 +119,6 @@ class WorkFlow(QtCore.QObject):
                     self.setStepState.emit(i, self.STEP_WARNING, msg)
             except Exception as e:
                 self.setStepState.emit(i, self.STEP_FAILED, str(e))
-                self.workflow_exit.emit(str(e))
-                self.thread.quit()
+                self._run_exit(e)
                 return
-        self.workflow_exit.emit(None)
-        self.thread.quit()
+        self._run_exit()

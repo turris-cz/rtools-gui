@@ -2,8 +2,9 @@
 class Step():
     "Abstract class for signle step"
 
-    def __init__(self, moxtester):
+    def __init__(self, moxtester, set_progress):
         self.moxtester = moxtester
+        self.set_progress = set_progress
 
     def run(self):
         "Run this step"
@@ -17,9 +18,4 @@ class Step():
     @staticmethod
     def description():
         "Returns description of this step. In Czech of course."
-        raise NotImplementedError()
-
-    @staticmethod
-    def substeps():
-        """Returns list of substeps. If there are none then return None."""
         raise NotImplementedError()
