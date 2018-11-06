@@ -166,27 +166,31 @@ class SPIFlash():
         """Write data to given address. This method tries to be smart and does
         as little as possible. It wipes memory at 4KB sectors and does that
         only if data in memory does not match provided data."""
-        def call_callback(value, vmin, vmax, vall):
-            if callback is not None:
-                low = vmin / vall
-                off = ((vmax / vall) - low) * value
-                callback(low + off)
-
         if address & 0xFFF != 0:
             raise MoxTesterSPIFLashUnalignedException(
                 "Write has to be aligned to 4KB sector")
-        secnum = self._sectors_count(len(data), 0x1000)
+        if callback is not None:
+            callback(0)
+        size = len(data)
+        secnum = self._sectors_count(size, 0x1000)
+        current = self.read_data(address, size, None if callback is None else lambda p: callback(p*.2))
+        if current == data:  # Don't bother if it is same
+            if callback is not None:
+                callback(1)
+            return
+
         for i in range(secnum):
             secaddr = address + (i * 0x1000)
             target = data[(i*0x1000):((i+1)*0x1000)]
-            current = self.read_data(
-                secaddr, 0x1000,
-                lambda p: call_callback(p, i, i+.5, secnum))
-            if target != current[0:len(target)]:
-                self.sector_erase(secaddr)
+            currsec = current[(i*0x1000):((i+1)*0x1000)]
+            if target != currsec:  # Do we have to change this section?
+                if not all((currsec[y] ^ 0xff) | target[y] for y in range(0x1000)):
+                    self.sector_erase(secaddr)
                 self.write_data(
-                    secaddr, target,
-                    lambda p: call_callback(p, i+.5, i+1, secnum))
+                    secaddr, target, None if callback is None else
+                    lambda p: callback(.2 + .8*((i + p)/secnum)))
+            if callback is not None:
+                callback(.2 + .8*((i + 1) / secnum))
         if callback is not None:
             callback(1)
 
