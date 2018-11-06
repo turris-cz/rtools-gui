@@ -86,10 +86,12 @@ class SPIFlash():
         while self.is_busy():
             pass
 
-    def read_data(self, address, size=1):
+    def read_data(self, address, size=1, callback=None):
         """Read data from SPI flash from given address. At single read it is
         possible to read multiple bytes. Fot that purpose you can use size
-        argument."""
+        argument.
+        callback(progress) argument is optional function that is called with
+        progress update. Progress is float value between 0 and 1."""
         # We have maximum amount of possible read bytes per single read so we
         # have to do it multiple times
         sectors = self._sectors_count(size, 0x10000)
@@ -103,6 +105,8 @@ class SPIFlash():
             else:
                 self.spi.spi_burst_read(0x10000)
             data = data + self.spi.spi_burst()
+            if callback is not None:
+                callback((i+1) / sectors)
         return data
 
     def chip_erase(self):
@@ -148,17 +152,26 @@ class SPIFlash():
             res = res + 1
         return res
 
-    def write_data(self, address, data):
+    def write_data(self, address, data, callback=None):
         """Write given data from given address of memory. You should wipe
         target sector before calling this function. After wipe you can call
         this multiple times but only on non-overlapping sections."""
-        for i in range(self._sectors_count(len(data), 0x100)):
+        sectors = self._sectors_count(len(data), 0x100)
+        for i in range(sectors):
             self.write_page(address + (256*i), data[(256*i):(256*(i+1))])
+            if callback is not None:
+                callback(sectors / (i+1))
 
-    def write(self, address, data):
+    def write(self, address, data, callback=None):
         """Write data to given address. This method tries to be smart and does
         as little as possible. It wipes memory at 4KB sectors and does that
         only if data in memory does not match provided data."""
+        def call_callback(value, vmin, vmax, vall):
+            if callback is not None:
+                low = vmin / vall
+                off = ((vmax / vall) - low) * value
+                callback(low + off)
+
         if address & 0xFFF != 0:
             raise MoxTesterSPIFLashUnalignedException(
                 "Write has to be aligned to 4KB sector")
@@ -166,14 +179,25 @@ class SPIFlash():
         for i in range(secnum):
             secaddr = address + (i * 0x1000)
             target = data[(i*0x1000):((i+1)*0x1000)]
-            current = self.read_data(secaddr, 0x1000)
+            current = self.read_data(
+                secaddr, 0x1000,
+                lambda p: call_callback(p, i, i+.5, secnum))
             if target != current[0:len(target)]:
                 self.sector_erase(secaddr)
-                self.write_data(secaddr, target)
+                self.write_data(
+                    secaddr, target,
+                    lambda p: call_callback(p, i+.5, i+1, secnum))
+        if callback is not None:
+            callback(1)
 
-    def verify(self, address, data):
+    def verify(self, address, data, callback=None):
         """Verify content of SPI Flash that from given address it contains
         given data."""
-        current = self.read_data(address, len(data))
+        current = self.read_data(
+            address, len(data), None if callback is None else
+            lambda progress: callback(progress * .95))
         assert len(current) == len(data)
-        return data == current
+        result = data == current
+        if callback is not None:
+            callback(1)
+        return result

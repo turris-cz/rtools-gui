@@ -2,6 +2,8 @@
 from time import sleep
 from moxtester import MoxTester
 
+def progress(value):
+    print(value)
 
 def main():
     mxt = MoxTester(1)
@@ -17,8 +19,8 @@ def main():
         flash.reset_device()
         with open('untrusted-flash-image.bin', 'rb') as file:
             data = file.read()
-            flash.write(0x0, data)
-            if not flash.verify(0x0, data):
+            flash.write(0x0, data, progress)
+            if not flash.verify(0x0, data, progress):
                 exit("SPI image verification failed")
 
     print("power up test")
