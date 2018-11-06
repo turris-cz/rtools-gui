@@ -22,29 +22,63 @@ class OTPProgramming(Step):
         zapisovatelné paměti."""
 
 
-class SPIProgramming(Step):
-    "Program SPI Flash memory"
+class SPIFlashStep(Step):
+    "Generic SPI Flash programming step"
 
-    def run(self):
+    def _flash(self, fpath, address):
         self.set_progress(0)
-        # TODO flash separate files
         with self.moxtester.spiflash() as flash:
             flash.reset_device()
-            with open('untrusted-flash-image.bin', 'rb') as file:
+            with open(fpath, 'rb') as file:
                 data = file.read()
-                flash.write(0x0, data, lambda v: self.set_progress(int(v*80)))
-                if not flash.verify(0x0, data, lambda v: self.set_progress(80 + int(v*20))):
+                flash.write(address, data, lambda v: self.set_progress(int(v*80)))
+                if not flash.verify(address, data, lambda v: self.set_progress(80 + int(v*20))):
                     raise FatalWorkflowException("SPI content verification failed")
+
+
+class ProgramSecureFirmware(SPIFlashStep):
+    "Program secure firmware to SPI flash memory"
+
+    def run(self):
+        self._flash('firmware/secure-firmware', 0x0)
 
     @staticmethod
     def name():
-        return "Programování SPI Flash paměti"
+        return "Programování bezpečnostního firmwaru"
 
     @staticmethod
     def description():
-        return """Programování bezpečnostního firmwaru, bootloaderu (u-boot) a
-        záchranného image do SPI Flash paměti. Tento krok také provádí
-        kontrolu."""
+        return """Programování bezpečnostního firmwaru do SPI Flash paměti."""
+
+
+class ProgramUBoot(SPIFlashStep):
+    "Program u-boot to SPI flash memory"
+
+    def run(self):
+        self._flash('firmware/uboot', 0x20000)
+
+    @staticmethod
+    def name():
+        return "Programování U-Bootu"
+
+    @staticmethod
+    def description():
+        return """Programování bootloaderu U-Boot do SPI Flash paměti."""
+
+
+class ProgramRescue(SPIFlashStep):
+    "Program rescue to SPI flash memory"
+
+    def run(self):
+        self._flash('firmware/image.fit.lzma', 0x190000)
+
+    @staticmethod
+    def name():
+        return "Programování záchraného systému"
+
+    @staticmethod
+    def description():
+        return """Programování záchraného systému do SPI Flash paměti."""
 
 
 class TestBootUp(Step):
@@ -143,7 +177,9 @@ class TestWan(Step):
 # All steps for MOX A in order
 ASTEPS = (
     OTPProgramming,
-    SPIProgramming,
+    ProgramSecureFirmware,
+    ProgramUBoot,
+    ProgramRescue,
     TestBootUp,
     TimeSetup,
     TestUSB,

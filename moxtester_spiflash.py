@@ -160,7 +160,7 @@ class SPIFlash():
         for i in range(sectors):
             self.write_page(address + (256*i), data[(256*i):(256*(i+1))])
             if callback is not None:
-                callback(sectors / (i+1))
+                callback((i+1) / sectors)
 
     def write(self, address, data, callback=None):
         """Write data to given address. This method tries to be smart and does
