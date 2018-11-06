@@ -134,6 +134,10 @@ class MoxTester:
         "Set hardware reset pin of board."
         self._b.set(enabled, 0x20)
 
+    def uart_fileno(self):
+        "Returns fileno for comunication with UART"
+        return self._d.fileno()
+
     def uart(self):
         "Returns fdpexpect object for comunication with UART"
         return self._d.pexpect()
@@ -421,19 +425,28 @@ class _UARTInterface(_Interface):
             raise MoxTesterCommunicationException(
                 "Line property setup failed for interface: " + str(interface))
 
-        self.socks = socket.socketpair()
-        self.threadexit = Event()
+        self.socks = None
+        self.inputthreadexit = Event()
         self.inputthread = Thread(target=self._input, daemon=True)
-        self.inputthread.start()
-        self.outputthread = Thread(target=self._output, daemon=True)
-        self.outputthread.start()
+        self.inputthread.start()  # Start input immediately
+        self.outputthreadexit = None
+        self.outputthread = None
 
     def __del__(self):
-        self.threadexit.set()
-        self.socks[0].close()
-        self.socks[1].close()
+        self.inputthreadexit.set()
+        if self.outputthread is not None:
+            self.outputthreadexit.set()
+        if self.socks is not None:
+            try:
+                self.socks[1].close()
+            except OSError:
+                pass
+            toclose = self.socks[0]
+            self.socks = None
+            toclose.close()
         self.inputthread.join()
-        self.outputthread.join()
+        if self.outputthread is not None:
+            self.outputthread.join()
         super().__del__()
 
     def _chunk_size(self):
@@ -446,12 +459,16 @@ class _UARTInterface(_Interface):
         chunk_size = self._chunk_size()
         # TODO correct logging!
         with io.FileIO("moxtester.log", "w") as log:
-            while not self.threadexit.is_set():
+            while not self.inputthreadexit.is_set():
                 ret, data = ftdi.read_data(self.ctx, chunk_size)
                 if ret < 0:
                     raise MoxTesterCommunicationException("UART Read failed")
                 elif ret > 0:
-                    self.socks[0].sendall(data[0:ret])
+                    if self.socks is not None:
+                        try:
+                            self.socks[0].sendall(data[0:ret])
+                        except BrokenPipeError:
+                            pass  # Ignore if other end is closed
                     log.write(data[0:ret])
                 else:
                     # Sleep for short amount of time to not busyloop
@@ -459,7 +476,7 @@ class _UARTInterface(_Interface):
 
     def _output(self):
         chunk_size = self._chunk_size()
-        while not self.threadexit.is_set():
+        while not self.outputthreadexit.is_set():
             try:
                 data = self.socks[0].recv(chunk_size)
             except ConnectionResetError:
@@ -467,6 +484,28 @@ class _UARTInterface(_Interface):
             if ftdi.write_data(self.ctx, data) < 0:
                 raise MoxTesterCommunicationException("UART Write failed")
 
+    def _new_socks(self):
+        if self.socks is not None:
+            self.outputthreadexit.set()
+            try:
+                self.socks[1].close()
+            except OSError:
+                pass
+            self.outputthread.join()
+            toclose = self.socks[0]
+            self.socks = None
+            toclose.close()
+        self.socks = socket.socketpair()
+        self.outputthreadexit = Event()
+        self.outputthread = Thread(target=self._output, daemon=True)
+        self.outputthread.start()
+
+    def fileno(self):
+        "Create new file descriptior (while closing the old one) and return it"
+        self._new_socks()
+        return self.socks[1].fileno()
+
     def pexpect(self):
         "Returns fdpexpect handle."
-        return fdpexpect.fdspawn(self.socks[1].fileno())
+        self._new_socks()
+        return fdpexpect.fdspawn(self.socks[1])
