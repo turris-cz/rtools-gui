@@ -124,6 +124,22 @@ class TestUSB(Step):
         return """Otestování USB Moxe."""
 
 
+class TestWan(Step):
+    "Test Wan"
+
+    def run(self):
+        # TODO
+        pass
+
+    @staticmethod
+    def name():
+        return "Test WAN"
+
+    @staticmethod
+    def description():
+        return """Otestování WAN Moxe."""
+
+
 # All steps for MOX A in order
 ASTEPS = (
     OTPProgramming,
@@ -131,4 +147,5 @@ ASTEPS = (
     TestBootUp,
     TimeSetup,
     TestUSB,
+    TestWan,
 )
