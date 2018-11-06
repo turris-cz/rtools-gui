@@ -1,3 +1,4 @@
+from time import sleep
 from PyQt5 import QtCore
 from .exceptions import WorkflowException
 from .exceptions import InvalidBoardNumberException
@@ -107,6 +108,7 @@ class WorkFlow(QtCore.QObject):
     def _run(self):
         "Workflow executor"
         self.allProgressUpdate.emit(0, len(self.steps))
+        sleep(0.1)  # Give some time to GUI to catch up
         for i in range(len(self.steps)):
             step = self.steps[i]
             try:
