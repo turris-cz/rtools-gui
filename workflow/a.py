@@ -1,6 +1,7 @@
 "Module implementing steps for A module"
 from datetime import datetime
 from .generic import Step
+from .exceptions import FatalWorkflowException
 from time import sleep
 
 
@@ -25,8 +26,13 @@ class SPIProgramming(Step):
     "Program SPI Flash memory"
 
     def run(self):
-        # TODO
-        pass
+        with self.moxtester.spiflash() as flash:
+            flash.reset_device()
+            with open('untrusted-flash-image.bin', 'rb') as file:
+                data = file.read()
+                flash.write(0x0, data, lambda v: self.set_progress(int(v*80)))
+                if not flash.verify(0x0, data, lambda v: self.set_progress(80 + int(v*20))):
+                    raise FatalWorkflowException("SPI content verification failed")
 
     @staticmethod
     def name():
@@ -72,7 +78,7 @@ class TimeSetup(Step):
                 now.month, now.day, now.hour,
                 now.minute, now.year, now.second
                 )
-            uart.send('date ' + date)
+            uart.send('date ' + date + '\n')
             uart.expect(['=>'])
             # TODO verify date
 

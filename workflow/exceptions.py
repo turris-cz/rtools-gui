@@ -6,3 +6,7 @@ class WorkflowException(Exception):
 class InvalidBoardNumberException(WorkflowException):
     "Provided serial number is not valid serial number for Turris Mox board"
     pass
+
+class FatalWorkflowException(WorkflowException):
+    "Exception that breaks workflow"
+    pass
