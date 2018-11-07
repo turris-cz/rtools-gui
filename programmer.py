@@ -110,8 +110,7 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         self.typeLabel.setText(self.workflow.get_board_name())
         self.contentWidget.setCurrentWidget(self.pageWork)
         self.progressWidget.setCurrentWidget(self.progressProgress)
-        self._steps = []
-        self.ProgressContent.layout().takeAt(0)  # Drop all step widgets
+        self._wipe_steps()
         for step in self.workflow.get_steps():
             self._new_step(step)
         self.totalProgress.setMaximum(len(self._steps))  # Set max to progress bar
@@ -133,6 +132,14 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             )
 
         self.workflow.run()  # And lastly start worklow
+
+    def _wipe_steps(self):
+        for step in self._steps:
+            self.ProgressContent.layout().removeWidget(step['icon'])
+            self.ProgressContent.layout().removeWidget(step['label'])
+            step['icon'].setVisible(False)
+            step['label'].setVisible(False)
+        self._steps = []
 
     def _new_step(self, step):
         icon = QtWidgets.QLabel(self.ProgressContent)
