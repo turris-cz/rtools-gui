@@ -55,7 +55,7 @@ class ProgramUBoot(SPIFlashStep):
     "Program u-boot to SPI flash memory"
 
     def run(self):
-        self._flash('firmware/uboot', 0x20000)
+        self._flash('firmware/u-boot', 0x20000)
 
     @staticmethod
     def name():
@@ -79,6 +79,21 @@ class ProgramRescue(SPIFlashStep):
     @staticmethod
     def description():
         return """Programování záchraného systému do SPI Flash paměti."""
+
+
+class ProgramDTB(SPIFlashStep):
+    "Program DTB to SPI flash memory"
+
+    def run(self):
+        self._flash('firmware/dtb', 0x7f0000)
+
+    @staticmethod
+    def name():
+        return "Programování DTB"
+
+    @staticmethod
+    def description():
+        return """Programování DTB do SPI Flash paměti."""
 
 
 class TestBootUp(Step):
@@ -185,6 +200,7 @@ ASTEPS = (
     ProgramSecureFirmware,
     ProgramUBoot,
     ProgramRescue,
+    ProgramDTB,
     TestBootUp,
     TimeSetup,
     TestUSB,
