@@ -184,11 +184,14 @@ class SPIFlash():
             secaddr = address + (i * 0x1000)
             target = data[(i*0x1000):((i+1)*0x1000)]
             currsec = current[(i*0x1000):((i+1)*0x1000)]
-            if not all(currsec[y] | (target[y] ^ 0xff) for y in range(len(target))):
+            wipe = False
+            for y in range(len(target)):
+                wipe = wipe or ((currsec[y] ^ 0xff) & target[y])
+            if wipe:
                 self.sector_erase(secaddr)  # Erase only if it is required
-            for y in range(16):  # There are 16 256 byte sectors in single 4K sector
+            for y in range(self._sectors_count(len(target), 0x100)):
                 page = target[(256*y):(256*(y+1))]
-                if page and page != currsec[(256*y):(256*(y+1))]:
+                if wipe or page != currsec[(256*y):(256*(y+1))]:
                     self.write_page(secaddr + 256*y, page)
         if callback is not None:
             callback(1)
