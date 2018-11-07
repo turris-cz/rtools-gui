@@ -187,8 +187,10 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         error.
         """
         self.workflow = None
+        # TODO if error is about disconnected programmer then we should reset
+        # our self and go to screen about disconnected programmer.
         if not error:
-            self.contentWidget.setCurrentWidget(self.pageIntro)
+            self.progressWidget.setCurrentWidget(self.progressSuccess)
         else:
             self.progressWidget.setCurrentWidget(self.progressError)
             self.progressErrorLabel.setText(error)
