@@ -166,31 +166,30 @@ class SPIFlash():
         """Write data to given address. This method tries to be smart and does
         as little as possible. It wipes memory at 4KB sectors and does that
         only if data in memory does not match provided data."""
-        if address & 0xFFF != 0:
+        if address & 0xFFF != 0:  # Just to make this code simple
             raise MoxTesterSPIFLashUnalignedException(
                 "Write has to be aligned to 4KB sector")
         if callback is not None:
             callback(0)
         size = len(data)
+        # First read current state
+        current = self.read_data(
+            address, size, None if callback is None else
+            lambda p: callback(p*.2))
+        # Go trough 4K sectors (minimum size to erase)
         secnum = self._sectors_count(size, 0x1000)
-        current = self.read_data(address, size, None if callback is None else lambda p: callback(p*.2))
-        if current == data:  # Don't bother if it is same
-            if callback is not None:
-                callback(1)
-            return
-
         for i in range(secnum):
+            if callback is not None:
+                callback(.2 + .8*(i / secnum))
             secaddr = address + (i * 0x1000)
             target = data[(i*0x1000):((i+1)*0x1000)]
             currsec = current[(i*0x1000):((i+1)*0x1000)]
-            if target != currsec:  # Do we have to change this section?
-                if not all((currsec[y] ^ 0xff) | target[y] for y in range(0x1000)):
-                    self.sector_erase(secaddr)
-                self.write_data(
-                    secaddr, target, None if callback is None else
-                    lambda p: callback(.2 + .8*((i + p)/secnum)))
-            if callback is not None:
-                callback(.2 + .8*((i + 1) / secnum))
+            if not all(currsec[y] | (target[y] ^ 0xff) for y in range(len(target))):
+                self.sector_erase(secaddr)  # Erase only if it is required
+            for y in range(16):  # There are 16 256 byte sectors in single 4K sector
+                page = target[(256*y):(256*(y+1))]
+                if page and page != currsec[(256*y):(256*(y+1))]:
+                    self.write_page(secaddr + 256*y, page)
         if callback is not None:
             callback(1)
 
