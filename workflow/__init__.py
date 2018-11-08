@@ -1,3 +1,4 @@
+import traceback
 from time import sleep
 from PyQt5 import QtCore
 from .exceptions import WorkflowException
@@ -120,6 +121,7 @@ class WorkFlow(QtCore.QObject):
                 else:
                     self.setStepState.emit(i, self.STEP_WARNING, msg)
             except Exception as e:
+                print(traceback.format_exc())
                 self.setStepState.emit(i, self.STEP_FAILED, str(e))
                 self._run_exit(e)
                 return
