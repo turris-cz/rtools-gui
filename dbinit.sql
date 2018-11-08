@@ -1,145 +1,78 @@
-CREATE ROLE omnia_flasher LOGIN PASSWORD 'poiuytrewq';
-ALTER ROLE omnia_flasher WITH SUPERUSER; -- needed for exporting csv
+-- For now
+DROP DATABASE mox_boards;
+-- TODO drop
 
-CREATE DATABASE omnia_flashing WITH OWNER omnia_flasher;
+CREATE ROLE mox_rtools;
+ALTER ROLE mox_rtools LOGIN PASSWORD 'VI7QNfDvJtmnrpQ5';
+CREATE DATABASE mox_boards WITH OWNER mox_rtools;
 
-\c omnia_flashing
+\c mox_boards
 
-CREATE TABLE routers (
-    id varchar(20) NOT NULL PRIMARY KEY,
-    add_time timestamp NOT NULL DEFAULT current_timestamp
+CREATE TYPE board_type AS ENUM ('A', 'B', 'C', 'D', 'E', 'F', 'G');
+CREATE TABLE boards (
+	serial bigint NOT NULL PRIMARY KEY,
+	type board_type NOT NULL,
+	add_time timestamp NOT NULL DEFAULT current_timestamp
 );
-ALTER TABLE routers OWNER TO omnia_flasher;
+ALTER TABLE boards OWNER TO mox_rtools;
+COMMENT ON COLUMN boards.serial IS 'Serial number of board (8 unsigned bytes)';
+COMMENT ON COLUMN boards.type IS 'Board type. It is single character business identifier.';
+
+CREATE TABLE core_keys (
+	id bigint NOT NULL PRIMARY KEY,
+	board bigint REFERENCES boards (serial),
+	key text NOT NULL,
+	add_time timestamp NOT NULL DEFAULT current_timestamp
+);
+ALTER TABLE core_keys OWNER TO mox_rtools;
+COMMENT ON COLUMN core_keys.key IS 'Public key for private key of Turris MOX';
+
+CREATE TABLE programmer_state (
+	id serial NOT NULL PRIMARY KEY,
+	hostname varchar(50) NOT NULL,
+	rtools_hash varchar(40) NOT NULL,
+	secure_firmware varchar(64) NOT NULL,
+	uboot varchar(64) NOT NULL,
+	rescue varchar(64) NOT NULL,
+	dtb varchar(64) NOT NULL
+);
+ALTER TABLE programmer_state OWNER TO mox_rtools;
+COMMENT ON COLUMN programmer_state.hostname IS 'Hostname of programmer';
+COMMENT ON COLUMN programmer_state.rtools_hash IS 'git hash of used rtools-gui repository';
+COMMENT ON COLUMN programmer_state.secure_firmware IS 'sha256sum of used secure-firmware';
+COMMENT ON COLUMN programmer_state.uboot IS 'sha256sum of used u-boot';
+COMMENT ON COLUMN programmer_state.rescue IS 'sha256sum of used rescue image';
+COMMENT ON COLUMN programmer_state.dtb IS 'sha256sum of used DTB';
 
 CREATE TABLE runs (
-    id bigserial NOT NULL PRIMARY KEY,
-    start timestamp NOT NULL DEFAULT current_timestamp,
-    router varchar(20) NOT NULL,
-    hostname varchar(50) NOT NULL,
-    runlist text NOT NULL,
-    success boolean NOT NULL DEFAULT false,
-    FOREIGN KEY (router) REFERENCES routers (id) ON DELETE CASCADE
+	id bigserial NOT NULL PRIMARY KEY,
+	board bigint REFERENCES boards (serial),
+	programmer bigint REFERENCES programmer_state(id),
+	programmer_id smallint,
+	steps text[] NOT NULL,
+	success boolean NOT NULL DEFAULT false,
+	tstart timestamp NOT NULL DEFAULT current_timestamp,
+	tend timestamp
 );
-ALTER TABLE runs OWNER TO omnia_flasher;
+ALTER TABLE runs OWNER TO mox_rtools;
+COMMENT ON COLUMN runs.programmer_id IS 'ID of used programmer board';
+COMMENT ON COLUMN runs.steps IS 'Planned steps (not executed ones those are in steps table)';
+COMMENT ON COLUMN runs.success IS 'If run reached last step without error or warning';
+COMMENT ON COLUMN runs.tstart IS 'Time of run execution start.';
+COMMENT ON COLUMN runs.tend IS 'Time of run execution end.';
 
 CREATE TABLE steps (
-    id bigserial NOT NULL PRIMARY KEY,
-    run int NOT NULL,
-    timestamp timestamp NOT NULL DEFAULT current_timestamp,
-    step_name text NOT NULL,
-    step_order int NOT NULL CHECK (step_order >= 0),
-    attempt int NOT NULL CHECK (attempt >= 0),
-    passed boolean NOT NULL DEFAULT false,
-    FOREIGN KEY (run) REFERENCES runs (id) ON DELETE CASCADE
+	id bigserial NOT NULL PRIMARY KEY,
+	step_name text NOT NULL,
+	run bigint REFERENCES runs (id),
+	success boolean NOT NULL DEFAULT false,
+	message text,
+	tstart timestamp NOT NULL DEFAULT current_timestamp,
+	tend timestamp
 );
-ALTER TABLE steps OWNER TO omnia_flasher;
-
-CREATE TABLE tests (
-    id bigserial PRIMARY KEY,
-    run int NOT NULL,
-    timestamp timestamp NOT NULL DEFAULT current_timestamp,
-    test_name text NOT NULL,
-    result boolean NOT NULL, -- true passed, false failed
-    attempt int NOT NULL CHECK (attempt >= 0) DEFAULT '0',
-    FOREIGN KEY (run) REFERENCES runs (id) ON DELETE CASCADE
-);
-ALTER TABLE tests OWNER TO omnia_flasher;
-
-CREATE TABLE last_seen_firmware (
-    time timestamp NOT NULL DEFAULT current_timestamp,
-    id varchar(20) NOT NULL,
-    firmware text NOT NULL DEFAULT '',
-    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
-);
-ALTER TABLE last_seen_firmware OWNER TO omnia_flasher;
-
-CREATE TABLE last_seen_ram (
-    time timestamp NOT NULL DEFAULT current_timestamp,
-    id varchar(20) NOT NULL,
-    phase char(1) NOT NULL, -- tests/steps
-    size int NOT NULL, -- in GB
-    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
-);
-ALTER TABLE last_seen_ram OWNER TO omnia_flasher;
-
-CREATE TABLE last_seen_eeprom (
-    time timestamp NOT NULL DEFAULT current_timestamp,
-    id varchar(20) NOT NULL,
-    phase char(1) NOT NULL, -- tests/steps
-    eeprom text NOT NULL,
-    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
-);
-ALTER TABLE last_seen_eeprom OWNER TO omnia_flasher;
-
-CREATE TABLE last_seen_mcu (
-    time timestamp NOT NULL DEFAULT current_timestamp,
-    id varchar(20) NOT NULL,
-    bootloader_md5 char(32) NOT NULL,
-    image_md5 char(32) NOT NULL,
-    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
-);
-ALTER TABLE last_seen_mcu OWNER TO omnia_flasher;
-
-CREATE TABLE last_seen_uboot (
-    time timestamp NOT NULL DEFAULT current_timestamp,
-    id varchar(20) NOT NULL,
-    image_md5 char(32) NOT NULL,
-    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
-);
-ALTER TABLE last_seen_uboot OWNER TO omnia_flasher;
-
-CREATE OR REPLACE VIEW never_passed_steps AS
-    SELECT DISTINCT router FROM runs INNER JOIN steps ON "steps"."run" = "runs"."id"
-    WHERE router NOT IN (
-        SELECT router FROM runs INNER JOIN steps ON "steps"."run" = "runs"."id"
-        WHERE passed = true
-        GROUP BY router HAVING COUNT(DISTINCT step_name) >= 7
-    );
-ALTER VIEW never_passed_steps OWNER TO omnia_flasher;
-
-CREATE OR REPLACE VIEW never_passed_tests AS
-    SELECT DISTINCT router FROM runs INNER JOIN tests ON "tests"."run" = "runs"."id"
-    WHERE router NOT IN (
-        SELECT DISTINCT router FROM runs INNER JOIN tests on "tests"."run" = "runs"."id"
-        WHERE success = true
-    );
-ALTER VIEW never_passed_tests OWNER TO omnia_flasher;
-
-CREATE TABLE results (
-    id varchar(20) NOT NULL,
-    time timestamp NOT NULL DEFAULT current_timestamp,
-    phase char(1) NOT NULL, -- tests/steps
-    result boolean NOT NULL, -- true passed, false failed
-    FOREIGN KEY (id) REFERENCES routers (id) ON DELETE CASCADE
-);
-ALTER TABLE results OWNER TO omnia_flasher;
-
-CREATE OR REPLACE VIEW good_routers AS
-    SELECT id, MIN(time) AS first_success, MAX(time) AS last_success FROM results
-    WHERE result = true and phase = 'T'
-    GROUP BY id
-    ORDER BY id;
-ALTER VIEW good_routers OWNER TO omnia_flasher;
-
-CREATE OR REPLACE FUNCTION router_steps(router_id text)
-    RETURNS TABLE ("run_id" bigint, "run_start" timestamp, "attempt" int, "order" int, "time" timestamp, "name" text, "passed" boolean) AS
-    $$ SELECT runs.id, runs.start, steps.attempt, steps.step_order, steps.timestamp, steps.step_name, steps.passed FROM runs INNER JOIN steps ON runs.id = steps.run
-        WHERE runs.router = router_steps.router_id ORDER BY steps.id
-    $$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION router_tests(router_id text)
-    RETURNS TABLE ("run_id" bigint, "run_start" timestamp, "attempt" int, "time" timestamp, "name" text, "passed" boolean) AS
-    $$ SELECT runs.id, runs.start, tests.attempt, tests.timestamp, tests.test_name, tests.result FROM runs INNER JOIN tests ON runs.id = tests.run
-        WHERE runs.router = router_tests.router_id ORDER BY tests.id
-    $$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION export_results()
-    RETURNS trigger AS
-    $$
-    BEGIN
-        COPY (SELECT to_char(time, 'YYYY-MM-DD HH24:MI:SS'),id,phase,result FROM results ORDER BY time) TO '/tmp/results.csv' WITH CSV DELIMITER ',';
-        RETURN NEW;
-    END;
-    $$ LANGUAGE 'plpgsql' SECURITY DEFINER;
-
-CREATE TRIGGER export_csv AFTER INSERT ON results EXECUTE PROCEDURE export_results();
+ALTER TABLE steps OWNER TO mox_rtools;
+COMMENT ON COLUMN steps.step_name IS 'Name of step it self. Used to identify this step.';
+COMMENT ON COLUMN steps.success IS 'Boolean if step passed successfully.';
+COMMENT ON COLUMN steps.message IS 'Error or warning message produced by this step';
+COMMENT ON COLUMN steps.tstart IS 'Time of step execution start.';
+COMMENT ON COLUMN steps.tend IS 'Time of step execution end. Should be consistend with message addition.';
