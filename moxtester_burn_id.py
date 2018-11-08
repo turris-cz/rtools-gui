@@ -9,7 +9,7 @@ def main():
                         help='Id to be burned to moxtester')
     options = parser.parse_args()
 
-    if options.id[0] <= 0 or options.id[0] > 4:
+    if options.id[0] < 0 or options.id[0] > 4:
         exit('ID should be 1 to 4')
 
     ctx = ftdi.new()

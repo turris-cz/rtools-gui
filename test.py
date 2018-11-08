@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from time import sleep
-from moxtester import MoxTester
+from rtools_gui.moxtester import MoxTester
 
 def progress(value):
     print(value)
