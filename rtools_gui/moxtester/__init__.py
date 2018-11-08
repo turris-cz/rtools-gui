@@ -122,9 +122,9 @@ class MoxTester:
         # TODO lower bit is negated here because of hardware change on board
         # durring development. Fix this to be consistent with final board.
         if mode == self.BOOT_MODE_SPI:
-            self._b.gpio_set(0xC0, 0xC0)
+            self._b.gpio_set(0x80, 0xC0)
         elif mode == self.BOOT_MODE_UART:
-            self._b.gpio_set(0x00, 0xC0)
+            self._b.gpio_set(0x40, 0xC0)
         else:
             raise MoxTesterInvalidMode(
                 "Trying to set invalid mode: {}".format(mode))
