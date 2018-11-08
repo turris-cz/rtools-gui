@@ -1,6 +1,7 @@
 import os
 import sys
 import hashlib
+import socket
 import subprocess
 
 DIR_PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -18,6 +19,7 @@ rescue_hash = None  # sha256sum of rescue image
 dtb = None  # Bytes of device tree
 dtb_hash = None  # sha256sum of device tree
 rtools_head = None  # Git hash of HEAD
+hostname = None  # Hostname of host machine
 
 
 def __load_file(path):
@@ -44,3 +46,5 @@ def load_resources():
         ['git', 'rev-parse', 'HEAD'], stdout=subprocess.PIPE)
     rtools_head = process.stdout.decode(sys.getdefaultencoding()).strip()
     os.chdir(curdir)
+    global hostname
+    hostname = socket.gethostname()
