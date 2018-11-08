@@ -2,7 +2,6 @@
 from datetime import datetime
 from .generic import Step
 from .exceptions import FatalWorkflowException
-from time import sleep
 
 
 class OTPProgramming(Step):
@@ -136,6 +135,7 @@ class TimeSetup(Step):
             uart.expect(['=>'])
             self.set_progress(50)
             uart.sendline('date')
+            # TODO
             #uart.expect(['^Date: '])
             #print(uart.before)
         self.set_progress(100)
@@ -165,7 +165,7 @@ class TestUSB(Step):
             uart.sendline('usb dev')
             self.set_progress(70)
             value = uart.expect(['IDE device 0: ', 'no usb devices available'])
-            if value != 1:
+            if value != 0:
                 FatalWorkflowException('USB device was not found')
         self.set_progress(100)
 
@@ -182,8 +182,14 @@ class TestWan(Step):
     "Test Wan"
 
     def run(self):
-        # TODO
-        pass
+        self.set_progress(0)
+        with self.moxtester.uart() as uart:
+            uart.sendline('setenv ethaddr 12:34:56:78:9A:BC')
+            uart.sendline('dhcp')
+            self.set_progress(20)
+            uart.expect(['=>'])
+            # TODO
+        self.set_progress(100)
 
     @staticmethod
     def name():
