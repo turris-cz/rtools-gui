@@ -19,7 +19,7 @@ def _removeItemFromGridLayout(layout, row, column):
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
-    def __init__(self, dbconnection, resources):
+    def __init__(self, dbconnection, dbprogrammer_state, resources):
         super(MainWindow, self).__init__()
         self.setupUi(self)  # create gui
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)

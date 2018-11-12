@@ -1,5 +1,4 @@
 import psycopg2
-from . import resources
 from .exceptions import DBException
 
 DB_USER = "mox_rtools"
@@ -18,7 +17,7 @@ def connect():
 # new records in database. Then new object is used to reference that record to
 # other classes in this module.
 
-class _GenericTable():
+class _GenericTable:
     "Generic table representation in this module"
 
     def __init__(self, db_connection):
@@ -71,7 +70,7 @@ class ProgrammerState(_GenericTable):
         (hostname, rtools_hash, secure_firmware, uboot, rescue, dtb) VALUES
         (%s, %s, %s, %s, %s, %s) RETURNING id;"""
 
-    def __init__(self, db_connection):
+    def __init__(self, db_connection, resources):
         super().__init__(db_connection)
         state_data = (
             resources.hostname, resources.rtools_head,

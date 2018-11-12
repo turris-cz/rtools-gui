@@ -19,10 +19,14 @@ def main(argv):
 
         # Load all resources
         res = resources.Resources()
+        # Connect to database
+        dbconn = db.connect()
+        # Programmer state
+        dbprg_state = db.ProgrammerState(dbconn, res)
 
         # this import need to be used after the app is created
         from rtools_gui.mainwindow import MainWindow
-        mainwindow = MainWindow(dbconn, res)
+        mainwindow = MainWindow(dbconn, dbprg_state, res)
         mainwindow.show()
         retval = app.exec_()
 
