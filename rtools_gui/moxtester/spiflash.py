@@ -139,7 +139,9 @@ class SPIFlash():
         self.spi.spi_burst_write_int(address, 3)
         self.spi.spi_burst_write(data)
         self.spi.spi_burst()
-        self.busy_wait()
+        # Note: this is at maximum shorther than it takes us to check for busy
+        # state (around 40ms). Because of that we use sleep here instead.
+        sleep(0.005)
 
     @staticmethod
     def _sectors_count(data_len, sector_size):
