@@ -51,7 +51,7 @@ class WorkFlow(QtCore.QObject):
     uartLogUpdate = QtCore.pyqtSignal(str)
     workflow_exit = QtCore.pyqtSignal(str)
 
-    def __init__(self, db_connection, moxtester, serial_number):
+    def __init__(self, db_connection, resources, moxtester, serial_number):
         super().__init__()
         self.db_connection = db_connection
         self.moxtester = moxtester
@@ -69,7 +69,7 @@ class WorkFlow(QtCore.QObject):
         # Load steps
         self.steps = []
         for step in _BOARD_MAP[self.board_id]['steps']:
-            self.steps.append(step(moxtester, self.singleProgressUpdate.emit))
+            self.steps.append(step(moxtester, resources, self.singleProgressUpdate.emit))
 
         self.thread = QtCore.QThread(self)
 

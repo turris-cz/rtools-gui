@@ -19,7 +19,7 @@ def _removeItemFromGridLayout(layout, row, column):
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
-    def __init__(self):
+    def __init__(self, dbconnection, resources):
         super(MainWindow, self).__init__()
         self.setupUi(self)  # create gui
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
@@ -27,20 +27,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.programmers = [None]*4
         for i in range(4):
-            self.programmers[i] = ProgrammerWidget(self, i)
+            self.programmers[i] = ProgrammerWidget(self, resources, i)
             self.programmersLayout.addWidget(
                 self.programmers[i], i // 2, i % 2)
-
-        # open db connection
-        #qApp.loggerMain.info("Opening db connection.")
-        #if not qApp.connection.open():
-            #qApp.loggerMain.error("Connecting to db fails.")
-            #QtWidgets.QMessageBox.critical(
-                #self, "Chyba databáze",
-                #"<p>Nepodařilo se připojit do databáze. Zavírám aplikaci...</p>"
-            #)
-            #raise DbError(qApp.connection.lastError().text())
-        #qApp.loggerMain.info("Connected to database.")
 
     def refocus(self):
         "Set focus back to primary window input box."

@@ -2,8 +2,9 @@
 class Step():
     "Abstract class for signle step"
 
-    def __init__(self, moxtester, set_progress):
+    def __init__(self, moxtester, resources, set_progress):
         self.moxtester = moxtester
+        self.resources = resources
         self.set_progress = set_progress
 
     def run(self):

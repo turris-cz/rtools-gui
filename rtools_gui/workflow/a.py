@@ -2,7 +2,6 @@
 from datetime import datetime
 from .generic import Step
 from .exceptions import FatalWorkflowException
-from .. import resources
 
 
 class OTPProgramming(Step):
@@ -38,7 +37,7 @@ class ProgramSecureFirmware(SPIFlashStep):
     "Program secure firmware to SPI flash memory"
 
     def run(self):
-        self._flash(resources.secure_firmware, 0x0)
+        self._flash(self.resources.secure_firmware, 0x0)
 
     @staticmethod
     def name():
@@ -53,7 +52,7 @@ class ProgramUBoot(SPIFlashStep):
     "Program u-boot to SPI flash memory"
 
     def run(self):
-        self._flash(resources.uboot, 0x20000)
+        self._flash(self.resources.uboot, 0x20000)
 
     @staticmethod
     def name():
@@ -68,7 +67,7 @@ class ProgramRescue(SPIFlashStep):
     "Program rescue to SPI flash memory"
 
     def run(self):
-        self._flash(resources.rescue, 0x190000)
+        self._flash(self.resources.rescue, 0x190000)
 
     @staticmethod
     def name():
@@ -83,7 +82,7 @@ class ProgramDTB(SPIFlashStep):
     "Program DTB to SPI flash memory"
 
     def run(self):
-        self._flash(resources.dtb, 0x7f0000)
+        self._flash(self.resources.dtb, 0x7f0000)
 
     @staticmethod
     def name():
