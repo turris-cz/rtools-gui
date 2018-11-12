@@ -34,7 +34,8 @@ CREATE TABLE programmer_state (
 	secure_firmware varchar(64) NOT NULL,
 	uboot varchar(64) NOT NULL,
 	rescue varchar(64) NOT NULL,
-	dtb varchar(64) NOT NULL
+	dtb varchar(64) NOT NULL,
+	add_time timestamp NOT NULL DEFAULT current_timestamp
 );
 ALTER TABLE programmer_state OWNER TO mox_rtools;
 COMMENT ON COLUMN programmer_state.hostname IS 'Hostname of programmer';
