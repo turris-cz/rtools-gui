@@ -6,7 +6,7 @@ from .ui.programmer import Ui_Programmer
 from .utils import MAX_SERIAL_LEN
 from .moxtester import MoxTester
 from .moxtester.exceptions import MoxTesterException
-from .workflow import WorkFlow, WorkflowException
+from .workflow import WorkFlow
 
 
 class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
@@ -92,7 +92,8 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             self.workflow = WorkFlow(
                 self.db_connection, self.db_programmer_state, self.resources,
                 self.programmer, serial_number)
-        except WorkflowException as e:
+        except Exception as e:
+            # TODO log this exception!
             self.workflow = None
             self.intro_error(str(e))
             self.introWidget.setCurrentWidget(self.pageIntroReady)
