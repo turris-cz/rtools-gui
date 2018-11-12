@@ -1,6 +1,7 @@
 import traceback
 from time import sleep
 from PyQt5 import QtCore
+from .. import db
 from .exceptions import WorkflowException
 from .exceptions import InvalidBoardNumberException
 from .a import ASTEPS
@@ -51,12 +52,16 @@ class WorkFlow(QtCore.QObject):
     uartLogUpdate = QtCore.pyqtSignal(str)
     workflow_exit = QtCore.pyqtSignal(str)
 
-    def __init__(self, db_connection, resources, moxtester, serial_number):
+    def __init__(self, db_connection, db_programmer_state, resources, moxtester, serial_number):
         super().__init__()
         self.db_connection = db_connection
+        self.db_programmer_state = db_programmer_state
+        self.db_board = None
+        self.db_run = None
         self.moxtester = moxtester
         self.serial_number = serial_number
 
+        # Verify board serial number
         self.series = serial_number >> 32
         if self.series == 0xFFFFFFFF or self.series < 0xD:
             raise InvalidBoardNumberException(
@@ -65,11 +70,13 @@ class WorkFlow(QtCore.QObject):
         if self.board_id not in _BOARD_MAP:
             raise InvalidBoardNumberException(
                 "Unsupported board ID in serial number: " + hex(self.board_id))
+        # Get board from database
+        self.db_board = db.Board(db_connection, serial_number)
 
         # Load steps
-        self.steps = []
-        for step in _BOARD_MAP[self.board_id]['steps']:
-            self.steps.append(step(moxtester, resources, self.singleProgressUpdate.emit))
+        self.steps = [
+            step(moxtester, resources, self.singleProgressUpdate.emit)
+            for step in _BOARD_MAP[self.board_id]['steps']]
 
         self.thread = QtCore.QThread(self)
 
@@ -77,15 +84,12 @@ class WorkFlow(QtCore.QObject):
         """Returns table steps. Every step is a dictionary where following keys
         exists:
             * name: name of single step
-            * description: long description of what is happening when this step
-              is being executed
             * state: value signaling step state which is one of STEP_ constants
         """
         steps = []
         for step in self.steps:
             steps.append({
                 'name': step.name(),
-                'description': step.description(),
                 'state': self.STEP_UNKNOWN,
                 })
         return steps
@@ -102,15 +106,22 @@ class WorkFlow(QtCore.QObject):
 
     def _run_exit(self, error=None):
         "Helper function for _run cleanup"
+        self.db_run.finish(error is None)
         self.workflow_exit.emit(None if error is None else str(error))
         self.moxtester.default()  # Return moxtester to default safe setting
         self.thread.quit()
 
     def _run(self):
         "Workflow executor"
+        self.db_run = db.ProgrammerRun(
+            self.db_connection, self.db_board, self.db_programmer_state,
+            self.moxtester.chip_id, [x.dbid() for x in self.steps])
+
         self.allProgressUpdate.emit(0, len(self.steps))
         sleep(0.1)  # Give some time to GUI to catch up
         for i in range(len(self.steps)):
+            db_step = db.ProgrammerStep(
+                self.db_connection, self.db_run, self.steps[i].dbid())
             step = self.steps[i]
             try:
                 self.setStepState.emit(i, self.STEP_RUNNING, "")
@@ -120,8 +131,11 @@ class WorkFlow(QtCore.QObject):
                     self.setStepState.emit(i, self.STEP_OK, "")
                 else:
                     self.setStepState.emit(i, self.STEP_WARNING, msg)
+                db_step.finish(msg is None, msg)
             except Exception as e:
-                print(traceback.format_exc())
+                trc = traceback.format_exc()
+                print(trc)
+                db_step.finish(False, str(trc))
                 self.setStepState.emit(i, self.STEP_FAILED, str(e))
                 self._run_exit(e)
                 return

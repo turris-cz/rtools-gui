@@ -21,8 +21,10 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         WORK_STATE_RUNNING,
     )
 
-    def __init__(self, mainWindow, resources, index):
+    def __init__(self, mainWindow, db_connection, db_programmer_state, resources, index):
         self.mainWindow = mainWindow
+        self.db_connection = db_connection
+        self.db_programmer_state = db_programmer_state
         self.resources = resources
         self.index = index
 
@@ -87,7 +89,9 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             self.introWidget.setCurrentWidget(self.pageIntroReady)
             return
         try:
-            self.workflow = WorkFlow(None, self.resources, self.programmer, serial_number)
+            self.workflow = WorkFlow(
+                self.db_connection, self.db_programmer_state, self.resources,
+                self.programmer, serial_number)
         except WorkflowException as e:
             self.workflow = None
             self.intro_error(str(e))

@@ -18,6 +18,8 @@ class MoxTester:
     BOOT_MODE_UART = 0b10
 
     def __init__(self, chip_id):
+        self.chip_id = chip_id
+
         self.ctx = ftdi.new()
         ret, devs = ftdi.usb_find_all(self.ctx, 0x0403, 0x6011)
         if ret < 0:

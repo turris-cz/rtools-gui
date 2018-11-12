@@ -17,6 +17,6 @@ class Step():
         raise NotImplementedError()
 
     @staticmethod
-    def description():
-        "Returns description of this step. In Czech of course."
+    def dbid():
+        "Identifier used in database for this step."
         raise NotImplementedError()

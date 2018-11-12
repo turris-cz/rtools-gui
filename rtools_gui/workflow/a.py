@@ -16,9 +16,8 @@ class OTPProgramming(Step):
         return "Programování OTP"
 
     @staticmethod
-    def description():
-        return """Programování odpovídajících údajů do jednorázově
-        zapisovatelné paměti."""
+    def dbid():
+        return "otp-program"
 
 
 class SPIFlashStep(Step):
@@ -44,8 +43,8 @@ class ProgramSecureFirmware(SPIFlashStep):
         return "Programování bezpečnostního firmwaru"
 
     @staticmethod
-    def description():
-        return """Programování bezpečnostního firmwaru do SPI Flash paměti."""
+    def dbid():
+        return "flash-secure-firmware"
 
 
 class ProgramUBoot(SPIFlashStep):
@@ -59,8 +58,8 @@ class ProgramUBoot(SPIFlashStep):
         return "Programování U-Bootu"
 
     @staticmethod
-    def description():
-        return """Programování bootloaderu U-Boot do SPI Flash paměti."""
+    def dbid():
+        return "flash-uboot"
 
 
 class ProgramRescue(SPIFlashStep):
@@ -74,8 +73,8 @@ class ProgramRescue(SPIFlashStep):
         return "Programování záchraného systému"
 
     @staticmethod
-    def description():
-        return """Programování záchraného systému do SPI Flash paměti."""
+    def dbid():
+        return "flash-rescue"
 
 
 class ProgramDTB(SPIFlashStep):
@@ -89,8 +88,8 @@ class ProgramDTB(SPIFlashStep):
         return "Programování DTB"
 
     @staticmethod
-    def description():
-        return """Programování DTB do SPI Flash paměti."""
+    def dbid():
+        return "flash-dtb"
 
 
 class TestBootUp(Step):
@@ -113,8 +112,8 @@ class TestBootUp(Step):
         return "Test bootu Moxe"
 
     @staticmethod
-    def description():
-        return """Otestování, že MOX nabootuje bootloader (u-boot)"""
+    def dbid():
+        return "bootup"
 
 
 class TimeSetup(Step):
@@ -143,8 +142,8 @@ class TimeSetup(Step):
         return "Nastavení aktuálního času"
 
     @staticmethod
-    def description():
-        return """Nastavení a kontrola času v RTC."""
+    def dbid():
+        return "datetime"
 
 
 class TestUSB(Step):
@@ -172,8 +171,8 @@ class TestUSB(Step):
         return "Test USB"
 
     @staticmethod
-    def description():
-        return """Otestování USB Moxe."""
+    def dbid():
+        return "test-usb"
 
 
 class TestWan(Step):
@@ -194,8 +193,8 @@ class TestWan(Step):
         return "Test WAN"
 
     @staticmethod
-    def description():
-        return """Otestování WAN Moxe."""
+    def dbid():
+        return "test-wan"
 
 
 # All steps for MOX A in order

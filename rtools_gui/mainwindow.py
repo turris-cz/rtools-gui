@@ -27,7 +27,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.programmers = [None]*4
         for i in range(4):
-            self.programmers[i] = ProgrammerWidget(self, resources, i)
+            self.programmers[i] = ProgrammerWidget(
+                self, dbconnection, dbprogrammer_state, resources, i)
             self.programmersLayout.addWidget(
                 self.programmers[i], i // 2, i % 2)
 
