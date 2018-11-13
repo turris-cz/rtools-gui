@@ -6,7 +6,7 @@ def progress(value):
     print(value)
 
 def main():
-    mxt = MoxTester(1)
+    mxt = MoxTester(3)
     mxt.selftest()
     mxt.reset_tester()
 
@@ -14,10 +14,11 @@ def main():
         print("Board not inserted")
         return
 
+    mxt.power(True)
     print("SPI flash")
     with mxt.spiflash() as flash:
         flash.reset_device()
-        with open('untrusted-flash-image.bin', 'rb') as file:
+        with open('firmware/secure-firmware', 'rb') as file:
             data = file.read()
             flash.write(0x0, data, progress)
             if not flash.verify(0x0, data, progress):
