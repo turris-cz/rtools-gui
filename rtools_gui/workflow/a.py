@@ -70,7 +70,7 @@ class ProgramRescue(SPIFlashStep):
 
     @staticmethod
     def name():
-        return "Programování záchraného systému"
+        return "Programování záchranného systému"
 
     @staticmethod
     def dbid():
