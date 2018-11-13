@@ -5,6 +5,10 @@ from .. import db
 from .exceptions import WorkflowException
 from .exceptions import InvalidBoardNumberException
 from .a import ASTEPS
+from .b import BSTEPS
+from .c import CSTEPS
+from .d import DSTEPS
+from .e import ESTEPS
 
 _BOARD_MAP = {
     0x30: {
@@ -13,27 +17,27 @@ _BOARD_MAP = {
         },
     0x31: {
         "name": "SFP (D)",
-        "steps": [],
+        "steps": DSTEPS,
         },
     0x32: {
         "name": "PCI (B)",
-        "steps": [],
+        "steps": BSTEPS,
         },
     0x33: {
         "name": "Topaz - 4x ethernet (C)",
-        "steps": [],
+        "steps": CSTEPS,
         },
-    #0x34: {
-    #    "name": "Peridot - 8x ethernet (E)",
-    #    "steps": None,
-    #    },
+    0x34: {
+        "name": "Peridot - 8x ethernet (E)",
+        "steps": ESTEPS,
+        },
     #0x35: {
     #    "name": "USB (F)",
-    #    "steps": None,
+    #    "steps": [],
     #    },
     #0x36: {
     #    "name": "PCI pass-trough (G)",
-    #    "steps": None,
+    #    "steps": [],
     #    },
     }
 
@@ -134,6 +138,7 @@ class WorkFlow(QtCore.QObject):
                 db_step.finish(msg is None, msg)
             except Exception as e:
                 trc = traceback.format_exc()
+                # TODO logging
                 print(trc)
                 db_step.finish(False, str(trc))
                 self.setStepState.emit(i, self.STEP_FAILED, str(e))

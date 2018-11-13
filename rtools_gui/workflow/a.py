@@ -100,7 +100,9 @@ class TestBootUp(Step):
         self.moxtester.power(True)
         with self.moxtester.uart() as uart:
             self.moxtester.reset(False)
-            self.set_progress(40)
+            self.set_progress(10)
+            uart.expect(['U-Boot'])
+            self.set_progress(30)
             uart.expect(['Hit any key to stop autoboot'])
             self.set_progress(90)
             uart.sendline('')
