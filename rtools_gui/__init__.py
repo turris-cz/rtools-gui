@@ -2,6 +2,7 @@ import sys
 import traceback
 from PyQt5.QtWidgets import QApplication
 from . import guard, resources, db
+from .conf import Configs
 
 
 def _printException(type, value, tb):
@@ -13,12 +14,14 @@ def _printException(type, value, tb):
     sys.exit(1)
 
 
-def main(argv):
+def main():
+    conf = Configs()
+
     with guard.Guard():
-        app = QApplication(argv)
+        app = QApplication(sys.argv)
 
         # Load all resources
-        res = resources.Resources()
+        res = resources.Resources(conf.trusted)
         # Connect to database
         dbconn = db.connect()
         # Programmer state
@@ -26,7 +29,7 @@ def main(argv):
 
         # this import need to be used after the app is created
         from rtools_gui.mainwindow import MainWindow
-        mainwindow = MainWindow(dbconn, dbprg_state, res)
+        mainwindow = MainWindow(conf, dbconn, dbprg_state, res)
         mainwindow.show()
         retval = app.exec_()
 

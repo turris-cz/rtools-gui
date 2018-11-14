@@ -21,8 +21,9 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
         WORK_STATE_RUNNING,
     )
 
-    def __init__(self, mainWindow, db_connection, db_programmer_state, resources, index):
+    def __init__(self, mainWindow, conf, db_connection, db_programmer_state, resources, index):
         self.mainWindow = mainWindow
+        self.conf = conf
         self.db_connection = db_connection
         self.db_programmer_state = db_programmer_state
         self.resources = resources
@@ -90,8 +91,8 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             return
         try:
             self.workflow = WorkFlow(
-                self.db_connection, self.db_programmer_state, self.resources,
-                self.programmer, serial_number)
+                self.conf, self.db_connection, self.db_programmer_state,
+                self.resources, self.programmer, serial_number)
         except Exception as e:
             # TODO log this exception!
             self.workflow = None

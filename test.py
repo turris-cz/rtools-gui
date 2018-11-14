@@ -6,7 +6,7 @@ def progress(value):
     print(value)
 
 def main():
-    mxt = MoxTester(3)
+    mxt = MoxTester(0)
     mxt.selftest()
     mxt.reset_tester()
 
@@ -18,7 +18,7 @@ def main():
     print("SPI flash")
     with mxt.spiflash() as flash:
         flash.reset_device()
-        with open('firmware/secure-firmware', 'rb') as file:
+        with open('firmware/untrusted-secure-firmware', 'rb') as file:
             data = file.read()
             flash.write(0x0, data, progress)
             if not flash.verify(0x0, data, progress):

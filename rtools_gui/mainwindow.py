@@ -19,7 +19,8 @@ def _removeItemFromGridLayout(layout, row, column):
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
-    def __init__(self, dbconnection, dbprogrammer_state, resources):
+    def __init__(self, conf, dbconnection, dbprogrammer_state, resources):
+        self.conf = conf
         super(MainWindow, self).__init__()
         self.setupUi(self)  # create gui
         self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
@@ -28,7 +29,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.programmers = [None]*4
         for i in range(4):
             self.programmers[i] = ProgrammerWidget(
-                self, dbconnection, dbprogrammer_state, resources, i)
+                self, conf, dbconnection, dbprogrammer_state, resources, i)
             self.programmersLayout.addWidget(
                 self.programmers[i], i // 2, i % 2)
 

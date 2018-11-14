@@ -8,8 +8,9 @@ class OTPProgramming(Step):
     "Program OTP memory"
 
     def run(self):
+        if not self.conf.trusted:
+            return  # Do nothing for untrusted run
         # TODO
-        pass
 
     @staticmethod
     def name():
