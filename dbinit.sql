@@ -18,6 +18,18 @@ ALTER TABLE boards OWNER TO mox_rtools;
 COMMENT ON COLUMN boards.serial IS 'Serial number of board (8 unsigned bytes)';
 COMMENT ON COLUMN boards.type IS 'Board type. It is single character business identifier.';
 
+-- TODO DROP
+INSERT INTO boards (serial, type) VALUES
+	(56639881216, 'A'), -- 30
+	(56656658432, 'D'), -- 31
+	(56673435648, 'B'), -- 32
+	(56690212864, 'C'), -- 33
+	(56706990080, 'E'), -- 34
+	(56723767296, 'F'), -- 35
+	(56740544512, 'G') -- 36
+	;
+-- TODO DROP
+
 CREATE TABLE core_keys (
 	id bigint NOT NULL PRIMARY KEY,
 	board bigint REFERENCES boards (serial),

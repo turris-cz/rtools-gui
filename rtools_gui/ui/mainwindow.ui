@@ -112,7 +112,7 @@
   </action>
  </widget>
  <resources>
-  <include location="../qrc/icons.qrc"/>
+  <include location="icons.qrc"/>
  </resources>
  <connections>
   <connection>
