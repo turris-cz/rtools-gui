@@ -1,0 +1,3 @@
+[submodule "mox-imager"]
+	path = mox-imager
+	url = git@gitlab.labs.nic.cz:turris/mox-imager.git
