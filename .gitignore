@@ -1,3 +1,4 @@
+.mox_imager-*
 *.swp
 *.pyc
 *.log
