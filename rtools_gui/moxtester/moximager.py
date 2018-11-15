@@ -21,6 +21,11 @@ class MoxImager:
         # TODO verify executable and so on
 
         # Variables set for caller
+        self.ram = None  # Amount of ram in MiB
+        self.real_serial_number = None  # Serial number as reported by mox-imager
+        self.real_board_version = None  # Board version as reported by mox-imager
+        self.real_fist_mac = None  # First mac address as reported by mox-imager
+        self.public_key = None  # ECDSA public key
         self.exit_code = None  # Exit code of executed run
         self.all_done = False  # If everything was executed correctly
         # TODO
@@ -65,9 +70,20 @@ class MoxImager:
         log = open('mox-imager.log', 'wb')
         fdpexp = fdpexpect.fdspawn(process_pipe[0], logfile=log)
 
-        # Go trough mox-imager output
-        # TODO
-        fdpexp.expect(['All done.', pexpect.EOF])
+        # TODO handle EOF and exceptions
+        fdpexp.expect(['Sending image type TIMH'])
+        fdpexp.expect(['Sending image type WTMI'])
+        fdpexp.expect(['Found (\\d+) MiB RAM'])
+        self.ram = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
+        fdpexp.expect(['Serial Number: ([0-9A-Fa-f]+)'])
+        self.real_serial_number = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()), 16)
+        fdpexp.expect(['Board version: (\\d+)'])
+        self.real_board_version = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
+        fdpexp.expect(['MAC address: ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})'])
+        self.real_first_mac = ':'.join(fdpexp.match.group(i+1).decode(sys.getdefaultencoding()) for i in range(6))
+        fdpexp.expect(['ECDSA Public Key: (0[23][0-9A-Fa-f]{132})'])
+        self.public_key = fdpexp.match.group(1).decode(sys.getdefaultencoding())
+        fdpexp.expect(['All done.'])
         self.all_done = True
 
         log.close()
