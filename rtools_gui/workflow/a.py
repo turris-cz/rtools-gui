@@ -13,7 +13,7 @@ class OTPProgramming(Step):
         self.set_progress(int(100*progress))
 
     def run(self):
-        if not self.conf.trusted:
+        if self.conf.no_otp:
             return  # Do nothing for untrusted run
         imager = self.moxtester.mox_imager(
             self.resources, self.serial_number, self.db_board.mac_wan(),

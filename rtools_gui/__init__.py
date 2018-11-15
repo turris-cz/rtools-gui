@@ -21,7 +21,7 @@ def main():
         app = QApplication(sys.argv)
 
         # Load all resources
-        res = resources.Resources(conf.trusted)
+        res = resources.Resources()
         # Connect to database
         dbconn = db.connect()
         # Programmer state

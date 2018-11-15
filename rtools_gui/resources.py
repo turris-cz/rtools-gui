@@ -8,8 +8,9 @@ from shutil import copyfile
 import pexpect
 
 DIR_PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-TRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/trusted-secure-firmware")
-UNTRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-firmware")
+SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-firmware")
+TRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/secure-firmware")
+# TODO use only one single secure firmware (trusted one) -> drop untrusted one
 UBOOT = os.path.join(DIR_PREFIX, "firmware/u-boot")
 RESCUE = os.path.join(DIR_PREFIX, "firmware/image.fit.lzma")
 DTB = os.path.join(DIR_PREFIX, "firmware/dtb")
@@ -37,21 +38,15 @@ def _git_head_hash(path):
 class Resources:
     "Resources used by rtools-gui"
 
-    def __init__(self, trusted=True):
-        secure_firmware_file = TRUSTED_SECURE_FIRMWARE if trusted else UNTRUSTED_SECURE_FIRMWARE
-        self.__secure_firmware, self.__secure_firmware_hash = _load_file(secure_firmware_file)
+    def __init__(self):
+        self.__secure_firmware, self.__secure_firmware_hash = _load_file(SECURE_FIRMWARE)
         self.__uboot, self.__uboot_hash = _load_file(UBOOT)
         self.__rescue, self.__rescue_hash = _load_file(RESCUE)
         self.__dtb, self.__dtb_hash = _load_file(DTB)
         self.__hostname = socket.gethostname()
         self.__rtools_head = _git_head_hash(DIR_PREFIX)
         self.__mox_imager_head = _git_head_hash(MOX_IMAGER_DIR)
-        self.__mox_imager_hash = None
-        self.__mox_imager_exec = None
-        self.__mox_imager_secure_firmware_hash = None
 
-        if not trusted:
-            return  # Skip mox imager preapre for untrusted (not possible)
         # Mox imager
         # TODO exception when there is no executable
         with open(MOX_IMAGER, 'rb') as file:
@@ -62,7 +57,7 @@ class Resources:
         os.chmod(self.__mox_imager_exec,
                  os.stat(self.__mox_imager_exec).st_mode | stat.S_IEXEC)
         # Hash for moximager
-        with pexpect.spawn(self.mox_imager_exec, ['--get-otp-hash', secure_firmware_file]) as pexp:
+        with pexpect.spawn(self.mox_imager_exec, ['--get-otp-hash', TRUSTED_SECURE_FIRMWARE]) as pexp:
             pexp.expect(['Secure firmware OTP hash: '])
             pexp.expect(['\\S{64}'])
             self.__mox_imager_secure_firmware_hash = pexp.after.decode(sys.getdefaultencoding())
