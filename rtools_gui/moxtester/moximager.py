@@ -10,7 +10,7 @@ class MoxImager:
     _ERROR_REGEXP = "FAIL_"
 
     def __init__(self, moxtester, resources, serial_number, first_mac,
-                 board_version=22):
+                 board_version):
         self.moxtester = moxtester
         self.resources = resources
 
@@ -48,7 +48,10 @@ class MoxImager:
             )
 
     def run(self, callback=None):
-        "Run mox-imager in OTP write mode. Returns fdexpect handle."
+        """Run mox-imager in OTP write mode. Returns fdexpect handle.
+        callback is called to report progress. It has only one argument and
+        that is floating poing between 0 and 1.
+        """
         # Prepare moxtester
         self.moxtester.default()
         self.moxtester.set_boot_mode(self.moxtester.BOOT_MODE_UART)
@@ -70,21 +73,30 @@ class MoxImager:
         log = open('mox-imager.log', 'wb')
         fdpexp = fdpexpect.fdspawn(process_pipe[0], logfile=log)
 
+        callback(0)
         # TODO handle EOF and exceptions
         fdpexp.expect(['Sending image type TIMH'])
+        callback(0.2)
         fdpexp.expect(['Sending image type WTMI'])
+        callback(0.4)
         fdpexp.expect(['Found (\\d+) MiB RAM'])
         self.ram = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
+        callback(0.5)
         fdpexp.expect(['Serial Number: ([0-9A-Fa-f]+)'])
         self.real_serial_number = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()), 16)
+        callback(0.6)
         fdpexp.expect(['Board version: (\\d+)'])
         self.real_board_version = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
+        callback(0.7)
         fdpexp.expect(['MAC address: ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})'])
         self.real_first_mac = ':'.join(fdpexp.match.group(i+1).decode(sys.getdefaultencoding()) for i in range(6))
+        callback(0.8)
         fdpexp.expect(['ECDSA Public Key: (0[23][0-9A-Fa-f]{132})'])
         self.public_key = fdpexp.match.group(1).decode(sys.getdefaultencoding())
+        callback(0.9)
         fdpexp.expect(['All done.'])
         self.all_done = True
+        callback(1)
 
         log.close()
         # Cleanup

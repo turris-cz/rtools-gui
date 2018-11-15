@@ -8,39 +8,47 @@ CREATE DATABASE mox_boards WITH OWNER mox_rtools;
 
 \c mox_boards
 
-CREATE TYPE board_type AS ENUM ('A', 'B', 'C', 'D', 'E', 'F', 'G');
 CREATE TABLE boards (
 	serial bigint NOT NULL PRIMARY KEY,
-	type board_type NOT NULL,
+	mac_wan macaddr,
+	mac_sgmii macaddr,
+	revision smallint NOT NULL,
+	type varchar(1) NOT NULL,
 	add_time timestamp NOT NULL DEFAULT current_timestamp
 );
 ALTER TABLE boards OWNER TO mox_rtools;
 COMMENT ON COLUMN boards.serial IS 'Serial number of board (8 unsigned bytes)';
+COMMENT ON COLUMN boards.mac_wan IS 'Mac address for WAN interface on MOX A';
+COMMENT ON COLUMN boards.mac_sgmii IS 'Mac address for SGMII interface on MOX A';
+COMMENT On COLUMN boards.revision IS 'Board revision number';
 COMMENT ON COLUMN boards.type IS 'Board type. It is single character business identifier.';
 
 -- TODO DROP
-INSERT INTO boards (serial, type) VALUES
-	(56639881216, 'A'), -- 30
-	(56656658432, 'D'), -- 31
-	(56673435648, 'B'), -- 32
-	(56690212864, 'C'), -- 33
-	(56706990080, 'E'), -- 34
-	(56723767296, 'F'), -- 35
-	(56740544512, 'G') -- 36
+-- Use these only in insecure mode!!!!
+INSERT INTO boards (serial, revision, type) VALUES
+	(56639881216, 21, 'A'), -- 30
+	(56656658432, 20, 'D'), -- 31
+	(56673435648, 0, 'B'), -- 32
+	(56690212864, 21, 'C'), -- 33
+	(56706990080, 0, 'E'), -- 34
+	(56723767296, 0, 'F'), -- 35
+	(56740544512, 0, 'G') -- 36
 	;
 -- TODO DROP
 
-CREATE TABLE core_keys (
-	id bigint NOT NULL PRIMARY KEY,
+CREATE TABLE core_info (
+	id bigserial PRIMARY KEY,
 	board bigint REFERENCES boards (serial),
+	mem_size smallint NOT NULL,
 	key text NOT NULL,
 	add_time timestamp NOT NULL DEFAULT current_timestamp
 );
-ALTER TABLE core_keys OWNER TO mox_rtools;
-COMMENT ON COLUMN core_keys.key IS 'Public key for private key of Turris MOX';
+ALTER TABLE core_info OWNER TO mox_rtools;
+COMMENT ON COLUMN core_info.mem_size IS 'Size of RAM in MiB';
+COMMENT ON COLUMN core_info.key IS 'Public key for private key of Turris MOX';
 
 CREATE TABLE programmer_state (
-	id serial NOT NULL PRIMARY KEY,
+	id serial PRIMARY KEY,
 	hostname varchar(50) NOT NULL,
 	rtools_hash varchar(40) NOT NULL,
 	secure_firmware varchar(64) NOT NULL,
@@ -58,7 +66,7 @@ COMMENT ON COLUMN programmer_state.rescue IS 'sha256sum of used rescue image';
 COMMENT ON COLUMN programmer_state.dtb IS 'sha256sum of used DTB';
 
 CREATE TABLE runs (
-	id bigserial NOT NULL PRIMARY KEY,
+	id bigserial PRIMARY KEY,
 	board bigint REFERENCES boards (serial),
 	programmer bigint REFERENCES programmer_state(id),
 	programmer_id smallint,
@@ -75,7 +83,7 @@ COMMENT ON COLUMN runs.tstart IS 'Time of run execution start.';
 COMMENT ON COLUMN runs.tend IS 'Time of run execution end.';
 
 CREATE TABLE steps (
-	id bigserial NOT NULL PRIMARY KEY,
+	id bigserial PRIMARY KEY,
 	step_name text NOT NULL,
 	run bigint REFERENCES runs (id),
 	success boolean NOT NULL DEFAULT false,

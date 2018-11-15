@@ -31,8 +31,14 @@ class _GenericTable:
 class Board(_GenericTable):
     "Database representation for single board"
     _SELECT_TYPE = "SELECT type FROM boards WHERE serial = %s;"
-    _INSERT_CORE_KEY = "INSERT INTO core_keys (board, key) VALUES (%s, %s);"
-    _SELECT_CORE_KEY = "SELECT key FROM core_keys WHERE board = %s;"
+    _SELECT_MAC_WAN = "SELECT mac_wan FROM boards WHERE serial = %s;"
+    _SELECT_MAC_SGMII = "SELECT mac_sgmii FROM boards WHERE serial = %s;"
+    _SELECT_REVISION = "SELECT revision FROM boards WHERE serial = %s;"
+    _INSERT_CORE_INFO = "INSERT INTO core_info (board, mem_size, key) VALUES (%s, %s, %s);"
+    _COUNT_CORE_INFO = """SELECT count(1) FROM core_info WHERE
+        board = %s AND mem_size = %s AND key = %s;"""
+    _SELECT_CORE_MEM_SIZE = "SELECT mem_size FROM core_info WHERE board = %s;"
+    _SELECT_CORE_KEY = "SELECT key FROM core_info WHERE board = %s;"
 
     def __init__(self, db_connection, serial_number):
         super().__init__(db_connection)
@@ -45,13 +51,41 @@ class Board(_GenericTable):
                 "There is no such board in database: " + hex(serial_number))
         self.type = res[0]
 
-    def set_core_key(self, key):
-        """Record public key for this board."""
+    def mac_wan(self):
+        "Returns mac address for wan interface"
+        self._cur.execute(self._SELECT_MAC_WAN, (self.serial,))
+        res = self._cur.fetchone()
+        return None if res is None else res[0]
+
+    def mac_sgmii(self):
+        "Returns mac address for sgmii interface (moxtet ethernet interface)"
+        self._cur.execute(self._SELECT_MAC_SGMII, (self.serial,))
+        res = self._cur.fetchone()
+        return None if res is None else res[0]
+
+    def revision(self):
+        "Numeric identifier of revision"
+        self._cur.execute(self._SELECT_REVISION, (self.serial,))
+        res = self._cur.fetchone()
+        return None if res is None else int(res[0])
+
+    def set_core_info(self, mem, key):
+        """Record public key and memory size for this board."""
         if self.type != "A":
             raise DBException(
-                "Invalid board type for inserting core key: " + str(self.type))
-        self._cur.execute(self._INSERT_CORE_KEY, (self.serial, str(key)))
+                "Invalid board type for inserting core info: " + str(self.type))
+        self._cur.execute(self._COUNT_CORE_INFO, (self.serial, mem, str(key)))
+        if self._cur.fetchone() is not None:
+            return  # This one is already recorded
+        self._cur.execute(self._INSERT_CORE_INFO, (self.serial, mem, str(key)))
         self._dbc.commit()
+
+    def core_mem(self):
+        """Returns core memory size for this board. If there is no such key
+        then returns None."""
+        self._cur.execute(self._SELECT_CORE_MEM_SIZE, (self.serial,))
+        res = self._cur.fetchone()
+        return None if res is None else int(res[0])
 
     def core_key(self):
         """Returns core key for this board. If there is no such key then

@@ -1,16 +1,26 @@
 "Module implementing steps for A module"
+from time import sleep
 from datetime import datetime
 from .generic import Step
 from .exceptions import FatalWorkflowException
+from .. import db
 
 
 class OTPProgramming(Step):
     "Program OTP memory"
 
+    def _imager_callback(self, progress):
+        self.set_progress(int(100*progress))
+
     def run(self):
         if not self.conf.trusted:
             return  # Do nothing for untrusted run
-        # TODO
+        imager = self.moxtester.mox_imager(
+            self.resources, self.serial_number, self.db_board.mac_wan(),
+            self.db_board.revision())
+        imager.run(self._imager_callback)
+        # TODO verify serial number and others with real from imager
+        self.db_board.set_core_info(imager.ram, imager.public_key)
 
     @staticmethod
     def name():

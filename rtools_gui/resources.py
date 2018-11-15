@@ -4,8 +4,8 @@ import stat
 import hashlib
 import socket
 import subprocess
-import pexpect
 from shutil import copyfile
+import pexpect
 
 DIR_PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 TRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/trusted-secure-firmware")

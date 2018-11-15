@@ -80,8 +80,9 @@ class WorkFlow(QtCore.QObject):
 
         # Load steps
         self.steps = [
-            step(moxtester, conf, resources, self.singleProgressUpdate.emit)
-            for step in _BOARD_MAP[self.board_id]['steps']]
+            step(serial_number, moxtester, conf, resources, self.db_board,
+                 self.singleProgressUpdate.emit) for step in
+            _BOARD_MAP[self.board_id]['steps']]
 
         self.thread = QtCore.QThread(self)
 

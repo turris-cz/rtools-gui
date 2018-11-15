@@ -5,6 +5,7 @@ from threading import Thread, Event
 from pexpect import fdpexpect
 import ftdi1 as ftdi
 from .spiflash import SPIFlash
+from .moximager import MoxImager
 from .exceptions import MoxTesterNotFoundException
 from .exceptions import MoxTesterCommunicationException
 from .exceptions import MoxTesterInvalidMode
@@ -143,6 +144,11 @@ class MoxTester:
         "Returns fdpexpect object for comunication with UART"
         return self._d.pexpect()
 
+    def mox_imager(self, resources, serial_number, first_mac, board_version):
+        """Returns instance of MoxImager for OTP flashing."""
+        return MoxImager(self, resources, serial_number, first_mac,
+                board_version)
+
     def spiflash(self):
         """Return instance of SPIFlash to control flash.
         Object returned from this function has to be used with 'with'
@@ -154,6 +160,7 @@ class MoxTester:
         state.
         """
         return SPIFlash(self, self._b)
+
 
 
 class _Interface():

@@ -4,10 +4,12 @@ from .exceptions import FatalWorkflowException
 class Step:
     "Abstract class for signle step"
 
-    def __init__(self, moxtester, conf, resources, set_progress):
+    def __init__(self, serial_number, moxtester, conf, resources, db_board, set_progress):
+        self.serial_number = serial_number
         self.moxtester = moxtester
         self.conf = conf
         self.resources = resources
+        self.db_board = db_board
         self.set_progress = set_progress
 
     def run(self):
