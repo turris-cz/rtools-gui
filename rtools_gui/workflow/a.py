@@ -1,4 +1,5 @@
 "Module implementing steps for A module"
+import sys
 from time import sleep
 from datetime import datetime
 from .generic import Step
@@ -34,12 +35,12 @@ class OTPProgramming(Step):
 class SPIFlashStep(Step):
     "Generic SPI Flash programming step"
 
-    def _flash(self, bin, address):
+    def _flash(self, binary, address):
         self.set_progress(0)
         with self.moxtester.spiflash() as flash:
             flash.reset_device()
-            flash.write(address, bin, lambda v: self.set_progress(int(v*80)))
-            if not flash.verify(address, bin, lambda v: self.set_progress(80 + int(v*20))):
+            flash.write(address, binary, lambda v: self.set_progress(int(v*80)))
+            if not flash.verify(address, binary, lambda v: self.set_progress(80 + int(v*20))):
                 raise FatalWorkflowException("SPI content verification failed")
 
 
@@ -132,6 +133,15 @@ class TestBootUp(Step):
 class TimeSetup(Step):
     "Set current time and verify this setting"
 
+    @staticmethod
+    def _match_date(uart, now):
+        def _group2int(group):
+            return int(uart.match.group(group).decode(sys.getdefaultencoding()))
+        return \
+            now.year == _group2int(1) and \
+            now.month == _group2int(2) and \
+            now.day == _group2int(3)
+
     def run(self):
         self.set_progress(0)
         with self.moxtester.uart() as uart:
@@ -145,9 +155,13 @@ class TimeSetup(Step):
             uart.expect(['=>'])
             self.set_progress(50)
             uart.sendline('date')
-            # TODO
-            #uart.expect(['^Date: '])
-            #print(uart.before)
+            # Note: we check only date. It is not exactly safe to check for
+            # time as that might change. Let's hope that in factory no one is
+            # going to work over midnight.
+            uart.expect(['Date: (\d+)-(\d+)-(\d+)'])
+            if not self._match_date(uart, now):
+                raise FatalWorkflowException("Přečtené datum neodpovídá")
+            uart.expect(['=>'])
         self.set_progress(100)
 
     @staticmethod
@@ -194,11 +208,13 @@ class TestWan(Step):
     def run(self):
         self.set_progress(0)
         with self.moxtester.uart() as uart:
-            uart.sendline('setenv ethaddr 12:34:56:78:9A:BC')
             uart.sendline('dhcp')
             self.set_progress(20)
+            uart.expect(['Waiting for PHY auto negotiation to complete'])
+            self.set_progress(40)
+            uart.expect(['DHCP client bound to address 192.168.'])
+            self.set_progress(80)
             uart.expect(['=>'])
-            # TODO
         self.set_progress(100)
 
     @staticmethod
