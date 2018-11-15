@@ -50,9 +50,11 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
     def select(self):
         "Try to select this programmer for new board session"
         if self.programmer is None:
-            self.mainWindow.display_msg(
-                "Programátor {} zřejmě není připojen".format(self.index + 1))
-            return
+            self.connectProgrammer()  # First try to connect it
+            if self.programmer is None:
+                self.mainWindow.display_msg(
+                    "Programátor {} zřejmě není připojen".format(self.index + 1))
+                return
         if self.workflow is not None:
             self.mainWindow.display_msg(
                 "Programátor {} je aktuálně obsazen".format(self.index + 1))
