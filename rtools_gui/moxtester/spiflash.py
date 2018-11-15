@@ -40,12 +40,18 @@ class SPIFlash():
     def reset_device(self):
         """Reset SPI Flash device and suspends execution for time to ensure
         device reset completion."""
+        self.busy_wait()
         self.spi.spi_burst_new()
         self.spi.spi_burst_write_int(self._ENABLE_RESET)
         self.spi.spi_burst_cs_reset()
         self.spi.spi_burst_write_int(self._RESET_DEVICE)
         self.spi.spi_burst()
-        sleep(0.0001)  # This should be longer than 30us
+        sleep(0.001)  # This should be longer than 30us
+        # Note: Documentation states that reset takes approximately 30us.
+        # Originally 100us was used but it sometimes wasn't enough. Because of
+        # that it was increased to 1ms. If there is any other case when for
+        # some reason flashing fails then it might be again because of this and
+        # this time can be even increased.
 
     def write_enable(self, enable):
         "Set if write is enabled"
