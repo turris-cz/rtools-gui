@@ -130,6 +130,28 @@ class TestBootUp(Step):
         return "bootup"
 
 
+class UbootSaveenv(Step):
+    "Save default enviroment to nor"
+
+    def run(self):
+        self.set_progress(0)
+        with self.moxtester.uart() as uart:
+            uart.sendline('saveenv')
+            self.set_progress(10)
+            uart.expect(['OK'])
+            self.set_progress(90)
+            uart.expect(['=>'])
+        self.set_progress(100)
+
+    @staticmethod
+    def name():
+        return "Uložení výchozí konfigurace U-Bootu"
+
+    @staticmethod
+    def dbid():
+        return "uboot-saveenv"
+
+
 class TimeSetup(Step):
     "Set current time and verify this setting"
 
@@ -234,6 +256,7 @@ ASTEPS = (
     ProgramRescue,
     ProgramDTB,
     TestBootUp,
+    UbootSaveenv,
     TimeSetup,
     TestUSB,
     TestWan,
