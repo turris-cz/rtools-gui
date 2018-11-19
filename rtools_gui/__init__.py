@@ -23,7 +23,7 @@ def main():
         # Load all resources
         res = resources.Resources()
         # Connect to database
-        dbconn = db.connect()
+        dbconn = db.connect(conf)
         # Programmer state
         dbprg_state = db.ProgrammerState(dbconn, res)
 

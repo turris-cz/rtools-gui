@@ -1,16 +1,16 @@
 import psycopg2
 from .exceptions import DBException
 
-DB_USER = "mox_rtools"
-DB_PASSWORD = "VI7QNfDvJtmnrpQ5"
-DB_NAME = "mox_boards"
 
-
-def connect():
+def connect(cnf):
     """Connect application to database
     Returns connection handle to database.
     """
-    return psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD)
+    return psycopg2.connect(
+        dbname=cnf.db_database,
+        user=cnf.db_user,
+        password=cnf.db_password
+        )
 
 
 # Note: Following classes are written so that by instantiating them you create
