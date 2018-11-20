@@ -4,7 +4,7 @@ rtools_root="$(dirname "$(readlink -f "$0")")"
 
 make -C mox-imager -j"$(nproc)"
 
-virtualenv -p python3 ~/.rtools-gui-env
+virtualenv --system-site-packages -p python3 ~/.rtools-gui-env
 . ~/.rtools-gui-env/bin/activate
 
 pip install -r requirements.txt --upgrade
