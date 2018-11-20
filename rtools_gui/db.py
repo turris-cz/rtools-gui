@@ -6,11 +6,17 @@ def connect(cnf):
     """Connect application to database
     Returns connection handle to database.
     """
-    return psycopg2.connect(
-        dbname=cnf.db_database,
-        user=cnf.db_user,
-        password=cnf.db_password
-        )
+    parameters = {}
+    parameters['dbname'] = cnf.db_database
+    if cnf.db_user is not None:
+        parameters['user'] = cnf.db_user
+    if cnf.db_password is not None:
+        parameters['password'] = cnf.db_password
+    if cnf.db_host is not None:
+        parameters['host'] = cnf.db_host
+    if cnf.db_port is not None:
+        parameters['port'] = cnf.db_port
+    return psycopg2.connect(**parameters)
 
 
 # Note: Following classes are written so that by instantiating them you create

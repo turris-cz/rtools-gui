@@ -47,7 +47,7 @@ class Configs:
         """If we should write OTP even in untrusted mode"""
         return self.args.no_otp
 
-    def _db_value(self, name, default):
+    def _db_value(self, name, default=None):
         if 'db' in self.config.sections() and name in self.config['db']:
             return self.config['db'][name]
         return default
@@ -55,14 +55,24 @@ class Configs:
     @property
     def db_user(self):
         """Username to be used to connect to database"""
-        return self._db_value('user', 'mox_rtools')
+        return self._db_value('user')
 
     @property
     def db_password(self):
         """Username to be used to connect to database"""
-        return self._db_value('password', 'VI7QNfDvJtmnrpQ5')
+        return self._db_value('password')
 
     @property
     def db_database(self):
         """Name of database to connect to"""
         return self._db_value('database', 'mox_boards')
+
+    @property
+    def db_host(self):
+        """Target host for database"""
+        return self._db_value('host')
+
+    @property
+    def db_port(self):
+        """Port used to connect to given host to database"""
+        return self._db_value('port')
