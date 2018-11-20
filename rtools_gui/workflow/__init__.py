@@ -1,7 +1,7 @@
 import traceback
 from time import sleep
 from PyQt5 import QtCore
-from .. import db
+from .. import db, report
 from .exceptions import WorkflowException
 from .exceptions import InvalidBoardNumberException
 from .a import ASTEPS
@@ -129,6 +129,7 @@ class WorkFlow(QtCore.QObject):
             db_step = db.ProgrammerStep(
                 self.db_connection, self.db_run, self.steps[i].dbid())
             step = self.steps[i]
+            trace = None
             try:
                 self.setStepState.emit(i, self.STEP_RUNNING, "")
                 msg = step.run()
@@ -138,12 +139,12 @@ class WorkFlow(QtCore.QObject):
                 else:
                     self.setStepState.emit(i, self.STEP_WARNING, msg)
                 db_step.finish(msg is None, msg)
-            except Exception as e:
-                trc = traceback.format_exc()
-                # TODO logging
-                print(trc)
-                db_step.finish(False, str(trc))
-                self.setStepState.emit(i, self.STEP_FAILED, str(e))
-                self._run_exit(e)
+            except Exception:
+                trace = traceback.format_exc()
+                report.error(trace)
+            if trace is not None:
+                db_step.finish(False, str(trace))
+                self.setStepState.emit(i, self.STEP_FAILED, str(trace))
+                self._run_exit(trace)
                 return
         self._run_exit()
