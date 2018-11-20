@@ -16,7 +16,7 @@ Requirements
 - For MOX Imager
 
   - `build-essential`
-  - `libssl-dev`
+  - `libssl1.0-dev`
 
 
 Howto run it
