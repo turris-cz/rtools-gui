@@ -6,27 +6,23 @@ This piece of software is designed to be used for Turris Mox provisioning.
 Requirements
 ------------
 
-- PyQt5
+- For application it self
 
   - `python3-pyqt5`
-
-- pexpect
-
   - `python3-pexpect`
-
-- psycopg2
-
   - `python3-psycopg2`
-
-- libftdi1
-
   - `python3-libftdi1`
+
+- For MOX Imager
+
+  - `build-essential`
+  - `libssl-dev`
 
 
 Howto run it
 ------------
 
-``./rtools-gui.py``
+``make -C mox-imager && ./rtools-gui.py``
 
 Settings
 --------
