@@ -1,7 +1,7 @@
-# -*- coding: utf8 -*-
-
+import traceback
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSizePolicy
+from . import report
 from .ui.programmer import Ui_Programmer
 from .utils import MAX_SERIAL_LEN
 from .moxtester import MoxTester
@@ -74,9 +74,10 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             self.programmer = MoxTester(self.index)
             self.programmer.selftest()
         except MoxTesterException:
-            # TODO print error to log
+            report.error(
+                "Programmer connection failed: " + str(traceback.format_exc()))
             # Ok this failed so we don't have programmer
-            pass
+            self.programmer = None
         if self.programmer is not None:
             self.introWidget.setCurrentWidget(self.pageIntroReady)
 
