@@ -134,9 +134,7 @@ class ProgrammerRun(_GenericTable):
         (board, programmer, programmer_id, steps) VALUES
         (%s, %s, %s, %s) RETURNING id;
         """
-    _UPDATE_FINISH = """UPDATE runs SET success = %s, tend = current_timestamp
-        WHERE id = %s;
-        """
+    _INSERT_RESULT = "INSERT INTO run_results (id, success) VALUES (%s, %s);"
 
     def __init__(self, db_connection, board, programmer_state, programmer_id, steps):
         super().__init__(db_connection)
@@ -151,7 +149,7 @@ class ProgrammerRun(_GenericTable):
         "Mark this run as finished."
         if self.finished:
             raise DBException("Run is already finished")
-        self._cur.execute(self._UPDATE_FINISH, (bool(success), self.id))
+        self._cur.execute(self._INSERT_RESULT, self.id, (bool(success)))
         self._dbc.commit()
         self.finished = True
 
@@ -161,8 +159,8 @@ class ProgrammerStep(_GenericTable):
     _INSERT_STEP = """INSERT INTO steps (step_name, run) VALUES
         (%s, %s) RETURNING id;
         """
-    _UPDATE_FINISH = """UPDATE steps SET
-        success = %s, message = %s, tend = current_timestamp WHERE id = %s;
+    _INSERT_RESULT = """INSERT INTO step_results (id, success, message) VALUES
+        (%s, %s, %s);
         """
 
     def __init__(self, db_connection, run, step_name):
@@ -177,7 +175,7 @@ class ProgrammerStep(_GenericTable):
         if self.finished:
             raise DBException("Step is already finished")
         self._cur.execute(
-            self._UPDATE_FINISH,
-            (bool(success), message, self.id))
+            self._INSERT_RESULT,
+            (self.id, bool(success), message))
         self._dbc.commit()
         self.finished = True
