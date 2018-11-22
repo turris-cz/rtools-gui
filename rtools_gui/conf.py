@@ -1,5 +1,4 @@
 import os
-from glob import iglob
 import argparse
 import configparser
 from . import report
@@ -19,18 +18,17 @@ class Configs:
         # Load configuration files
         config_file = None
         if self.args.config is not None:
-            for config in iglob(self.args.config):
-                if os.path.isfile(config):
-                    config_file = config
-                    break
-            if config_file is None:
+            cnf_path = os.path.expanduser(self.args.config)
+            if os.path.isfile(cnf_path):
+                config_file = cnf_path
+            else:
                 report.fail_exit("There is no such configuration file: " +
                                  str(self.args.config))
         if config_file is None:
             for def_config in self._DEF_CONFIG:
-                for config in iglob(def_config):
-                    if os.path.isfile(config):
-                        config_file = config
+                cnf_path = os.path.expanduser(def_config)
+                if os.path.isfile(cnf_path):
+                    config_file = cnf_path
         self.config = configparser.ConfigParser()
         if config_file is not None:
             self.config.read(config_file)
