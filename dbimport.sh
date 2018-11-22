@@ -1,6 +1,5 @@
 #!/bin/sh
 set -e
-DATABASE="mox_boards"
 TABLE="boards"
 
 fail() {
@@ -62,7 +61,7 @@ if [ "$board_type" = "A" ]; then
 	awk -F ',' -v tp="$board_type" -v rev="$board_revision" \
 		'/^\S+$/ { print $2","$3","$4","rev","tp }' \
 		"$input" | \
-		psql -d "$DATABASE" "$@" -c "COPY $TABLE (serial, mac_wan, mac_sgmii, revision, type)  FROM STDIN WITH (FORMAT csv)"
+		psql "$@" -c "COPY $TABLE (serial, mac_wan, mac_sgmii, revision, type)  FROM STDIN WITH (FORMAT csv)"
 else
 	awk -F ',' -v tp="$board_type" -v rev="$board_revision" \
 		'{ print $2","rev","tp }' \
