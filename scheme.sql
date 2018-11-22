@@ -17,8 +17,7 @@ COMMENT On COLUMN boards.revision IS 'Board revision number';
 COMMENT ON COLUMN boards.type IS 'Board type. It is single character business identifier.';
 
 CREATE TABLE core_info (
-	id bigserial PRIMARY KEY,
-	board bigint REFERENCES boards (serial),
+	serial bigint PRIMARY KEY REFERENCES boards (serial),
 	mem_size smallint NOT NULL,
 	key text NOT NULL,
 	add_time timestamp NOT NULL DEFAULT current_timestamp
@@ -49,13 +48,13 @@ CREATE TABLE runs (
 	programmer bigint REFERENCES programmer_state(id),
 	programmer_id smallint,
 	steps text[] NOT NULL,
-	add_time timestamp NOT NULL DEFAULT current_timestamp,
+	add_time timestamp NOT NULL DEFAULT current_timestamp
 );
 COMMENT ON COLUMN runs.programmer_id IS 'ID of used programmer board';
 COMMENT ON COLUMN runs.steps IS 'Planned steps (not executed ones those are in steps table)';
 
 CREATE TABLE run_results (
-	id bigint PRIMARY KEY REFERENCES boards (id),
+	id bigint PRIMARY KEY REFERENCES runs (id),
 	success boolean NOT NULL,
 	add_time timestamp NOT NULL DEFAULT current_timestamp
 );
