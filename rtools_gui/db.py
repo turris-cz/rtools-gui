@@ -43,7 +43,7 @@ class Board(_GenericTable):
     _INSERT_CORE_INFO = """INSERT INTO core_info (serial, mem_size, key) VALUES
         (%s, %s, %s);"""
     _COUNT_CORE_INFO = """SELECT count(1) FROM core_info WHERE
-        board = %s AND mem_size = %s AND key = %s;"""
+        serial = %s AND mem_size = %s AND key = %s;"""
     _SELECT_CORE_MEM_SIZE = "SELECT mem_size FROM core_info WHERE board = %s;"
     _SELECT_CORE_KEY = "SELECT key FROM core_info WHERE board = %s;"
 
@@ -82,7 +82,7 @@ class Board(_GenericTable):
             raise DBException(
                 "Invalid board type for inserting core info: " + str(self.type))
         self._cur.execute(self._COUNT_CORE_INFO, (self.serial, mem, str(key)))
-        if self._cur.fetchone() is not None:
+        if self._cur.fetchone()[0] > 0:
             return  # This one is already recorded
         # TODO what it there is record for this serial number but with
         # different key or memory size
@@ -152,7 +152,7 @@ class ProgrammerRun(_GenericTable):
         "Mark this run as finished."
         if self.finished:
             raise DBException("Run is already finished")
-        self._cur.execute(self._INSERT_RESULT, self.id, (bool(success)))
+        self._cur.execute(self._INSERT_RESULT, (self.id, bool(success)))
         self._dbc.commit()
         self.finished = True
 
