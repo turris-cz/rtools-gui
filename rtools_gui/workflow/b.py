@@ -1,5 +1,5 @@
 "Module implementing steps for B module"
-from .generic import Step, ExpansionDetection
+from .generic import ExpansionDetection
 
 
 class BExpansionDetection(ExpansionDetection):
@@ -9,7 +9,7 @@ class BExpansionDetection(ExpansionDetection):
         self._boot_and_detect('Mini-PCIe Module')
 
 
-# All steps for MOX D in order
+# All steps for MOX B in order
 BSTEPS = (
     BExpansionDetection,
 )

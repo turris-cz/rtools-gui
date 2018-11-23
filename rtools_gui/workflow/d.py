@@ -1,5 +1,5 @@
 "Module implementing steps for D module"
-from .generic import Step, ExpansionDetection
+from .generic import ExpansionDetection
 
 
 class DExpansionDetection(ExpansionDetection):

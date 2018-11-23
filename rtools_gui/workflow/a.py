@@ -1,10 +1,8 @@
 "Module implementing steps for A module"
 import sys
-from time import sleep
 from datetime import datetime
 from .generic import Step
 from .exceptions import FatalWorkflowException
-from .. import db
 
 
 class OTPProgramming(Step):

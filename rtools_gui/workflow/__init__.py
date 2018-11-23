@@ -9,6 +9,8 @@ from .b import BSTEPS
 from .c import CSTEPS
 from .d import DSTEPS
 from .e import ESTEPS
+from .f import FSTEPS
+from .g import GSTEPS
 
 _BOARD_MAP = {
     0x30: {
@@ -31,14 +33,14 @@ _BOARD_MAP = {
         "name": "Peridot - 8x ethernet (E)",
         "steps": ESTEPS,
         },
-    #0x35: {
-    #    "name": "USB (F)",
-    #    "steps": [],
-    #    },
-    #0x36: {
-    #    "name": "PCI pass-trough (G)",
-    #    "steps": [],
-    #    },
+    0x35: {
+        "name": "USB (F)",
+        "steps": FSTEPS,
+        },
+    0x36: {
+        "name": "PCI pass-trough (G)",
+        "steps": GSTEPS,
+        },
     }
 
 
