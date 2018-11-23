@@ -56,7 +56,7 @@ class Configs:
     def tmp_dir(self):
         """Path to tmp directory"""
         tmp = self.args.tmpdir
-        return tmp if tmp is None else "/tmp"
+        return '/tmp' if tmp is None else tmp
 
     def _db_value(self, name, default=None):
         if 'db' in self.config.sections() and name in self.config['db']:
