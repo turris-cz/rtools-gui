@@ -6,7 +6,12 @@ from . import report
 
 class Configs:
     "Configuration handler and arguments parser all at once"
-    _DEF_CONFIG = ["~/rtools-gui.conf", "rtools-gui.conf"]
+    _DEF_CONFIG = [
+        "/etc/rtools-gui.conf",
+        "~/.config/rtools-gui.conf",
+        "~/.rtools-gui.conf",
+        "rtools-gui.conf",
+        ]
 
     def __init__(self):
         # Parser arguments
