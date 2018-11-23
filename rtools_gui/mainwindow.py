@@ -20,6 +20,7 @@ class MainWindow:
 
         self.window = self._builder.get_object("MainWindow")
         self.window.show_all()
+        self.window.fullscreen()
         self.gtk_display_msg(None)
 
         prg_grid = self._builder.get_object('ProgrammerGrid')

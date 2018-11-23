@@ -45,6 +45,8 @@
                         <property name="label" translatable="yes">Programátor odpojen
 Naskenujte kód programátoru pro pokus o připojení</property>
                         <property name="justify">center</property>
+                        <property name="wrap">True</property>
+                        <property name="ellipsize">end</property>
                         <style>
                           <class name="label-error"/>
                         </style>
@@ -152,6 +154,9 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                         <property name="hexpand">True</property>
                         <property name="label" translatable="yes">#TYPE#</property>
                         <property name="single_line_mode">True</property>
+                        <style>
+                          <class name="label-info"/>
+                        </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -168,6 +173,9 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                         <property name="label" translatable="yes">#SERIAL NUMBER#</property>
                         <property name="justify">center</property>
                         <property name="single_line_mode">True</property>
+                        <style>
+                          <class name="label-info"/>
+                        </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -313,6 +321,9 @@ Naskenujte kód programátoru pro pokus o připojení</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">#PROGRAMMER NUMBER#</property>
+        <style>
+          <class name="label-programmer"/>
+        </style>
       </object>
     </child>
   </object>

@@ -2,13 +2,21 @@
 	font-size: 14px;
 }
 
+.label-info {
+	font-size: 22px;
+}
+
+.label-programmer {
+	font-size: 20px;
+}
+
 .label-error {
-	font-size: 30px;
+	font-size: 24px;
 	background-color: rgb(255, 0, 0);
 }
 
 .label-ok {
-	font-size: 30px;
+	font-size: 24px;
 	background-color: rgb(0, 255, 0);
 }
 
