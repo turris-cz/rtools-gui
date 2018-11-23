@@ -2,6 +2,16 @@
 	font-size: 14px;
 }
 
+trough {
+	min-height: 20px;
+}
+progress {
+	min-height: 20px;
+}
+block {
+	min-height: 20px;
+}
+
 .label-info {
 	font-size: 22px;
 }

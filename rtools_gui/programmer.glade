@@ -151,6 +151,7 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">start</property>
+                        <property name="margin_left">6</property>
                         <property name="hexpand">True</property>
                         <property name="label" translatable="yes">#TYPE#</property>
                         <property name="single_line_mode">True</property>
@@ -169,6 +170,7 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">end</property>
+                        <property name="margin_right">6</property>
                         <property name="hexpand">True</property>
                         <property name="label" translatable="yes">#SERIAL NUMBER#</property>
                         <property name="justify">center</property>
@@ -191,39 +193,28 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkGrid" id="WorkStepsGrid">
+                  <object class="GtkScrolledWindow">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">center</property>
-                    <property name="valign">start</property>
-                    <property name="row_spacing">2</property>
-                    <property name="column_spacing">4</property>
+                    <property name="can_focus">True</property>
+                    <property name="margin_top">4</property>
+                    <property name="margin_bottom">4</property>
                     <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
+                      <object class="GtkViewport">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkGrid" id="WorkStepsGrid">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">center</property>
+                            <property name="margin_left">4</property>
+                            <property name="margin_right">4</property>
+                            <property name="margin_top">4</property>
+                            <property name="margin_bottom">4</property>
+                            <property name="hexpand">True</property>
+                          </object>
+                        </child>
+                      </object>
                     </child>
                   </object>
                   <packing>
@@ -302,7 +293,7 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
