@@ -1,8 +1,6 @@
 import traceback
-from time import sleep
-from PyQt5 import QtCore
+from threading import Thread
 from .. import db, report
-from .exceptions import WorkflowException
 from .exceptions import InvalidBoardNumberException
 from .a import ASTEPS
 from .b import BSTEPS
@@ -44,22 +42,37 @@ _BOARD_MAP = {
     }
 
 
-class WorkFlow(QtCore.QObject):
+class WorkFlowHandler:
+    "Abstract handler for workflow reported events"
+
+    def progress_step(self, value):
+        "Report progress of single step. value is float between 0 and 1."
+        raise NotImplementedError
+
+    def step_update(self, step_id, state):
+        """Report step state update. state argument can be one of STEP_* values
+        from WorkFlow class. step_id argument is identifier of updated step."""
+        raise NotImplementedError
+
+    def workflow_exit(self, error=None):
+        """Called on workflow conclusion. Either there was no error and in that
+        case argument error is set to None. If there was an error then argument
+        error contains string describing it."""
+        raise NotImplementedError
+
+
+class WorkFlow:
     "General class managing workflow for single programmer and board."
-    STEP_UNKNOWN="unknown" # Step was not run yet
-    STEP_RUNNING="running" # Currently executing
-    STEP_FAILED="failed" # Execution failed
-    STEP_OK="ok" # Execution exited normally
-    STEP_UNSTABLE="unstable" # Step that previous run successfully but should run again
+    STEP_UNKNOWN = "unknown"  # Step was not run yet
+    STEP_RUNNING = "running"  # Currently executing
+    STEP_FAILED = "failed"  # Execution failed
+    STEP_OK = "ok"  # Execution exited normally
+    STEP_UNSTABLE = "unstable"  # Step exited with warnings
 
-    singleProgressUpdate = QtCore.pyqtSignal(int)
-    allProgressUpdate = QtCore.pyqtSignal(int, int)
-    setStepState = QtCore.pyqtSignal(int, str, str)
-    uartLogUpdate = QtCore.pyqtSignal(str)
-    workflow_exit = QtCore.pyqtSignal(str)
-
-    def __init__(self, conf, db_connection, db_programmer_state, resources, moxtester, serial_number):
+    def __init__(self, handler, conf, db_connection, db_programmer_state,
+                 resources, moxtester, serial_number):
         super().__init__()
+        self.handler = handler
         self.conf = conf
         self.db_connection = db_connection
         self.db_programmer_state = db_programmer_state
@@ -72,7 +85,8 @@ class WorkFlow(QtCore.QObject):
         self.series = serial_number >> 32
         if self.series == 0xFFFFFFFF or self.series < 0xD:
             raise InvalidBoardNumberException(
-                "Serial number does not seems to have valid series for Mox: " + hex(self.series))
+                "Serial number does not seems to have valid series for Mox: " +
+                hex(self.series))
         self.board_id = (serial_number >> 24) & 0xff
         if self.board_id not in _BOARD_MAP:
             raise InvalidBoardNumberException(
@@ -83,10 +97,12 @@ class WorkFlow(QtCore.QObject):
         # Load steps
         self.steps = [
             step(serial_number, moxtester, conf, resources, self.db_board,
-                 self.singleProgressUpdate.emit) for step in
+                 handler.progress_step) for step in
             _BOARD_MAP[self.board_id]['steps']]
-
-        self.thread = QtCore.QThread(self)
+        # Create thread
+        self.thread = Thread(
+            target=self._run, name="workflow-" + str(serial_number),
+            daemon=True)
 
     def get_steps(self):
         """Returns table steps. Every step is a dictionary where following keys
@@ -98,6 +114,7 @@ class WorkFlow(QtCore.QObject):
         for step in self.steps:
             steps.append({
                 'name': step.name(),
+                'id': step.id(),
                 'state': self.STEP_UNKNOWN,
                 })
         return steps
@@ -106,47 +123,35 @@ class WorkFlow(QtCore.QObject):
         """Returns name of board"""
         return _BOARD_MAP[self.board_id]['name']
 
-    def run(self):
+    def start(self):
         "Trigger workflow execution"
-        self.moveToThread(self.thread)
-        self.thread.started.connect(self._run)
         self.thread.start()
 
     def _run_exit(self, error=None):
         "Helper function for _run cleanup"
-        self.db_run.finish(error is None)
-        self.workflow_exit.emit(None if error is None else str(error))
-        self.moxtester.default()  # Return moxtester to default safe setting
-        self.thread.quit()
 
     def _run(self):
         "Workflow executor"
-        self.db_run = db.ProgrammerRun(
+        db_run = db.ProgrammerRun(
             self.db_connection, self.db_board, self.db_programmer_state,
-            self.moxtester.chip_id, [x.dbid() for x in self.steps])
-
-        self.allProgressUpdate.emit(0, len(self.steps))
-        sleep(0.1)  # Give some time to GUI to catch up
-        for i in range(len(self.steps)):
+            self.moxtester.chip_id, [x.id() for x in self.steps])
+        error_str = None
+        for step in self.steps:
             db_step = db.ProgrammerStep(
-                self.db_connection, self.db_run, self.steps[i].dbid())
-            step = self.steps[i]
-            trace = None
+                self.db_connection, db_run, step.id())
             try:
-                self.setStepState.emit(i, self.STEP_RUNNING, "")
+                self.handler.step_update(step.id(), self.STEP_RUNNING)
                 msg = step.run()
-                self.allProgressUpdate.emit(i + 1, len(self.steps))
-                if msg is None:
-                    self.setStepState.emit(i, self.STEP_OK, "")
-                else:
-                    self.setStepState.emit(i, self.STEP_WARNING, msg)
                 db_step.finish(msg is None, msg)
+                # TODO display warning message in graphics and report it
+                self.handler.step_update(step.id(), self.STEP_OK)
             except Exception:
                 trace = traceback.format_exc()
                 report.error(trace)
-            if trace is not None:
                 db_step.finish(False, str(trace))
-                self.setStepState.emit(i, self.STEP_FAILED, str(trace))
-                self._run_exit(trace)
-                return
-        self._run_exit()
+                self.handler.step_update(step.id(), self.STEP_FAILED)
+                error_str = str(trace)
+                break  # Do not continue after exception in workflow
+        db_run.finish(error_str is None)
+        self.handler.workflow_exit(None if error_str is None else error_str)
+        self.moxtester.default()  # Return moxtester to default safe setting

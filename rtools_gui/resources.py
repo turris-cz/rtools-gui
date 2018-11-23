@@ -60,7 +60,7 @@ class Resources:
         # Hash for moximager
         with pexpect.spawn(self.mox_imager_exec, ['--get-otp-hash', TRUSTED_SECURE_FIRMWARE]) as pexp:
             pexp.expect(['Secure firmware OTP hash: '])
-            pexp.expect(['\\S{64}'])
+            pexp.expect([r'\S{64}'])
             self.__mox_imager_secure_firmware_hash = pexp.after.decode(sys.getdefaultencoding())
 
     @property

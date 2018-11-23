@@ -1,7 +1,10 @@
 import sys
 import traceback
-from PyQt5.QtWidgets import QApplication
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk, Gdk
 from . import guard, resources, db
+from . import mainwindow, style
 from .conf import Configs
 
 
@@ -15,22 +18,18 @@ def _printException(type, value, tb):
 
 
 def main():
-    conf = Configs()
+    "Main function of rtools-gui"
+    argv = Gtk.init(sys.argv[1:])
+    conf = Configs(argv)
+    # TODO setup logging
 
-    with guard.Guard():
-        app = QApplication(sys.argv)
-
-        # Load all resources
+    with guard.Guard(conf):
+        # Database and resources
         res = resources.Resources(conf)
-        # Connect to database
         dbconn = db.connect(conf)
-        # Programmer state
         dbprg_state = db.ProgrammerState(dbconn, res)
 
-        # this import need to be used after the app is created
-        from rtools_gui.mainwindow import MainWindow
-        mainwindow = MainWindow(conf, dbconn, dbprg_state, res)
-        mainwindow.show()
-        retval = app.exec_()
-
-    exit(retval)
+        # Graphics
+        style.load()
+        mainwindow.MainWindow(conf, dbconn, dbprg_state, res)
+        Gtk.main()

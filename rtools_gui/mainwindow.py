@@ -1,61 +1,70 @@
-# -*- coding: utf8 -*-
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtWidgets import QSizePolicy
-from .ui.mainwindow import Ui_MainWindow
-
+import os
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk, Gdk
 from .custom_exceptions import DbError, IncorrectSerialNumber
 from .utils import MAX_SERIAL_LEN
-
-from .programmer import ProgrammerWidget
-
-
-def _removeItemFromGridLayout(layout, row, column):
-    item = layout.itemAtPosition(row, column)
-    if item:
-        layout.removeItem(item)
-        item.widget().hide()
-        item.widget().deleteLater()
+from .programmer import Programmer
 
 
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+class MainWindow:
+    "Main window of application"
+    GLADE_FILE = os.path.join(os.path.dirname(__file__), "mainwindow.glade")
 
-    def __init__(self, conf, dbconnection, dbprogrammer_state, resources):
+    def __init__(self, conf, db_connection, db_programmer_state, resources):
         self.conf = conf
-        super(MainWindow, self).__init__()
-        self.setupUi(self)  # create gui
-        self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
-        self.error_label.setVisible(False)
 
+        self._builder = Gtk.Builder()
+        self._builder.add_from_file(self.GLADE_FILE)
+        self._builder.connect_signals(self)
+
+        self.window = self._builder.get_object("MainWindow")
+        self.window.show_all()
+        self.gtk_display_msg(None)
+
+        prg_grid = self._builder.get_object('ProgrammerGrid')
+        # Create programmers
         self.programmers = [None]*4
         for i in range(4):
-            self.programmers[i] = ProgrammerWidget(
-                self, conf, dbconnection, dbprogrammer_state, resources, i)
-            self.programmersLayout.addWidget(
-                self.programmers[i], i // 2, i % 2)
+            prg = Programmer(self, conf, db_connection, db_programmer_state,
+                             resources, i)
+            prg_grid.attach(prg.widget, i % 2, i // 2, 1, 1)
+            self.programmers[i] = prg
 
-    def refocus(self):
+    def gtks_on_delete_event(self, *args):
+        Gtk.main_quit(*args)
+
+    def gtk_focus(self):
         "Set focus back to primary window input box."
-        self.barcodeLineEdit.setFocus()
+        self._builder.get_object("BarcodeEntry").grab_focus()
 
-    def display_msg(self, message):
+    def gtk_display_msg(self, message):
         """"Display given message in main window message box. You can pass None
         as a message to clear error box."""
+        label = self._builder.get_object('ErrorLabel')
         if message is None:
-            self.error_label.setVisible(False)
+            label.hide()
         else:
-            self.error_label.setVisible(True)
-            self.error_label.setText(message)
+            label.show()
+            label.set_label(message)
 
-    @QtCore.pyqtSlot()
-    def barcodeScanEnter(self):
-        "Slot called when text is entered to primary text field in main window"
-        self.display_msg(None)
-        serial_number = int(self.barcodeLineEdit.text())
+    def gtks_barcode_scan(self, *udata):
+        "Called when text is entered to primary text field in main window"
+        del udata
+        self.gtk_display_msg(None)
+        entry = self._builder.get_object('BarcodeEntry')
+        text = entry.get_text()
+        entry.set_text("")
+        try:
+            serial_number = int(text)
+        except ValueError:
+            self.gtk_display_msg("Hodnota nebyla číslo. Byla použita čtečka?")
+            return
         index = serial_number & 0xFFFFFFFF
         if (serial_number >> 32) != 0xFFFFFFFF or index < 0 or index > 3:
-            self.barcodeLineEdit.clear()
-            self.display_msg(
+            self.gtk_display_msg(
                 "Naskenovaný kód není validní pro volbu programátoru")
             return
-        self.programmers[index].select()
-        self.barcodeLineEdit.clear()
+        msg = self.programmers[index].gtk_select()
+        if msg is not None:
+            self.gtk_display_msg(msg)

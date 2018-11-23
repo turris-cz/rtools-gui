@@ -13,7 +13,7 @@ class Configs:
         "rtools-gui.conf",
         ]
 
-    def __init__(self):
+    def __init__(self, argv):
         # Parser arguments
         prs = argparse.ArgumentParser(description="Router programming tool - GUI")
         prs.add_argument('--no-otp', action='store_true', help="Skip OTP write")
@@ -21,7 +21,7 @@ class Configs:
                          help="Use given config instead of default one.")
         prs.add_argument('--tmpdir', action='store',
                          help="Use given path to store temporally files.")
-        self.args = prs.parse_args()
+        self.args = prs.parse_args(argv)
         # Load configuration files
         config_file = None
         if self.args.config is not None:

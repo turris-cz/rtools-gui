@@ -8,16 +8,13 @@ from .exceptions import FatalWorkflowException
 class OTPProgramming(Step):
     "Program OTP memory"
 
-    def _imager_callback(self, progress):
-        self.set_progress(int(100*progress))
-
     def run(self):
         if self.conf.no_otp:
             return  # Do nothing for untrusted run
         imager = self.moxtester.mox_imager(
             self.resources, self.serial_number, self.db_board.mac_wan(),
             self.db_board.revision())
-        imager.run(self._imager_callback)
+        imager.run(self.set_progress)
         # TODO verify serial number and others with real from imager
         self.db_board.set_core_info(imager.ram, imager.public_key)
 
@@ -26,7 +23,7 @@ class OTPProgramming(Step):
         return "Programování OTP"
 
     @staticmethod
-    def dbid():
+    def id():
         return "otp-program"
 
 
@@ -37,8 +34,8 @@ class SPIFlashStep(Step):
         self.set_progress(0)
         with self.moxtester.spiflash() as flash:
             flash.reset_device()
-            flash.write(address, binary, lambda v: self.set_progress(int(v*80)))
-            if not flash.verify(address, binary, lambda v: self.set_progress(80 + int(v*20))):
+            flash.write(address, binary, lambda v: self.set_progress(.8*v))
+            if not flash.verify(address, binary, lambda v: self.set_progress(.8 + (.2*v))):
                 raise FatalWorkflowException("SPI content verification failed")
 
 
@@ -53,7 +50,7 @@ class ProgramSecureFirmware(SPIFlashStep):
         return "Programování bezpečnostního firmwaru"
 
     @staticmethod
-    def dbid():
+    def id():
         return "flash-secure-firmware"
 
 
@@ -68,7 +65,7 @@ class ProgramUBoot(SPIFlashStep):
         return "Programování U-Bootu"
 
     @staticmethod
-    def dbid():
+    def id():
         return "flash-uboot"
 
 
@@ -83,7 +80,7 @@ class ProgramRescue(SPIFlashStep):
         return "Programování záchranného systému"
 
     @staticmethod
-    def dbid():
+    def id():
         return "flash-rescue"
 
 
@@ -98,7 +95,7 @@ class ProgramDTB(SPIFlashStep):
         return "Programování DTB"
 
     @staticmethod
-    def dbid():
+    def id():
         return "flash-dtb"
 
 
@@ -110,21 +107,21 @@ class TestBootUp(Step):
         self.moxtester.power(True)
         with self.moxtester.uart() as uart:
             self.moxtester.reset(False)
-            self.set_progress(10)
+            self.set_progress(.1)
             uart.expect(['U-Boot'])
-            self.set_progress(30)
+            self.set_progress(.3)
             uart.expect(['Hit any key to stop autoboot'])
-            self.set_progress(90)
+            self.set_progress(.9)
             uart.sendline('')
             uart.expect(['=>'])
-            self.set_progress(100)
+            self.set_progress(1)
 
     @staticmethod
     def name():
         return "Test bootu Moxe"
 
     @staticmethod
-    def dbid():
+    def id():
         return "bootup"
 
 
@@ -135,18 +132,18 @@ class UbootSaveenv(Step):
         self.set_progress(0)
         with self.moxtester.uart() as uart:
             uart.sendline('saveenv')
-            self.set_progress(10)
+            self.set_progress(.1)
             uart.expect(['OK'])
-            self.set_progress(90)
+            self.set_progress(.9)
             uart.expect(['=>'])
-        self.set_progress(100)
+        self.set_progress(1)
 
     @staticmethod
     def name():
         return "Uložení výchozí konfigurace U-Bootu"
 
     @staticmethod
-    def dbid():
+    def id():
         return "uboot-saveenv"
 
 
@@ -171,9 +168,9 @@ class TimeSetup(Step):
                 now.minute, now.year, now.second
                 )
             uart.sendline('date ' + date)
-            self.set_progress(40)
+            self.set_progress(.4)
             uart.expect(['=>'])
-            self.set_progress(50)
+            self.set_progress(.5)
             uart.sendline('date')
             # Note: we check only date. It is not exactly safe to check for
             # time as that might change. Let's hope that in factory no one is
@@ -182,14 +179,14 @@ class TimeSetup(Step):
             if not self._match_date(uart, now):
                 raise FatalWorkflowException("Přečtené datum neodpovídá")
             uart.expect(['=>'])
-        self.set_progress(100)
+        self.set_progress(1)
 
     @staticmethod
     def name():
         return "Nastavení aktuálního času"
 
     @staticmethod
-    def dbid():
+    def id():
         return "datetime"
 
 
@@ -200,25 +197,25 @@ class TestUSB(Step):
         self.set_progress(0)
         with self.moxtester.uart() as uart:
             uart.sendline('gpio set GPIO20')
-            self.set_progress(20)
+            self.set_progress(.2)
             uart.expect(['=>'])
             uart.sendline('usb start')
-            self.set_progress(50)
+            self.set_progress(.5)
             uart.expect(['=>'])
-            self.set_progress(60)
+            self.set_progress(.6)
             uart.sendline('usb dev')
-            self.set_progress(70)
+            self.set_progress(.7)
             value = uart.expect(['IDE device 0: ', 'no usb devices available'])
             if value != 0:
                 FatalWorkflowException('USB device was not found')
-        self.set_progress(100)
+        self.set_progress(1)
 
     @staticmethod
     def name():
         return "Test USB"
 
     @staticmethod
-    def dbid():
+    def id():
         return "test-usb"
 
 
@@ -229,20 +226,20 @@ class TestWan(Step):
         self.set_progress(0)
         with self.moxtester.uart() as uart:
             uart.sendline('dhcp')
-            self.set_progress(20)
+            self.set_progress(.2)
             uart.expect(['Waiting for PHY auto negotiation to complete'])
-            self.set_progress(40)
+            self.set_progress(.4)
             uart.expect(['DHCP client bound to address 192.168.'])
-            self.set_progress(80)
+            self.set_progress(.8)
             uart.expect(['=>'])
-        self.set_progress(100)
+        self.set_progress(1)
 
     @staticmethod
     def name():
         return "Test WAN"
 
     @staticmethod
-    def dbid():
+    def id():
         return "test-wan"
 
 

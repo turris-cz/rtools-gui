@@ -1,0 +1,20 @@
+* {
+	font-size: 14px;
+}
+
+.label-error {
+	font-size: 30px;
+	background-color: rgb(255, 0, 0);
+}
+
+.label-ok {
+	font-size: 30px;
+	background-color: rgb(0, 255, 0);
+}
+
+.turris-logo {
+	background-image: url('../img/favicon-big.png');
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+}

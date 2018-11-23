@@ -1,75 +1,86 @@
+import os
 import traceback
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSizePolicy
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import GLib, Gtk, Gdk
 from . import report
-from .ui.programmer import Ui_Programmer
 from .utils import MAX_SERIAL_LEN
 from .moxtester import MoxTester
 from .moxtester.exceptions import MoxTesterException
-from .workflow import WorkFlow
+from .workflow import WorkFlow, WorkFlowHandler
 
 
-class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
-    WORK_STATE_FAILED = "F"
-    WORK_STATE_UNKNOWN = "U"
-    WORK_STATE_PASSED = "P"
-    WORK_STATE_RUNNING = "R"
-    WORK_STATES = (
-        WORK_STATE_FAILED,
-        WORK_STATE_UNKNOWN,
-        WORK_STATE_PASSED,
-        WORK_STATE_RUNNING,
-    )
+class Programmer(WorkFlowHandler):
+    "Programmer widget"
+    _IMG_PREFIX = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'img')
+    _STATE_TO_PIX = {
+        WorkFlow.STEP_UNKNOWN:
+            os.path.join(_IMG_PREFIX, "icons/unknown.png"),
+        WorkFlow.STEP_RUNNING:
+            os.path.join(_IMG_PREFIX, "../img/icons/run.png"),
+        WorkFlow.STEP_FAILED:
+            os.path.join(_IMG_PREFIX, "../img/icons/fail.png"),
+        WorkFlow.STEP_OK:
+            os.path.join(_IMG_PREFIX, "../img/icons/ok.png"),
+        WorkFlow.STEP_UNSTABLE:
+            os.path.join(_IMG_PREFIX, "../img/icons/unstable.png"),
+    }
+    GLADE_FILE = os.path.join(os.path.dirname(__file__), "programmer.glade")
 
-    def __init__(self, mainWindow, conf, db_connection, db_programmer_state, resources, index):
-        self.mainWindow = mainWindow
+    def __init__(self, main_window, conf, db_connection, db_programmer_state,
+                 resources, index):
+        self.main_window = main_window
         self.conf = conf
         self.db_connection = db_connection
         self.db_programmer_state = db_programmer_state
         self.resources = resources
         self.index = index
+        self._steps = dict()
+        self._progress_step_value = None  # Se note in progress_step
 
-        super(ProgrammerWidget, self).__init__()
-        self.setupUi(self)  # create gui
-        self.barcodeLineEdit.setMaxLength(MAX_SERIAL_LEN)
-        self.indexLabel.setText("Programátor: " + str(index + 1))
-        self.intro_error(None)
-        self._steps = []  # List of steps elements
+        self._builder = Gtk.Builder()
+        self._builder.add_from_file(self.GLADE_FILE)
+        self._builder.connect_signals(self)
+
+        self.widget = self._obj("ProgrammerFrame")
+        self.widget.show_all()
+        self._obj("ProgrammerLabel").set_label(
+            'Programátor ' + str(index + 1))
 
         self.workflow = None  # Current workflow for this programmer
         self.programmer = None  # Handle for MoxTester
-        self.connectProgrammer()
+        self.gtk_connect_programmer()
 
-    def intro_error(self, message):
-        "Display error for intro page. Pass None to reset previous error."
-        self.introMessageLabel.setVisible(message is None)
-        self.introErrorLabel.setVisible(message is not None)
-        if message is not None:
-            self.introErrorLabel.setText(message)
+    def _obj(self, name):
+        return self._builder.get_object(name)
 
-    def select(self):
-        "Try to select this programmer for new board session"
+    def gtk_intro_error(self, message):
+        "Display error for intro page."
+        label = self._obj("IntroErrorLabel")
+        self._obj("IntroStack").set_visible_child(label)
+        label.set_text(str(message))
+
+    def gtk_select(self):
+        """Try to select this programmer for new board session.
+        Returns error string or None if selection was ok.
+        """
         if self.programmer is None:
-            self.connectProgrammer()  # First try to connect it
+            self.gtk_connect_programmer()  # First try to connect it
             if self.programmer is None:
-                self.mainWindow.display_msg(
-                    "Programátor {} zřejmě není připojen".format(self.index + 1))
-                return
+                return "Programátor {} zřejmě není připojen".format(self.index+1)
         if self.workflow is not None:
-            self.mainWindow.display_msg(
-                "Programátor {} je aktuálně obsazen".format(self.index + 1))
-            return
+            return "Programátor {} je aktuálně obsazen".format(self.index+1)
         self.programmer.reset_tester()
         if not self.programmer.board_present():
-            self.mainWindow.display_msg(
-                "Do programátoru {} není vložená deska".format(self.index + 1))
-            return
-        self.contentWidget.setCurrentWidget(self.pageIntro)
-        self.introWidget.setCurrentWidget(self.pageIntroSerial)
-        self.barcodeLineEdit.setFocus()
+            return "Do programátoru {} není vložená deska".format(self.index+1)
+        self._obj('ContentStack').set_visible_child(self._obj('ContentIntro'))
+        self._obj('IntroStack').set_visible_child(self._obj('IntroScanCode'))
+        self._obj('BarcodeEntry').grab_focus()
+        return None
 
-    @QtCore.pyqtSlot()
-    def connectProgrammer(self):
+    def gtk_connect_programmer(self):
+        "Try to connect programmer"
         try:
             self.programmer = MoxTester(self.index)
             self.programmer.selftest()
@@ -79,132 +90,123 @@ class ProgrammerWidget(QtWidgets.QFrame, Ui_Programmer):
             # Ok this failed so we don't have programmer
             self.programmer = None
         if self.programmer is not None:
-            self.introWidget.setCurrentWidget(self.pageIntroReady)
+            stack = self._obj("IntroStack")
+            stack.set_visible_child(self._obj("IntroPrepared"))
 
-    @QtCore.pyqtSlot()
-    def barcodeScanEnter(self):
+    def gtks_barcode_entry(self, *udata):
         """Slot called when barcode is scanned to input box. Should check if
         given code is valid and start flashing process"""
-        serial_number = int(self.barcodeLineEdit.text())
-        self.barcodeLineEdit.clear()
-        self.mainWindow.refocus()
+        del udata
+        entry = self._obj("BarcodeEntry")
+        serial_text = entry.get_text()
+        entry.set_text("")
+        try:
+            serial_number = int(serial_text)
+        except ValueError:
+            self.gtk_intro_error("Hodnota nebyla číslo. Byla použita čtečka?")
+            return
+        self.main_window.gtk_focus()
         if (serial_number >> 32) == 0xFFFFFFFF:
-            self.intro_error("Naskenován kód programátoru")
-            self.introWidget.setCurrentWidget(self.pageIntroReady)
+            self.gtk_intro_error("Naskenován kód programátoru")
             return
         try:
             self.workflow = WorkFlow(
-                self.conf, self.db_connection, self.db_programmer_state,
+                self, self.conf, self.db_connection, self.db_programmer_state,
                 self.resources, self.programmer, serial_number)
         except Exception as e:
+            report.error(
+                "Workflow creation failed:" + str(traceback.format_exc()))
             # TODO log this exception!
             self.workflow = None
-            self.intro_error(str(e))
-            self.introWidget.setCurrentWidget(self.pageIntroReady)
+            self.gtk_intro_error(str(e))
             return
-        self.intro_error(None)
-
-        # Connect workflow signals to our slots
-        self.workflow.singleProgressUpdate.connect(
-            self.currentProgress.setValue)
-        self.workflow.allProgressUpdate.connect(self.totalProgress.setValue)
-        self.workflow.setStepState.connect(self.stepStateUpdate)
-        self.workflow.uartLogUpdate.connect(self.uartOutput)
-        self.workflow.workflow_exit.connect(self.workflowExit)
+        self._obj("IntroStack").set_visible_child(
+            self._obj("IntroPrepared"))
 
         # Update GUI
-        self.serialNumberLabel.setText(hex(serial_number))
-        self.typeLabel.setText(self.workflow.get_board_name())
-        self.contentWidget.setCurrentWidget(self.pageWork)
-        self.progressWidget.setCurrentWidget(self.progressProgress)
+        self._obj("ContentStack").set_visible_child(self._obj("ContentWork"))
+        self._obj("TypeLabel").set_text(self.workflow.get_board_name())
+        self._obj("SerialNumberLabel").set_text(hex(serial_number))
+        self._obj("WorkStack").set_visible_child(self._obj("WorkProgress"))
         self._wipe_steps()
         for step in self.workflow.get_steps():
             self._new_step(step)
-        self.totalProgress.setMaximum(len(self._steps))  # Set max to progress bar
-        # Add spacers
-        self.ProgressContent.layout().addItem(
-            QtWidgets.QSpacerItem(
-                0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum),
-            len(self._steps), 0
-            )
-        self.ProgressContent.layout().addItem(
-            QtWidgets.QSpacerItem(
-                0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding),
-            len(self._steps), 1
-            )
-        self.ProgressContent.layout().addItem(
-            QtWidgets.QSpacerItem(
-                0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum),
-            len(self._steps), 4
-            )
+        self._obj("WorkStepsGrid").show_all()
+        run_progress = self._obj("RunProgress")
+        run_progress.set_max_value(len(self._steps))
+        run_progress.set_value(0)
 
-        self.workflow.run()  # And lastly start worklow
+        self.workflow.start()  # And lastly start worklow
 
     def _wipe_steps(self):
-        for step in self._steps:
-            self.ProgressContent.layout().removeWidget(step['icon'])
-            self.ProgressContent.layout().removeWidget(step['label'])
-            step['icon'].setVisible(False)
-            step['label'].setVisible(False)
-        self._steps = []
+        grid = self._obj("WorkStepsGrid")
+        for id, step in self._steps.items():
+            grid.remove(step['icon'])
+            grid.remove(step['label'])
+        self._steps = dict()
 
     def _new_step(self, step):
-        icon = QtWidgets.QLabel(self.ProgressContent)
-        icon.setMinimumSize(16, 16)
-        icon.setMaximumSize(16, 16)
-        self.ProgressContent.layout().addWidget(icon, len(self._steps), 1)
-        label = QtWidgets.QLabel(self.ProgressContent)
-        label.setText(step['name'])
-        self.ProgressContent.layout().addWidget(label, len(self._steps), 2)
-        self._steps.append({
+        icon = Gtk.Image()
+        label = Gtk.Label()
+        label.set_text(step['name'])
+        label.set_halign(Gtk.Align.START)
+        grid = self._obj("WorkStepsGrid")
+        row = len(self._steps)
+        grid.attach(icon, 1, row, 1, 1)
+        grid.attach(label, 2, row, 1, 1)
+        self._steps[step['id']] = {
             "icon": icon,
             "label": label,
-            })
-        self.stepStateUpdate(len(self._steps) - 1, step['state'], None)
+            }
+        self.gtk_step_update(step['id'], step['state'])
 
-    @QtCore.pyqtSlot()
-    def barcodeAbandon(self):
-        """Slot called when input box for barcode is abandoned. It closes
-        current state and returns to intro page"""
-        self.barcodeLineEdit.clear()
-        self.introWidget.setCurrentWidget(self.pageIntroReady)
-        self.mainWindow.refocus()
-
-    @QtCore.pyqtSlot(int, str, str)
-    def stepStateUpdate(self, step, state, msg):
+    def gtk_step_update(self, step_id, state):
         """Set state of one of steps. state is string and can be one of
         supported steps from workflow.
         """
-        _STATE_TO_PIX = {
-            WorkFlow.STEP_UNKNOWN: ":/img/icons/unknown.png",
-            WorkFlow.STEP_RUNNING: ":/img/icons/run.png",
-            WorkFlow.STEP_FAILED: ":/img/icons/fail.png",
-            WorkFlow.STEP_OK: ":/img/icons/ok.png",
-            WorkFlow.STEP_UNSTABLE: ":/img/icons/unstable.png",
-        }
-        self._steps[step]['icon'].setPixmap(
-            QtGui.QPixmap(_STATE_TO_PIX[state])
-            )
-        # TODO show warnings somewhere
+        img_path = self._STATE_TO_PIX[state]
+        icon = self._steps[step_id]['icon']
+        if os.path.isfile(img_path):
+            icon.set_from_file(img_path)
+        else:
+            icon.set_from_stock(Gtk.STOCK_MISSING_IMAGE)
 
-    @QtCore.pyqtSlot(str)
-    def uartOutput(self, line):
-        """Update UART log with given new line.
-        """
-        # TODO
-        pass
+    def _gtk_progress_step(self):
+        value = self._progress_step_value
+        self._progress_step_value = None
+        self._obj('StepProgress').set_fraction(value)
 
-    @QtCore.pyqtSlot(str)
-    def workflowExit(self, error):
-        """Slot called when workflow exits. If workflow exited with error then
-        error is string with error message. If error is None then there was no
-        error.
-        """
-        self.workflow = None
+    def progress_step(self, value):
+        # Note: There is a problem that flashing produces a lot of calls to
+        # this function. For some reason a lot of idle tasks freezes GUI so
+        # instead of generating new task for every single call we generate only
+        # one untill that one is executed. This implementation of course is not
+        # exactly safe and there is race condition where possible update is
+        # dropped but we just don't care. Sorry to anyone who cares.
+        spawn = self._progress_step_value is None
+        self._progress_step_value = value
+        if spawn:
+            GLib.idle_add(self._gtk_progress_step)
+
+    def _gtk_step_update(self, step_id, state):
+        self.gtk_step_update(step_id, state)
+        if state == WorkFlow.STEP_FAILED or state == WorkFlow.STEP_OK:
+            run_progress = self._obj("RunProgress")
+            run_progress.set_value(run_progress.get_value() + 1)
+
+    def step_update(self, step_id, state):
+        GLib.idle_add(self._gtk_step_update, step_id, state)
+
+    def _gtk_workflow_exit(self, error):
         # TODO if error is about disconnected programmer then we should reset
         # our self and go to screen about disconnected programmer.
         if not error:
-            self.progressWidget.setCurrentWidget(self.progressSuccess)
+            self._obj("WorkStack").set_visible_child(self._obj("WorkDone"))
         else:
-            self.progressWidget.setCurrentWidget(self.progressError)
-            self.progressErrorLabel.setText(error)
+            label = self._obj("WorkError")
+            self._obj("WorkStack").set_visible_child(label)
+            label.set_text(error)
+
+    def workflow_exit(self, error=None):
+        self.workflow = None
+        GLib.idle_add(self._gtk_workflow_exit, error)
