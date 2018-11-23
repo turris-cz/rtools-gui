@@ -39,7 +39,7 @@ def _git_head_hash(path):
 class Resources:
     "Resources used by rtools-gui"
 
-    def __init__(self):
+    def __init__(self, conf):
         self.__secure_firmware, self.__secure_firmware_hash = _load_file(SECURE_FIRMWARE)
         self.__uboot, self.__uboot_hash = _load_file(UBOOT)
         self.__rescue, self.__rescue_hash = _load_file(RESCUE)
@@ -53,7 +53,7 @@ class Resources:
         with open(MOX_IMAGER, 'rb') as file:
             self.__mox_imager_hash = hashlib.sha256(file.read()).hexdigest()
         self.__mox_imager_exec = os.path.join(
-            DIR_PREFIX, '.mox_imager-' + self.__mox_imager_hash)
+            conf.tmp_dir, 'rtools-mox-imager-' + self.__mox_imager_hash)
         copyfile(MOX_IMAGER, self.__mox_imager_exec)
         os.chmod(self.__mox_imager_exec,
                  os.stat(self.__mox_imager_exec).st_mode | stat.S_IEXEC)

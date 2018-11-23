@@ -19,6 +19,8 @@ class Configs:
         prs.add_argument('--no-otp', action='store_true', help="Skip OTP write")
         prs.add_argument('--config', '-c', action='store',
                          help="Use given config instead of default one.")
+        prs.add_argument('--tmpdir', action='store',
+                         help="Use given path to store temporally files.")
         self.args = prs.parse_args()
         # Load configuration files
         config_file = None
@@ -49,6 +51,12 @@ class Configs:
     def no_otp(self):
         """If we should write OTP even in untrusted mode"""
         return self.args.no_otp
+
+    @property
+    def tmp_dir(self):
+        """Path to tmp directory"""
+        tmp = self.args.tmpdir
+        return tmp if tmp is None else "/tmp"
 
     def _db_value(self, name, default=None):
         if 'db' in self.config.sections() and name in self.config['db']:
