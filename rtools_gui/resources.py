@@ -29,7 +29,7 @@ def _git_head_hash(path):
     curdir = os.getcwd()
     os.chdir(path)
     process = subprocess.run(
-        ['git', 'describe', '--long', '--always', '--dirty', '--broken'],
+        ['git', 'describe', '--long', '--always', '--dirty'],
         stdout=subprocess.PIPE)
     githash = process.stdout.decode(sys.getdefaultencoding()).strip()
     os.chdir(curdir)
