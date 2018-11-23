@@ -27,8 +27,10 @@ COMMENT ON COLUMN core_info.key IS 'Public key for private key of Turris MOX';
 
 CREATE TABLE programmer_state (
 	id serial PRIMARY KEY,
-	hostname varchar(50) NOT NULL,
-	rtools_hash varchar(40) NOT NULL,
+	hostname text NOT NULL,
+	rtools_git text NOT NULL,
+	moximager_git text NOT NULL,
+	moximager_hash varchar(64) NOT NULL,
 	secure_firmware varchar(64) NOT NULL,
 	uboot varchar(64) NOT NULL,
 	rescue varchar(64) NOT NULL,
@@ -36,7 +38,9 @@ CREATE TABLE programmer_state (
 	add_time timestamp NOT NULL DEFAULT current_timestamp
 );
 COMMENT ON COLUMN programmer_state.hostname IS 'Hostname of programmer';
-COMMENT ON COLUMN programmer_state.rtools_hash IS 'git hash of used rtools-gui repository';
+COMMENT ON COLUMN programmer_state.rtools_git IS 'git describe of used rtools-gui repository';
+COMMENT ON COLUMN programmer_state.moximager_git IS 'git describe of used mox-imager repository';
+COMMENT ON COLUMN programmer_state.moximager_hash IS 'sha256sum of used mox-imager binary';
 COMMENT ON COLUMN programmer_state.secure_firmware IS 'sha256sum of used secure-firmware';
 COMMENT ON COLUMN programmer_state.uboot IS 'sha256sum of used u-boot';
 COMMENT ON COLUMN programmer_state.rescue IS 'sha256sum of used rescue image';

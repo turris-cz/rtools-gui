@@ -107,18 +107,20 @@ class Board(_GenericTable):
 class ProgrammerState(_GenericTable):
     "Database connection for programmer_state"
     _SELECT_PROGRAMMER_ID = """SELECT id FROM programmer_state WHERE
-        hostname = %s AND rtools_hash = %s AND secure_firmware = %s AND
-        uboot = %s AND rescue = %s AND dtb = %s;"""
+        hostname = %s AND rtools_git = %s AND moximager_git = %s AND
+        moximager_hash = %s AND secure_firmware = %s AND uboot = %s AND
+        rescue = %s AND dtb = %s;"""
     _INSERT_PROGRAMMER_ID = """INSERT INTO programmer_state
-        (hostname, rtools_hash, secure_firmware, uboot, rescue, dtb) VALUES
-        (%s, %s, %s, %s, %s, %s) RETURNING id;"""
+        (hostname, rtools_git, moximager_git, moximager_hash, secure_firmware,
+        uboot, rescue, dtb) VALUES
+        (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id;"""
 
     def __init__(self, db_connection, resources):
         super().__init__(db_connection)
         state_data = (
-            resources.hostname, resources.rtools_head,
-            resources.secure_firmware_hash, resources.uboot_hash,
-            resources.rescue_hash, resources.dtb_hash)
+            resources.hostname, resources.rtools_git, resources.mox_imager_git,
+            resources.mox_imager_hash, resources.secure_firmware_hash,
+            resources.uboot_hash, resources.rescue_hash, resources.dtb_hash)
         # Look for existing programmer state
         self._cur.execute(self._SELECT_PROGRAMMER_ID, state_data)
         state = self._cur.fetchone()

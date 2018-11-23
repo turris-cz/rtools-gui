@@ -29,7 +29,8 @@ def _git_head_hash(path):
     curdir = os.getcwd()
     os.chdir(path)
     process = subprocess.run(
-        ['git', 'rev-parse', 'HEAD'], stdout=subprocess.PIPE)
+        ['git', 'describe', '--long', '--always', '--dirty', '--broken'],
+        stdout=subprocess.PIPE)
     githash = process.stdout.decode(sys.getdefaultencoding()).strip()
     os.chdir(curdir)
     return githash
@@ -44,8 +45,8 @@ class Resources:
         self.__rescue, self.__rescue_hash = _load_file(RESCUE)
         self.__dtb, self.__dtb_hash = _load_file(DTB)
         self.__hostname = socket.gethostname()
-        self.__rtools_head = _git_head_hash(DIR_PREFIX)
-        self.__mox_imager_head = _git_head_hash(MOX_IMAGER_DIR)
+        self.__rtools_git = _git_head_hash(DIR_PREFIX)
+        self.__mox_imager_git = _git_head_hash(MOX_IMAGER_DIR)
 
         # Mox imager
         # TODO exception when there is no executable
@@ -108,14 +109,14 @@ class Resources:
         return self.__hostname
 
     @property
-    def rtools_head(self):
+    def rtools_git(self):
         "Git hash of rtools-gui repository HEAD"
-        return self.__rtools_head
+        return self.__rtools_git
 
     @property
-    def mox_imager_head(self):
+    def mox_imager_git(self):
         "Git hash of mox-imager submodule HEAD"
-        return self.__mox_imager_head
+        return self.__mox_imager_git
 
     @property
     def mox_imager_hash(self):
