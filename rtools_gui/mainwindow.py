@@ -1,9 +1,6 @@
 import os
-import gi
-gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 from .custom_exceptions import DbError, IncorrectSerialNumber
-from .utils import MAX_SERIAL_LEN
 from .programmer import Programmer
 
 

@@ -1,6 +1,4 @@
 import os
-import gi
-gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk
 
 GTK_CSS_FILE = os.path.join(os.path.dirname(__file__), "style.css")

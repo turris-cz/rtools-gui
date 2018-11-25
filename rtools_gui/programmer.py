@@ -1,10 +1,7 @@
 import os
 import traceback
-import gi
-gi.require_version("Gtk", "3.0")
-from gi.repository import GLib, Gtk, Gdk
+from gi.repository import GLib, Gtk
 from . import report
-from .utils import MAX_SERIAL_LEN
 from .moxtester import MoxTester
 from .moxtester.exceptions import MoxTesterException
 from .workflow import WorkFlow, WorkFlowHandler
