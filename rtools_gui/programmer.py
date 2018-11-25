@@ -5,6 +5,7 @@ from . import report
 from .moxtester import MoxTester
 from .moxtester.exceptions import MoxTesterException
 from .workflow import WorkFlow, WorkFlowHandler
+from .svgimage import SVGImage
 
 
 class Programmer(WorkFlowHandler):
@@ -41,9 +42,11 @@ class Programmer(WorkFlowHandler):
         self._builder.connect_signals(self)
 
         self.widget = self._obj("ProgrammerFrame")
-        self.widget.show_all()
         self._obj("ProgrammerLabel").set_label(
             'Programátor ' + str(index + 1))
+        self._obj('IntroImage').add(
+            SVGImage(os.path.join(self._IMG_PREFIX, "logo.svg")))
+        self.widget.show_all()
 
         self.workflow = None  # Current workflow for this programmer
         self.programmer = None  # Handle for MoxTester
