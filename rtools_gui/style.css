@@ -21,11 +21,11 @@ block {
 }
 
 .label-error {
-	font-size: 24px;
+	font-size: 22px;
 	background-color: rgb(255, 0, 0);
 }
 
 .label-ok {
-	font-size: 24px;
+	font-size: 22px;
 	background-color: rgb(0, 255, 0);
 }

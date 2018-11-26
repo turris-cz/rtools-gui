@@ -203,9 +203,8 @@ class Programmer(WorkFlowHandler):
         if not error:
             self._obj("WorkStack").set_visible_child(self._obj("WorkDone"))
         else:
-            label = self._obj("WorkError")
-            self._obj("WorkStack").set_visible_child(label)
-            label.set_text(error)
+            self._obj("WorkStack").set_visible_child(self._obj('WorkError'))
+            self._obj("WorkErrorLabel").set_text(error)
 
     def workflow_exit(self, error=None):
         self.workflow = None

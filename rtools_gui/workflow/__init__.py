@@ -145,12 +145,12 @@ class WorkFlow:
                 db_step.finish(msg is None, msg)
                 # TODO display warning message in graphics and report it
                 self.handler.step_update(step.id(), self.STEP_OK)
-            except Exception:
-                trace = traceback.format_exc()
+            except Exception as e:
+                trace = str(traceback.format_exc())
                 report.error(trace)
-                db_step.finish(False, str(trace))
+                db_step.finish(False, trace)
                 self.handler.step_update(step.id(), self.STEP_FAILED)
-                error_str = str(trace)
+                error_str = str(e)
                 break  # Do not continue after exception in workflow
         db_run.finish(error_str is None)
         self.handler.workflow_exit(None if error_str is None else error_str)

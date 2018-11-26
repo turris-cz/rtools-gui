@@ -303,7 +303,7 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkScrolledWindow">
+                      <object class="GtkScrolledWindow" id="WorkError">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="shadow_type">in</property>
@@ -312,10 +312,14 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkLabel" id="WorkError">
+                              <object class="GtkLabel" id="WorkErrorLabel">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">label</property>
+                                <property name="label" translatable="yes">#ERROR#j</property>
+                                <property name="selectable">True</property>
+                                <style>
+                                  <class name="label-error"/>
+                                </style>
                               </object>
                             </child>
                           </object>

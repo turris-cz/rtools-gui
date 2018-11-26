@@ -207,7 +207,7 @@ class TestUSB(Step):
             self.set_progress(.7)
             value = uart.expect(['IDE device 0: ', 'no usb devices available'])
             if value != 0:
-                FatalWorkflowException('USB device was not found')
+                raise FatalWorkflowException('USB device was not found')
         self.set_progress(1)
 
     @staticmethod
