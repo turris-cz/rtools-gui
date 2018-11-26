@@ -1,5 +1,5 @@
 import os
-from gi.repository import Gtk, Gdk
+from gi.repository import GLib, Gtk, Gdk
 from .custom_exceptions import DbError, IncorrectSerialNumber
 from .programmer import Programmer
 
@@ -10,6 +10,7 @@ class MainWindow:
 
     def __init__(self, conf, db_connection, db_programmer_state, resources):
         self.conf = conf
+        self.db_connection = db_connection
 
         self._builder = Gtk.Builder()
         self._builder.add_from_file(self.GLADE_FILE)
@@ -19,6 +20,7 @@ class MainWindow:
         self.window.show_all()
         self.window.fullscreen()
         self.gtk_display_msg(None)
+        self._gtk_database_check_register()
 
         prg_grid = self._builder.get_object('ProgrammerGrid')
         # Create programmers
@@ -66,3 +68,14 @@ class MainWindow:
         msg = self.programmers[index].gtk_select()
         if msg is not None:
             self.gtk_display_msg(msg)
+
+    def _gtk_database_check_register(self):
+        GLib.timeout_add_seconds(interval=1, function=self._gtk_database_check)
+
+    def _gtk_database_check(self):
+        """This is periodic task that verifies database status and on
+        connection failure notifies user.
+        """
+        self._builder.get_object('DatabaseError').set_visible(
+            self.db_connection.closed)
+        self._gtk_database_check_register()
