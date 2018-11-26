@@ -1,6 +1,5 @@
 import os
-from gi.repository import GLib, Gtk, Gdk
-from .custom_exceptions import DbError, IncorrectSerialNumber
+from gi.repository import GLib, Gtk
 from .programmer import Programmer
 
 
