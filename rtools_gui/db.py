@@ -16,7 +16,9 @@ def connect(cnf):
         parameters['host'] = cnf.db_host
     if cnf.db_port is not None:
         parameters['port'] = cnf.db_port
-    return psycopg2.connect(**parameters)
+    conn = psycopg2.connect(**parameters)
+    conn.autocommit = True
+    return conn
 
 
 # Note: Following classes are written so that by instantiating them you create
@@ -87,7 +89,6 @@ class Board(_GenericTable):
         # TODO what it there is record for this serial number but with
         # different key or memory size
         self._cur.execute(self._INSERT_CORE_INFO, (self.serial, mem, str(key)))
-        self._dbc.commit()
 
     def core_mem(self):
         """Returns core memory size for this board. If there is no such key
@@ -128,7 +129,6 @@ class ProgrammerState(_GenericTable):
             # If not found then create new one
             self._cur.execute(self._INSERT_PROGRAMMER_ID, state_data)
             state = self._cur.fetchone()
-            self._dbc.commit()
         # Record id of current programmer state
         self.id = state[0]
 
@@ -147,7 +147,6 @@ class ProgrammerRun(_GenericTable):
         self._cur.execute(
             self._INSERT_RUN,
             (board.serial, programmer_state.id, programmer_id, steps))
-        self._dbc.commit()
         self.id = self._cur.fetchone()[0]
 
     def finish(self, success):
@@ -155,7 +154,6 @@ class ProgrammerRun(_GenericTable):
         if self.finished:
             raise DBException("Run is already finished")
         self._cur.execute(self._INSERT_RESULT, (self.id, bool(success)))
-        self._dbc.commit()
         self.finished = True
 
 
@@ -172,7 +170,6 @@ class ProgrammerStep(_GenericTable):
         super().__init__(db_connection)
         self.finished = False
         self._cur.execute(self._INSERT_STEP, (step_name, run.id))
-        self._dbc.commit()
         self.id = self._cur.fetchone()[0]
 
     def finish(self, success, message=None):
@@ -182,5 +179,4 @@ class ProgrammerStep(_GenericTable):
         self._cur.execute(
             self._INSERT_RESULT,
             (self.id, bool(success), message))
-        self._dbc.commit()
         self.finished = True
