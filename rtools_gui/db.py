@@ -1,5 +1,12 @@
+import socket
+from ctypes import Structure, cdll, c_long
 import psycopg2
 from .exceptions import DBException
+
+
+class _timeval(Structure):
+    "ctype: struct timeval"
+    _fields_ = [("tv_sec", c_long), ("tv_usec", c_long)]
 
 
 def connect(cnf):
@@ -18,6 +25,11 @@ def connect(cnf):
         parameters['port'] = cnf.db_port
     conn = psycopg2.connect(**parameters)
     conn.autocommit = True
+    libc = cdll.LoadLibrary('libc.so.6')
+    libc.setsockopt(
+        conn.fileno(), socket.SOL_SOCKET, socket.SO_SNDTIMEO, _timeval(10, 0))
+    libc.setsockopt(
+        conn.fileno(), socket.SOL_SOCKET, socket.SO_RCVTIMEO, _timeval(10, 0))
     return conn
 
 
@@ -34,8 +46,6 @@ class _GenericTable:
 
     def _select(self, sql, values):
         "SQL select that fails if there is no connection to database"
-        if self._dbc.closed:
-            raise DBException("Database disconnected")
         self._cur.execute(sql, values)
 
     def _insert(self, sql, values):
