@@ -232,6 +232,9 @@ class TestWan(Step):
             uart.expect(['DHCP client bound to address 192.168.'])
             self.set_progress(.8)
             uart.expect(['=>'])
+            uart.sendline('mii info')
+            uart.expect(['PHY 0x01:'])
+            uart.expect(['=>'])
         self.set_progress(1)
 
     @staticmethod
