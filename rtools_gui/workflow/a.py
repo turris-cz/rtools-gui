@@ -40,8 +40,8 @@ class SPIFlashStep(Step):
         self.set_progress(0)
         with self.moxtester.spiflash() as flash:
             flash.reset_device()
-            flash.write(address, binary, lambda v: self.set_progress(.8*v))
-            if not flash.verify(address, binary, lambda v: self.set_progress(.8 + (.2*v))):
+            flash.write(address, binary, lambda v: self.set_progress(.8 * v))
+            if not flash.verify(address, binary, lambda v: self.set_progress(.8 + (.2 * v))):
                 raise FatalWorkflowException("SPI content verification failed")
 
 
@@ -172,7 +172,7 @@ class TimeSetup(Step):
             date = "{:02}{:02}{:02}{:02}{:04}.{:02}".format(
                 now.month, now.day, now.hour,
                 now.minute, now.year, now.second
-                )
+            )
             uart.sendline('date ' + date)
             self.set_progress(.4)
             uart.expect(['=>'])
@@ -181,7 +181,7 @@ class TimeSetup(Step):
             # Note: we check only date. It is not exactly safe to check for
             # time as that might change. Let's hope that in factory no one is
             # going to work over midnight.
-            uart.expect(['Date: (\d+)-(\d+)-(\d+)'])
+            uart.expect(['Date: (\\d+)-(\\d+)-(\\d+)'])
             if not self._match_date(uart, now):
                 raise FatalWorkflowException("Přečtené datum neodpovídá")
             uart.expect(['=>'])

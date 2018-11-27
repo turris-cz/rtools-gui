@@ -3,8 +3,10 @@ from time import sleep
 import argparse
 from rtools_gui.moxtester import MoxTester
 
+
 def progress(value):
     print(value)
+
 
 def main():
     parser = argparse.ArgumentParser(prog="moxtester_serial")

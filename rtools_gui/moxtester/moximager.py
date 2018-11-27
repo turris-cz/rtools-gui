@@ -1,7 +1,5 @@
 import os
 import sys
-import fcntl
-import pexpect
 from pexpect import fdpexpect
 
 
@@ -45,7 +43,7 @@ class MoxImager:
             '--mac-address', self.first_mac,
             '--board-version', str(self.board_version),
             '--otp-hash', self.resources.mox_imager_secure_firmware_hash,
-            )
+        )
 
     def run(self, callback=None):
         """Run mox-imager in OTP write mode. Returns fdexpect handle.
@@ -89,7 +87,7 @@ class MoxImager:
         self.real_board_version = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
         callback(0.7)
         fdpexp.expect(['MAC address: ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})'])
-        self.real_first_mac = ':'.join(fdpexp.match.group(i+1).decode(sys.getdefaultencoding()) for i in range(6))
+        self.real_first_mac = ':'.join(fdpexp.match.group(i + 1).decode(sys.getdefaultencoding()) for i in range(6))
         callback(0.8)
         fdpexp.expect(['ECDSA Public Key: (0[23][0-9A-Fa-f]{132})'])
         self.public_key = fdpexp.match.group(1).decode(sys.getdefaultencoding())

@@ -68,12 +68,12 @@ class Programmer(WorkFlowHandler):
         if self.programmer is None:
             self.gtk_connect_programmer()  # First try to connect it
             if self.programmer is None:
-                return "Programátor {} zřejmě není připojen".format(self.index+1)
+                return "Programátor {} zřejmě není připojen".format(self.index + 1)
         if self.workflow is not None:
-            return "Programátor {} je aktuálně obsazen".format(self.index+1)
+            return "Programátor {} je aktuálně obsazen".format(self.index + 1)
         self.programmer.reset_tester()
         if not self.programmer.board_present():
-            return "Do programátoru {} není vložená deska".format(self.index+1)
+            return "Do programátoru {} není vložená deska".format(self.index + 1)
         self._obj('ContentStack').set_visible_child(self._obj('ContentIntro'))
         self._obj('IntroStack').set_visible_child(self._obj('IntroScanCode'))
         self._obj('BarcodeEntry').grab_focus()
@@ -157,7 +157,7 @@ class Programmer(WorkFlowHandler):
         self._steps[step['id']] = {
             "icon": icon,
             "label": label,
-            }
+        }
         self.gtk_step_update(step['id'], step['state'])
 
     def gtk_step_update(self, step_id, state):

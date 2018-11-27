@@ -147,7 +147,7 @@ class MoxTester:
     def mox_imager(self, resources, serial_number, first_mac, board_version):
         """Returns instance of MoxImager for OTP flashing."""
         return MoxImager(self, resources, serial_number, first_mac,
-                board_version)
+                         board_version)
 
     def spiflash(self):
         """Return instance of SPIFlash to control flash.
@@ -162,8 +162,7 @@ class MoxTester:
         return SPIFlash(self, self._b)
 
 
-
-class _Interface():
+class _Interface:
     "Common FTDI interface"
 
     def __init__(self, device, interface):
@@ -295,7 +294,7 @@ class _SPIInterface(_MPSSEInterface):
             ftdi.DIS_3_PHASE,  # Disable 3 phase data clocking
             ftdi.DIS_ADAPTIVE,  # Disable adaprive clocking
             ftdi.TCK_DIVISOR, 0, 0,  # Set clock to 6MHz
-            )))
+        )))
         self._burst = None
         self.spi_burst_new()
 
@@ -320,7 +319,7 @@ class _SPIInterface(_MPSSEInterface):
             ftdi.SET_BITS_LOW,
             (self.gpio_value & 0xF0) | (0x01 if select else 0x09),
             self.output_mask,
-            ))
+        ))
 
     def spi_burst_cs_reset(self):
         """Add chip select reset to current burst.
@@ -340,7 +339,7 @@ class _SPIInterface(_MPSSEInterface):
             ftdi.MPSSE_DO_READ,
             (size - 1) % 0x100,
             (size - 1) // 0x100,
-            ))
+        ))
 
     def _spi_burst_write_common(self, size):
         if size < 1 or size > (0x10000):
@@ -350,7 +349,7 @@ class _SPIInterface(_MPSSEInterface):
             ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_WRITE_NEG,
             (size - 1) % 0x100,
             (size - 1) // 0x100,
-            ))
+        ))
 
     def spi_burst_write(self, data):
         """Write bytes.
@@ -402,18 +401,14 @@ class _SPIInterface(_MPSSEInterface):
         self._write(bytes((0xAB,)))
         read = int.from_bytes(self._read(), 'big')
         if read != 0xFAAB:
-            raise MoxTesterSPITestFail(
-                "Invalid respond on bogus command " +
-                "(expected 0xfaab but received {})".format(hex(read)))
+            raise MoxTesterSPITestFail("Invalid respond on bogus command " + "(expected 0xfaab but received {})".format(hex(read)))
         self._write(bytes((
             ftdi.MPSSE_DO_READ | ftdi.MPSSE_DO_WRITE | ftdi.MPSSE_READ_NEG,
             0, 0, 0x42,
-            )))
+        )))
         data = int.from_bytes(self._read(), 'big')
         if data != 0x42:
-            raise MoxTesterSPITestFail(
-                "Invalid value read on loopkback " +
-                "(expected 0x42 but received {})".format(hex(data)))
+            raise MoxTesterSPITestFail("Invalid value read on loopkback " + "(expected 0x42 but received {})".format(hex(data)))
         self.spi_loopback(False)
 
 

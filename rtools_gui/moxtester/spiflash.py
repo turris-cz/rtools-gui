@@ -105,14 +105,14 @@ class SPIFlash():
         for i in range(sectors):
             self.spi.spi_burst_new()
             self.spi.spi_burst_write_int(self._READ_DATA)
-            self.spi.spi_burst_write_int(address + (0x10000*i), 3)
+            self.spi.spi_burst_write_int(address + (0x10000 * i), 3)
             if i >= (sectors - 1) and size % 0x10000 != 0:
                 self.spi.spi_burst_read(size % 0x10000)
             else:
                 self.spi.spi_burst_read(0x10000)
             data = data + self.spi.spi_burst()
             if callback is not None:
-                callback((i+1) / sectors)
+                callback((i + 1) / sectors)
         return data
 
     def chip_erase(self):
@@ -166,9 +166,9 @@ class SPIFlash():
         this multiple times but only on non-overlapping sections."""
         sectors = self._sectors_count(len(data), 0x100)
         for i in range(sectors):
-            self.write_page(address + (256*i), data[(256*i):(256*(i+1))])
+            self.write_page(address + (256 * i), data[(256 * i):(256 * (i + 1))])
             if callback is not None:
-                callback((i+1) / sectors)
+                callback((i + 1) / sectors)
 
     def write(self, address, data, callback=None):
         """Write data to given address. This method tries to be smart and does
@@ -183,24 +183,24 @@ class SPIFlash():
         # First read current state
         current = self.read_data(
             address, size, None if callback is None else
-            lambda p: callback(p*.2))
+            lambda p: callback(p * .2))
         # Go trough 4K sectors (minimum size to erase)
         secnum = self._sectors_count(size, 0x1000)
         for i in range(secnum):
             if callback is not None:
-                callback(.2 + .8*(i / secnum))
+                callback(.2 + .8 * (i / secnum))
             secaddr = address + (i * 0x1000)
-            target = data[(i*0x1000):((i+1)*0x1000)]
-            currsec = current[(i*0x1000):((i+1)*0x1000)]
+            target = data[(i * 0x1000):((i + 1) * 0x1000)]
+            currsec = current[(i * 0x1000):((i + 1) * 0x1000)]
             wipe = False
             for y in range(len(target)):
                 wipe = wipe or ((currsec[y] ^ 0xff) & target[y])
             if wipe:
                 self.sector_erase(secaddr)  # Erase only if it is required
             for y in range(self._sectors_count(len(target), 0x100)):
-                page = target[(256*y):(256*(y+1))]
-                if wipe or page != currsec[(256*y):(256*(y+1))]:
-                    self.write_page(secaddr + 256*y, page)
+                page = target[(256 * y):(256 * (y + 1))]
+                if wipe or page != currsec[(256 * y):(256 * (y + 1))]:
+                    self.write_page(secaddr + (256 * y), page)
         if callback is not None:
             callback(1)
 

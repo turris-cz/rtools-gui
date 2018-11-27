@@ -14,32 +14,32 @@ _BOARD_MAP = {
     0x30: {
         "name": "Core (A)",
         "steps": ASTEPS,
-        },
+    },
     0x31: {
         "name": "SFP (D)",
         "steps": DSTEPS,
-        },
+    },
     0x32: {
         "name": "PCI (B)",
         "steps": BSTEPS,
-        },
+    },
     0x33: {
         "name": "Topaz - 4x ethernet (C)",
         "steps": CSTEPS,
-        },
+    },
     0x34: {
         "name": "Peridot - 8x ethernet (E)",
         "steps": ESTEPS,
-        },
+    },
     0x35: {
         "name": "USB (F)",
         "steps": FSTEPS,
-        },
+    },
     0x36: {
         "name": "PCI pass-trough (G)",
         "steps": GSTEPS,
-        },
-    }
+    },
+}
 
 
 class WorkFlowHandler:
@@ -84,9 +84,7 @@ class WorkFlow:
         # Verify board serial number
         self.series = serial_number >> 32
         if self.series == 0xFFFFFFFF or self.series < 0xD:
-            raise InvalidBoardNumberException(
-                "Serial number does not seems to have valid series for Mox: " +
-                hex(self.series))
+            raise InvalidBoardNumberException("Serial number does not seems to have valid series for Mox: " + hex(self.series))
         self.board_id = (serial_number >> 24) & 0xff
         if self.board_id not in _BOARD_MAP:
             raise InvalidBoardNumberException(
@@ -116,7 +114,7 @@ class WorkFlow:
                 'name': step.name(),
                 'id': step.id(),
                 'state': self.STEP_UNKNOWN,
-                })
+            })
         return steps
 
     def get_board_name(self):

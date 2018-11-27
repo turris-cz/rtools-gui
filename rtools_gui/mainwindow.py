@@ -23,7 +23,7 @@ class MainWindow:
 
         prg_grid = self._builder.get_object('ProgrammerGrid')
         # Create programmers
-        self.programmers = [None]*4
+        self.programmers = [None] * 4
         for i in range(4):
             prg = Programmer(self, conf, db_connection, db_programmer_state,
                              resources, i)

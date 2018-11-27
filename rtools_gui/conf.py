@@ -11,7 +11,7 @@ class Configs:
         "~/.config/rtools-gui.conf",
         "~/.rtools-gui.conf",
         "rtools-gui.conf",
-        ]
+    ]
 
     def __init__(self, argv):
         # Parser arguments
@@ -29,8 +29,7 @@ class Configs:
             if os.path.isfile(cnf_path):
                 config_file = cnf_path
             else:
-                report.fail_exit("There is no such configuration file: " +
-                                 str(self.args.config))
+                report.fail_exit("There is no such configuration file: " + str(self.args.config))
         if config_file is None:
             for def_config in self._DEF_CONFIG:
                 cnf_path = os.path.expanduser(def_config)
