@@ -15,8 +15,14 @@ class OTPProgramming(Step):
             self.resources, self.serial_number, self.db_board.mac_wan(),
             self.db_board.revision())
         imager.run(self.set_progress)
-        # TODO verify serial number and others with real from imager
+        recorded = self.db_board.core_info()
+        if recorded is not None:
+            if recorded['mem'] != imager.ram or recorded['key'] != imager.public_key:
+                return "DB value does not match:\nRam: {} : {}\nKey: {} : {}".format(
+                    recorded['mem'], imager.ram, recorded['key'], imager.key)
+            return None
         self.db_board.set_core_info(imager.ram, imager.public_key)
+        return None
 
     @staticmethod
     def name():

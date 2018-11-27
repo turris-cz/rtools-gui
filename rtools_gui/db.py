@@ -51,10 +51,7 @@ class Board(_GenericTable):
     _SELECT_REVISION = "SELECT revision FROM boards WHERE serial = %s;"
     _INSERT_CORE_INFO = """INSERT INTO core_info (serial, mem_size, key) VALUES
         (%s, %s, %s);"""
-    _COUNT_CORE_INFO = """SELECT count(1) FROM core_info WHERE
-        serial = %s AND mem_size = %s AND key = %s;"""
-    _SELECT_CORE_MEM_SIZE = "SELECT mem_size FROM core_info WHERE board = %s;"
-    _SELECT_CORE_KEY = "SELECT key FROM core_info WHERE board = %s;"
+    _SELECT_CORE_INFO = "SELECT mem_size, key FROM core_info WHERE serial = %s;"
 
     def __init__(self, db_connection, serial_number):
         super().__init__(db_connection)
@@ -89,27 +86,23 @@ class Board(_GenericTable):
         """Record public key and memory size for this board."""
         if self.type != "A":
             raise DBException(
-                "Invalid board type for inserting core info: " + str(self.type))
-        self._select(self._COUNT_CORE_INFO, (self.serial, mem, str(key)))
-        if self._cur.fetchone()[0] > 0:
-            return  # This one is already recorded
-        # TODO what it there is record for this serial number but with
-        # different key or memory size
+                "Invalid board type for inserting core info: {}".format(
+                    str(self.type)))
         self._insert(self._INSERT_CORE_INFO, (self.serial, mem, str(key)))
 
-    def core_mem(self):
-        """Returns core memory size for this board. If there is no such key
-        then returns None."""
-        self._select(self._SELECT_CORE_MEM_SIZE, (self.serial,))
+    def core_info(self):
+        """Returns dict with core information recoded in database. If there was
+        no record then it returns None. Dict contains following values under
+        key:
+        * mem: memory size in MiB
+        * key: public key
+        """
+        self._select(self._SELECT_CORE_INFO, (self.serial,))
         res = self._cur.fetchone()
-        return None if res is None else int(res[0])
-
-    def core_key(self):
-        """Returns core key for this board. If there is no such key then
-        returns None."""
-        self._select(self._SELECT_CORE_KEY, (self.serial,))
-        res = self._cur.fetchone()
-        return None if res is None else res[0]
+        return None if res is None else {
+            "mem": int(res[0]),
+            "key": res[1]
+        }
 
 
 class ProgrammerState(_GenericTable):
