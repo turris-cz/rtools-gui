@@ -34,3 +34,8 @@ class MoxTesterSPITestFail(MoxTesterSPIException):
 class MoxTesterSPIFLashUnalignedException(MoxTesterSPIException):
     """Address used in SPIFlash is not correctly aligned."""
     pass
+
+
+class MoxTesterImagerNoBootPrompt(MoxTesterException):
+    """There was no boot prompt. This might mean that CPU is already locked"""
+    pass

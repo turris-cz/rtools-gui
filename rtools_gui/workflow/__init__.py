@@ -125,9 +125,6 @@ class WorkFlow:
         "Trigger workflow execution"
         self.thread.start()
 
-    def _run_exit(self, error=None):
-        "Helper function for _run cleanup"
-
     def _run(self):
         "Workflow executor"
         db_run = db.ProgrammerRun(

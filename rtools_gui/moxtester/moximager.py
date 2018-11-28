@@ -1,6 +1,7 @@
 import os
 import sys
-from pexpect import fdpexpect
+import pexpect
+from .exceptions import MoxTesterImagerNoBootPrompt
 
 
 class MoxImager:
@@ -16,8 +17,6 @@ class MoxImager:
         self.first_mac = first_mac
         self.board_version = board_version
 
-        # TODO verify executable and so on
-
         # Variables set for caller
         self.ram = None  # Amount of ram in MiB
         self.real_serial_number = None  # Serial number as reported by mox-imager
@@ -26,7 +25,6 @@ class MoxImager:
         self.public_key = None  # ECDSA public key
         self.exit_code = None  # Exit code of executed run
         self.all_done = False  # If everything was executed correctly
-        # TODO
 
     def _subprocess(self, uart_sock, process_pipe):
         os.close(process_pipe[0])
@@ -57,8 +55,10 @@ class MoxImager:
         self.moxtester.reset(False)
         # Verify bootpromt
         with self.moxtester.uart() as uart:
-            uart.expect(['>'], timeout=3)
-            # TODO catch timeout and raise different exception
+            try:
+                uart.expect(['>'], timeout=3)
+            except pexpect.exceptions.TIMEOUT:
+                raise MoxTesterImagerNoBootPrompt()
 
         # Prepare and spawn mox-imager
         uart_sock = self.moxtester.uart_fileno()
@@ -69,7 +69,7 @@ class MoxImager:
         os.close(process_pipe[1])
         # TODO send log to logging
         log = open('mox-imager.log', 'wb')
-        fdpexp = fdpexpect.fdspawn(process_pipe[0], logfile=log)
+        fdpexp = pexpect.fdpexpect.fdspawn(process_pipe[0], logfile=log)
 
         callback(0)
         # TODO handle EOF and exceptions

@@ -3,6 +3,7 @@ import sys
 from datetime import datetime
 from .generic import Step
 from .exceptions import FatalWorkflowException
+from ..moxtester.exceptions import MoxTesterImagerNoBootPrompt
 
 
 class OTPProgramming(Step):
@@ -14,13 +15,19 @@ class OTPProgramming(Step):
         imager = self.moxtester.mox_imager(
             self.resources, self.serial_number, self.db_board.mac_wan(),
             self.db_board.revision())
-        imager.run(self.set_progress)
+        failed = False
+        try:
+            imager.run(self.set_progress)
+        except MoxTesterImagerNoBootPrompt:
+            failed = True
         recorded = self.db_board.core_info()
         if recorded is not None:
-            if recorded['mem'] != imager.ram or recorded['key'] != imager.public_key:
+            if not failed and (recorded['mem'] != imager.ram or recorded['key'] != imager.public_key):
                 return "DB value does not match:\nRam: {} : {}\nKey: {} : {}".format(
                     recorded['mem'], imager.ram, recorded['key'], imager.key)
             return None
+        if failed:
+            raise FatalWorkflowException("OTP programming failed")
         self.db_board.set_core_info(imager.ram, imager.public_key)
         return None
 
