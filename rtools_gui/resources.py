@@ -8,9 +8,7 @@ from shutil import copyfile
 import pexpect
 
 DIR_PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-firmware")
-TRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/secure-firmware")
-# TODO use only one single secure firmware (trusted one) -> drop untrusted one
+SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/secure-firmware")
 UBOOT = os.path.join(DIR_PREFIX, "firmware/u-boot")
 RESCUE = os.path.join(DIR_PREFIX, "firmware/image.fit.lzma")
 DTB = os.path.join(DIR_PREFIX, "firmware/dtb")
@@ -58,7 +56,7 @@ class Resources:
         os.chmod(self.__mox_imager_exec,
                  os.stat(self.__mox_imager_exec).st_mode | stat.S_IEXEC)
         # Hash for moximager
-        with pexpect.spawn(self.mox_imager_exec, ['--get-otp-hash', TRUSTED_SECURE_FIRMWARE]) as pexp:
+        with pexpect.spawn(self.mox_imager_exec, ['--get-otp-hash', SECURE_FIRMWARE]) as pexp:
             pexp.expect(['Secure firmware OTP hash: '])
             pexp.expect([r'\S{64}'])
             self.__mox_imager_secure_firmware_hash = pexp.after.decode(sys.getdefaultencoding())
