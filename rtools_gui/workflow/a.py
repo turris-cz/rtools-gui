@@ -144,8 +144,12 @@ class UbootSaveenv(Step):
     def run(self):
         self.set_progress(0)
         with self.moxtester.uart() as uart:
-            uart.sendline('saveenv')
+            uart.sendline('env default -f -a')
             self.set_progress(.1)
+            uart.expect(['=>'])
+            self.set_progress(.4)
+            uart.sendline('saveenv')
+            self.set_progress(.5)
             uart.expect(['OK'])
             self.set_progress(.9)
             uart.expect(['=>'])
