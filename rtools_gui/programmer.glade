@@ -12,101 +12,186 @@
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <child>
-          <object class="GtkStack" id="ContentStack">
+          <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
             <child>
-              <object class="GtkBox" id="ContentIntro">
+              <object class="GtkLabel" id="StationTestLabel">
+                <property name="can_focus">False</property>
+                <property name="no_show_all">True</property>
+                <property name="label" translatable="yes">Programátor může být poškozen
+Otestujte stanoviště!</property>
+                <property name="justify">center</property>
+                <style>
+                  <class name="label-warning"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkStack" id="ContentStack">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkAlignment">
+                  <object class="GtkBox" id="ContentIntro">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="top_padding">10</property>
-                    <property name="bottom_padding">10</property>
-                    <property name="left_padding">10</property>
-                    <property name="right_padding">10</property>
+                    <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkAspectFrame" id="IntroImage">
+                      <object class="GtkAlignment">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label_xalign">0</property>
-                        <property name="shadow_type">none</property>
+                        <property name="top_padding">10</property>
+                        <property name="bottom_padding">10</property>
+                        <property name="left_padding">10</property>
+                        <property name="right_padding">10</property>
                         <child>
-                          <placeholder/>
+                          <object class="GtkAspectFrame" id="IntroImage">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label_xalign">0</property>
+                            <property name="shadow_type">none</property>
+                            <child>
+                              <placeholder/>
+                            </child>
+                          </object>
                         </child>
                       </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkStack" id="IntroStack">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkLabel" id="IntroNotConnected">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Programátor odpojen
-Naskenujte kód programátoru pro pokus o připojení</property>
-                        <property name="justify">center</property>
-                        <property name="wrap">True</property>
-                        <property name="ellipsize">end</property>
-                        <style>
-                          <class name="label-error"/>
-                        </style>
-                      </object>
                       <packing>
-                        <property name="name">page0</property>
-                        <property name="title" translatable="yes">page0</property>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="IntroErrorLabel">
+                      <object class="GtkStack" id="IntroStack">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">#ERROR#</property>
-                        <style>
-                          <class name="label-error"/>
-                        </style>
+                        <child>
+                          <object class="GtkLabel" id="IntroNotConnected">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Programátor odpojen
+Naskenujte kód programátoru pro pokus o připojení</property>
+                            <property name="justify">center</property>
+                            <property name="wrap">True</property>
+                            <property name="ellipsize">end</property>
+                            <style>
+                              <class name="label-error"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="name">page0</property>
+                            <property name="title" translatable="yes">page0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="IntroErrorLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">#ERROR#</property>
+                            <style>
+                              <class name="label-error"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="name">page1</property>
+                            <property name="title" translatable="yes">page1</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="IntroPrepared">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Programátor připraven</property>
+                            <style>
+                              <class name="label-ok"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="name">page2</property>
+                            <property name="title" translatable="yes">page2</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="IntroScanCode">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Naskenujte kód desky: </property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="BarcodeEntry">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="hexpand">True</property>
+                                <property name="max_width_chars">20</property>
+                                <property name="truncate_multiline">True</property>
+                                <signal name="activate" handler="gtks_barcode_entry" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="name">page3</property>
+                            <property name="title" translatable="yes">page3</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
-                        <property name="name">page1</property>
-                        <property name="title" translatable="yes">page1</property>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
+                  </object>
+                  <packing>
+                    <property name="name">page0</property>
+                    <property name="title" translatable="yes">page0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="ContentWork">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkLabel" id="IntroPrepared">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Programátor připraven</property>
-                        <style>
-                          <class name="label-ok"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="name">page2</property>
-                        <property name="title" translatable="yes">page2</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="IntroScanCode">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkLabel">
+                          <object class="GtkLabel" id="TypeLabel">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Naskenujte kód desky: </property>
+                            <property name="halign">start</property>
+                            <property name="hexpand">True</property>
+                            <property name="label" translatable="yes">#TYPE#</property>
+                            <property name="single_line_mode">True</property>
+                            <style>
+                              <class name="label-info"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -115,62 +200,24 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkEntry" id="BarcodeEntry">
+                          <object class="GtkLabel" id="SerialNumberLabel">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">end</property>
                             <property name="hexpand">True</property>
-                            <property name="max_width_chars">20</property>
-                            <property name="truncate_multiline">True</property>
-                            <signal name="activate" handler="gtks_barcode_entry" swapped="no"/>
+                            <property name="label" translatable="yes">#SERIAL NUMBER#</property>
+                            <property name="justify">center</property>
+                            <property name="single_line_mode">True</property>
+                            <style>
+                              <class name="label-info"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
-                      </object>
-                      <packing>
-                        <property name="name">page3</property>
-                        <property name="title" translatable="yes">page3</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="pack_type">end</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="name">page0</property>
-                <property name="title" translatable="yes">page0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox" id="ContentWork">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkLabel" id="TypeLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">start</property>
-                        <property name="margin_left">6</property>
-                        <property name="hexpand">True</property>
-                        <property name="label" translatable="yes">#TYPE#</property>
-                        <property name="single_line_mode">True</property>
-                        <style>
-                          <class name="label-info"/>
-                        </style>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -179,184 +226,162 @@ Naskenujte kód programátoru pro pokus o připojení</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="SerialNumberLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">end</property>
-                        <property name="margin_right">6</property>
-                        <property name="hexpand">True</property>
-                        <property name="label" translatable="yes">#SERIAL NUMBER#</property>
-                        <property name="justify">center</property>
-                        <property name="single_line_mode">True</property>
-                        <style>
-                          <class name="label-info"/>
-                        </style>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkScrolledWindow">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="margin_top">4</property>
-                    <property name="margin_bottom">4</property>
-                    <child>
-                      <object class="GtkViewport">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <child>
-                          <object class="GtkGrid" id="WorkStepsGrid">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">center</property>
-                            <property name="margin_left">4</property>
-                            <property name="margin_right">4</property>
-                            <property name="margin_top">4</property>
-                            <property name="margin_bottom">4</property>
-                            <property name="hexpand">True</property>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkStack" id="WorkStack">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkBox" id="WorkProgress">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="orientation">vertical</property>
-                        <child>
-                          <object class="GtkProgressBar" id="StepProgress">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="show_text">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLevelBar" id="RunProgress">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="mode">discrete</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="name">page0</property>
-                        <property name="title" translatable="yes">page0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkScrolledWindow" id="WorkError">
+                      <object class="GtkScrolledWindow">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="shadow_type">in</property>
+                        <property name="margin_top">4</property>
+                        <property name="margin_bottom">4</property>
                         <child>
                           <object class="GtkViewport">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <child>
-                              <object class="GtkLabel" id="WorkErrorLabel">
+                              <object class="GtkGrid" id="WorkStepsGrid">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">#ERROR#j</property>
-                                <property name="selectable">True</property>
-                                <style>
-                                  <class name="label-error"/>
-                                </style>
+                                <property name="halign">center</property>
+                                <property name="margin_top">4</property>
+                                <property name="margin_bottom">4</property>
+                                <property name="hexpand">True</property>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
+                                <child>
+                                  <placeholder/>
+                                </child>
                               </object>
                             </child>
                           </object>
                         </child>
                       </object>
                       <packing>
-                        <property name="name">page1</property>
-                        <property name="title" translatable="yes">page1</property>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="WorkDone">
+                      <object class="GtkStack" id="WorkStack">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Úspěšně dokončeno</property>
-                        <style>
-                          <class name="label-ok"/>
-                        </style>
+                        <child>
+                          <object class="GtkBox" id="WorkProgress">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkProgressBar" id="StepProgress">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="show_text">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLevelBar" id="RunProgress">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="mode">discrete</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="name">page0</property>
+                            <property name="title" translatable="yes">page0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow" id="WorkError">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="shadow_type">in</property>
+                            <child>
+                              <object class="GtkViewport">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkLabel" id="WorkErrorLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label" translatable="yes">#ERROR#j</property>
+                                    <property name="selectable">True</property>
+                                    <style>
+                                      <class name="label-error"/>
+                                    </style>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="name">page1</property>
+                            <property name="title" translatable="yes">page1</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="WorkDone">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Úspěšně dokončeno</property>
+                            <style>
+                              <class name="label-ok"/>
+                            </style>
+                          </object>
+                          <packing>
+                            <property name="name">page2</property>
+                            <property name="title" translatable="yes">page2</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
-                        <property name="name">page2</property>
-                        <property name="title" translatable="yes">page2</property>
-                        <property name="position">2</property>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="name">page1</property>
+                    <property name="title" translatable="yes">page1</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
               </object>
               <packing>
-                <property name="name">page1</property>
-                <property name="title" translatable="yes">page1</property>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
             </child>

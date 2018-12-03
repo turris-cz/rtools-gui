@@ -36,6 +36,7 @@ class Programmer(WorkFlowHandler):
         self.index = index
         self._steps = dict()
         self._progress_step_value = None  # Se note in progress_step
+        self.fail_count = 0
 
         self._builder = Gtk.Builder()
         self._builder.add_from_file(self.GLADE_FILE)
@@ -202,9 +203,13 @@ class Programmer(WorkFlowHandler):
         # our self and go to screen about disconnected programmer.
         if not error:
             self._obj("WorkStack").set_visible_child(self._obj("WorkDone"))
+            self.fail_count = 0
         else:
             self._obj("WorkStack").set_visible_child(self._obj('WorkError'))
             self._obj("WorkErrorLabel").set_text(error)
+            self.fail_count = self.fail_count + 1
+        self._obj('StationTestLabel').set_visible(
+            self.conf.suggest_test > 0 and self.fail_count >= self.conf.suggest_test)
 
     def workflow_exit(self, error=None):
         self.workflow = None

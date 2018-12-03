@@ -57,6 +57,13 @@ class Configs:
         tmp = self.args.tmpdir
         return '/tmp' if tmp is None else os.path.expanduser(tmp)
 
+    @property
+    def suggest_test(self):
+        """Number of failed tests before station test is suggested"""
+        if 'rtools' in self.config.sections() and 'suggesttest' in self.config['rtools']:
+            return self.config['rtools']['suggesttest']
+        return 3
+
     def _db_value(self, name, default=None):
         if 'db' in self.config.sections() and name in self.config['db']:
             return self.config['db'][name]
