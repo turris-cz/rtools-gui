@@ -67,12 +67,17 @@ class Programmer(WorkFlowHandler):
         Returns error string or None if selection was ok.
         """
         if self.programmer is None:
-            self.gtk_connect_programmer()  # First try to connect it
+            self.gtk_connect_programmer()  # First try to initialize it
             if self.programmer is None:
                 return "Programátor {} zřejmě není připojen".format(self.index + 1)
         if self.workflow is not None:
             return "Programátor {} je aktuálně obsazen".format(self.index + 1)
-        self.programmer.reset_tester()
+        try:
+            self.programmer.connect_tester()
+        except Exception:
+            report.ignored_exception()
+            self.gtk_disconnected_programmer()
+            return "Nezdařilo se připojit k programátoru {}, zřejmě není připojen".format(self.index + 1)
         if not self.programmer.board_present():
             return "Do programátoru {} není vložená deska".format(self.index + 1)
         self._obj('ContentStack').set_visible_child(self._obj('ContentIntro'))
@@ -84,15 +89,21 @@ class Programmer(WorkFlowHandler):
         "Try to connect programmer"
         try:
             self.programmer = MoxTester(self.index)
-            self.programmer.selftest()
         except MoxTesterException:
-            report.error(
-                "Programmer connection failed: " + str(traceback.format_exc()))
-            # Ok this failed so we don't have programmer
-            self.programmer = None
+            report.ignored_exception()
+            self.gtk_disconnected_programmer()  # Ok this failed so we don't have programmer
+            return
         if self.programmer is not None:
             stack = self._obj("IntroStack")
             stack.set_visible_child(self._obj("IntroPrepared"))
+
+    def gtk_disconnected_programmer(self):
+        "Set programmer as disconnected"
+        if self.programmer:
+            del self.programmer
+        self.programmer = None
+        stack = self._obj("IntroStack")
+        stack.set_visible_child(self._obj("IntroNotConnected"))
 
     def gtks_barcode_entry(self, *udata):
         """Slot called when barcode is scanned to input box. Should check if
@@ -111,13 +122,12 @@ class Programmer(WorkFlowHandler):
             self.gtk_intro_error("Naskenován kód programátoru")
             return
         try:
+            self.programmer.reset_tester(hex(serial_number))
             self.workflow = WorkFlow(
                 self, self.conf, self.db_connection, self.db_programmer_state,
                 self.resources, self.programmer, serial_number)
         except Exception as e:
-            report.error(
-                "Workflow creation failed:" + str(traceback.format_exc()))
-            # TODO log this exception!
+            report.ignored_exception()
             self.workflow = None
             self.gtk_intro_error(str(e))
             return
@@ -199,8 +209,12 @@ class Programmer(WorkFlowHandler):
         GLib.idle_add(self._gtk_step_update, step_id, state)
 
     def _gtk_workflow_exit(self, error):
-        # TODO if error is about disconnected programmer then we should reset
-        # our self and go to screen about disconnected programmer.
+        try:
+            self.programmer.disconnect_tester()
+        except Exception:
+            report.ignored_exception()
+            self.gtk_disconnected_programmer()
+            # Ignore any disconnect exceptions but report programmer as disconnected
         if not error:
             self._obj("WorkStack").set_visible_child(self._obj("WorkDone"))
             self.fail_count = 0

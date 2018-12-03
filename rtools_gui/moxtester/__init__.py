@@ -6,6 +6,7 @@ from pexpect import fdpexpect
 import ftdi1 as ftdi
 from .spiflash import SPIFlash
 from .moximager import MoxImager
+from .exceptions import MoxTesterException
 from .exceptions import MoxTesterNotFoundException
 from .exceptions import MoxTesterCommunicationException
 from .exceptions import MoxTesterInvalidMode
@@ -20,6 +21,7 @@ class MoxTester:
 
     def __init__(self, chip_id):
         self.chip_id = chip_id
+        self.board = "unknown"
 
         self.ctx = ftdi.new()
         ret, devs = ftdi.usb_find_all(self.ctx, 0x0403, 0x6011)
@@ -54,7 +56,6 @@ class MoxTester:
         self._b = None
         self._c = None
         self._d = None
-        self.connect_tester()
 
     def disconnect_tester(self):
         """Disconnect this object from tester"""
@@ -67,22 +68,13 @@ class MoxTester:
         self._d.__del__()
         self._d = None
 
-    def connect_tester(self):
-        """Reconnect to tester after disconnect"""
+    def connect_tester(self, board_id="unknown"):
+        """Restart FTDI device and connect to tester"""
         if self._a is not None or self._b is not None or self._c is not None \
                 or self._d is not None:
-            # TODO exception?
-            return
-        self._a = _BitBangInterface(self.dev, ftdi.INTERFACE_A, 0x40)
-        self._b = _SPIInterface(self.dev, ftdi.INTERFACE_B, 0xE0)
-        self._c = _BitBangInterface(self.dev, ftdi.INTERFACE_C, 0x00)
-        self._d = _UARTInterface(self.dev, ftdi.INTERFACE_D)
-        self.default()
-
-    def reset_tester(self):
-        """ReseteMoxTester device. It disconnects MoxTester from FTDI USB
-        device, restarts it and reconnects."""
-        self.disconnect_tester()
+            raise MoxTesterException("Trying to connect to already connected tester")
+        self.board_id = board_id
+        # Reset before connect
         if ftdi.usb_open_dev(self.ctx, self.dev) != 0:
             raise MoxTesterCommunicationException(
                 "Unable to open FTDI interface for reset")
@@ -92,7 +84,18 @@ class MoxTester:
         if ftdi.usb_close(self.ctx) != 0:
             raise MoxTesterCommunicationException(
                 "Closing USB FTDI device failed")
-        self.connect_tester()
+        # Connect
+        self._a = _BitBangInterface(self.dev, ftdi.INTERFACE_A, 0x40)
+        self._b = _SPIInterface(self.dev, ftdi.INTERFACE_B, 0xE0)
+        self._c = _BitBangInterface(self.dev, ftdi.INTERFACE_C, 0x00)
+        self._d = _UARTInterface(self.dev, ftdi.INTERFACE_D, board_id)
+        self.default()
+
+    def reset_tester(self, board_id="unknown"):
+        """ReseteMoxTester device. It disconnects MoxTester from FTDI USB
+        device, restarts it and reconnects."""
+        self.disconnect_tester()
+        self.connect_tester(board_id)
 
     def default(self):
         """Return tester state to default"""
@@ -415,8 +418,9 @@ class _SPIInterface(_MPSSEInterface):
 class _UARTInterface(_Interface):
     "FTDI interface in Bit Bang mode"
 
-    def __init__(self, device, interface):
+    def __init__(self, device, interface, board_id="unknown"):
         super().__init__(device, interface)
+        self.board_id = board_id
         if ftdi.set_bitmode(self.ctx, 0x00, ftdi.BITMODE_RESET) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to reset bitmode for port: " + str(interface))

@@ -14,6 +14,11 @@ def error(message):
     print("Error: " + str(message), file=sys.stderr)
 
 
+def ignored_exception():
+    "Report ignored exception"
+    print("Ignored exception: " + str(traceback.format_exc()), file=sys.stderr)
+
+
 def report_uncaught_exception_gtk(tp, value, tb):
     "Exception handler for all uncaught exceptions"
     msg = "Uncaught exception: {}.{}({})\nTraceback:\n{}".format(

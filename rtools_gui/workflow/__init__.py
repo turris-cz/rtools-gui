@@ -1,4 +1,3 @@
-import traceback
 from threading import Thread
 from .. import db, report
 from .exceptions import InvalidBoardNumberException
@@ -141,9 +140,8 @@ class WorkFlow:
                 # TODO display warning message in graphics and report it
                 self.handler.step_update(step.id(), self.STEP_OK)
             except Exception as e:
-                trace = str(traceback.format_exc())
-                report.error(trace)
-                db_step.finish(False, trace)
+                report.ignored_exception()
+                db_step.finish(False, str(e))
                 self.handler.step_update(step.id(), self.STEP_FAILED)
                 error_str = str(e)
                 break  # Do not continue after exception in workflow
