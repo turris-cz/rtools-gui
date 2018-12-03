@@ -39,35 +39,37 @@ class Configs:
         if config_file is not None:
             self.config.read(config_file)
 
-    @property
-    def trusted(self):
-        """If we should run in trusted or untrusted mode. Difference is
-        whatever OTP should be flashed and what image should be used.
-        """
-        return not self.args.untrusted
+    def _fconf(self, section, option):
+        "If set in configuration return string value"
+        if section in self.config and option in self.config[section]:
+            return self.config[section][option]
+        return None
+
+    def _fconf_bool(self, section, option):
+        "Same as _fconf but does boolean transformation"
+        if section in self.config and option in self.config[section]:
+            return self.config[section].getboolean(option)
+        return None
 
     @property
     def no_otp(self):
-        """If we should write OTP even in untrusted mode"""
-        return self.args.no_otp
+        """If we should write OTP or if we should skip it"""
+        return self.args.no_otp or self._fconf_bool('rtools', 'no_opt')
 
     @property
     def tmp_dir(self):
         """Path to tmp directory"""
-        tmp = self.args.tmpdir
-        return '/tmp' if tmp is None else os.path.expanduser(tmp)
+        return self.args.tmpdir or self._fconf('rtools', 'tmpdir') or '/tmp'
 
     @property
     def suggest_test(self):
         """Number of failed tests before station test is suggested"""
         if 'rtools' in self.config.sections() and 'suggesttest' in self.config['rtools']:
-            return self.config['rtools']['suggesttest']
+            return self.config['rtools'].getint('suggesttest')
         return 3
 
     def _db_value(self, name, default=None):
-        if 'db' in self.config.sections() and name in self.config['db']:
-            return self.config['db'][name]
-        return default
+        return self._fconf('db', name) or default
 
     @property
     def db_user(self):
