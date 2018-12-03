@@ -47,6 +47,7 @@ def main():
 
     # Create mox tester
     mxt = MoxTester(options.id[0])
+    mxt.connect_tester()
     if not mxt.board_present():
         print("Board not inserted", file=sys.stderr)
         sys.exit(1)
