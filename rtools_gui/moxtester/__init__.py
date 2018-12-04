@@ -68,6 +68,8 @@ class MoxTester:
         self._c = None
         self._d.__del__()
         self._d = None
+        report.log("Moxtester {} disconnected for board {}".format(
+            self.tester_id, str(self.board_id)))
 
     def connect_tester(self, board_id="unknown"):
         """Restart FTDI device and connect to tester"""
@@ -92,6 +94,8 @@ class MoxTester:
         # TODO propagate configuration to log here
         self._d = _UARTInterface(self.dev, ftdi.INTERFACE_D, board_id)
         self.default()
+        report.log("Moxtester {} connected for board {}".format(
+            self.tester_id, str(board_id)))
 
     def reset_tester(self, board_id="unknown"):
         """ReseteMoxTester device. It disconnects MoxTester from FTDI USB

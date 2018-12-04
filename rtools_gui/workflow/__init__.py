@@ -100,6 +100,8 @@ class WorkFlow:
         self.thread = Thread(
             target=self._run, name="workflow-" + str(serial_number),
             daemon=True)
+        report.log("Workflow initialized on programmer {} for board {}".format(
+            moxtester.tester_id, hex(serial_number)))
 
     def get_steps(self):
         """Returns table steps. Every step is a dictionary where following keys
@@ -126,6 +128,8 @@ class WorkFlow:
 
     def _run(self):
         "Workflow executor"
+        report.log("Workflow started on programmer {} for board {}".format(
+            self.moxtester.tester_id, hex(self.serial_number)))
         db_run = db.ProgrammerRun(
             self.db_connection, self.db_board, self.db_programmer_state,
             self.moxtester.tester_id, [x.id() for x in self.steps])
@@ -137,14 +141,20 @@ class WorkFlow:
                 self.handler.step_update(step.id(), self.STEP_RUNNING)
                 msg = step.run()
                 db_step.finish(msg is None, msg)
-                # TODO display warning message in graphics and report it
+                report.log("Step {} on programmer {} for board {} warning: {}".format(
+                    step.id(), self.moxtester.tester_id, hex(self.serial_number, msg)))
+                # TODO display warning message in graphics
                 self.handler.step_update(step.id(), self.STEP_OK)
             except Exception as e:
                 report.ignored_exception()
                 db_step.finish(False, str(e))
                 self.handler.step_update(step.id(), self.STEP_FAILED)
                 error_str = str(e)
+                report.log("Step {} on programmer {} for board {} failed: {}".format(
+                    step.id(), self.moxtester.tester_id, hex(self.serial_number, error_str)))
                 break  # Do not continue after exception in workflow
         self.moxtester.default()  # Return moxtester to default safe setting
         db_run.finish(error_str is None)
+        report.log("Workflow ended on programmer {} for board {}".format(
+            self.moxtester.tester_id, hex(self.serial_number)))
         self.handler.workflow_exit(None if error_str is None else error_str)
