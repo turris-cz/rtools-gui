@@ -79,6 +79,7 @@ class Programmer(WorkFlowHandler):
             self.gtk_disconnected_programmer()
             return "Nezdařilo se připojit k programátoru {}, zřejmě není připojen".format(self.index + 1)
         if not self.programmer.board_present():
+            self.programmer.disconnect_tester()
             return "Do programátoru {} není vložená deska".format(self.index + 1)
         self._obj('ContentStack').set_visible_child(self._obj('ContentIntro'))
         self._obj('IntroStack').set_visible_child(self._obj('IntroScanCode'))
