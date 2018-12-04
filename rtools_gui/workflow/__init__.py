@@ -145,6 +145,6 @@ class WorkFlow:
                 self.handler.step_update(step.id(), self.STEP_FAILED)
                 error_str = str(e)
                 break  # Do not continue after exception in workflow
+        self.moxtester.default()  # Return moxtester to default safe setting
         db_run.finish(error_str is None)
         self.handler.workflow_exit(None if error_str is None else error_str)
-        self.moxtester.default()  # Return moxtester to default safe setting
