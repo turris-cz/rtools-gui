@@ -141,6 +141,7 @@ class Programmer(WorkFlowHandler):
         run_progress.set_max_value(len(self._steps))
         run_progress.set_value(0)
 
+        self.programmer.set_board_id(hex(serial_number))
         self.workflow.start()  # And lastly start worklow
 
     def _wipe_steps(self):
@@ -214,5 +215,6 @@ class Programmer(WorkFlowHandler):
             self.conf.suggest_test > 0 and self.fail_count >= self.conf.suggest_test)
 
     def workflow_exit(self, error=None):
+        self.programmer.set_board_id()
         self.workflow = None
         GLib.idle_add(self._gtk_workflow_exit, error)
