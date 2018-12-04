@@ -72,8 +72,13 @@ class Programmer(WorkFlowHandler):
                 return "Programátor {} zřejmě není připojen".format(self.index + 1)
         if self.workflow is not None:
             return "Programátor {} je aktuálně obsazen".format(self.index + 1)
-        if not self.programmer.board_present():
-            return "Do programátoru {} není vložená deska".format(self.index + 1)
+        try:
+            if not self.programmer.board_present():
+                return "Do programátoru {} není vložená deska".format(self.index + 1)
+        except MoxTesterException as e:
+            report.ignored_exception()
+            self.gtk_disconnected_programmer()
+            return str(e)
         self._obj('ContentStack').set_visible_child(self._obj('ContentIntro'))
         self._obj('IntroStack').set_visible_child(self._obj('IntroScanCode'))
         self._obj('BarcodeEntry').grab_focus()
