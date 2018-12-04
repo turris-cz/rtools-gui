@@ -34,28 +34,28 @@ class ExpansionDetection(Step):
         "Boot board and detect given string as board"
         self.set_progress(0)
         self.moxtester.power(True)
-        with self.moxtester.uart() as uart:
-            self.moxtester.reset(False)
-            self.set_progress(.1)
-            uart.expect(['U-Boot'])
-            self.set_progress(.2)
-            res = uart.expect(['Module Topology:', 'Hit any key to stop autoboot'])
-            if res != 0:
-                raise FatalWorkflowException(
-                    """Rozšiřující deska nebyla pravděpodobně vložena nebo ji
-                    nebylo možné detekovat!""")
-            self.set_progress(.4)
-            res = uart.expect(['1: ' + board_str, 'Hit any key to stop autoboot'])
-            if res != 0:
-                raise FatalWorkflowException(
-                    "Rozšiřující deska byla detekována jako špatný typ!")
-            self.set_progress(.8)
-            uart.expect(['Hit any key to stop autoboot'])
-            self.set_progress(.9)
-            uart.sendline('')
-            self.set_progress(.95)
-            uart.expect(['=>'])
-            self.set_progress(1)
+        uart = self.moxtester.uart()
+        self.moxtester.reset(False)
+        self.set_progress(.1)
+        uart.expect(['U-Boot'])
+        self.set_progress(.2)
+        res = uart.expect(['Module Topology:', 'Hit any key to stop autoboot'])
+        if res != 0:
+            raise FatalWorkflowException(
+                """Rozšiřující deska nebyla pravděpodobně vložena nebo ji
+                nebylo možné detekovat!""")
+        self.set_progress(.4)
+        res = uart.expect(['1: ' + board_str, 'Hit any key to stop autoboot'])
+        if res != 0:
+            raise FatalWorkflowException(
+                "Rozšiřující deska byla detekována jako špatný typ!")
+        self.set_progress(.8)
+        uart.expect(['Hit any key to stop autoboot'])
+        self.set_progress(.9)
+        uart.sendline('')
+        self.set_progress(.95)
+        uart.expect(['=>'])
+        self.set_progress(1)
 
     @staticmethod
     def name():

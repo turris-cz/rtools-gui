@@ -440,30 +440,28 @@ class _UARTInterface(_Interface):
             raise MoxTesterCommunicationException(
                 "Line property setup failed for interface: " + str(interface))
 
-        self.socks = None
+        # Input
         self.inputthreadexit = Event()
         # TODO add sensible name
         self.inputthread = Thread(
             target=self._input, daemon=True)
         self.inputthread.start()  # Start input immediately
-        self.outputthreadexit = None
-        self.outputthread = None
+        # Output
+        self.socks = socket.socketpair()
+        self.outputthreadexit = Event()
+        # TODO add sensible name
+        self.outputthread = Thread(target=self._output, daemon=True)
+        self.outputthread.start()
 
     def __del__(self):
         self.inputthreadexit.set()
-        if self.outputthread is not None:
-            self.outputthreadexit.set()
-        if self.socks is not None:
-            try:
-                self.socks[1].close()
-            except OSError:
-                pass
-            toclose = self.socks[0]
-            self.socks = None
-            toclose.close()
+        self.outputthreadexit.set()
+        self.socks[1].close()
+        toclose = self.socks[0]
+        self.socks = None
+        toclose.close()
         self.inputthread.join()
-        if self.outputthread is not None:
-            self.outputthread.join()
+        self.outputthread.join()
         super().__del__()
 
     def set_board_id(self, board_id="unknown"):
@@ -483,11 +481,7 @@ class _UARTInterface(_Interface):
             if ret < 0:
                 raise MoxTesterCommunicationException("UART Read failed")
             elif ret > 0:
-                if self.socks is not None:
-                    try:
-                        self.socks[0].sendall(data[0:ret])
-                    except BrokenPipeError:
-                        pass  # Ignore if other end is closed
+                self.socks[0].sendall(data[0:ret])
                 new_data = data[0:ret]
                 index = new_data.find(b'\n')
                 if index >= 0:
@@ -502,35 +496,15 @@ class _UARTInterface(_Interface):
     def _output(self):
         chunk_size = self._chunk_size()
         while not self.outputthreadexit.is_set():
-            try:
-                data = self.socks[0].recv(chunk_size)
-            except ConnectionResetError:
-                return
+            data = self.socks[0].recv(chunk_size)
             # TODO do we want to log this also?
             if ftdi.write_data(self.ctx, data) < 0:
                 raise MoxTesterCommunicationException("UART Write failed")
 
-    def _new_socks(self):
-        if self.socks is not None:
-            self.outputthreadexit.set()
-            try:
-                self.socks[1].close()
-            except OSError:
-                pass
-            self.outputthread.join()
-            self.socks[0].close()
-        self.socks = socket.socketpair()
-        self.outputthreadexit = Event()
-        # TODO add sensible name
-        self.outputthread = Thread(target=self._output, daemon=True)
-        self.outputthread.start()
-
     def fileno(self):
         "Create new file descriptior (while closing the old one) and return it"
-        self._new_socks()
         return self.socks[1].fileno()
 
     def pexpect(self):
         "Returns fdpexpect handle."
-        self._new_socks()
         return fdpexpect.fdspawn(self.socks[1])

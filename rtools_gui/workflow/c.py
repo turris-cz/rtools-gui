@@ -14,10 +14,10 @@ class TestMII(Step):
 
     def run(self):
         self.set_progress(0)
-        with self.moxtester.uart() as uart:
-            uart.sendline('mii info')
-            uart.expect(['PHY 0x02:'])
-            uart.expect(['=>'])
+        uart = self.moxtester.uart()
+        uart.sendline('mii info')
+        uart.expect(['PHY 0x02:'])
+        uart.expect(['=>'])
         self.set_progress(1)
 
     @staticmethod

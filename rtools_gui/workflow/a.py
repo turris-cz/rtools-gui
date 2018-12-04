@@ -118,16 +118,16 @@ class TestBootUp(Step):
     def run(self):
         self.set_progress(0)
         self.moxtester.power(True)
-        with self.moxtester.uart() as uart:
-            self.moxtester.reset(False)
-            self.set_progress(.1)
-            uart.expect(['U-Boot'])
-            self.set_progress(.3)
-            uart.expect(['Hit any key to stop autoboot'])
-            self.set_progress(.9)
-            uart.sendline('')
-            uart.expect(['=>'])
-            self.set_progress(1)
+        uart = self.moxtester.uart()
+        self.moxtester.reset(False)
+        self.set_progress(.1)
+        uart.expect(['U-Boot'])
+        self.set_progress(.3)
+        uart.expect(['Hit any key to stop autoboot'])
+        self.set_progress(.9)
+        uart.sendline('')
+        uart.expect(['=>'])
+        self.set_progress(1)
 
     @staticmethod
     def name():
@@ -143,16 +143,16 @@ class UbootSaveenv(Step):
 
     def run(self):
         self.set_progress(0)
-        with self.moxtester.uart() as uart:
-            uart.sendline('env default -f -a')
-            self.set_progress(.1)
-            uart.expect(['=>'])
-            self.set_progress(.4)
-            uart.sendline('saveenv')
-            self.set_progress(.5)
-            uart.expect(['OK'])
-            self.set_progress(.9)
-            uart.expect(['=>'])
+        uart = self.moxtester.uart()
+        uart.sendline('env default -f -a')
+        self.set_progress(.1)
+        uart.expect(['=>'])
+        self.set_progress(.4)
+        uart.sendline('saveenv')
+        self.set_progress(.5)
+        uart.expect(['OK'])
+        self.set_progress(.9)
+        uart.expect(['=>'])
         self.set_progress(1)
 
     @staticmethod
@@ -178,24 +178,24 @@ class TimeSetup(Step):
 
     def run(self):
         self.set_progress(0)
-        with self.moxtester.uart() as uart:
-            now = datetime.utcnow()
-            date = "{:02}{:02}{:02}{:02}{:04}.{:02}".format(
-                now.month, now.day, now.hour,
-                now.minute, now.year, now.second
-            )
-            uart.sendline('date ' + date)
-            self.set_progress(.4)
-            uart.expect(['=>'])
-            self.set_progress(.5)
-            uart.sendline('date')
-            # Note: we check only date. It is not exactly safe to check for
-            # time as that might change. Let's hope that in factory no one is
-            # going to work over midnight.
-            uart.expect(['Date: (\\d+)-(\\d+)-(\\d+)'])
-            if not self._match_date(uart, now):
-                raise FatalWorkflowException("Přečtené datum neodpovídá")
-            uart.expect(['=>'])
+        uart = self.moxtester.uart()
+        now = datetime.utcnow()
+        date = "{:02}{:02}{:02}{:02}{:04}.{:02}".format(
+            now.month, now.day, now.hour,
+            now.minute, now.year, now.second
+        )
+        uart.sendline('date ' + date)
+        self.set_progress(.4)
+        uart.expect(['=>'])
+        self.set_progress(.5)
+        uart.sendline('date')
+        # Note: we check only date. It is not exactly safe to check for
+        # time as that might change. Let's hope that in factory no one is
+        # going to work over midnight.
+        uart.expect(['Date: (\\d+)-(\\d+)-(\\d+)'])
+        if not self._match_date(uart, now):
+            raise FatalWorkflowException("Přečtené datum neodpovídá")
+        uart.expect(['=>'])
         self.set_progress(1)
 
     @staticmethod
@@ -212,19 +212,19 @@ class TestUSB(Step):
 
     def run(self):
         self.set_progress(0)
-        with self.moxtester.uart() as uart:
-            uart.sendline('gpio set GPIO20')
-            self.set_progress(.2)
-            uart.expect(['=>'])
-            uart.sendline('usb start')
-            self.set_progress(.5)
-            uart.expect(['=>'])
-            self.set_progress(.6)
-            uart.sendline('usb dev')
-            self.set_progress(.7)
-            value = uart.expect(['IDE device 0: ', 'no usb devices available'])
-            if value != 0:
-                raise FatalWorkflowException('USB device was not found')
+        uart = self.moxtester.uart()
+        uart.sendline('gpio set GPIO20')
+        self.set_progress(.2)
+        uart.expect(['=>'])
+        uart.sendline('usb start')
+        self.set_progress(.5)
+        uart.expect(['=>'])
+        self.set_progress(.6)
+        uart.sendline('usb dev')
+        self.set_progress(.7)
+        value = uart.expect(['IDE device 0: ', 'no usb devices available'])
+        if value != 0:
+            raise FatalWorkflowException('USB device was not found')
         self.set_progress(1)
 
     @staticmethod
@@ -241,17 +241,17 @@ class TestWan(Step):
 
     def run(self):
         self.set_progress(0)
-        with self.moxtester.uart() as uart:
-            uart.sendline('dhcp')
-            self.set_progress(.2)
-            uart.expect(['Waiting for PHY auto negotiation to complete'])
-            self.set_progress(.4)
-            uart.expect(['DHCP client bound to address 192.168.'])
-            self.set_progress(.8)
-            uart.expect(['=>'])
-            uart.sendline('mii info')
-            uart.expect(['PHY 0x01:'])
-            uart.expect(['=>'])
+        uart = self.moxtester.uart()
+        uart.sendline('dhcp')
+        self.set_progress(.2)
+        uart.expect(['Waiting for PHY auto negotiation to complete'])
+        self.set_progress(.4)
+        uart.expect(['DHCP client bound to address 192.168.'])
+        self.set_progress(.8)
+        uart.expect(['=>'])
+        uart.sendline('mii info')
+        uart.expect(['PHY 0x01:'])
+        uart.expect(['=>'])
         self.set_progress(1)
 
     @staticmethod
