@@ -56,7 +56,8 @@ class MoxImager:
         # Verify bootpromt
         with self.moxtester.uart() as uart:
             try:
-                uart.expect(['>'], timeout=3)
+                if uart.expect(['>', 'U-Boot'], timeout=3) != 1:
+                    raise MoxTesterImagerNoBootPrompt()
             except pexpect.exceptions.TIMEOUT:
                 raise MoxTesterImagerNoBootPrompt()
 

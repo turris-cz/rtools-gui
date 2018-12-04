@@ -518,9 +518,7 @@ class _UARTInterface(_Interface):
             except OSError:
                 pass
             self.outputthread.join()
-            toclose = self.socks[0]
-            self.socks = None
-            toclose.close()
+            self.socks[0].close()
         self.socks = socket.socketpair()
         self.outputthreadexit = Event()
         # TODO add sensible name
