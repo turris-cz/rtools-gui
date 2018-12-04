@@ -96,7 +96,6 @@ class MoxImager:
         self.all_done = True
         callback(1)
 
-        log.close()
         # Cleanup
         self.exit_code = os.waitpid(pid, 0)[1]
         os.close(process_pipe[0])
