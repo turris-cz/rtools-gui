@@ -141,8 +141,9 @@ class WorkFlow:
                 self.handler.step_update(step.id(), self.STEP_RUNNING)
                 msg = step.run()
                 db_step.finish(msg is None, msg)
-                report.log("Step {} on programmer {} for board {} warning: {}".format(
-                    step.id(), self.moxtester.tester_id, hex(self.serial_number, msg)))
+                if msg is not None:
+                    report.log("Step {} on programmer {} for board {} warning: {}".format(
+                        step.id(), self.moxtester.tester_id, hex(self.serial_number), msg))
                 # TODO display warning message in graphics
                 self.handler.step_update(step.id(), self.STEP_OK)
             except Exception as e:
@@ -151,7 +152,7 @@ class WorkFlow:
                 self.handler.step_update(step.id(), self.STEP_FAILED)
                 error_str = str(e)
                 report.log("Step {} on programmer {} for board {} failed: {}".format(
-                    step.id(), self.moxtester.tester_id, hex(self.serial_number, error_str)))
+                    step.id(), self.moxtester.tester_id, hex(self.serial_number), error_str))
                 break  # Do not continue after exception in workflow
         self.moxtester.default()  # Return moxtester to default safe setting
         db_run.finish(error_str is None)

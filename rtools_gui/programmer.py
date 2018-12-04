@@ -106,6 +106,9 @@ class Programmer(WorkFlowHandler):
         stack = self._obj("IntroStack")
         stack.set_visible_child(self._obj("IntroNotConnected"))
 
+    def disconnected_programmer(self):
+        GLib.idle_add(self.gtk_disconnected_programmer)
+
     def gtks_barcode_entry(self, *udata):
         """Slot called when barcode is scanned to input box. Should check if
         given code is valid and start flashing process"""
@@ -210,12 +213,6 @@ class Programmer(WorkFlowHandler):
         GLib.idle_add(self._gtk_step_update, step_id, state)
 
     def _gtk_workflow_exit(self, error):
-        try:
-            self.programmer.disconnect_tester()
-        except Exception:
-            report.ignored_exception()
-            self.gtk_disconnected_programmer()
-            # Ignore any disconnect exceptions but report programmer as disconnected
         if not error:
             self._obj("WorkStack").set_visible_child(self._obj("WorkDone"))
             self.fail_count = 0
@@ -228,4 +225,10 @@ class Programmer(WorkFlowHandler):
 
     def workflow_exit(self, error=None):
         self.workflow = None
+        try:
+            self.programmer.disconnect_tester()
+        except Exception:
+            report.ignored_exception()
+            self.disconnected_programmer()
+            # Ignore any disconnect exceptions but report programmer as disconnected
         GLib.idle_add(self._gtk_workflow_exit, error)
