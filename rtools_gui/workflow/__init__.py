@@ -128,7 +128,7 @@ class WorkFlow:
         "Workflow executor"
         db_run = db.ProgrammerRun(
             self.db_connection, self.db_board, self.db_programmer_state,
-            self.moxtester.chip_id, [x.id() for x in self.steps])
+            self.moxtester.tester_id, [x.id() for x in self.steps])
         error_str = None
         for step in self.steps:
             db_step = db.ProgrammerStep(

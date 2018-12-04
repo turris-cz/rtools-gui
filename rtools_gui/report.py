@@ -3,6 +3,11 @@ import traceback
 from gi.repository import Gtk
 
 
+def log(message):
+    "Report simple message to log"
+    print(str(message))
+
+
 def fail_exit(message, exit_code=1):
     "Report message and exit with given exit_code"
     print("Fatal: " + str(message), file=sys.stderr)

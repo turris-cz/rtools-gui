@@ -4,6 +4,7 @@ from time import sleep
 from threading import Thread, Event
 from pexpect import fdpexpect
 import ftdi1 as ftdi
+from .. import report
 from .spiflash import SPIFlash
 from .moximager import MoxImager
 from .exceptions import MoxTesterException
@@ -19,9 +20,9 @@ class MoxTester:
     BOOT_MODE_SPI = 0b01
     BOOT_MODE_UART = 0b10
 
-    def __init__(self, chip_id):
-        self.chip_id = chip_id
-        self.board = "unknown"
+    def __init__(self, tester_id):
+        self.tester_id = tester_id
+        self.board_id = "unknown"
 
         self.ctx = ftdi.new()
         ret, devs = ftdi.usb_find_all(self.ctx, 0x0403, 0x6011)
@@ -40,7 +41,7 @@ class MoxTester:
                 if ret < 0:
                     raise MoxTesterCommunicationException(
                         "Reading chip type (id) failed")
-                if chip_tp == chip_id:
+                if chip_tp == tester_id:
                     self.dev = devs.dev  # Setting dev if correct device found
                 if ftdi.usb_reset(self.ctx) != 0:
                     raise MoxTesterCommunicationException(
@@ -51,7 +52,7 @@ class MoxTester:
             devs = devs.next
         if self.dev is None:
             raise MoxTesterNotFoundException(
-                "There is no connected tester with id: " + str(chip_id))
+                "There is no connected tester with id: " + str(tester_id))
         self._a = None
         self._b = None
         self._c = None
@@ -88,6 +89,7 @@ class MoxTester:
         self._a = _BitBangInterface(self.dev, ftdi.INTERFACE_A, 0x40)
         self._b = _SPIInterface(self.dev, ftdi.INTERFACE_B, 0xE0)
         self._c = _BitBangInterface(self.dev, ftdi.INTERFACE_C, 0x00)
+        # TODO propagate configuration to log here
         self._d = _UARTInterface(self.dev, ftdi.INTERFACE_D, board_id)
         self.default()
 
@@ -418,9 +420,10 @@ class _SPIInterface(_MPSSEInterface):
 class _UARTInterface(_Interface):
     "FTDI interface in Bit Bang mode"
 
-    def __init__(self, device, interface, board_id="unknown"):
+    def __init__(self, device, interface, board_id="unknown", log=True):
         super().__init__(device, interface)
         self.board_id = board_id
+        self.log = log
         if ftdi.set_bitmode(self.ctx, 0x00, ftdi.BITMODE_RESET) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to reset bitmode for port: " + str(interface))
@@ -464,22 +467,27 @@ class _UARTInterface(_Interface):
 
     def _input(self):
         chunk_size = self._chunk_size()
-        # TODO correct logging!
-        with io.FileIO("moxtester.log", "w") as log:
-            while not self.inputthreadexit.is_set():
-                ret, data = ftdi.read_data(self.ctx, chunk_size)
-                if ret < 0:
-                    raise MoxTesterCommunicationException("UART Read failed")
-                elif ret > 0:
-                    if self.socks is not None:
-                        try:
-                            self.socks[0].sendall(data[0:ret])
-                        except BrokenPipeError:
-                            pass  # Ignore if other end is closed
-                    log.write(data[0:ret])
+        prev_data = b''
+        while not self.inputthreadexit.is_set():
+            ret, data = ftdi.read_data(self.ctx, chunk_size)
+            if ret < 0:
+                raise MoxTesterCommunicationException("UART Read failed")
+            elif ret > 0:
+                if self.socks is not None:
+                    try:
+                        self.socks[0].sendall(data[0:ret])
+                    except BrokenPipeError:
+                        pass  # Ignore if other end is closed
+                new_data = data[0:ret]
+                index = new_data.find(b'\n')
+                if index >= 0:
+                    report.log('UART({}): '.format(self.board_id) + str(prev_data + new_data[0:index + 1]))
+                    prev_data = new_data[index:]
                 else:
-                    # Sleep for short amount of time to not busyloop
-                    sleep(0.01)
+                    prev_data = prev_data + new_data
+            else:
+                # Sleep for short amount of time to not busyloop
+                sleep(0.01)
 
     def _output(self):
         chunk_size = self._chunk_size()
@@ -488,6 +496,7 @@ class _UARTInterface(_Interface):
                 data = self.socks[0].recv(chunk_size)
             except ConnectionResetError:
                 return
+            # TODO do we want to log this also?
             if ftdi.write_data(self.ctx, data) < 0:
                 raise MoxTesterCommunicationException("UART Write failed")
 

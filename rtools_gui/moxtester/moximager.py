@@ -68,8 +68,7 @@ class MoxImager:
             self._subprocess(uart_sock, process_pipe)
         os.close(process_pipe[1])
         # TODO send log to logging
-        log = open('mox-imager.log', 'wb')
-        fdpexp = pexpect.fdpexpect.fdspawn(process_pipe[0], logfile=log)
+        fdpexp = pexpect.fdpexpect.fdspawn(process_pipe[0])
 
         callback(0)
         # TODO handle EOF and exceptions
