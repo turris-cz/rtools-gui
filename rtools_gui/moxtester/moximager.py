@@ -99,5 +99,4 @@ class MoxImager:
         # Cleanup
         self.exit_code = os.waitpid(pid, 0)[1]
         os.close(process_pipe[0])
-        os.close(uart_sock)
         self.moxtester.default()
