@@ -57,6 +57,7 @@ class MoxTester:
         self._b = None
         self._c = None
         self._d = None
+        self.connect_tester()
 
     def disconnect_tester(self):
         """Disconnect this object from tester"""
@@ -68,16 +69,25 @@ class MoxTester:
         self._c = None
         self._d.__del__()
         self._d = None
-        report.log("Moxtester {} disconnected for board {}".format(
-            self.tester_id, str(self.board_id)))
 
-    def connect_tester(self, board_id="unknown"):
+    def connect_tester(self):
         """Restart FTDI device and connect to tester"""
         if self._a is not None or self._b is not None or self._c is not None \
                 or self._d is not None:
             raise MoxTesterException("Trying to connect to already connected tester")
-        self.board_id = board_id
-        # Reset before connect
+        # Connect
+        self._a = _BitBangInterface(self.dev, ftdi.INTERFACE_A, 0x40)
+        self._b = _SPIInterface(self.dev, ftdi.INTERFACE_B, 0xE0)
+        self._c = _BitBangInterface(self.dev, ftdi.INTERFACE_C, 0x00)
+        # TODO propagate configuration to log here
+        self._d = _UARTInterface(self.dev, ftdi.INTERFACE_D, self.board_id)
+        self.default()
+
+    def reset_tester(self):
+        """ReseteMoxTester device. It disconnects MoxTester from FTDI USB
+        device, restarts it and reconnects."""
+        self.disconnect_tester()
+        # Reset
         if ftdi.usb_open_dev(self.ctx, self.dev) != 0:
             raise MoxTesterCommunicationException(
                 "Unable to open FTDI interface for reset")
@@ -87,21 +97,12 @@ class MoxTester:
         if ftdi.usb_close(self.ctx) != 0:
             raise MoxTesterCommunicationException(
                 "Closing USB FTDI device failed")
-        # Connect
-        self._a = _BitBangInterface(self.dev, ftdi.INTERFACE_A, 0x40)
-        self._b = _SPIInterface(self.dev, ftdi.INTERFACE_B, 0xE0)
-        self._c = _BitBangInterface(self.dev, ftdi.INTERFACE_C, 0x00)
-        # TODO propagate configuration to log here
-        self._d = _UARTInterface(self.dev, ftdi.INTERFACE_D, board_id)
-        self.default()
-        report.log("Moxtester {} connected for board {}".format(
-            self.tester_id, str(board_id)))
-
-    def reset_tester(self, board_id="unknown"):
-        """ReseteMoxTester device. It disconnects MoxTester from FTDI USB
-        device, restarts it and reconnects."""
-        self.disconnect_tester()
-        self.connect_tester(board_id)
+        self.connect_tester()
+    
+    def set_board_id(self, board_id="unknown"):
+        """Set identifier for board"""
+        self.board_id = board_id
+        self._d.set_board_id(board_id)
 
     def default(self):
         """Return tester state to default"""
@@ -442,7 +443,8 @@ class _UARTInterface(_Interface):
         self.socks = None
         self.inputthreadexit = Event()
         # TODO add sensible name
-        self.inputthread = Thread(target=self._input, daemon=True)
+        self.inputthread = Thread(
+            target=self._input, daemon=True)
         self.inputthread.start()  # Start input immediately
         self.outputthreadexit = None
         self.outputthread = None
@@ -463,6 +465,9 @@ class _UARTInterface(_Interface):
         if self.outputthread is not None:
             self.outputthread.join()
         super().__del__()
+
+    def set_board_id(self, board_id="unknown"):
+        self.board_id = board_id
 
     def _chunk_size(self):
         ret, chunk_size = ftdi.read_data_get_chunksize(self.ctx)

@@ -72,14 +72,7 @@ class Programmer(WorkFlowHandler):
                 return "Programátor {} zřejmě není připojen".format(self.index + 1)
         if self.workflow is not None:
             return "Programátor {} je aktuálně obsazen".format(self.index + 1)
-        try:
-            self.programmer.connect_tester()
-        except Exception:
-            report.ignored_exception()
-            self.gtk_disconnected_programmer()
-            return "Nezdařilo se připojit k programátoru {}, zřejmě není připojen".format(self.index + 1)
         if not self.programmer.board_present():
-            self.programmer.disconnect_tester()
             return "Do programátoru {} není vložená deska".format(self.index + 1)
         self._obj('ContentStack').set_visible_child(self._obj('ContentIntro'))
         self._obj('IntroStack').set_visible_child(self._obj('IntroScanCode'))
@@ -100,8 +93,6 @@ class Programmer(WorkFlowHandler):
 
     def gtk_disconnected_programmer(self):
         "Set programmer as disconnected"
-        if self.programmer:
-            del self.programmer
         self.programmer = None
         stack = self._obj("IntroStack")
         stack.set_visible_child(self._obj("IntroNotConnected"))
@@ -126,7 +117,6 @@ class Programmer(WorkFlowHandler):
             self.gtk_intro_error("Naskenován kód programátoru")
             return
         try:
-            self.programmer.reset_tester(hex(serial_number))
             self.workflow = WorkFlow(
                 self, self.conf, self.db_connection, self.db_programmer_state,
                 self.resources, self.programmer, serial_number)
@@ -225,10 +215,4 @@ class Programmer(WorkFlowHandler):
 
     def workflow_exit(self, error=None):
         self.workflow = None
-        try:
-            self.programmer.disconnect_tester()
-        except Exception:
-            report.ignored_exception()
-            self.disconnected_programmer()
-            # Ignore any disconnect exceptions but report programmer as disconnected
         GLib.idle_add(self._gtk_workflow_exit, error)

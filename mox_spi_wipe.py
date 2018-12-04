@@ -18,7 +18,6 @@ def main():
         exit('ID should be 0 to 3')
 
     mxt = MoxTester(options.id[0])
-    mxt.connect_tester()
 
     if not mxt.board_present():
         print("Board not inserted")
