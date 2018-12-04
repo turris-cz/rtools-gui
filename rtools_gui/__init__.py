@@ -13,6 +13,7 @@ def main():
     "Main function of rtools-gui"
     argv = Gtk.init(sys.argv[1:])
     conf = Configs(argv)
+    report.setup_logging()
     sys.excepthook = report.report_uncaught_exception_gtk
 
     with guard.Guard(conf):

@@ -437,6 +437,7 @@ class _UARTInterface(_Interface):
 
         self.socks = None
         self.inputthreadexit = Event()
+        # TODO add sensible name
         self.inputthread = Thread(target=self._input, daemon=True)
         self.inputthread.start()  # Start input immediately
         self.outputthreadexit = None
@@ -513,6 +514,7 @@ class _UARTInterface(_Interface):
             toclose.close()
         self.socks = socket.socketpair()
         self.outputthreadexit = Event()
+        # TODO add sensible name
         self.outputthread = Thread(target=self._output, daemon=True)
         self.outputthread.start()
 
