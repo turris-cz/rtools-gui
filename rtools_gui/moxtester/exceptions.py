@@ -39,3 +39,8 @@ class MoxTesterSPIFLashUnalignedException(MoxTesterSPIException):
 class MoxTesterImagerNoBootPrompt(MoxTesterException):
     """There was no boot prompt. This might mean that CPU is already locked"""
     pass
+
+
+class MoxTesterImagerFail(MoxTesterException):
+    """Failure of mox-imager"""
+    pass

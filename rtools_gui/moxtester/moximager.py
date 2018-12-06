@@ -3,6 +3,7 @@ import sys
 import signal
 import pexpect
 from .exceptions import MoxTesterImagerNoBootPrompt
+from .exceptions import MoxTesterImagerFail
 
 
 class MoxImager:
@@ -44,6 +45,10 @@ class MoxImager:
             '--otp-hash', self.resources.mox_imager_secure_firmware_hash,
         )
 
+    def _match(fdpexpect, expected):
+        if fdpexpect.expect([expected, 'FAIL.*', pexpect.EOF]) != 0:
+            raise MoxTesterImagerFail(fdpexpect.match.string)
+
     def run(self, callback=None):
         """Run mox-imager in OTP write mode. Returns fdexpect handle.
         callback is called to report progress. It has only one argument and
@@ -74,27 +79,26 @@ class MoxImager:
 
         try:
             callback(0)
-            # TODO handle EOF and exceptions
-            fdpexp.expect(['Sending image type TIMH'])
+            self._match(fdpexp, 'Sending image type TIMH')
             callback(0.2)
-            fdpexp.expect(['Sending image type WTMI'])
+            self._match(fdpexp, 'Sending image type WTMI')
             callback(0.4)
-            fdpexp.expect(['Found (\\d+) MiB RAM'])
+            self._match(fdpexp, 'Found (\\d+) MiB RAM')
             self.ram = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
             callback(0.5)
-            fdpexp.expect(['Serial Number: ([0-9A-Fa-f]+)'])
+            self._match(fdpexp, 'Serial Number: ([0-9A-Fa-f]+)')
             self.real_serial_number = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()), 16)
             callback(0.6)
-            fdpexp.expect(['Board version: (\\d+)'])
+            self._match(fdpexp, 'Board version: (\\d+)')
             self.real_board_version = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
             callback(0.7)
-            fdpexp.expect(['MAC address: ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})'])
+            self._match(fdpexp, 'MAC address: ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})')
             self.real_first_mac = ':'.join(fdpexp.match.group(i + 1).decode(sys.getdefaultencoding()) for i in range(6))
             callback(0.8)
-            fdpexp.expect(['ECDSA Public Key: (0[23][0-9A-Fa-f]{132})'])
+            self._match(fdpexp, 'ECDSA Public Key: (0[23][0-9A-Fa-f]{132})')
             self.public_key = fdpexp.match.group(1).decode(sys.getdefaultencoding())
             callback(0.9)
-            fdpexp.expect(['All done.'])
+            self._match(fdpexp, 'All done.')
             self.all_done = True
             callback(1)
         finally:
