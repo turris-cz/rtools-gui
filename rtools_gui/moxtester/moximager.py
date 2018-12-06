@@ -1,5 +1,6 @@
 import os
 import sys
+import signal
 import pexpect
 from .exceptions import MoxTesterImagerNoBootPrompt
 
@@ -71,32 +72,33 @@ class MoxImager:
         # TODO send log to logging
         fdpexp = pexpect.fdpexpect.fdspawn(process_pipe[0])
 
-        callback(0)
-        # TODO handle EOF and exceptions
-        fdpexp.expect(['Sending image type TIMH'])
-        callback(0.2)
-        fdpexp.expect(['Sending image type WTMI'])
-        callback(0.4)
-        fdpexp.expect(['Found (\\d+) MiB RAM'])
-        self.ram = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
-        callback(0.5)
-        fdpexp.expect(['Serial Number: ([0-9A-Fa-f]+)'])
-        self.real_serial_number = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()), 16)
-        callback(0.6)
-        fdpexp.expect(['Board version: (\\d+)'])
-        self.real_board_version = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
-        callback(0.7)
-        fdpexp.expect(['MAC address: ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})'])
-        self.real_first_mac = ':'.join(fdpexp.match.group(i + 1).decode(sys.getdefaultencoding()) for i in range(6))
-        callback(0.8)
-        fdpexp.expect(['ECDSA Public Key: (0[23][0-9A-Fa-f]{132})'])
-        self.public_key = fdpexp.match.group(1).decode(sys.getdefaultencoding())
-        callback(0.9)
-        fdpexp.expect(['All done.'])
-        self.all_done = True
-        callback(1)
-
-        # Cleanup
-        self.exit_code = os.waitpid(pid, 0)[1]
-        os.close(process_pipe[0])
-        self.moxtester.default()
+        try:
+            callback(0)
+            # TODO handle EOF and exceptions
+            fdpexp.expect(['Sending image type TIMH'])
+            callback(0.2)
+            fdpexp.expect(['Sending image type WTMI'])
+            callback(0.4)
+            fdpexp.expect(['Found (\\d+) MiB RAM'])
+            self.ram = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
+            callback(0.5)
+            fdpexp.expect(['Serial Number: ([0-9A-Fa-f]+)'])
+            self.real_serial_number = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()), 16)
+            callback(0.6)
+            fdpexp.expect(['Board version: (\\d+)'])
+            self.real_board_version = int(fdpexp.match.group(1).decode(sys.getdefaultencoding()))
+            callback(0.7)
+            fdpexp.expect(['MAC address: ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})'])
+            self.real_first_mac = ':'.join(fdpexp.match.group(i + 1).decode(sys.getdefaultencoding()) for i in range(6))
+            callback(0.8)
+            fdpexp.expect(['ECDSA Public Key: (0[23][0-9A-Fa-f]{132})'])
+            self.public_key = fdpexp.match.group(1).decode(sys.getdefaultencoding())
+            callback(0.9)
+            fdpexp.expect(['All done.'])
+            self.all_done = True
+            callback(1)
+        finally:
+            os.kill(pid, signal.SIGKILL)
+            self.exit_code = os.waitpid(pid, 0)[1]
+            os.close(process_pipe[0])
+            self.moxtester.default()
