@@ -45,7 +45,7 @@ class MoxImager:
             '--otp-hash', self.resources.mox_imager_secure_firmware_hash,
         )
 
-    def _match(fdpexpect, expected):
+    def _match(self, fdpexpect, expected):
         if fdpexpect.expect([expected, 'FAIL.*', pexpect.EOF]) != 0:
             raise MoxTesterImagerFail(fdpexpect.match.string)
 
