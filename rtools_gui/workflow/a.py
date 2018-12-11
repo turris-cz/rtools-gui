@@ -1,8 +1,10 @@
 "Module implementing steps for A module"
 import sys
+import pexpect
 from datetime import datetime
 from .generic import Step
 from .exceptions import FatalWorkflowException
+from .. import report
 from ..moxtester.exceptions import MoxTesterImagerNoBootPrompt
 
 
@@ -239,15 +241,22 @@ class TestUSB(Step):
 class TestWan(Step):
     "Test Wan"
 
-    def run(self):
-        self.set_progress(0)
-        uart = self.moxtester.uart()
+    def _test_dhcp(self, uart):
         uart.sendline('dhcp')
         self.set_progress(.2)
         uart.expect(['Waiting for PHY auto negotiation to complete'])
         self.set_progress(.4)
         uart.expect(['DHCP client bound to address 192.168.'])
         self.set_progress(.8)
+
+    def run(self):
+        self.set_progress(0)
+        uart = self.moxtester.uart()
+        try:
+            self._test_dhcp(uart)
+        except pexpect.exceptions.TIMEOUT:
+            report.log("DHCP failed. Trying again.")
+            self._test_dhcp(uart)
         uart.expect(['=>'])
         uart.sendline('mii info')
         uart.expect(['PHY 0x01:'])
