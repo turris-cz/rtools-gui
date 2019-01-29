@@ -136,7 +136,7 @@ class Programmer(WorkFlowHandler):
         # Update GUI
         self._obj("ContentStack").set_visible_child(self._obj("ContentWork"))
         self._obj("TypeLabel").set_text(self.workflow.get_board_name())
-        self._obj("SerialNumberLabel").set_text(hex(serial_number))
+        self._obj("SerialNumberLabel").set_text(str(serial_number))
         self._obj("WorkStack").set_visible_child(self._obj("WorkProgress"))
         self._wipe_steps()
         for step in self.workflow.get_steps():
