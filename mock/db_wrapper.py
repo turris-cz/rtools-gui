@@ -9,6 +9,11 @@ def restoreRecovery():
     qApp.loggerMain.info("Mocking recovery.")
 
 
+def getLastRunsResults():
+    qApp.loggerMain.info("Mocking run results.")
+    return []
+
+
 class Router(object):
     _current_run = 0
 

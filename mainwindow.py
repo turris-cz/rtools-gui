@@ -8,7 +8,11 @@ from custom_exceptions import DbError, IncorrectSerialNumber
 from utils import MAX_SERIAL_LEN, backupAppLog
 
 from application import qApp, settings
-from db_wrapper import restoreRecovery, getLastRunsResults
+
+if qApp.run_offline:
+    from mock.db_wrapper import restoreRecovery, getLastRunsResults
+else:
+    from db_wrapper import restoreRecovery, getLastRunsResults
 
 
 def _removeItemFromGridLayout(layout, row, column):
@@ -48,16 +52,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         )
         self.backButton.setIconSize(QtCore.QSize(20, 20))
 
-        # open db connection
-        qApp.loggerMain.info("Opening db connection.")
-        if not qApp.connection.open():
-            qApp.loggerMain.error("Connecting to db fails.")
-            QtWidgets.QMessageBox.critical(
-                self, "Chyba databáze",
-                "<p>Nepodařilo se připojit do databáze. Zavírám aplikaci...</p>"
-            )
-            raise DbError(qApp.connection.lastError().text())
-        qApp.loggerMain.info("Connected to database.")
+        # don't open db connection if started in isolated environment
+        if not qApp.run_offline:
+            qApp.loggerMain.info("Opening db connection.")
+            if not qApp.connection.open():
+                qApp.loggerMain.error("Connecting to db fails.")
+                QtWidgets.QMessageBox.critical(
+                    self, "Chyba databáze",
+                    """<p>Nepodařilo se připojit do databáze. Zavírám aplikaci...</p>
+                    <p>Pro spuštění bez databáze spusťte program s konfigurací pro offline režim.</p>
+                    <p>RTOOLS_SETTINGS='settings.omnia_offline' ./rtools-gui.py</p>
+                    """
+                )
+                raise DbError(qApp.connection.lastError().text())
+            qApp.loggerMain.info("Connected to database.")
 
         # perform queries which weren't performed last time
         restoreRecovery()
@@ -446,9 +454,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 qApp.loggerMain.warn("closign the application in the middle of a run")
 
         # close the database
-        if qApp.connection.isOpen():
-            qApp.loggerMain.info("Closing db connection.")
-            qApp.connection.close()
+        if not qApp.run_offline:
+            if qApp.connection.isOpen():
+                qApp.loggerMain.info("Closing db connection.")
+                qApp.connection.close()
 
         backupAppLog()
 

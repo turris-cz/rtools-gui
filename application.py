@@ -83,6 +83,7 @@ class Application(QApplication):
         # store tests/steps only options
         self.tests_only = '-t' in args[0] or '--tests-only' in args[0]
         self.steps_only = '-s' in args[0] or '--steps-only' in args[0]
+        self.run_offline = False
 
         # init logging
         try:
@@ -106,11 +107,17 @@ class Application(QApplication):
         self.loggerMain.info("Using db wrapper '%s'" % settings.DB_WRAPPER_MODULE)
 
         # set the db connection
-        self.connection = QSqlDatabase.addDatabase("QPSQL")
-        self.connection.setHostName(settings.DB['HOST'])
-        self.connection.setDatabaseName(settings.DB['NAME'])
-        self.connection.setUserName(settings.DB['USER'])
-        self.connection.setPassword(settings.DB['PASSWORD'])
+        if settings.DB is None:
+            # don't use database in isolated environment
+            self.loggerMain.info("Running in offline mode - not using database")
+            self.connection = None
+            self.run_offline = True
+        else:
+            self.connection = QSqlDatabase.addDatabase("QPSQL")
+            self.connection.setHostName(settings.DB['HOST'])
+            self.connection.setDatabaseName(settings.DB['NAME'])
+            self.connection.setUserName(settings.DB['USER'])
+            self.connection.setPassword(settings.DB['PASSWORD'])
 
         # current router
         self.router = None
