@@ -38,17 +38,33 @@ class Application(QApplication):
     def __init__(self, *args, **kwargs):
         super(Application, self).__init__(*args, **kwargs)
 
+        # load the settings module
+        global settings
+        settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings.omnia')
+        settings = importlib.import_module(settings_module)
+
+        logging.root.setLevel(logging.INFO)
+        logging.FileHandler(settings.LOG_APP_FILE)
+        STDOUTFORMAT = '%(levelname)s %(message)s'
+        FILEFORMAT = '%(asctime)s - %(levelname)s - [%(name)s] %(message)s'
+        fileFormatter = logging.Formatter(FILEFORMAT)
+        fileHandler = logging.FileHandler(settings.LOG_APP_FILE)
+        fileHandler.setFormatter(fileFormatter)
+        stdoutHandler = logging.StreamHandler(sys.stdout)
+        stdoutFormatter = logging.Formatter(STDOUTFORMAT)
+        stdoutHandler.setFormatter(stdoutFormatter)
+        self.loggerMain = logging.getLogger("MAIN")
+        self.loggerMain.addHandler(fileHandler)
+        self.loggerMain.addHandler(stdoutHandler)
+        self.loggerDb = logging.getLogger("DB")
+        self.loggerDb.addHandler(fileHandler)
+
         # This line will enable to handle exceptions outside of Qt event loop
         sys.excepthook = _printException
 
         # load the app link
         global qApp
         qApp = self
-
-        # load the settings module
-        global settings
-        settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings.omnia')
-        settings = importlib.import_module(settings_module)
 
         # load workflow module
         self.workflow = importlib.import_module(settings.WORKFLOW_STEPS_MODULE)
@@ -75,22 +91,6 @@ class Application(QApplication):
             # Dir already exists continue
             if e.errno not in [errno.EEXIST]:
                 raise e
-
-        logging.root.setLevel(logging.INFO)
-        logging.FileHandler(settings.LOG_APP_FILE)
-        STDOUTFORMAT = '%(levelname)s %(message)s'
-        FILEFORMAT = '%(asctime)s - %(levelname)s - [%(name)s] %(message)s'
-        fileFormatter = logging.Formatter(FILEFORMAT)
-        fileHandler = logging.FileHandler(settings.LOG_APP_FILE)
-        fileHandler.setFormatter(fileFormatter)
-        stdoutHandler = logging.StreamHandler(sys.stdout)
-        stdoutFormatter = logging.Formatter(STDOUTFORMAT)
-        stdoutHandler.setFormatter(stdoutFormatter)
-        self.loggerMain = logging.getLogger("MAIN")
-        self.loggerMain.addHandler(fileHandler)
-        self.loggerMain.addHandler(stdoutHandler)
-        self.loggerDb = logging.getLogger("DB")
-        self.loggerDb.addHandler(fileHandler)
 
         try:
             os.makedirs(os.path.dirname(settings.LOG_ROUTERS_DIR))
