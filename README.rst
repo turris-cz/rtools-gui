@@ -30,6 +30,15 @@ Howto run it
 
 ``./rtools-gui.py -s`` (steps only)
 
+How to run it in offline mode 
+-----------------------------
+
+Offline mode doesn't use database and calls from/to database are mocked.
+
+Use provided custom settings ``omnia_offline`` ::
+
+    RTOOLS_SETTINGS='settings.omnia_offline' ./rtools-gui.py
+
 Settings
 --------
 
