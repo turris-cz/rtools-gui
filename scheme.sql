@@ -80,3 +80,15 @@ CREATE TABLE step_results (
 );
 COMMENT ON COLUMN step_results.success IS 'Boolean if step passed successfully.';
 COMMENT ON COLUMN step_results.message IS 'Error or warning message produced by this step';
+
+CREATE TABLE sets (
+	id bigserial PRIMARY KEY,
+	type text NOT NULL,
+	add_time timestamp NOT NULL DEFAULT current_timestamp
+);
+COMMENT ON COLUMN sets.type IS 'Set type/name identifier.';
+
+CREATE TABLE set_boards (
+	board bigint PRIMARY KEY REFERENCES boards (serial),
+	set bigint REFERENCES sets (id)
+);

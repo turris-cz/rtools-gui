@@ -52,6 +52,11 @@ class Board(_GenericTable):
     _INSERT_CORE_INFO = """INSERT INTO core_info (serial, mem_size, key) VALUES
         (%s, %s, %s);"""
     _SELECT_CORE_INFO = "SELECT mem_size, key FROM core_info WHERE serial = %s;"
+    _SELECT_LAST_RUN_RESULT = """SELECT rr.success FROM boards b INNER JOIN
+            runs r ON r.board = b.serial INNER JOIN
+            run_results rr ON rr.id = r.id
+            WHERE b.serial = %s ORDER BY rr.add_time DESC LIMIT 1;
+        """
 
     def __init__(self, db_connection, serial_number):
         super().__init__(db_connection)
@@ -103,6 +108,16 @@ class Board(_GenericTable):
             "mem": int(res[0]),
             "key": res[1]
         }
+
+    def last_run_result(self):
+        """Returns boolean value signaling if latest run for this board was
+        successful or not. It can also return None if there is not run.
+        """
+        self._select(self._SELECT_LAST_RUN_RESULT, (self.serial,))
+        result = self._cur.fetchone()
+        if result is None:
+            return None
+        return result[0]
 
 
 class ProgrammerState(_GenericTable):
@@ -180,3 +195,28 @@ class ProgrammerStep(_GenericTable):
             self._INSERT_RESULT,
             (self.id, bool(success), message))
         self.finished = True
+
+
+class Set(_GenericTable):
+    "Boards set database handler"
+    _INSERT_SET = "INSERT INTO sets (type) VALUES (%s) RETURNING id;"
+    _INSERT_BOARD = "INSERT INTO set_boards (board, set) VALUES (%s, %s);"
+
+    @staticmethod
+    def included(db_connection, serial_number):
+        "Check if given serial number is already included in some set"
+        cursor = db_connection.cursor()
+        cursor.execute(
+            "SELECT 1 FROM set_boards WHERE board = %s;",
+            (serial_number,))
+        return cursor.fetchone() is not None
+
+    def __init__(self, db_connection, set_name):
+        super().__init__(db_connection)
+        self.set_name = set_name
+        self._insert(self._INSERT_SET, (set_name,))
+        self.id = self._cur.fetchone()[0]
+
+    def add_board(self, board):
+        "Add given board to set"
+        self._insert(self._INSERT_BOARD, (board.serial, self.id))
