@@ -6,8 +6,8 @@ from . import db
 class Window:
     "Grouper window"
     GLADE_FILE = os.path.join(os.path.dirname(__file__), "grouper.glade")
-    BOARD_NAME = {
-        "A": "CPU",
+    BOARDS = {
+        "A": { "name": "CPU", "verify": verify_cpu },
         "B": "PCI",
         "C": "Topaz",
         "D": "SFP",

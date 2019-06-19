@@ -1,7 +1,94 @@
-Router:
-    - A
+# Commercial
+Classic:
+    - A: 512
     - B
     - C
-NAS:
-    - A
+    - SDIO
+Pocket Wi-Fi:
+    - A: 512
+    - SDIO
+Power Wi-Fi:
+    - A: 512
+    - B
+    - SDIO
+
+# Campaign only
+Classic 1GB:
+    - A: 1024
+    - B
+    - C
+    - SDIO
+Super Classic:
+    - A: 512
+    - B
+    - E
+    - SDIO
+Super Classic 1GB:
+    - A: 1024
+    - B
+    - E
+    - SDIO
+Wired:
+    - A: 512
+    - C
+Wired 1GB:
+    - A: 1024
+    - C
+Super Wired:
+    - A: 512
+    - E
+Super Wired 1GB:
+    - A: 1024
+    - E
+Pocket Wi-Fi 1GB:
+    - A: 1024
+    - SDIO
+Power Wi-Fi 1GB:
+    - A: 1024
+    - B
+    - SDIO
+Fiber:
+    - A: 512
+    - D
+Fiber 1GB:
+    - A: 1024
+    - D
+Cloud:
+    - A: 1024
     - F
+
+# Standard sets with replaced B to G
+Power Wi-Fi (G):
+    - A: 512
+    - G
+    - SDIO
+Power Wi-Fi 1GB (G):
+    - A: 1024
+    - G
+    - SDIO
+Classic (G):
+    - A: 512
+    - G
+    - C
+    - SDIO
+Classic 1GB (G):
+    - A: 1024
+    - G
+    - C
+    - SDIO
+Super Classic:
+    - A: 512
+    - G
+    - E
+    - SDIO
+Super Classic 1GB:
+    - A: 1024
+    - G
+    - E
+    - SDIO
+
+# Various other sets
+A+E+D Rusko:
+    - A: 512
+    - E
+    - D
