@@ -161,7 +161,7 @@ class Uboot(Base):
         def __init__(self, pathFlashrom, pathImage, spiSpeed):
             super(Uboot.Worker, self).__init__()
             self.flashImageCommand = \
-                "sudo %s -p linux_spi:dev=/dev/spidev0.0,spispeed=%d -w %s" \
+                "sudo %s -p linux_spi:dev=/dev/spidev0.0,spispeed=%d -c MX25L6405D -w %s" \
                 % (pathFlashrom, spiSpeed, pathImage)
             self.md5Image = md5File(pathImage)
 
