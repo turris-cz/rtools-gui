@@ -1,4 +1,5 @@
 import os
+import math
 from gi.repository import Gtk, Gdk
 from . import db
 
@@ -7,7 +8,7 @@ class Window:
     "Grouper window"
     GLADE_FILE = os.path.join(os.path.dirname(__file__), "grouper.glade")
     BOARDS = {
-        "A": "PCU",#{ "name": "CPU", "verify": verify_cpu },
+        "A": "CPU",
         "B": "PCI",
         "C": "Topaz",
         "D": "SFP",
@@ -15,6 +16,7 @@ class Window:
         "F": "USB",
         "G": "PCI-passtrough",
     }
+    FINAL = ["PLASTEV", "KRABICE"]
 
     def __init__(self, conf, db_connection, sets_variants):
         self.db_connection = db_connection
@@ -22,25 +24,21 @@ class Window:
         self.current_set_variant = None
         self.current_set = None
         self._set = dict()
-
         self.current_set_components = list()    
         self.current_mem = None
-        self.loaded_mem = None    
-
+        self.loaded_mem = None
+        self.board_number = 0
         self._builder = Gtk.Builder()
         self._builder.add_from_file(self.GLADE_FILE)
         self._builder.connect_signals(self)
-
-        setsselectors = list()
         columns_count = 2
-        for i in range(columns_count):
-            setsselectors.append(self._obj("SetsSelectorBox{0}".format(str(i))))
+        sets_container = self._obj("GridSets")
         j = 0
-        for set_name in self.sets_variants:
+        for set_name in sorted(self.sets_variants):
             button = Gtk.Button()
             button.set_label(set_name)
             button.connect("clicked", self.gtk_set_select, set_name)
-            setsselectors[j%columns_count].pack_start(button, False, True, 0)
+            sets_container.attach(button, j%columns_count, math.floor(j/columns_count), 1, 1)
             j += 1
         self._obj("Window").show_all()
 
@@ -51,12 +49,16 @@ class Window:
         "Generic set selector button click handler"
         self.current_set_components = list()
         self.loaded_mem = None
+        # Excpected 'A' module is first
+        # because of memory check
         for comp in self.sets_variants[set]:
-            if type(comp) is not type(dict()):
-                self.current_set_components.append(comp)
-            elif type(comp) is type(dict()):
-                board_type, self.loaded_mem = list(comp.items())[0]
-                self.current_set_components.append(board_type)
+            if isinstance(comp, dict):
+                board_type = next(iter(comp))
+                self.loaded_mem = comp[board_type]
+            else:
+                board_type = comp
+            self.current_set_components.append(board_type)
+        self.current_set_components.extend(self.FINAL)
         self._obj("MainStack").set_visible_child(self._obj("SetsGrouper"))
         self._obj("ScancodeEntry").grab_focus()
         self._wipe_set()
@@ -127,46 +129,52 @@ class Window:
             self.gtk_info_text("Tato deska ({}) není v aktuální sestavě!".format(board.type), "error")
             return
         if self.current_set[board.type] is not None:
-            if self.current_set[board.type].serial_number == serial_number:
-                self.gtk_info_text("Tato deska ({}) již byla přidána!".format(board.type), "warning")
-            else:
-                self.gtk_info_text("Jiná deska tohoto typu ({}) již byla přidána!".format(board.type), "error")
-            return
+            if self.board_number < len(self.current_set_components) - len(self.FINAL):
+                if self.current_set[board.type].serial_number == serial_number:
+                    self.gtk_info_text("Tato deska ({}) již byla přidána!".format(board.type), "warning")
+                    return
         if db.Set.included(self.db_connection, serial_number):
             self.gtk_info_text("Tato deska ({}) je již součástí jiné sestavy!".format(board.type), "error")
             return
         if not board.last_run_result():
             self.gtk_info_text("Poslední zaznamenaný test pro tuto desku neprošel!", "error")
             return
-        mem_info_text = ""
+        if board.type != self.current_set_components[self.board_number] and self.current_set_components[self.board_number] not in self.FINAL:
+            self.gtk_info_text("Deska {0}: špatné pořadí očekávána {1}".format(board.type, self.current_set_components[self.board_number]))
+            return
+        # memory check on first board in set
         if board.type == self.current_set_components[0]:
-            try:
-                self.current_mem = board.core_info()['mem']
-            except:
+            self.current_mem = board.core_info().get('mem')
+            if self.current_mem is None:
                 self.gtk_info_text("Tato deska ({0}) nemá záznam o paměti".format(board.type))
                 return
             if not self.current_mem == self.loaded_mem:
                 self.gtk_info_text("Paměť desky ({0}) neodpovídá předpisům".format(board.type))
                 return
-            else:
-                mem_info_text = "Paměť OK"
-        self.current_set[board.type] = board
-        self.gtk_info_text("Deska {} byla přidána.".format(board.type))
-        self.gtk_set_update(board.type)
+        if self.current_set_components[self.board_number] in self.FINAL:
+            self.current_set[self.current_set_components[self.board_number]] = 1
+            self.gtk_info_text("{0} potvrzeno".format(self.current_set_components[self.board_number]))
+            self.gtk_set_update(self.current_set_components[self.board_number])
+        else:
+            self.current_set[board.type] = board
+            self.gtk_info_text("Deska ({}) byla přidána.".format(board.type))
+            self.gtk_set_update(board.type)
         # Check if this is last one
-        for _, value in self.current_set.items():
-            if value is None:
-                return
+        self.board_number += 1
+        if self.board_number < len(self.current_set_components):
+            return
         # Add it to database
         dbset = db.Set(self.db_connection, self.current_set_variant)
-        for _, board in self.current_set.items():
-            dbset.add_board(board)
+        for types, board in self.current_set.items():
+            if types not in self.FINAL:
+                dbset.add_board(board)
         # Continue with full set
-        self.gtk_info_text("Sestava sestavena. {0}".format(mem_info_text), "ok")
+        self.gtk_info_text("Sestava sestavena.", "ok")
+        self.board_number = 0
         # Reset current set
         for board in self.current_set:
             self.current_set[board] = None
             self.gtk_set_update(board)
-
+            
     def gtks_on_delete_event(self, *args):
         Gtk.main_quit(*args)
