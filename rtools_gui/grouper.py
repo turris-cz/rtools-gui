@@ -7,7 +7,7 @@ class Window:
     "Grouper window"
     GLADE_FILE = os.path.join(os.path.dirname(__file__), "grouper.glade")
     BOARDS = {
-        "A": { "name": "CPU", "verify": verify_cpu },
+        "A": "PCU",#{ "name": "CPU", "verify": verify_cpu },
         "B": "PCI",
         "C": "Topaz",
         "D": "SFP",
@@ -23,17 +23,25 @@ class Window:
         self.current_set = None
         self._set = dict()
 
+        self.current_set_components = list()    
+        self.current_mem = None
+        self.loaded_mem = None    
+
         self._builder = Gtk.Builder()
         self._builder.add_from_file(self.GLADE_FILE)
         self._builder.connect_signals(self)
 
-        setselector = self._obj("SetsSelectorBox")
+        setsselectors = list()
+        columns_count = 2
+        for i in range(columns_count):
+            setsselectors.append(self._obj("SetsSelectorBox{0}".format(str(i))))
+        j = 0
         for set_name in self.sets_variants:
             button = Gtk.Button()
             button.set_label(set_name)
             button.connect("clicked", self.gtk_set_select, set_name)
-            setselector.pack_start(button, False, True, 0)
-
+            setsselectors[j%columns_count].pack_start(button, False, True, 0)
+            j += 1
         self._obj("Window").show_all()
 
     def _obj(self, name):
@@ -41,12 +49,20 @@ class Window:
 
     def gtk_set_select(self, _, set):
         "Generic set selector button click handler"
+        self.current_set_components = list()
+        self.loaded_mem = None
+        for comp in self.sets_variants[set]:
+            if type(comp) is not type(dict()):
+                self.current_set_components.append(comp)
+            elif type(comp) is type(dict()):
+                board_type, self.loaded_mem = list(comp.items())[0]
+                self.current_set_components.append(board_type)
         self._obj("MainStack").set_visible_child(self._obj("SetsGrouper"))
         self._obj("ScancodeEntry").grab_focus()
         self._wipe_set()
         self.current_set_variant = set
-        self.current_set = {board: None for board in self.sets_variants[set]}
-        for board in self.sets_variants[set]:
+        self.current_set = {board: None for board in self.current_set_components}
+        for board in self.current_set_components:
             self._new_set_board(board)
         self._obj("SetGrid").show_all()
         self.gtk_info_text("Začněte naskenováním první desky")
@@ -54,7 +70,7 @@ class Window:
     def _new_set_board(self, board):
         icon = Gtk.Image()
         label = Gtk.Label()
-        label.set_text("{} ({})".format(board, self.BOARD_NAME.get(board, "unknown")))
+        label.set_text("{} ({})".format(board, self.BOARDS.get(board, "unknown")))
         label.set_halign(Gtk.Align.START)
         grid = self._obj("SetGrid")
         row = len(self._set)
@@ -114,7 +130,7 @@ class Window:
             if self.current_set[board.type].serial_number == serial_number:
                 self.gtk_info_text("Tato deska ({}) již byla přidána!".format(board.type), "warning")
             else:
-                self.gtk_info_text("Jiná deska tohoto typy ({}) již byla přidána!".format(board.type), "error")
+                self.gtk_info_text("Jiná deska tohoto typu ({}) již byla přidána!".format(board.type), "error")
             return
         if db.Set.included(self.db_connection, serial_number):
             self.gtk_info_text("Tato deska ({}) je již součástí jiné sestavy!".format(board.type), "error")
@@ -122,6 +138,18 @@ class Window:
         if not board.last_run_result():
             self.gtk_info_text("Poslední zaznamenaný test pro tuto desku neprošel!", "error")
             return
+        mem_info_text = ""
+        if board.type == self.current_set_components[0]:
+            try:
+                self.current_mem = board.core_info()['mem']
+            except:
+                self.gtk_info_text("Tato deska ({0}) nemá záznam o paměti".format(board.type))
+                return
+            if not self.current_mem == self.loaded_mem:
+                self.gtk_info_text("Paměť desky ({0}) neodpovídá předpisům".format(board.type))
+                return
+            else:
+                mem_info_text = "Paměť OK"
         self.current_set[board.type] = board
         self.gtk_info_text("Deska {} byla přidána.".format(board.type))
         self.gtk_set_update(board.type)
@@ -134,7 +162,7 @@ class Window:
         for _, board in self.current_set.items():
             dbset.add_board(board)
         # Continue with full set
-        self.gtk_info_text("Sestava sestavena.", "ok")
+        self.gtk_info_text("Sestava sestavena. {0}".format(mem_info_text), "ok")
         # Reset current set
         for board in self.current_set:
             self.current_set[board] = None
