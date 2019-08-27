@@ -40,7 +40,9 @@ class Window:
             button.connect("clicked", self.gtk_set_select, set_name)
             sets_container.attach(button, j%columns_count, math.floor(j/columns_count), 1, 1)
             j += 1
-        self._obj("Window").show_all()
+        window = self._obj("Window")
+        window.show_all()
+        window.fullscreen()
 
     def _obj(self, name):
         return self._builder.get_object(name)
