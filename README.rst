@@ -11,6 +11,7 @@ Requirements
   - `python3-pexpect`
   - `python3-psycopg2`
   - `python3-libftdi1`
+  - `python3-yaml`
   - `python3-gi`
   - `python3-gi-cairo`
   - `gir1.2-gtk-3.0`
