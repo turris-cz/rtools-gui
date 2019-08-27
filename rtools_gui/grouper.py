@@ -34,7 +34,7 @@ class Window:
         columns_count = 2
         sets_container = self._obj("GridSets")
         j = 0
-        for set_name in sorted(self.sets_variants):
+        for set_name in self.sets_variants:
             button = Gtk.Button()
             button.set_label(set_name)
             button.connect("clicked", self.gtk_set_select, set_name)
