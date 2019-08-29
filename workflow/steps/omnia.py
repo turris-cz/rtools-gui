@@ -160,9 +160,12 @@ class Uboot(Base):
 
         def __init__(self, pathFlashrom, pathImage, spiSpeed):
             super(Uboot.Worker, self).__init__()
-            self.flashImageCommand = \
-                "sudo %s -p linux_spi:dev=/dev/spidev0.0,spispeed=%d -c MX25L6405D -w %s" \
-                % (pathFlashrom, spiSpeed, pathImage)
+            self.flashImageCommands = \
+                ["sudo %s -p linux_spi:dev=/dev/spidev0.0,spispeed=%d -c MX25L6405D -w %s" \
+                % (pathFlashrom, spiSpeed, pathImage), \
+                "sudo %s -p linux_spi:dev=/dev/spidev0.0,spispeed=%d -w %s" \
+                % (pathFlashrom, spiSpeed, pathImage)]
+
             self.md5Image = md5File(pathImage)
 
         @resetallOnException
@@ -193,18 +196,21 @@ class Uboot(Base):
             self.progress.emit(50)
 
             # Flash uboot image
-            expLocal = self.expectStartLocalCommand(self.flashImageCommand, 5 * 60)  # 5 minutes
-            while True:
-                res = self.expect(expLocal, [
-                    pexpect.EOF,
-                    r'Calibrating delay loop...',
-                    r'Reading old flash chip contents...',
-                    r'Erasing and writing flash chip...',
-                    r'Verifying flash...',
-                ])
-                if res == 0:
+            for c in self.flashImageCommands:
+                expLocal = self.expectStartLocalCommand(c, 5 * 60)  # 5 minutes
+                while True:
+                    res = self.expect(expLocal, [
+                        pexpect.EOF,
+                        r'Calibrating delay loop...',
+                        r'Reading old flash chip contents...',
+                        r'Erasing and writing flash chip...',
+                        r'Verifying flash...',
+                    ])
+                    if res == 0:
+                        break
+                    self.progress.emit(50 + 10 * res)
+                if not expLocal.isalive() and expLocal.exitstatus == 0:
                     break
-                self.progress.emit(50 + 10 * res)
             self.testExitStatus(expLocal)
             self.progress.emit(95)
 
