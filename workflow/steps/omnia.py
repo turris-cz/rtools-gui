@@ -507,17 +507,14 @@ class UsbFlashClock(Base):
             self.progress.emit(1)
 
             # perform commands
-            expRouter.sendline("setenv rescue 3")
-            self.progress.emit(10)
-            time.sleep(0.1)
-            expRouter.sendline("run rescueboot")
+            expRouter.sendline("setenv bootargs \"earlyprintk console=ttyS0,115200 rescue_mode=3\"; sf probe; sf read 0x1000000 0x100000 0x700000; lzmadec 0x1000000 0x1700000; bootm 0x1700000")
             self.progress.emit(20)
             time.sleep(0.1)
 
-            self.expect(expRouter, 'Mode: Reflash...', timeout=150)
+            self.expect(expRouter, 'Running USB flash', timeout=150)
             self.progress.emit(30)
 
-            self.expect(expRouter, 'Reflash succeeded.', timeout=150)
+            self.expect(expRouter, 'Everything done, rebooting!', timeout=150)
             self.progress.emit(50)
 
             self.expect(expRouter, 'Router Turris successfully started.', timeout=150)
