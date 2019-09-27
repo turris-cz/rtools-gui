@@ -72,7 +72,7 @@ class EthTest(BaseTest):
             self.progress.emit(70)
 
             # ping test
-            exp.sendline("ping 192.168.%d.1 -c 5" % self.subnet)
+            exp.sendline("ping -c 5 192.168.%d.1" % self.subnet)
             exp.sendline('echo "###$?###"')
             self.expect(exp, r'###([0-9]+)###')
             retval = exp.match.group(1)
