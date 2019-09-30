@@ -231,9 +231,9 @@ class SerialNumberTest(BaseTest):
                 exp.terminate(force=True)
                 raise RunFailed("Serial number doesn't match '%s' != '%s'" % (self.serial, serial))
 
-            # try storing the firmware if the serial matches
-            exp.sendline('cat /etc/git-version')
-            pattern = r'[a-fA-F0-9]{40}'
+            # try to store TurrisOS release
+            exp.sendline("sh -c '. /etc/openwrt_release && echo \"$DISTRIB_DESCRIPTION\"'")
+            pattern = r'TurrisOS'
             self.expect(exp, pattern)
             firmware = exp.match.group()
             self.progress.emit(70)
