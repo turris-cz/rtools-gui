@@ -745,6 +745,13 @@ class MSATATest(BaseTest):
 
 
 class DeviceTreeLink(BaseTest):
+    """
+    This test is used to create symbolic links for proper device tree
+    definition: sfp or phy (ethernet)
+    This link is ignored by recent U-Boot (2019), which handles proper device
+    tree automatically, but it is needed for old U-Boot (2015) which can not
+    detect SFP otherwise
+    """
     _name = "LINK DEVICE TREE"
 
     def __init__(self, variant):
