@@ -744,40 +744,6 @@ class MSATATest(BaseTest):
             return True
 
 
-class DeviceTreeLink(BaseTest):
-    """
-    This test is used to create symbolic links for proper device tree
-    definition: sfp or phy (ethernet)
-    This link is ignored by recent U-Boot (2019), which handles proper device
-    tree automatically, but it is needed for old U-Boot (2015) which can not
-    detect SFP otherwise
-    """
-    _name = "LINK DEVICE TREE"
-
-    def __init__(self, variant):
-        self.variant = variant
-
-    def createWorker(self):
-        return self.Worker(self.variant)
-
-    class Worker(BaseWorker):
-        def __init__(self, variant):
-            super(DeviceTreeLink.Worker, self).__init__()
-            self.variant = variant
-
-        def perform(self):
-            exp = spawnPexpectSerialConsole(settings.SERIAL_CONSOLE['router']['device'])
-            self.progress.emit(1)
-            self.expectSystemConsole(exp)
-            self.progress.emit(20)
-            self.expectCommand(exp, "ln -sf armada-385-turris-omnia-{}.dtb /boot/dtb".format(self.variant))
-            self.progress.emit(90)
-            self.expectCommand(exp, "sync" )
-            self.progress.emit(100)
-
-            return True
-
-
 TESTS = (
     Booted(),
     SerialConsoleTest(),
@@ -799,7 +765,6 @@ TESTS = (
     LedTest("green", u"zelená"),
     LedTest("blue", u"modrá"),
     ResetLed(),
-    DeviceTreeLink("sfp"),
     Booted2(),
     USBTest("3.0-1", "3-1", USBTest.USB3),
     USBTest("3.0-2", "5-1", USBTest.USB3),
@@ -808,7 +773,6 @@ TESTS = (
     MiniPCIeTest("2-02", 0x02),
     MiniPCIeTest("2-03", 0x03),
     EthSimpleTest("eth2", "WAN (SFP)", 168),
-    DeviceTreeLink("phy"),
     EepromTest(),
     RegionTest(),
     SerialNumberTest(),
