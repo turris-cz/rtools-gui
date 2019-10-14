@@ -764,6 +764,8 @@ class DeviceTreeLink(BaseTest):
             self.expectSystemConsole(exp)
             self.progress.emit(20)
             self.expectCommand(exp, "ln -sf armada-385-turris-omnia-{}.dtb /boot/dtb".format(self.variant))
+            self.progress.emit(90)
+            self.expectCommand(exp, "sync" )
             self.progress.emit(100)
 
             return True
