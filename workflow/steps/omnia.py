@@ -495,7 +495,7 @@ class UsbFlashClock(Base):
             # unfortunatelly can't wait for "Hit any key to stop autoboot" msg (too small delay)
             # so a several new line commands will be sent there
 
-            tries = 10  # 10s shall be enough
+            tries = 20  # 20s shall be enough
             while True:
                 time.sleep(1)
                 expRouter.sendline('\n')
@@ -511,13 +511,29 @@ class UsbFlashClock(Base):
             self.progress.emit(20)
             time.sleep(0.1)
 
-            self.expect(expRouter, 'Running USB flash', timeout=150)
+            self.expect(expRouter, 'Running USB flash', timeout=100)
             self.progress.emit(30)
 
             self.expect(expRouter, 'Everything done, rebooting!', timeout=150)
             self.progress.emit(50)
 
-            self.expect(expRouter, 'Router Turris successfully started.', timeout=150)
+            # get into uboot shell
+            tries = 20  # 10s shall be enough
+            while True:
+                time.sleep(1)
+                expRouter.sendline('\n')
+                res = self.expect(expRouter, [r'.*[\n\r]+=>.*', r'.+'] if tries > 0 else r'=>')
+                if res == 0:
+                    break
+                else:
+                    tries -= 1
+
+            # perform commands
+            expRouter.sendline("env default -f -a; saveenv; usb start; sf probe; if load usb 0:1 $kernel_addr_r /uboot-orig; then sf update $kernel_addr_r 0 $filesize; boot; fi")
+            self.progress.emit(55)
+            time.sleep(0.1)
+
+            self.expect(expRouter, 'Router Turris successfully started.', timeout=100)
             self.progress.emit(60)
 
             self.expectSystemConsole(expRouter)
