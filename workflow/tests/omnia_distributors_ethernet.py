@@ -33,11 +33,11 @@ class EthSfpTest(EthTest):
 
 TESTS = (
     BootedEth(),
-    EthTest("eth1", "ethTEST", "WAN", 167),
+    EthTest("eth2", "ethTEST", "WAN", 167),
     EthTest("br-lan", "ethTEST", "LAN4", 166),
     EthTest("br-lan", "ethTEST", "LAN3", 165),
     EthTest("br-lan", "ethTEST", "LAN2", 164),
     EthTest("br-lan", "ethTEST", "LAN1", 163),
     EthTest("br-lan", "ethTEST", "LAN0", 162),
-    EthSfpTest("eth1", "ethTEST", "WAN (SFP)", 161),
+    EthTest("eth2", "ethTEST", "WAN (SFP)", 161),
 )

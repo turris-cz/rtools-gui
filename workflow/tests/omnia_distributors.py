@@ -141,7 +141,7 @@ TESTS = (
     SerialNumberTest(),
     EepromTest(),
     RegionTest(),
-    EthTest("eth1", "ethTEST", "WAN", 167),
+    EthTest("eth2", "ethTEST", "WAN", 167),
     EthTest("br-lan", "ethTEST", "LAN4", 166),
     EthTest("br-lan", "ethTEST", "LAN3", 165),
     EthTest("br-lan", "ethTEST", "LAN2", 164),
@@ -154,6 +154,6 @@ TESTS = (
     DiskTest(3, "2xUSB3+MSATA"),
     MiniPCIeTest("2-02", 0x02),
     MiniPCIeTest("2-03", 0x03),
-    EthTest("eth1", "ethTEST", "WAN (SFP)", 161),
+    EthTest("eth2", "ethTEST", "WAN (SFP)", 161),
     RamTest(),
 )
