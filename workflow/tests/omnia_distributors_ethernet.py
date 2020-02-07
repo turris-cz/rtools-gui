@@ -19,17 +19,23 @@ class BootedEth(Booted):
         """
 
 
-class EthSfpTest(EthTest):
+class BootedSFP(Booted):
+    _name = "BOOTED 2"
+
     @property
     def instructions(self):
         return """
-            <h3>%(test_name)s</h3>
+            <h3>Druhý krok</h3>
             <p>Před tím, než budete pokračovat:</p>
             <ul>
+                <li>Vytáhněte napájení</li>
+                <li>Odpojte Ethernet kabel(y)</li>
                 <li>Připojte SFP modul do routeru.</li>
                 <li>Připojte ethernetový kabel do SFP modulu.</li>
+                <li>Připojte napájení</li>
             </ul>
-        """ % dict(test_name=self._name)
+        """
+
 
 TESTS = (
     BootedEth(),
@@ -39,5 +45,6 @@ TESTS = (
     EthTest("br-lan", "ethTEST", "LAN2", 164),
     EthTest("br-lan", "ethTEST", "LAN1", 163),
     EthTest("br-lan", "ethTEST", "LAN0", 162),
+    BootedSFP(),
     EthTest("eth2", "ethTEST", "WAN (SFP)", 161),
 )
