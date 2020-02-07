@@ -1,7 +1,7 @@
 # -*- coding: utf8 -*-
 
 from workflow.tests.omnia import Booted
-from workflow.tests.omnia_distributors import EthTest
+from workflow.tests.omnia_distributors import EthTest, DeviceTreeLink
 
 
 class BootedEth(Booted):
@@ -45,6 +45,8 @@ TESTS = (
     EthTest("br-lan", "ethTEST", "LAN2", 164),
     EthTest("br-lan", "ethTEST", "LAN1", 163),
     EthTest("br-lan", "ethTEST", "LAN0", 162),
+    DeviceTreeLink("sfp"),
     BootedSFP(),
     EthTest("eth2", "ethTEST", "WAN (SFP)", 161),
+    DeviceTreeLink("phy"),
 )
