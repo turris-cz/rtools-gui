@@ -15,8 +15,8 @@ class EnterUboot(Base):
         return """
             <h3>Aktualizace systému</h3>
             <ul>
-                <li>Ujistěte se, že do usb portů není zapojeno žándé zařízení.</li>
-                <li>Vložte flash disk se záchraným systémem do routeru.</li>
+                <li>Ujistěte se, že do USB portů není zapojeno žádné zařízení.</li>
+                <li>Vložte flash disk se záchranným systémem do routeru.</li>
                 <li>Připojte napájení k routeru.</li>
                 <li>Klikněte na tlačítko OK.</li>
                 <li>Stiskněte tlačítko reset na routeru.</li>
