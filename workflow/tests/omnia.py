@@ -660,8 +660,8 @@ class ResetLed(BaseTest):
 
 
 class USBTest(BaseTest):
-    USB2 = "2.00"
-    USB3 = "3.00"
+    USB2_PREFIX = "2."
+    USB3_PREFIX = "3."
 
     _name = 'USB'
 
@@ -703,9 +703,9 @@ class USBTest(BaseTest):
 
             self.progress.emit(100)
 
-            if not usb_version.group(1) == self.usb_version:
+            if not usb_version.group(1).startswith(self.usb_version):
                 raise RunFailed(
-                    "USB version mismatched (%s!=%s)" % (usb_version.group(1), self.usb_version))
+                    "USB version mismatched (%s !~ %s.XX)" % (usb_version.group(1), self.usb_version))
 
             return True
 
@@ -748,8 +748,8 @@ TESTS = (
     Booted(),
     SerialConsoleTest(),
     GpioTest(),
-    USBTest("2.0-1", "2-1", USBTest.USB2),
-    USBTest("2.0-2", "4-1", USBTest.USB2),
+    USBTest("2.0-1", "2-1", USBTest.USB2_PREFIX),
+    USBTest("2.0-2", "4-1", USBTest.USB2_PREFIX),
     DiskTest(2, "2x"),
     MiniPCIeTest("1-01", 0x01),
     MiniPCIeTest("1-02", 0x02),
@@ -766,8 +766,8 @@ TESTS = (
     LedTest("blue", u"modrá"),
     ResetLed(),
     Booted2(),
-    USBTest("3.0-1", "3-1", USBTest.USB3),
-    USBTest("3.0-2", "5-1", USBTest.USB3),
+    USBTest("3.0-1", "3-1", USBTest.USB3_PREFIX),
+    USBTest("3.0-2", "5-1", USBTest.USB3_PREFIX),
     MSATATest(),
     DiskTest(3, "3x"),
     MiniPCIeTest("2-02", 0x02),

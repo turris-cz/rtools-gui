@@ -43,9 +43,9 @@ class Usb3Test(DiskTest):
 TESTS = (
     BootedUsb(),
     Usb2Test(2, "2xUSB2"),
-    USBTest("2.0-1", "2-1", USBTest.USB2),
-    USBTest("2.0-2", "4-1", USBTest.USB2),
+    USBTest("2.0-1", "2-1", USBTest.USB2_PREFIX),
+    USBTest("2.0-2", "4-1", USBTest.USB2_PREFIX),
     Usb3Test(2, "2xUSB3"),
-    USBTest("3.0-1", "3-1", USBTest.USB3),
-    USBTest("3.0-2", "5-1", USBTest.USB3),
+    USBTest("3.0-1", "3-1", USBTest.USB3_PREFIX),
+    USBTest("3.0-2", "5-1", USBTest.USB3_PREFIX),
 )
