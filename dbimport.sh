@@ -40,11 +40,14 @@ while [ $# -gt 0 ]; do
 			shift
 			break
 			;;
+		-*)
+			fail "Unknown option: $1"
+			;;
 		*)
 			if [ -z "$input" ]; then
 				input="$1"
 			else
-				fail "Unknown option: $1"
+				fail "Unexpected argument: $1"
 			fi
 			;;
 	esac
