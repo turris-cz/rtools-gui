@@ -43,8 +43,6 @@ while [ $# -gt 0 ]; do
 		*)
 			if [ -z "$input" ]; then
 				input="$1"
-			elif [ -z "$output" ]; then
-				output="$1"
 			else
 				fail "Unknown option: $1"
 			fi
