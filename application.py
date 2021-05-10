@@ -1,5 +1,6 @@
 import importlib
 import logging
+import logging.handlers
 import os
 import sys
 import errno
@@ -42,21 +43,29 @@ class Application(QApplication):
         settings_module = os.environ.get('RTOOLS_SETTINGS', 'settings.omnia')
         settings = importlib.import_module(settings_module)
 
-        logging.root.setLevel(logging.INFO)
-        logging.FileHandler(settings.LOG_APP_FILE)
-        STDOUTFORMAT = '%(levelname)s %(message)s'
-        FILEFORMAT = '%(asctime)s - %(levelname)s - [%(name)s] %(message)s'
-        fileFormatter = logging.Formatter(FILEFORMAT)
-        fileHandler = logging.FileHandler(settings.LOG_APP_FILE)
-        fileHandler.setFormatter(fileFormatter)
+        syslogHandler = logging.handlers.SysLogHandler(
+            address="/dev/log",
+            facility=logging.handlers.SysLogHandler.LOG_LOCAL0,
+        )
+        syslogFormatter = logging.Formatter(
+            "rtools-gui: %(levelname)s [%(name)s] %(message)s"
+        )
+        syslogHandler.setFormatter(syslogFormatter)
+
         stdoutHandler = logging.StreamHandler(sys.stdout)
-        stdoutFormatter = logging.Formatter(STDOUTFORMAT)
+        stdoutFormatter = logging.Formatter(
+            "%(levelname)s %(message)s"
+        )
         stdoutHandler.setFormatter(stdoutFormatter)
+
         self.loggerMain = logging.getLogger("MAIN")
-        self.loggerMain.addHandler(fileHandler)
+        self.loggerMain.addHandler(syslogHandler)
         self.loggerMain.addHandler(stdoutHandler)
+        self.loggerMain.setLevel(logging.INFO)
+
         self.loggerDb = logging.getLogger("DB")
-        self.loggerDb.addHandler(fileHandler)
+        self.loggerDb.addHandler(syslogHandler)
+        self.loggerDb.setLevel(logging.INFO)
 
         # This line will enable to handle exceptions outside of Qt event loop
         sys.excepthook = _printException
@@ -85,13 +94,6 @@ class Application(QApplication):
         self.run_offline = False
 
         # init logging
-        try:
-            os.makedirs(os.path.dirname(settings.LOG_APP_FILE))
-        except OSError as e:
-            # Dir already exists continue
-            if e.errno not in [errno.EEXIST]:
-                raise e
-
         try:
             os.makedirs(os.path.dirname(settings.LOG_ROUTERS_DIR))
         except OSError as e:

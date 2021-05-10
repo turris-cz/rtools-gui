@@ -65,9 +65,6 @@ _________
 ``SERIAL_CONSOLE``
   Specifies parameters of a serial console devices which are connected during the steps/tests.
 
-``LOG_APP_FILE = '/var/log/programmer/application.log'``
-  Path to the application log.
-
 ``LOG_ROUTERS_DIR = '/var/log/programmer/runs/'``
   Directory where outputs of individual steps/tests batches should be placed.
 

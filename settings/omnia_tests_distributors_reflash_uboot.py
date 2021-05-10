@@ -23,6 +23,4 @@ REFLASH = {
 }
 
 
-LOG_APP_FILE = '/var/log/programmer/application-reflash-uboot.log'
-
 CUSTOM_INIT_TITLE = u'Aktualizace bootloaderu'

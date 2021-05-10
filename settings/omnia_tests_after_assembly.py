@@ -9,5 +9,3 @@ WORKFLOW_TESTS_MODULE = 'workflow.tests.omnia_after_assembly'
 WORKFLOW_TESTS_WORKSTATION_MODULE = 'workflow.tests.omnia_after_assembly'
 
 MODE_NAME = "PO SESTAVENÍ"
-
-LOG_APP_FILE = '/var/log/programmer/application-after_assembly.log'

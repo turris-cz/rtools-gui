@@ -60,7 +60,6 @@ SPI_SPEED = 5000
 ROUTER_RAMSIZE = 1  # only `1` or `2` (in GB)
 REGION = '**'  # ** or iso country code (e.g. us)
 
-LOG_APP_FILE = '/var/log/programmer/application.log'
 LOG_ROUTERS_DIR = '/var/log/programmer/runs/'
 
 import os
