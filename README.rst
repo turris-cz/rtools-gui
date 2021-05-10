@@ -75,10 +75,6 @@ _________
   If a connection to db fails during the steps/tests the failed db queries are placed here.
   This file is read after the application starts and the queries are written into db.
 
-``BACKUP_SCRIPT = 'backup_log.sh'``
-  Path to a backup script. This script is use do backup application logs well as individual
-  tests/steps outputs.
-
 
 Querying database
 -----------------

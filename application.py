@@ -9,7 +9,6 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtSql import QSqlDatabase
 
 from custom_exceptions import IncorrectSerialNumber
-from utils import backupAppLog
 
 
 # custom qApp
@@ -121,8 +120,6 @@ class Application(QApplication):
 
         # current router
         self.router = None
-
-        backupAppLog()
 
     def useRouter(self, serialNumber):
 

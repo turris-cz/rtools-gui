@@ -7,7 +7,6 @@ from PyQt5 import QtCore
 from PyQt5.QtNetwork import QLocalSocket
 
 from application import qApp, settings
-from utils import backupFile, backupAppLog
 
 
 class Runner(QtCore.QObject):
@@ -112,8 +111,6 @@ class Runner(QtCore.QObject):
         # Force kill the processes
         [e.kill() for e in self.pipeProcesses]
         self.running = False
-        backupFile(self.logFile)
-        backupAppLog()
 
     @QtCore.pyqtSlot(bool)
     def runDone(self, result):

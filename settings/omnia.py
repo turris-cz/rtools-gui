@@ -66,8 +66,6 @@ LOG_ROUTERS_DIR = '/var/log/programmer/runs/'
 import os
 DB_RECOVER_QUERY_FILE = os.path.expanduser('~/recover-queries.json')
 
-BACKUP_SCRIPT = 'backup_log.sh'
-
 WORKSTATION_TESTING_SERIALS = [
     # Results of these serials won't be stored into the db
 ]

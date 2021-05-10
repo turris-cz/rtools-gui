@@ -36,30 +36,6 @@ def serialNumberNormalize(sn):
     return "%d" % int(sn)
 
 
-def backupFile(path):
-    from application import settings, qApp
-    from PyQt5.QtCore import QProcess
-    # start detached process
-    res, pid = QProcess.startDetached(settings.BACKUP_SCRIPT, [path], None)
-    if res:
-        qApp.loggerMain.info(
-            "Backup process started. '%s %s' (pid %d)" % (
-                settings.BACKUP_SCRIPT, path, pid
-            )
-        )
-    else:
-        qApp.loggerMain.error(
-            "Failed to start backup process! '%s %s'" % (
-                settings.BACKUP_SCRIPT, path
-            )
-        )
-
-
-def backupAppLog():
-    from application import settings
-    backupFile(settings.LOG_APP_FILE)
-
-
 class PrefixFile(file):
     def __init__(self, *args, **kwargs):
         self.prefix = kwargs.get('prefix', "")
