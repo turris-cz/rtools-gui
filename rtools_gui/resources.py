@@ -1,4 +1,5 @@
 import os
+import pathlib
 import sys
 import stat
 import hashlib
@@ -9,7 +10,9 @@ import pexpect
 
 DIR_PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/secure-firmware")
+UNTRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-firmware")
 UBOOT = os.path.join(DIR_PREFIX, "firmware/u-boot")
+UBOOT_RIPE = os.path.join(DIR_PREFIX, "firmware/u-boot-ripe")
 RESCUE = os.path.join(DIR_PREFIX, "firmware/image.fit.lzma")
 DTB = os.path.join(DIR_PREFIX, "firmware/dtb")
 MOX_IMAGER_DIR = os.path.join(DIR_PREFIX, "mox-imager")
@@ -39,7 +42,9 @@ class Resources:
 
     def __init__(self, conf):
         self.__secure_firmware, self.__secure_firmware_hash = _load_file(SECURE_FIRMWARE)
+        self.__untrusted_secure_firmware, self.__untrusted_secure_firmware_hash = _load_file(UNTRUSTED_SECURE_FIRMWARE)
         self.__uboot, self.__uboot_hash = _load_file(UBOOT)
+        self.__uboot_ripe, self.__uboot_ripe_hash = _load_file(UBOOT_RIPE)
         self.__rescue, self.__rescue_hash = _load_file(RESCUE)
         self.__dtb, self.__dtb_hash = _load_file(DTB)
         self.__hostname = socket.gethostname()
@@ -47,14 +52,18 @@ class Resources:
         self.__mox_imager_git = _git_head_hash(MOX_IMAGER_DIR)
 
         # Mox imager
-        # TODO exception when there is no executable
-        with open(MOX_IMAGER, 'rb') as file:
+        imager_path = pathlib.Path(MOX_IMAGER)
+        if not imager_path.exists():
+            raise RuntimeError(f"No mox imager binary found in {imager_path}")
+
+        with imager_path.open('rb') as file:
             self.__mox_imager_hash = hashlib.sha256(file.read()).hexdigest()
         self.__mox_imager_exec = os.path.join(
-            conf.tmp_dir, 'rtools-mox-imager-' + self.__mox_imager_hash)
-        copyfile(MOX_IMAGER, self.__mox_imager_exec)
-        os.chmod(self.__mox_imager_exec,
-                 os.stat(self.__mox_imager_exec).st_mode | stat.S_IEXEC)
+            conf.tmp_dir, 'rtools-mox-imager-' + self.mox_imager_hash)
+        copyfile(MOX_IMAGER, self.mox_imager_exec)
+        os.chmod(self.mox_imager_exec,
+                 os.stat(self.mox_imager_exec).st_mode | stat.S_IEXEC)
+
         # Hash for moximager
         with pexpect.spawn(self.mox_imager_exec, ['--get-otp-hash', SECURE_FIRMWARE]) as pexp:
             pexp.expect(['Secure firmware OTP hash: '])
@@ -72,6 +81,16 @@ class Resources:
         return self.__secure_firmware_hash
 
     @property
+    def untrusted_secure_firmware(self):
+        "Bytes of secure firmware"
+        return self.__untrusted_secure_firmware
+
+    @property
+    def untrusted_secure_firmware_hash(self):
+        "Sha256 hash of secure firmware"
+        return self.__untrusted_secure_firmware_hash
+
+    @property
     def uboot(self):
         "Bytes of u-boot image"
         return self.__uboot
@@ -80,6 +99,16 @@ class Resources:
     def uboot_hash(self):
         "Sha256 hash of u-boot image"
         return self.__uboot_hash
+
+    @property
+    def uboot_ripe(self):
+        "Bytes of u-boot-ripe image"
+        return self.__uboot_ripe
+
+    @property
+    def uboot_ripe_hash(self):
+        "Sha256 hash of u-boot image"
+        return self.__uboot_ripe_hash
 
     @property
     def rescue(self):

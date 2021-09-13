@@ -8,8 +8,13 @@ from .d import DSTEPS
 from .e import ESTEPS
 from .f import FSTEPS
 from .g import GSTEPS
+from .ripe import RSTEPS
 
 _BOARD_MAP = {
+    0x00: {  # TODO more reasonable CODE
+        "name": "Ripe Atlas",
+        "steps": RSTEPS,
+    },
     0x30: {
         "name": "Core (A)",
         "steps": ASTEPS,

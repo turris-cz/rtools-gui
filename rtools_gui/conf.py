@@ -1,6 +1,7 @@
 import os
 import argparse
 import configparser
+import ipaddress
 from . import report
 
 
@@ -17,6 +18,8 @@ class Configs:
         # Parser arguments
         prs = argparse.ArgumentParser(description="Router programming tool - GUI")
         prs.add_argument('--no-otp', action='store_true', help="Skip OTP write")
+        prs.add_argument('--untrusted-firmware', action='store_true',
+                         help="Use untrusted firmware instead of trusted one (in case of board without written OTP).")
         prs.add_argument('--config', '-c', action='store',
                          help="Use given config instead of default one.")
         prs.add_argument('--tmpdir', action='store',
@@ -54,7 +57,12 @@ class Configs:
     @property
     def no_otp(self):
         """If we should write OTP or if we should skip it"""
-        return self.args.no_otp or self._fconf_bool('rtools', 'no_opt')
+        return self.args.no_otp or self._fconf_bool('rtools', 'no_otp')
+
+    @property
+    def use_untrusted(self):
+        """If untrusted firmware should be used instead of trusted one"""
+        return self.args.untrusted or self._fconf_bool('rtools', 'untrusted_firmware')
 
     @property
     def tmp_dir(self):
@@ -95,3 +103,15 @@ class Configs:
     def db_port(self):
         """Port used to connect to given host to database"""
         return self._db_value('port')
+
+    @property
+    def tftp_dir(self):
+        """Path to root directory of TFTP server"""
+        if 'tftp' in self.config:
+            return self.config['tftp'].get('dir', '/var/tftp')
+        return None
+
+    @property
+    def tftp_ip(self):
+        """IP address of TFTP server, that is IP of host system in same network as board is connected to."""
+        return ipaddress.ip_address(self.config['tftp'].get('ip'))

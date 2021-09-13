@@ -1,3 +1,5 @@
+import os
+import sys
 import io
 import socket
 from time import sleep
@@ -154,10 +156,9 @@ class MoxTester:
         "Returns fdpexpect object for comunication with UART"
         return self._d.pexpect()
 
-    def mox_imager(self, resources, serial_number, first_mac, board_version):
+    def mox_imager(self, resources):
         """Returns instance of MoxImager for OTP flashing."""
-        return MoxImager(self, resources, serial_number, first_mac,
-                         board_version)
+        return MoxImager(self, resources)
 
     def spiflash(self):
         """Return instance of SPIFlash to control flash.

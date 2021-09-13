@@ -41,7 +41,17 @@ def report_uncaught_exception_gtk(tp, value, tb):
 def setup_logging():
     "Setup logging functions"
     FORMAT = "rtools-gui %(levelname)s %(threadName)s: %(message)s"
-    hdl = logging.handlers.SysLogHandler(address='/dev/log')
+    hdl = logging.handlers.SysLogHandler(address="/dev/log")
+    hdl.setLevel(logging.INFO)
+    hdl.setFormatter(logging.Formatter(FORMAT))
+    logging.getLogger().addHandler(hdl)
+    logging.getLogger().setLevel(logging.INFO)
+
+
+def setup_stderr_logging():
+    "Setup logging functions"
+    FORMAT = "%(levelname)s %(threadName)s: %(message)s"
+    hdl = logging.handlers.StreamHandler()
     hdl.setLevel(logging.INFO)
     hdl.setFormatter(logging.Formatter(FORMAT))
     logging.getLogger().addHandler(hdl)
