@@ -51,7 +51,7 @@ def setup_logging():
 def setup_stderr_logging():
     "Setup logging functions"
     FORMAT = "%(levelname)s %(threadName)s: %(message)s"
-    hdl = logging.handlers.StreamHandler()
+    hdl = logging.StreamHandler()
     hdl.setLevel(logging.INFO)
     hdl.setFormatter(logging.Formatter(FORMAT))
     logging.getLogger().addHandler(hdl)

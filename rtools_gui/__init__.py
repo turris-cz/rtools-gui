@@ -16,7 +16,12 @@ def _common_main(prepare):
     "Main structure for both main() and grouper_main()"
     argv = Gtk.init(sys.argv[1:])
     conf = Configs(argv)
-    report.setup_logging()
+
+    if os.environ.get("RTOOLS_STDERR") == "1":
+        report.setup_stderr_logging()
+    else:
+        report.setup_logging()
+
     sys.excepthook = report.report_uncaught_exception_gtk
 
     with guard.Guard(conf):
