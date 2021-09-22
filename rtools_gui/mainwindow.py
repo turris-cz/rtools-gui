@@ -30,6 +30,8 @@ class MainWindow:
             prg_grid.attach(prg.widget, i % 2, i // 2, 1, 1)
             self.programmers[i] = prg
 
+        self._builder.get_object("BarcodeEntry").set_text(os.environ.get("RTOOLS_DEFAULT_PROGRAMMER", ""))
+
     def gtks_on_delete_event(self, *args):
         Gtk.main_quit(*args)
 
@@ -54,6 +56,7 @@ class MainWindow:
         entry = self._builder.get_object('BarcodeEntry')
         text = entry.get_text()
         entry.set_text("")
+        entry.set_text(os.environ.get("RTOOLS_DEFAULT_PROGRAMMER", ""))
         try:
             serial_number = int(text)
         except ValueError:

@@ -53,6 +53,8 @@ class Programmer(WorkFlowHandler):
         self.programmer = None  # Handle for MoxTester
         self.gtk_connect_programmer()
 
+        self._obj("BarcodeEntry").set_text(os.environ.get("RTOOLS_DEFAULT_SERIAL", ""))
+
     def _obj(self, name):
         return self._builder.get_object(name)
 
@@ -111,7 +113,7 @@ class Programmer(WorkFlowHandler):
         del udata
         entry = self._obj("BarcodeEntry")
         serial_text = entry.get_text()
-        entry.set_text("")
+        entry.set_text(os.environ.get("RTOOLS_DEFAULT_SERIAL", ""))
         try:
             serial_number = int(serial_text)
         except ValueError:
