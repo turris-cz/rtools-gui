@@ -14,6 +14,7 @@ UNTRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-
 UBOOT = os.path.join(DIR_PREFIX, "firmware/u-boot")
 UBOOT_RIPE = os.path.join(DIR_PREFIX, "firmware/u-boot-ripe")
 RESCUE = os.path.join(DIR_PREFIX, "firmware/image.fit.lzma")
+FLASHING_IMAGE = os.path.join(DIR_PREFIX, "firmware/image.fit.gz")
 DTB = os.path.join(DIR_PREFIX, "firmware/dtb")
 MOX_IMAGER_DIR = os.path.join(DIR_PREFIX, "mox-imager")
 MOX_IMAGER = os.path.join(MOX_IMAGER_DIR, "mox-imager")
@@ -46,6 +47,7 @@ class Resources:
         self.__uboot, self.__uboot_hash = _load_file(UBOOT)
         self.__uboot_ripe, self.__uboot_ripe_hash = _load_file(UBOOT_RIPE)
         self.__rescue, self.__rescue_hash = _load_file(RESCUE)
+        self.__flashing_image, self.__flashing_image_hash = _load_file(FLASHING_IMAGE)
         self.__dtb, self.__dtb_hash = _load_file(DTB)
         self.__hostname = socket.gethostname()
         self.__rtools_git = _git_head_hash(DIR_PREFIX)
@@ -119,6 +121,16 @@ class Resources:
     def rescue_hash(self):
         "Sha256 hash of rescue image"
         return self.__rescue_hash
+
+    @property
+    def flashing_image(self):
+        "Bytes of flashing image"
+        return self.__flashing_image
+
+    @property
+    def flashing_image_hash(self):
+        "Sha256 hash of flashing image"
+        return self.__flashing_image
 
     @property
     def dtb(self):

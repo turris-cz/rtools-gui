@@ -9,7 +9,8 @@ from tempfile import NamedTemporaryFile
 from .generic import Step
 from . import a
 
-MEM_START= "0x01000000"
+MEM_START = "0x01000000"
+EXTRACTED = "0x02000000"
 
 class TFTPServerMixin:
     @property
@@ -26,13 +27,11 @@ class TFTPServerMixin:
 
     @property
     def tftp_image_crc32_and_size(self) -> typing.Tuple[bytes, int]:
-        # TODO perhaps there should be something like atlas_rescue
-        return zlib.crc32(self.resources.rescue), len(self.resources.rescue)
+        return zlib.crc32(self.resources.flashing_image), len(self.resources.flashing_image)
 
     def make_tftp_image(self):
         from ..tftp import TFTPFile
-        # TODO perhaps there should be something like atlas_rescue
-        return TFTPFile(self.conf.tftp_dir, self.resources.rescue)
+        return TFTPFile(self.conf.tftp_dir, self.resources.flashing_image)
 
 
 class UBootMixin:
@@ -134,19 +133,28 @@ class DownloadSystem(UBootMixin, TFTPServerMixin, Step):
         return "download"
 
 
-class FlashSystem(UBootMixin, TFTPServerMixin, Step):
+class FlashSystem(UBootMixin, Step):
     "Flash OS system to NAND"
 
     def run(self):
         self.set_progress(0)
-        uart = self.moxtester.uart()
+        self.uart = self.moxtester.uart()
 
-        _, size = self.tftp_image_crc32_and_size
-        # TODO Uncomment and fix addresses
-        #self.ubootcmd(
-            #f'nand write {MEM_START} 0xDEADBEEF {size:X}',
-            #sleep=1,
-        #)
+        # Extract Image
+        self.ubootcmd(
+            f'unzip {MEM_START} {EXTRACTED}',
+            f'Uncompressed size:',
+            sleep=1.0,
+        )
+        self.set_progress(0.1)
+
+        # Boot image
+        self.ubootcmd(
+            f'bootm {EXTRACTED}',
+            f'TODO some finished message',
+            sleep=1,
+            timeout=120,  # TODO limit it based on that how long it actually takes
+        )
 
         self.set_progress(1)
 
