@@ -151,7 +151,7 @@ class FlashSystem(UBootMixin, Step):
         # Boot image
         self.ubootcmd(
             f'bootm {EXTRACTED}',
-            f'TODO some finished message',
+            f'Success - everything reflashed',
             sleep=1,
             timeout=120,  # TODO limit it based on that how long it actually takes
         )
