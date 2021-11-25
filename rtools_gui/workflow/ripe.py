@@ -4,6 +4,11 @@ import pathlib
 import time
 import typing
 import zlib
+import logging
+
+from pexpect.exceptions import EOF
+
+logger = logging.getLogger(__name__)
 
 from tempfile import NamedTemporaryFile
 from .generic import Step
@@ -36,12 +41,17 @@ class TFTPServerMixin:
 
 class UBootMixin:
 
-    def ubootcmd(self, cmd, expect=None, timeout=-1, sleep=None):
+    def ubootcmd(self, cmd, expect=None, timeout=-1, sleep=None) -> int:
         self.uart.sendline(cmd)
-        self.uart.expect([expect or '=>'], timeout=timeout)
-        # TODO check whether the command passes
+        exp = [expect or '=>']
+        idx = self.uart.expect(exp, timeout=timeout)
+        if idx is None:
+            raise EOF
+
         if sleep:
             time.sleep(sleep)
+
+        return idx
 
 class UARTBoot(Step):
     "Load and run firmware (U-boot) by UART"
@@ -78,8 +88,8 @@ class UARTBoot(Step):
     def id():
         return "uboot"
 
-class DownloadSystem(UBootMixin, TFTPServerMixin, Step):
-    "Load system to memory"
+class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
+    "Download flasher to memory"
 
 
     def run(self):
@@ -126,7 +136,7 @@ class DownloadSystem(UBootMixin, TFTPServerMixin, Step):
 
     @staticmethod
     def name():
-        return "Stažení systému do zařízení"
+        return "Stažení flashovacího systému do zařízení"
 
     @staticmethod
     def id():
@@ -153,7 +163,7 @@ class FlashSystem(UBootMixin, Step):
             f'bootm {EXTRACTED}',
             f'Success - everything reflashed',
             sleep=1,
-            timeout=120,  # TODO limit it based on that how long it actually takes
+            timeout=240,  # TODO limit it based on that how long it actually takes
         )
 
         self.set_progress(1)
@@ -171,6 +181,6 @@ class FlashSystem(UBootMixin, Step):
 RSTEPS = (
     a.OTPProgramming,
     UARTBoot,
-    DownloadSystem,
+    DownloadFlasher,
     FlashSystem,
 )
