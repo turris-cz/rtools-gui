@@ -74,7 +74,7 @@ class WorkFlow:
     STEP_UNSTABLE = "unstable"  # Step exited with warnings
 
     def __init__(self, handler, conf, db_connection, db_programmer_state,
-                 resources, moxtester, serial_number):
+                 resources, moxtester, serial_number, mac_wan):
         super().__init__()
         self.handler = handler
         self.conf = conf
@@ -83,7 +83,10 @@ class WorkFlow:
         self.db_board = None
         self.db_run = None
         self.moxtester = moxtester
-        self.serial_number = serial_number
+
+        # Get board from database
+        self.db_board = db.Board(db_connection, serial_number, mac_wan)
+        self.serial_number = db_board.serial_number
 
         # Verify board serial number
         self.series = serial_number >> 32
@@ -93,8 +96,6 @@ class WorkFlow:
         if self.board_id not in _BOARD_MAP:
             raise InvalidBoardNumberException(
                 "Unsupported board ID in serial number: " + hex(self.board_id))
-        # Get board from database
-        self.db_board = db.Board(db_connection, serial_number)
 
         # Load steps
         self.steps = [

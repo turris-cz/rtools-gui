@@ -46,6 +46,7 @@ class _GenericTable:
 class Board(_GenericTable):
     "Database representation for single board"
     _SELECT_TYPE = "SELECT type FROM boards WHERE serial = %s;"
+    _SELECT_SERIAL = "SELECT serial FROM boards WHERE mac_wan = %s;"
     _SELECT_MAC_WAN = "SELECT mac_wan FROM boards WHERE serial = %s;"
     _SELECT_MAC_SGMII = "SELECT mac_sgmii FROM boards WHERE serial = %s;"
     _SELECT_REVISION = "SELECT revision FROM boards WHERE serial = %s;"
@@ -58,9 +59,17 @@ class Board(_GenericTable):
             WHERE b.serial = %s ORDER BY rr.add_time DESC LIMIT 1;
         """
 
-    def __init__(self, db_connection, serial_number):
+    def __init__(self, db_connection, serial_number, mac_wan = None):
         super().__init__(db_connection)
-        self.serial = serial_number
+        if serial_number is None:
+            self._select(self._SELECT_SERIAL, (mac_wan,))
+            res = self._cur.fetchone()
+            if res is None:
+                raise DBException(
+                    "There is no such board in database: " + hex(serial_number))
+            self.serial = res[0]
+        else:
+            self.serial = serial_number
 
         self._select(self._SELECT_TYPE, (serial_number,))
         res = self._cur.fetchone()

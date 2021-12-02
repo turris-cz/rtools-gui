@@ -114,19 +114,19 @@ class Programmer(WorkFlowHandler):
         entry = self._obj("BarcodeEntry")
         serial_text = entry.get_text()
         entry.set_text(os.environ.get("RTOOLS_DEFAULT_SERIAL", ""))
+        mac_wan = None
         try:
             serial_number = int(serial_text)
         except ValueError:
-            self.gtk_intro_error("Hodnota nebyla číslo. Byla použita čtečka?")
-            return
+            serial_number = None
         self.main_window.gtk_focus()
-        if (serial_number >> 32) == 0xFFFFFFFF:
+        if serial_number and (serial_number >> 32) == 0xFFFFFFFF:
             self.gtk_intro_error("Naskenován kód programátoru")
             return
         try:
             self.workflow = WorkFlow(
                 self, self.conf, self.db_connection, self.db_programmer_state,
-                self.resources, self.programmer, serial_number)
+                self.resources, self.programmer, serial_number, mac_wan)
         except Exception as e:
             report.ignored_exception()
             self.workflow = None
