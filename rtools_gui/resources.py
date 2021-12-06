@@ -10,6 +10,7 @@ import pexpect
 
 DIR_PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/secure-firmware")
+SECURE_FIRMWARE_RIPE = os.path.join(DIR_PREFIX, "firmware/secure-firmware-ripe")
 UNTRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-firmware")
 UBOOT = os.path.join(DIR_PREFIX, "firmware/u-boot")
 UBOOT_RIPE = os.path.join(DIR_PREFIX, "firmware/u-boot-ripe")
@@ -43,6 +44,7 @@ class Resources:
 
     def __init__(self, conf):
         self.__secure_firmware, self.__secure_firmware_hash = _load_file(SECURE_FIRMWARE)
+        self.__secure_firmware_ripe, self.__secure_firmware_ripe_hash = _load_file(SECURE_FIRMWARE_RIPE)
         self.__untrusted_secure_firmware, self.__untrusted_secure_firmware_hash = _load_file(UNTRUSTED_SECURE_FIRMWARE)
         self.__uboot, self.__uboot_hash = _load_file(UBOOT)
         self.__uboot_ripe, self.__uboot_ripe_hash = _load_file(UBOOT_RIPE)
@@ -66,11 +68,16 @@ class Resources:
         os.chmod(self.mox_imager_exec,
                  os.stat(self.mox_imager_exec).st_mode | stat.S_IEXEC)
 
+        # Hashes for moximager
+        self.__mox_imager_secure_firmware_hash = self._otp_hash(SECURE_FIRMWARE)
+        self.__mox_imager_secure_firmware_ripe_hash = self._otp_hash(SECURE_FIRMWARE_RIPE)
+
+    def _otp_hash(self, path):
         # Hash for moximager
-        with pexpect.spawn(self.mox_imager_exec, ['--get-otp-hash', SECURE_FIRMWARE]) as pexp:
+        with pexpect.spawn(self.mox_imager_exec, ['--get-otp-hash', path]) as pexp:
             pexp.expect(['Secure firmware OTP hash: '])
             pexp.expect([r'\S{64}'])
-            self.__mox_imager_secure_firmware_hash = pexp.after.decode(sys.getdefaultencoding())
+            return pexp.after.decode(sys.getdefaultencoding())
 
     @property
     def secure_firmware(self):
@@ -81,6 +88,16 @@ class Resources:
     def secure_firmware_hash(self):
         "Sha256 hash of secure firmware"
         return self.__secure_firmware_hash
+
+    @property
+    def secure_firmware_ripe(self):
+        "Bytes of secure firmware ripe"
+        return self.__secure_firmware_ripe
+
+    @property
+    def secure_firmware_ripe_hash(self):
+        "Sha256 hash of secure firmware ripe"
+        return self.__secure_firmware_ripe_hash
 
     @property
     def untrusted_secure_firmware(self):
@@ -171,3 +188,8 @@ class Resources:
     def mox_imager_secure_firmware_hash(self):
         "Hash from secure-firmware for mox-imager"
         return self.__mox_imager_secure_firmware_hash
+
+    @property
+    def mox_imager_secure_firmware_ripe_hash(self):
+        "Hash from secure-firmware-ripe for mox-imager"
+        return self.__mox_imager_secure_firmware_ripe_hash
