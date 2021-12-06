@@ -103,7 +103,7 @@ class Board(_GenericTable):
 
     def set_core_info(self, mem, key):
         """Record public key and memory size for this board."""
-        if self.type != "A":
+        if self.type != "A" and self.type != "R":
             raise DBException(
                 "Invalid board type for inserting core info: {}".format(
                     str(self.type)))
