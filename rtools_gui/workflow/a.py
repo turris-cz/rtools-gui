@@ -2,78 +2,9 @@
 import sys
 import pexpect
 from datetime import datetime
-from .generic import Step
+from .generic import Step, OTPProgramming
 from .exceptions import FatalWorkflowException
 from .. import report
-from ..moxtester.exceptions import MoxTesterImagerNoBootPrompt
-
-
-class OTPProgramming(Step):
-    "Program OTP memory"
-
-    def run(self):
-        if self.conf.no_otp:
-            return  # Do nothing for untrusted run
-        imager = self.moxtester.mox_imager(self.resources)
-        failed = False
-        ram = None  # Amount of ram in MiB
-        real_serial_number = None  # Serial number as reported by mox-imager
-        real_board_version = None  # Board version as reported by mox-imager
-        real_fist_mac = None  # First mac address as reported by mox-imager
-        public_key = None  # ECDSA public key
-        exit_code = None  # Exit code of executed run
-        all_done = False  # If everything was executed correctly
-
-        try:
-            imager.run(
-                '--deploy',
-                '--serial-number', hex(self.serial_number),
-                '--mac-address', self.db_board.mac_wan(),
-                '--board-version', str(self.db_board.revision()),
-                '--otp-hash', self.resources.mox_imager_secure_firmware_hash
-            )
-            try:
-                self.set_progress(0)
-                imager.match('Sending image type TIMH')
-                self.set_progress(0.2)
-                imager.match('Sending image type WTMI')
-                self.set_progress(0.4)
-                ram = int(imager.match('Found (\\d+) MiB RAM')[1].decode())
-                self.set_progress(0.5)
-                real_serial_number = int(imager.match('Serial Number: ([0-9A-Fa-f]+)')[1].decode(), 16)
-                self.set_progress(0.6)
-                real_board_version = int(imager.match('Board version: (\\d+)')[1].decode())
-                self.set_progress(0.7)
-                real_first_mac = ':'.join(imager.match('MAC address: ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})')[1:])
-                self.set_progress(0.8)
-                public_key = imager.match('ECDSA Public Key: (0[23][0-9A-Fa-f]{132})')[1].decode()
-                self.set_progress(0.9)
-                imager.match('All done.')
-                all_done = True
-                self.set_progress(1)
-            finally:
-                exit_code = imager.stop()
-        except MoxTesterImagerNoBootPrompt:
-            failed = True
-        recorded = self.db_board.core_info()
-        # TODO we can verify here if this is mox with correct sticker
-        if recorded is not None:
-            if not failed and (recorded['mem'] != ram or recorded['key'] != public_key):
-                return "DB value does not match:\nRam: {} : {}\nKey: {} : {}".format(
-                    recorded['mem'], ram, recorded['key'], public_key)
-            return None
-        if failed:
-            raise FatalWorkflowException("OTP programming failed")
-        self.db_board.set_core_info(ram, public_key)
-        return None
-
-    @staticmethod
-    def name():
-        return "Programování OTP"
-
-    @staticmethod
-    def id():
-        return "otp-program"
 
 
 class SPIFlashStep(Step):

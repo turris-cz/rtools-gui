@@ -11,8 +11,7 @@ from pexpect.exceptions import EOF
 logger = logging.getLogger(__name__)
 
 from tempfile import NamedTemporaryFile
-from .generic import Step
-from . import a
+from .generic import Step, OTPProgramming
 
 MEM_START = "0x01000000"
 EXTRACTED = "0x02000000"
@@ -179,7 +178,7 @@ class FlashSystem(UBootMixin, Step):
 
 # All steps for MOX RIPE in order
 RSTEPS = (
-    a.OTPProgramming,
+    OTPProgramming,
     UARTBoot,
     DownloadFlasher,
     FlashSystem,
