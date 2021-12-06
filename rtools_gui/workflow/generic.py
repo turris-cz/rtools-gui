@@ -76,6 +76,7 @@ class OTPProgramming(Step):
         failed = False
         ram = None  # Amount of ram in MiB
         real_serial_number = None  # Serial number as reported by mox-imager
+        real_board_type = None  # Board type as reported by mox-imager
         real_board_version = None  # Board version as reported by mox-imager
         real_fist_mac = None  # First mac address as reported by mox-imager
         public_key = None  # ECDSA public key
@@ -101,6 +102,8 @@ class OTPProgramming(Step):
                 self.set_progress(0.5)
                 real_serial_number = int(imager.match('Serial Number: ([0-9A-Fa-f]+)')[1].decode(), 16)
                 self.set_progress(0.6)
+                real_board_type = imager.match('Board type: \\d+ \\(([0-9A-Za-z ]+)\\)')[1].decode()
+                self.set_progress(0.65)
                 real_board_version = int(imager.match('Board version: (\\d+)')[1].decode())
                 self.set_progress(0.7)
                 real_first_mac = ':'.join(imager.match('MAC address: ([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})([0-9A-Fa-f]{2})')[1:])
