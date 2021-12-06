@@ -95,9 +95,9 @@ class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
         self.set_progress(0)
         self.uart = self.moxtester.uart()
 
-        self.ubootcmd(f'setenv ipaddr {self.tftp_client_ip}', sleep=1.0)
+        self.ubootcmd('setenv ipaddr {}'.format(self.tftp_client_ip), sleep=1.0)
         self.set_progress(0.05)
-        self.ubootcmd(f'setenv serverip {self.tftp_server_ip}', sleep=1.0)
+        self.ubootcmd('setenv serverip {}'.format(self.tftp_server_ip), sleep=1.0)
         self.set_progress(0.1)
 
         image = self.make_tftp_image()
@@ -105,15 +105,15 @@ class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
 
         # make sure that connection is working properly
         self.ubootcmd(
-            f'ping {self.tftp_server_ip}',
-            f'host {self.tftp_server_ip} is alive',
+            'ping {}'.format(self.tftp_server_ip),
+            'host {}'.format(self.tftp_server_ip),
             sleep=1.0,
         )
         self.set_progress(0.1)
 
         # Load image from tftp to memory
         self.ubootcmd(
-            f'tftpboot {MEM_START} {image_filename}',
+            'tftpboot {} {}'.format(MEM_START, image_filename),
             'Bytes transferred',
             timeout=120,
             sleep=1.0,
@@ -124,8 +124,8 @@ class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
         # check crc
         crc32, size = self.tftp_image_crc32_and_size
         self.ubootcmd(
-            f'crc32 {MEM_START} {size:X}',
-            f'{crc32:x}',
+                'crc32 {} {:X}'.format(MEM_START, size),
+                '{:x}'.format(crc32),
             timeout=10,
             sleep=1.0,
          )
@@ -151,20 +151,30 @@ class FlashSystem(UBootMixin, Step):
 
         # Extract Image
         self.ubootcmd(
-            f'unzip {MEM_START} {EXTRACTED}',
-            f'Uncompressed size:',
+            'lzmadec {} {}'.format(MEM_START, EXTRACTED),
+            'Uncompressed size:',
             sleep=1.0,
         )
         self.set_progress(0.1)
 
         # Boot image
         self.ubootcmd(
-            f'bootm {EXTRACTED}',
-            f'Success - everything reflashed',
+            'bootm {}'.format(EXTRACTED),
+            'Success - everything reflashed',
             sleep=1,
             timeout=240,  # TODO limit it based on that how long it actually takes
         )
+        self.set_progress(0.2)
 
+        self.uart.expect('Downloading NOR content')
+        self.set_progress(0.3)
+        self.uart.expect('Downloading rootfs content')
+        self.set_progress(0.4)
+        self.uart.expect('Deploying .* image')
+        self.set_progress(0.6)
+        self.uart.expect('Updating NOR')
+        self.set_progress(0.8)
+        self.uart.expect('Success - everything reflashed')
         self.set_progress(1)
 
     @staticmethod

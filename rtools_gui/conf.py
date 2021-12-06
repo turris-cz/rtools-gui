@@ -115,3 +115,15 @@ class Configs:
     def tftp_ip(self):
         """IP address of TFTP server, that is IP of host system in same network as board is connected to."""
         return ipaddress.ip_address(self.config['tftp'].get('ip'))
+
+    @property
+    def http_dir(self):
+        """Path to root directory of HTTP server"""
+        if 'http' in self.config:
+            return self.config['http'].get('dir', '/var/www')
+        return None
+
+    @property
+    def http_ip(self):
+        """IP address of HTTP server, that is IP of host system in same network as board is connected to."""
+        return ipaddress.ip_address(self.config['http'].get('ip'))

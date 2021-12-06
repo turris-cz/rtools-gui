@@ -482,6 +482,8 @@ class _UARTInterface(_Interface):
             if ret < 0:
                 raise MoxTesterCommunicationException("UART Read failed")
             elif ret > 0:
+                import logging
+                logging.error(data[0:ret])
                 self.socks[0].sendall(data[0:ret])
                 new_data = data[0:ret]
                 index = new_data.find(b'\n')

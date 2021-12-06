@@ -58,7 +58,7 @@ class Resources:
         # Mox imager
         imager_path = pathlib.Path(MOX_IMAGER)
         if not imager_path.exists():
-            raise RuntimeError(f"No mox imager binary found in {imager_path}")
+            raise RuntimeError("No mox imager binary found in {}".format(imager_path))
 
         with imager_path.open('rb') as file:
             self.__mox_imager_hash = hashlib.sha256(file.read()).hexdigest()
