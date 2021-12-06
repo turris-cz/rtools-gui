@@ -87,6 +87,7 @@ class OTPProgramming(Step):
                 '--deploy',
                 '--serial-number', hex(self.serial_number),
                 '--mac-address', self.db_board.mac_wan(),
+                '--board', self.otp_board_type(),
                 '--board-version', str(self.db_board.revision()),
                 '--otp-hash', self.otp_hash()
             )

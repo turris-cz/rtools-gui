@@ -176,6 +176,9 @@ class FlashSystem(UBootMixin, Step):
         return "flash"
 
 class OTPProgrammingRIPE(OTPProgramming):
+    def otp_board_type(self):
+        return "RIPE"
+
     def otp_hash(self):
         return self.resources.mox_imager_secure_firmware_ripe_hash
 

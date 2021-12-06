@@ -7,6 +7,9 @@ from .exceptions import FatalWorkflowException
 from .. import report
 
 class OTPProgrammingMOX(OTPProgramming):
+    def otp_board_type(self):
+        return "MOX"
+
     def otp_hash(self):
         return self.resources.mox_imager_secure_firmware_hash
 
