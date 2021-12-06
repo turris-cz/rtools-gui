@@ -1,5 +1,6 @@
 import os
 import traceback
+import logging
 from gi.repository import GLib, Gtk
 from . import report
 from .moxtester import MoxTester
@@ -7,6 +8,7 @@ from .moxtester.exceptions import MoxTesterException
 from .workflow import WorkFlow, WorkFlowHandler
 from .svgimage import SVGImage
 
+logger = logging.getLogger(__name__)
 
 class Programmer(WorkFlowHandler):
     "Programmer widget"
@@ -115,10 +117,12 @@ class Programmer(WorkFlowHandler):
         serial_text = entry.get_text()
         entry.set_text(os.environ.get("RTOOLS_DEFAULT_SERIAL", ""))
         mac_wan = None
+        serial_number = None
+        logger.info("Got board with id %s" % serial_text)
         try:
             serial_number = int(serial_text)
         except ValueError:
-            serial_number = None
+            mac_wan = serial_text
         self.main_window.gtk_focus()
         if serial_number and (serial_number >> 32) == 0xFFFFFFFF:
             self.gtk_intro_error("Naskenován kód programátoru")
@@ -148,7 +152,7 @@ class Programmer(WorkFlowHandler):
         run_progress.set_max_value(len(self._steps))
         run_progress.set_value(0)
 
-        self.programmer.set_board_id(hex(serial_number))
+        self.programmer.set_board_id(serial_text)
         self.workflow.start()  # And lastly start worklow
 
     def _wipe_steps(self):

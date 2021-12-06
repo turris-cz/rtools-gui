@@ -1,6 +1,9 @@
 import psycopg2
 from .exceptions import DBException
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def connect(cnf):
     """Connect application to database
@@ -59,19 +62,21 @@ class Board(_GenericTable):
             WHERE b.serial = %s ORDER BY rr.add_time DESC LIMIT 1;
         """
 
-    def __init__(self, db_connection, serial_number, mac_wan = None):
+    def __init__(self, db_connection, serial_number, mac_wan):
         super().__init__(db_connection)
+        self.serial = None
         if serial_number is None:
             self._select(self._SELECT_SERIAL, (mac_wan,))
             res = self._cur.fetchone()
             if res is None:
                 raise DBException(
-                    "There is no such board in database: " + hex(serial_number))
-            self.serial = res[0]
+                    "There is no such board in database: " + mac_wan)
+            logger.info('Fetched serial %s via mac %s' % (res[0], mac_wan))
+            self.serial = int(res[0])
         else:
             self.serial = serial_number
 
-        self._select(self._SELECT_TYPE, (serial_number,))
+        self._select(self._SELECT_TYPE, (self.serial,))
         res = self._cur.fetchone()
         if res is None:
             raise DBException(

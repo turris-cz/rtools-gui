@@ -86,28 +86,29 @@ class WorkFlow:
 
         # Get board from database
         self.db_board = db.Board(db_connection, serial_number, mac_wan)
-        self.serial_number = db_board.serial_number
+        self.serial_number = self.db_board.serial
 
         # Verify board serial number
-        self.series = serial_number >> 32
+        self.series = self.serial_number >> 32
         if self.series == 0xFFFFFFFF or self.series < 0xD:
             raise InvalidBoardNumberException("Serial number does not seems to have valid series for Mox: " + hex(self.series))
-        self.board_id = (serial_number >> 24) & 0xff
+        self.board_id = (self.serial_number >> 24) & 0xff
+        print(self.board_id)
         if self.board_id not in _BOARD_MAP:
             raise InvalidBoardNumberException(
                 "Unsupported board ID in serial number: " + hex(self.board_id))
 
         # Load steps
         self.steps = [
-            step(serial_number, moxtester, conf, resources, self.db_board,
+            step(self.serial_number, moxtester, conf, resources, self.db_board,
                  handler.progress_step) for step in
             _BOARD_MAP[self.board_id]['steps']]
         # Create thread
         self.thread = Thread(
-            target=self._run, name="workflow-" + str(serial_number),
+            target=self._run, name="workflow-" + str(self.serial_number),
             daemon=True)
         report.log("Workflow initialized on programmer {} for board {}".format(
-            moxtester.tester_id, hex(serial_number)))
+            moxtester.tester_id, hex(self.serial_number)))
 
     def get_steps(self):
         """Returns table steps. Every step is a dictionary where following keys
