@@ -175,10 +175,13 @@ class FlashSystem(UBootMixin, Step):
     def id():
         return "flash"
 
+class OTPProgrammingRIPE(OTPProgramming):
+    def otp_hash(self):
+        return self.resources.mox_imager_secure_firmware_ripe_hash
 
 # All steps for MOX RIPE in order
 RSTEPS = (
-    OTPProgramming,
+    OTPProgrammingRIPE,
     UARTBoot,
     DownloadFlasher,
     FlashSystem,

@@ -88,7 +88,7 @@ class OTPProgramming(Step):
                 '--serial-number', hex(self.serial_number),
                 '--mac-address', self.db_board.mac_wan(),
                 '--board-version', str(self.db_board.revision()),
-                '--otp-hash', self.resources.mox_imager_secure_firmware_hash
+                '--otp-hash', self.otp_hash()
             )
             try:
                 self.set_progress(0)

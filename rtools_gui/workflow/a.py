@@ -6,6 +6,9 @@ from .generic import Step, OTPProgramming
 from .exceptions import FatalWorkflowException
 from .. import report
 
+class OTPProgrammingMOX(OTPProgramming):
+    def otp_hash(self):
+        return self.resources.mox_imager_secure_firmware_hash
 
 class SPIFlashStep(Step):
     "Generic SPI Flash programming step"
@@ -239,7 +242,7 @@ class TestWan(Step):
 
 # All steps for MOX A in order
 ASTEPS = (
-    OTPProgramming,
+    OTPProgrammingMOX,
     ProgramSecureFirmware,
     ProgramUBoot,
     ProgramRescue,
