@@ -93,7 +93,6 @@ class WorkFlow:
         if self.series == 0xFFFFFFFF or self.series < 0xD:
             raise InvalidBoardNumberException("Serial number does not seems to have valid series for Mox: " + hex(self.series))
         self.board_id = (self.serial_number >> 24) & 0xff
-        print(self.board_id)
         if self.board_id not in _BOARD_MAP:
             raise InvalidBoardNumberException(
                 "Unsupported board ID in serial number: " + hex(self.board_id))

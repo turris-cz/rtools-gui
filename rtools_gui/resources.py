@@ -12,10 +12,11 @@ DIR_PREFIX = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/secure-firmware")
 SECURE_FIRMWARE_RIPE = os.path.join(DIR_PREFIX, "firmware/secure-firmware-ripe")
 UNTRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-firmware")
+UNTRUSTED_SECURE_FIRMWARE_RIPE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-firmware-ripe")
 UBOOT = os.path.join(DIR_PREFIX, "firmware/u-boot")
 UBOOT_RIPE = os.path.join(DIR_PREFIX, "firmware/u-boot-ripe")
 RESCUE = os.path.join(DIR_PREFIX, "firmware/image.fit.lzma")
-FLASHING_IMAGE = os.path.join(DIR_PREFIX, "firmware/ripe-flasher.fit.gz")
+FLASHING_IMAGE = os.path.join(DIR_PREFIX, "firmware/ripe-flasher.fit.lzma")
 DTB = os.path.join(DIR_PREFIX, "firmware/dtb")
 MOX_IMAGER_DIR = os.path.join(DIR_PREFIX, "mox-imager")
 MOX_IMAGER = os.path.join(MOX_IMAGER_DIR, "mox-imager")
@@ -46,6 +47,7 @@ class Resources:
         self.__secure_firmware, self.__secure_firmware_hash = _load_file(SECURE_FIRMWARE)
         self.__secure_firmware_ripe, self.__secure_firmware_ripe_hash = _load_file(SECURE_FIRMWARE_RIPE)
         self.__untrusted_secure_firmware, self.__untrusted_secure_firmware_hash = _load_file(UNTRUSTED_SECURE_FIRMWARE)
+        self.__untrusted_secure_firmware_ripe, self.__untrusted_secure_firmware_ripe_hash = _load_file(UNTRUSTED_SECURE_FIRMWARE_RIPE)
         self.__uboot, self.__uboot_hash = _load_file(UBOOT)
         self.__uboot_ripe, self.__uboot_ripe_hash = _load_file(UBOOT_RIPE)
         self.__rescue, self.__rescue_hash = _load_file(RESCUE)
@@ -108,6 +110,16 @@ class Resources:
     def untrusted_secure_firmware_hash(self):
         "Sha256 hash of secure firmware"
         return self.__untrusted_secure_firmware_hash
+
+    @property
+    def untrusted_secure_firmware_ripe(self):
+        "Bytes of secure firmware ripe"
+        return self.__untrusted_secure_firmware_ripe
+
+    @property
+    def untrusted_secure_firmware_ripe_hash(self):
+        "Sha256 hash of secure firmware ripe"
+        return self.__untrusted_secure_firmware_ripe_hash
 
     @property
     def uboot(self):

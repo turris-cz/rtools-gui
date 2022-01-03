@@ -1,6 +1,6 @@
 from .exceptions import FatalWorkflowException
 from ..moxtester.exceptions import MoxTesterImagerNoBootPrompt
-
+import time
 
 class Step:
     "Abstract class for signle step"
@@ -82,9 +82,13 @@ class OTPProgramming(Step):
         public_key = None  # ECDSA public key
         exit_code = None  # Exit code of executed run
         all_done = False  # If everything was executed correctly
+        self.moxtester.power(False)
+        self.moxtester.reset(True)
+        time.sleep(1.0)
+        self.set_progress(.1)
 
         try:
-            imager.run(
+            imgpe = imager.run(
                 '--deploy',
                 '--serial-number', hex(self.serial_number),
                 '--mac-address', self.db_board.mac_wan(),
@@ -93,7 +97,6 @@ class OTPProgramming(Step):
                 '--otp-hash', self.otp_hash()
             )
             try:
-                self.set_progress(0)
                 imager.match('Sending image type TIMH')
                 self.set_progress(0.2)
                 imager.match('Sending image type WTMI')

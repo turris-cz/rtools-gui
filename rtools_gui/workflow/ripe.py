@@ -42,7 +42,10 @@ class UBootMixin:
 
     def ubootcmd(self, cmd, expect=None, timeout=-1, sleep=None) -> int:
         self.uart.sendline(cmd)
-        exp = [expect or '=>']
+        if isinstance(expect, list):
+            exp = expect
+        else:
+            exp = [expect or '=>']
         idx = self.uart.expect(exp, timeout=timeout)
         if idx is None:
             raise EOF
@@ -58,18 +61,21 @@ class UARTBoot(Step):
     def run(self):
         firmware = NamedTemporaryFile()
         try:
-            firmware.write(self.resources.untrusted_secure_firmware)
+            self.set_progress(0)
+            firmware.write(self.resources.untrusted_secure_firmware_ripe)
             firmware.write(self.resources.uboot_ripe)
+            self.set_progress(0.05)
 
             imager = self.moxtester.mox_imager(self.resources)
             imgpe = imager.run(firmware.name)
             imager.match("Sending image type TIMH")
+            self.set_progress(0.1)
             imager.match("Sending image type WTMI")
+            self.set_progress(0.2)
             imager.match("Sending image type OBMI")
             imgpe.expect_exact('.\n', timeout=None)
             imager.stop()
 
-            self.set_progress(0)
             self.set_progress(1)
         finally:
             firmware.close()
@@ -95,8 +101,12 @@ class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
         self.set_progress(0)
         self.uart = self.moxtester.uart()
 
-        self.ubootcmd('setenv ipaddr {}'.format(self.tftp_client_ip), sleep=1.0)
-        self.set_progress(0.05)
+        self.ubootcmd('setenv ethaddr {}'.format(self.db_board.mac_wan()), sleep=1.0)
+        self.ubootcmd('setenv autoload no', sleep=1.0)
+        self.ubootcmd('setenv bootargs "earlyprintk srv={} console=ttyMV0,115200 earlycon=ar3700_uart,0xd0012000"'.format(self.tftp_server_ip), sleep=1.0)
+        self.set_progress(0.03)
+        self.ubootcmd('dhcp', 'DHCP client bound', sleep=1.0)
+        self.set_progress(0.06)
         self.ubootcmd('setenv serverip {}'.format(self.tftp_server_ip), sleep=1.0)
         self.set_progress(0.1)
 
@@ -104,20 +114,28 @@ class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
         image_filename = pathlib.Path(image.name).name
 
         # make sure that connection is working properly
-        self.ubootcmd(
+        idx = self.ubootcmd(
             'ping {}'.format(self.tftp_server_ip),
-            'host {}'.format(self.tftp_server_ip),
+            ['host {}'.format(self.tftp_server_ip), 'bad rx status'],
             sleep=1.0,
         )
+
+        if(idx != 0):
+            raise Exception("Nahodna chyba, prosim spustte flashovani znova")
+
         self.set_progress(0.1)
 
         # Load image from tftp to memory
-        self.ubootcmd(
+        idx = self.ubootcmd(
             'tftpboot {} {}'.format(MEM_START, image_filename),
-            'Bytes transferred',
-            timeout=120,
+            [ 'Bytes transferred', 'bad rx status'],
+            timeout=30,
             sleep=1.0,
          )
+
+        if(idx != 0):
+            raise Exception("Nahodna chyba, prosim spustte flashovani znova")
+
         self.ubootcmd('')
         self.set_progress(0.1)
 
@@ -160,9 +178,9 @@ class FlashSystem(UBootMixin, Step):
         # Boot image
         self.ubootcmd(
             'bootm {}'.format(EXTRACTED),
-            'Success - everything reflashed',
+            'Starting kernel ...',
             sleep=1,
-            timeout=240,  # TODO limit it based on that how long it actually takes
+            timeout=30,  # TODO limit it based on that how long it actually takes
         )
         self.set_progress(0.2)
 
@@ -170,10 +188,12 @@ class FlashSystem(UBootMixin, Step):
         self.set_progress(0.3)
         self.uart.expect('Downloading rootfs content')
         self.set_progress(0.4)
-        self.uart.expect('Deploying .* image')
+        self.uart.expect('Deploying .* image', timeout=240)
         self.set_progress(0.6)
-        self.uart.expect('Updating NOR')
+        self.uart.expect('Create a snapshot of', timeout=240)
         self.set_progress(0.8)
+        self.uart.expect('Updating NOR', timeout=600)
+        self.set_progress(0.85)
         self.uart.expect('Success - everything reflashed')
         self.set_progress(1)
 
@@ -194,8 +214,8 @@ class OTPProgrammingRIPE(OTPProgramming):
 
 # All steps for MOX RIPE in order
 RSTEPS = (
-    OTPProgrammingRIPE,
     UARTBoot,
     DownloadFlasher,
     FlashSystem,
+    OTPProgrammingRIPE,
 )
