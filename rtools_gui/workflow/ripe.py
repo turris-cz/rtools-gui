@@ -67,7 +67,7 @@ class UARTBoot(Step):
             self.set_progress(0.05)
 
             imager = self.moxtester.mox_imager(self.resources)
-            imgpe = imager.run(firmware.name)
+            imgpe = imager.run(firmware.name, '-b', '3000000')
             imager.match("Sending image type TIMH")
             self.set_progress(0.1)
             imager.match("Sending image type WTMI")

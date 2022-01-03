@@ -71,6 +71,7 @@ class MoxImager:
         """Terminate execution"""
         os.kill(self.pid, signal.SIGKILL)
         exit_code = os.waitpid(self.pid, 0)[1]
+        self.moxtester._d.default_baudrate()
         self.pexpect.close()
         #self.moxtester.default()
         return exit_code

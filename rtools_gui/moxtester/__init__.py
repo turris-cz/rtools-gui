@@ -430,6 +430,7 @@ class _UARTInterface(_Interface):
         super().__init__(device, interface)
         self.board_id = board_id
         self.log = log
+        self._baud_state = 0
         if ftdi.set_bitmode(self.ctx, 0x00, ftdi.BITMODE_RESET) < 0:
             raise MoxTesterCommunicationException(
                 "Unable to reset bitmode for port: " + str(interface))
@@ -453,6 +454,11 @@ class _UARTInterface(_Interface):
         # TODO add sensible name
         self.outputthread = Thread(target=self._output, daemon=True)
         self.outputthread.start()
+
+    def default_baudrate(self):
+        if ftdi.set_baudrate(self.ctx, 115200) < 0:
+            raise MoxTesterCommunicationException(
+                "Unable to set baudrate for port:" + str(interface))
 
     def __del__(self):
         self.inputthreadexit.set()
@@ -485,6 +491,8 @@ class _UARTInterface(_Interface):
                 import logging
                 logging.error(data[0:ret])
                 self.socks[0].sendall(data[0:ret])
+                if self._baud_state == 1 and ret == 9 and data[:4] == b'baud':
+                    self._baud_state = 2
                 new_data = data[0:ret]
                 index = new_data.find(b'\n')
                 if index >= 0:
@@ -503,6 +511,13 @@ class _UARTInterface(_Interface):
             # TODO do we want to log this also?
             if ftdi.write_data(self.ctx, data) < 0:
                 raise MoxTesterCommunicationException("UART Write failed")
+            if self._baud_state == 0 and data == b'baud':
+                self._baud_state = 1
+            elif self._baud_state == 2 and len(data) == 6:
+                sleep(0.3)
+                if ftdi.set_baudrate(self.ctx, 3000000) < 0:
+                    raise MoxTesterCommunicationException(
+                        "Unable to set baudrate for port:" + str(interface))
 
     def fileno(self):
         "Create new file descriptior (while closing the old one) and return it"
