@@ -1,6 +1,6 @@
 from threading import Thread
 from .. import db, report
-from .exceptions import InvalidBoardNumberException
+from .exceptions import InvalidBoardNumberException, RandomErrorException
 from .a import ASTEPS
 from .b import BSTEPS
 from .c import CSTEPS
@@ -44,7 +44,6 @@ _BOARD_MAP = {
         "steps": GSTEPS,
     },
 }
-
 
 class WorkFlowHandler:
     "Abstract handler for workflow reported events"
@@ -132,7 +131,7 @@ class WorkFlow:
         "Trigger workflow execution"
         self.thread.start()
 
-    def _run(self):
+    def _run(self, count=0):
         "Workflow executor"
         report.log("Workflow started on programmer {} for board {}".format(
             self.moxtester.tester_id, hex(self.serial_number)))
@@ -153,6 +152,8 @@ class WorkFlow:
                 # TODO display warning message in graphics
                 self.handler.step_update(step.id(), self.STEP_OK)
             except Exception as e:
+                if(isinstance(e,RandomErrorException) and count <10):
+                    return self._run(count + 1)
                 report.ignored_exception()
                 db_step.finish(False, str(e))
                 self.handler.step_update(step.id(), self.STEP_FAILED)

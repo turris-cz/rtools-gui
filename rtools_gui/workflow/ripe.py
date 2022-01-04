@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 from tempfile import NamedTemporaryFile
 from .generic import Step, OTPProgramming
+from .exceptions import RandomErrorException
 
 MEM_START = "0x01000000"
 EXTRACTED = "0x02000000"
@@ -121,7 +122,7 @@ class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
         )
 
         if(idx != 0):
-            raise Exception("Nahodna chyba, prosim spustte flashovani znova")
+            raise RandomErrorException("Nahodna sitova chyba, prosim spustte flashovani znova")
 
         self.set_progress(0.1)
 
@@ -134,7 +135,7 @@ class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
          )
 
         if(idx != 0):
-            raise Exception("Nahodna chyba, prosim spustte flashovani znova")
+            raise RandomErrorException("Nahodna sitova chyba, prosim spustte flashovani znova")
 
         self.ubootcmd('')
         self.set_progress(0.1)
@@ -180,7 +181,7 @@ class FlashSystem(UBootMixin, Step):
             'bootm {}'.format(EXTRACTED),
             'Starting kernel ...',
             sleep=1,
-            timeout=30,  # TODO limit it based on that how long it actually takes
+            timeout=20,  # TODO limit it based on that how long it actually takes
         )
         self.set_progress(0.2)
 
@@ -190,7 +191,9 @@ class FlashSystem(UBootMixin, Step):
         self.set_progress(0.4)
         self.uart.expect('Deploying .* image', timeout=240)
         self.set_progress(0.6)
-        self.uart.expect('Create a snapshot of', timeout=240)
+        idx = self.uart.expect(['Create a snapshot of', 'mmc1: error -110 whilst initialising MMC card'], timeout=60)
+        if(idx != 0):
+            raise RandomErrorException("Nahodna MMC chyba, prosim spustte flashovani znova")
         self.set_progress(0.8)
         self.uart.expect('Updating NOR', timeout=600)
         self.set_progress(0.85)
