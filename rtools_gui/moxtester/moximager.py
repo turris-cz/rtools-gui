@@ -4,6 +4,7 @@ import signal
 import pexpect
 from .exceptions import MoxTesterImagerNoBootPrompt
 from .exceptions import MoxTesterImagerFail
+from .. import report
 
 
 class MoxImager:
@@ -23,6 +24,14 @@ class MoxImager:
         os.dup2(process_pipe[1], 1)
         os.dup2(process_pipe[1], 2)
         os.dup2(uart_sock, 3)
+        if args[0] == '--deploy':
+            os.execl(
+                '/bin/sh', '/bin/sh', '-c',
+                ' '.join(['/usr/bin/strace',
+                self.resources.mox_imager_exec,
+                '-F', '3',
+                *args, '2>/tmp/imager-err', '>/tmp/imager'])
+            )
         os.execl(
             self.resources.mox_imager_exec,
             self.resources.mox_imager_exec,
@@ -58,6 +67,7 @@ class MoxImager:
         # Prepare and spawn mox-imager
         uart_sock = self.moxtester.uart_fileno()
         process_pipe = os.pipe2(os.O_CLOEXEC)
+        self.pid = None
         self.pid = os.fork()
         if not self.pid:
             self._subprocess(uart_sock, process_pipe, args)
@@ -70,6 +80,7 @@ class MoxImager:
     def stop(self):
         """Terminate execution"""
         os.kill(self.pid, signal.SIGKILL)
+        self.pid = None
         exit_code = os.waitpid(self.pid, 0)[1]
         self.moxtester._d.default_baudrate()
         self.pexpect.close()
