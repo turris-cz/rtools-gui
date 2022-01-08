@@ -489,7 +489,7 @@ class _UARTInterface(_Interface):
                 raise MoxTesterCommunicationException("UART Read failed")
             elif ret > 0:
                 import logging
-                logging.error(data[0:ret])
+                logging.info(data[0:ret])
                 self.socks[0].sendall(data[0:ret])
                 if self._baud_state == 1 and ret == 9 and data[:4] == b'baud':
                     self._baud_state = 2
