@@ -9,6 +9,7 @@ from .e import ESTEPS
 from .f import FSTEPS
 from .g import GSTEPS
 from .ripe import RSTEPS
+import logging
 
 _BOARD_MAP = {
     0x00: {  # TODO more reasonable CODE
@@ -131,7 +132,7 @@ class WorkFlow:
         "Trigger workflow execution"
         self.thread.start()
 
-    def _run(self, count=0):
+    def _run(self, count=0, last=False):
         "Workflow executor"
         report.log("Workflow started on programmer {} for board {}".format(
             self.moxtester.tester_id, hex(self.serial_number)))
@@ -140,6 +141,12 @@ class WorkFlow:
             self.moxtester.tester_id, [x.id() for x in self.steps])
         error_str = None
         for step in self.steps:
+            if(step == self.steps[-1] and not last):
+                logging.info("Restarting to run the last step")
+                self._run(count, True)
+            if(step != self.steps[-1] and last):
+                logging.info("Skipping everything except the last step")
+                continue
             db_step = db.ProgrammerStep(
                 self.db_connection, db_run, step.id())
             try:

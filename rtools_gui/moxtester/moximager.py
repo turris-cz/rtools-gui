@@ -21,23 +21,22 @@ class MoxImager:
         self.pexpect = None
 
     def _subprocess(self, uart_sock, process_pipe, args):
-        logging.info("Subprocess entry")
-        os.close(process_pipe[0])
-        logging.info("Subprocess close")
+        if(process_pipe[0] != 1):
+            os.close(process_pipe[0])
         if(process_pipe[1] != 1):
             os.dup2(process_pipe[1], 1)
         if(process_pipe[1] != 2):
             os.dup2(process_pipe[1], 2)
-        logging.info("Subprocess DUP")
+        os.dup2(uart_sock, 3)
         os.close(process_pipe[1])
         logging.info("Calling {} with args '{}'".format(self.resources.mox_imager_exec, args))
         os.execl(
             self.resources.mox_imager_exec,
             self.resources.mox_imager_exec,
-            '-F', uart_sock,
-            *args
+            '-F', '3',
+            *args,
         )
-        logging.error("Exec faile")
+        logging.error("Exec failed")
 
     def match(self, expected):
         "Wrapper around pexpect's expect that raises MoxTesterImagerFail exception"
@@ -68,7 +67,7 @@ class MoxImager:
 
         # Prepare and spawn mox-imager
         uart_sock = self.moxtester.uart_fileno()
-        process_pipe = os.pipe()
+        process_pipe = os.pipe2(os.O_CLOEXEC)
         logging.info("Got UART sock ({}) and PIPE ({}) to start".format(uart_sock, process_pipe))
         self.pid = None
         self.pid = os.fork()
@@ -79,7 +78,6 @@ class MoxImager:
         os.close(process_pipe[1])
         # TODO send log to logging
         self.pexpect = pexpect.fdpexpect.fdspawn(process_pipe[0])
-        self.pexpect.logfile = os.fdopen(sys.stdout.fileno(), 'wb')
         return self.pexpect
 
     def stop(self):
@@ -91,6 +89,6 @@ class MoxImager:
         self.pid = None
         self.moxtester._d.default_baudrate()
         self.pexpect.close()
-        self.pexecpect = None
+        self.pexpect = None
         #self.moxtester.default()
         return exit_code
