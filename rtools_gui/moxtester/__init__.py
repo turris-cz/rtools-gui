@@ -21,6 +21,7 @@ class MoxTester:
     "Class controlling one specific mox tester."
     BOOT_MODE_SPI = 0b01
     BOOT_MODE_UART = 0b10
+    BOOT_MODE_NONE = 0
 
     def __init__(self, tester_id):
         self.tester_id = tester_id
@@ -140,6 +141,8 @@ class MoxTester:
             self._b.gpio_set(0x80, 0xC0)
         elif mode == self.BOOT_MODE_UART:
             self._b.gpio_set(0x40, 0xC0)
+        elif mode == self.BOOT_MODE_NONE:
+            self._b.gpio_set(0xC0, 0xC0)
         else:
             raise MoxTesterInvalidMode(
                 "Trying to set invalid mode: {}".format(mode))
@@ -442,6 +445,9 @@ class _UARTInterface(_Interface):
             raise MoxTesterCommunicationException(
                 "Line property setup failed for interface: " + str(interface))
 
+        # Initialize socket for inter-thread communication
+        self.socks = socket.socketpair()
+
         # Input
         self.inputthreadexit = Event()
         # TODO add sensible name
@@ -449,7 +455,6 @@ class _UARTInterface(_Interface):
             target=self._input, daemon=True)
         self.inputthread.start()  # Start input immediately
         # Output
-        self.socks = socket.socketpair()
         self.outputthreadexit = Event()
         # TODO add sensible name
         self.outputthread = Thread(target=self._output, daemon=True)

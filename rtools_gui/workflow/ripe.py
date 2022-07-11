@@ -69,12 +69,12 @@ class UARTBoot(Step):
 
             imager = self.moxtester.mox_imager(self.resources)
             imgpe = imager.run(firmware.name, '-b', '3000000')
-            imager.match("Sending image type TIMH")
+            imager.match("Sending image type TIMH", timeout=10)
             self.set_progress(0.1)
-            imager.match("Sending image type WTMI")
+            imager.match("Sending image type WTMI", timeout=20)
             self.set_progress(0.2)
-            imager.match("Sending image type OBMI")
-            imgpe.expect_exact('.\n', timeout=None)
+            imager.match("Sending image type OBMI", timeout=30)
+            imgpe.expect_exact('.\n', timeout=20)
             imager.stop()
 
             self.set_progress(1)
@@ -82,9 +82,9 @@ class UARTBoot(Step):
             firmware.close()
 
         uart = self.moxtester.uart()
-        uart.expect(['Hit any key to stop autoboot'])
+        uart.expect(['Hit any key to stop autoboot'], timeout=10)
         uart.sendline('')
-        uart.expect(['=>'])
+        uart.expect(['=>'], timeout=10)
 
     @staticmethod
     def name():
@@ -106,7 +106,7 @@ class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
         self.ubootcmd('setenv autoload no', sleep=1.0)
         self.ubootcmd('setenv bootargs "earlyprintk srv={} console=ttyMV0,115200 earlycon=ar3700_uart,0xd0012000"'.format(self.tftp_server_ip), sleep=1.0)
         self.set_progress(0.03)
-        self.ubootcmd('dhcp', 'DHCP client bound', sleep=1.0)
+        self.ubootcmd('dhcp', 'DHCP client bound', sleep=1.0, timeout=5)
         self.set_progress(0.06)
         self.ubootcmd('setenv serverip {}'.format(self.tftp_server_ip), sleep=1.0)
         self.set_progress(0.1)
@@ -130,22 +130,23 @@ class DownloadFlasher(UBootMixin, TFTPServerMixin, Step):
         idx = self.ubootcmd(
             'tftpboot {} {}'.format(MEM_START, image_filename),
             [ 'Bytes transferred', 'bad rx status'],
-            timeout=30,
+            timeout=80,
             sleep=1.0,
          )
 
         if(idx != 0):
             raise RandomErrorException("Nahodna sitova chyba, prosim spustte flashovani znova")
 
-        self.ubootcmd('')
+        self.ubootcmd('', sleep=1.0)
         self.set_progress(0.1)
+        self.ubootcmd('', sleep=1.0)
 
         # check crc
         crc32, size = self.tftp_image_crc32_and_size
         self.ubootcmd(
                 'crc32 {} {:X}'.format(MEM_START, size),
                 '{:x}'.format(crc32),
-            timeout=10,
+            timeout=20,
             sleep=1.0,
          )
 
@@ -214,6 +215,29 @@ class OTPProgrammingRIPE(OTPProgramming):
 
     def otp_hash(self):
         return self.resources.mox_imager_secure_firmware_ripe_hash
+
+class TestBoot(Step):
+    "Run firmware"
+
+    def run(self):
+        self.moxtester.default()
+        self.moxtester.set_boot_mode(self.moxtester.BOOT_MODE_NONE)
+        self.moxtester.power(True)
+        self.moxtester.reset(False)
+        uart = self.moxtester.uart()
+        uart.expect(['Hit any key to stop autoboot'], timeout=10)
+        uart.expect(['Starting kernel'], timeout=20)
+        uart.expect(['Router Turris'], timeout=30)
+
+    @staticmethod
+    def name():
+        return "Testování systému"
+
+    @staticmethod
+    def id():
+        return "uboot"
+
+
 
 # All steps for MOX RIPE in order
 RSTEPS = (

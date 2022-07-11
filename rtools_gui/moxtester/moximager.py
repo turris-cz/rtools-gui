@@ -38,9 +38,9 @@ class MoxImager:
         )
         logging.error("Exec failed")
 
-    def match(self, expected):
+    def match(self, expected, timeout=None):
         "Wrapper around pexpect's expect that raises MoxTesterImagerFail exception"
-        if self.pexpect.expect([expected, 'FAIL.*', pexpect.EOF], timeout=None) != 0:
+        if self.pexpect.expect([expected, 'FAIL.*', pexpect.EOF], timeout=timeout) != 0:
             raise MoxTesterImagerFail("EOF" if self.pexpect.match == pexpect.EOF else self.pexpect.match.string)
         return self.pexpect.match.groups()
 
@@ -58,12 +58,13 @@ class MoxImager:
         logging.info("Ready to start")
         # Verify bootpromt
         uart = self.moxtester.uart()
-        logging.info("Uart: {}".format(uart))
+        logging.info("Got uart")
         try:
             if uart.expect(['>', 'U-Boot'], timeout=3) != 0:
                 raise MoxTesterImagerNoBootPrompt()
         except pexpect.exceptions.TIMEOUT:
             raise MoxTesterImagerNoBootPrompt()
+        logging.info("Got prompt")
 
         # Prepare and spawn mox-imager
         uart_sock = self.moxtester.uart_fileno()

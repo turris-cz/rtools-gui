@@ -142,7 +142,10 @@ class Programmer(WorkFlowHandler):
         # Update GUI
         self._obj("ContentStack").set_visible_child(self._obj("ContentWork"))
         self._obj("TypeLabel").set_text(self.workflow.get_board_name())
-        self._obj("SerialNumberLabel").set_text(str(serial_number))
+        if serial_number:
+            self._obj("SerialNumberLabel").set_text(str(serial_number))
+        else:
+            self._obj("SerialNumberLabel").set_text(str(mac_wan))
         self._obj("WorkStack").set_visible_child(self._obj("WorkProgress"))
         self._wipe_steps()
         for step in self.workflow.get_steps():
@@ -205,14 +208,20 @@ class Programmer(WorkFlowHandler):
         if spawn:
             GLib.idle_add(self._gtk_progress_step)
 
+    def reset_steps(self):
+        self._obj("WorkStepsGrid").show_all()
+        self._obj("RunProgress").set_value(0)
+        self._progress_step_value = None
+        self._obj('StepProgress').set_fraction(0)
+
     def _gtk_step_update(self, step_id, state):
         self.gtk_step_update(step_id, state)
-        if state == WorkFlow.STEP_FAILED or state == WorkFlow.STEP_OK:
-            run_progress = self._obj("RunProgress")
-            run_progress.set_value(run_progress.get_value() + 1)
 
     def step_update(self, step_id, state):
         GLib.idle_add(self._gtk_step_update, step_id, state)
+
+    def workflow_update(self, index):
+        self._obj("RunProgress").set_value(index)
 
     def _gtk_workflow_exit(self, error):
         if not error:

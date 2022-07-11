@@ -1,4 +1,5 @@
 from threading import Thread
+from pexpect import TIMEOUT
 from .. import db, report
 from .exceptions import InvalidBoardNumberException, RandomErrorException
 from .a import ASTEPS
@@ -132,7 +133,7 @@ class WorkFlow:
         "Trigger workflow execution"
         self.thread.start()
 
-    def _run(self, count=0, last=False):
+    def _run(self):
         "Workflow executor"
         report.log("Workflow started on programmer {} for board {}".format(
             self.moxtester.tester_id, hex(self.serial_number)))
@@ -140,34 +141,44 @@ class WorkFlow:
             self.db_connection, self.db_board, self.db_programmer_state,
             self.moxtester.tester_id, [x.id() for x in self.steps])
         error_str = None
-        for step in self.steps:
-            if(step == self.steps[-1] and not last):
-                logging.info("Restarting to run the last step")
-                self._run(count, True)
-            if(step != self.steps[-1] and last):
-                logging.info("Skipping everything except the last step")
-                continue
+        i = 0
+        retry = 0
+        while i < len(self.steps):
+            self.handler.reset_steps()
             db_step = db.ProgrammerStep(
-                self.db_connection, db_run, step.id())
+                self.db_connection, db_run, self.steps[i].id())
             try:
-                self.handler.step_update(step.id(), self.STEP_RUNNING)
-                msg = step.run()
+                self.handler.workflow_update(i+0.1)
+                self.handler.step_update(self.steps[i].id(), self.STEP_RUNNING)
+                msg = self.steps[i].run()
                 db_step.finish(msg is None, msg)
                 if msg is not None:
                     report.log("Step {} on programmer {} for board {} warning: {}".format(
-                        step.id(), self.moxtester.tester_id, hex(self.serial_number), msg))
+                        self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), msg))
                 # TODO display warning message in graphics
-                self.handler.step_update(step.id(), self.STEP_OK)
+                self.handler.workflow_update(i)
+                self.handler.step_update(self.steps[i].id(), self.STEP_OK)
+                i=i+1
             except Exception as e:
-                if(isinstance(e,RandomErrorException) and count <10):
-                    return self._run(count + 1)
-                report.ignored_exception()
-                db_step.finish(False, str(e))
-                self.handler.step_update(step.id(), self.STEP_FAILED)
-                error_str = str(e)
-                report.log("Step {} on programmer {} for board {} failed: {}".format(
-                    step.id(), self.moxtester.tester_id, hex(self.serial_number), error_str))
-                break  # Do not continue after exception in workflow
+                if((isinstance(e,RandomErrorException) or (isinstance(e,TIMEOUT))) and retry <10):
+                    report.log("Step {} on programmer {} for board {} failed: {}".format(
+                        self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), str(e)))
+                    i = 0
+                    retry += 1
+                    report.log("Restarting the workflow - {}. retry".format(retry))
+                    for step in self.steps:
+                        step.state = self.STEP_UNKNOWN
+                        self.handler.workflow_update(0)
+                        self.handler.step_update(step.id(), self.STEP_UNKNOWN)
+                    error_str = None
+                else:
+                    report.ignored_exception()
+                    db_step.finish(False, str(e))
+                    self.handler.step_update(self.steps[i].id(), self.STEP_FAILED)
+                    error_str = str(e)
+                    report.log("Step {} on programmer {} for board {} failed: {}".format(
+                        self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), error_str))
+                    break  # Do not continue after exception in workflow
         self.moxtester.default()  # Return moxtester to default safe setting
         db_run.finish(error_str is None)
         report.log("Workflow ended on programmer {} for board {}".format(
