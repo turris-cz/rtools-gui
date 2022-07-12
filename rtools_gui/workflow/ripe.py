@@ -1,4 +1,5 @@
 "Module implementing steps for Ripe Atlas (A like module)"
+from ast import Raise
 import ipaddress
 import pathlib
 import time
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 from tempfile import NamedTemporaryFile
 from .generic import Step, OTPProgramming
-from .exceptions import RandomErrorException
+from .exceptions import RandomErrorException, WorkflowException
 
 MEM_START = "0x01000000"
 EXTRACTED = "0x02000000"
@@ -78,6 +79,8 @@ class UARTBoot(Step):
             imager.stop()
 
             self.set_progress(1)
+        except Exception as e:
+            raise WorkflowException from e
         finally:
             firmware.close()
 
@@ -85,6 +88,7 @@ class UARTBoot(Step):
         uart.expect(['Hit any key to stop autoboot'], timeout=10)
         uart.sendline('')
         uart.expect(['=>'], timeout=10)
+
 
     @staticmethod
     def name():
