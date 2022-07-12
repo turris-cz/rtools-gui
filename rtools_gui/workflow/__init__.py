@@ -135,7 +135,7 @@ class WorkFlow:
 
     def _run(self):
         "Workflow executor"
-        core_info = self.db_board.core_info(self.serial_number)
+        core_info = self.db_board.core_info()
         if core_info is not None:
             error_str = "Board {} on programmer {} already exists.".format(hex(self.serial_number),self.moxtester.tester_id)
             report.log(error_str)
