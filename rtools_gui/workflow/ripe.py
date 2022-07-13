@@ -196,9 +196,11 @@ class FlashSystem(UBootMixin, Step):
         self.set_progress(0.4)
         self.uart.expect('Deploying .* image', timeout=240)
         self.set_progress(0.6)
-        idx = self.uart.expect(['Create a snapshot of', 'mmc1: error -110 whilst initialising MMC card'], timeout=60)
-        if(idx != 0):
+        idx = self.uart.expect(['Create a snapshot of', 'mmc1: error -110 whilst initialising MMC card', "can't open '/dev/mmcblk1"], timeout=60)
+        if(idx == 1):
             raise RandomErrorException("Nahodna MMC chyba, prosim spustte flashovani znova")
+        if(idx == 2):
+            raise WorkflowException("Rozbity eMMC, zkontrolujte desku")
         self.set_progress(0.8)
         self.uart.expect('Updating NOR', timeout=600)
         self.set_progress(0.85)
