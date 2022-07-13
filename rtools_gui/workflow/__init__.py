@@ -10,6 +10,7 @@ from .e import ESTEPS
 from .f import FSTEPS
 from .g import GSTEPS
 from .ripe import RSTEPS
+import re
 import logging
 
 _BOARD_MAP = {
