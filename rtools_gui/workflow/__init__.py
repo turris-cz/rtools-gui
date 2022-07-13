@@ -165,7 +165,7 @@ class WorkFlow:
                     self.handler.step_update(self.steps[i].id(), self.STEP_OK)
                     i=i+1
                 except Exception as e:
-                    if((isinstance(e,RandomErrorException) or (isinstance(e,TIMEOUT))) and retry <10):
+                    if((isinstance(e,RandomErrorException) or (isinstance(e,TIMEOUT))) and retry <7):
                         report.log("Step {} on programmer {} for board {} failed: {}".format(
                             self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), str(e)))
                         i = 0
@@ -178,9 +178,16 @@ class WorkFlow:
                         error_str = None
                     else:
                         report.ignored_exception()
-                        db_step.finish(False, str(e))
                         self.handler.step_update(self.steps[i].id(), self.STEP_FAILED)
-                        error_str = str(e)
+                        error_str = None
+                        if isinstance(e,TIMEOUT):
+                            for i in e.get_trace().split('\n'):
+                                err = re.findall(".*['\"](.*)['\"]\s*,\s*timeout\s*=.*", i)
+                                if err:
+                                    error_str = ' '.join(err)
+                        if not error_str:
+                            error_str = str(e)
+                        db_step.finish(False, error_str)
                         report.log("Step {} on programmer {} for board {} failed: {}".format(
                             self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), error_str))
                         break  # Do not continue after exception in workflow
