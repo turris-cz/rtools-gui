@@ -182,10 +182,17 @@ class WorkFlow:
                         self.handler.step_update(self.steps[i].id(), self.STEP_FAILED)
                         error_str = None
                         if isinstance(e,TIMEOUT):
-                            for i in e.get_trace().split('\n'):
-                                err = re.findall(".*['\"](.*)['\"]\s*,\s*timeout\s*=.*", i)
+                            for j in e.get_trace().split('\n'):
+                                err = re.findall(".*['\"](.*)['\"]\s*,\s*timeout\s*=.*", j)
                                 if err:
                                     error_str = ' '.join(err)
+                                else:
+                                    err = re.findall(".*['\"](.*)['\"]\s*,\s*sleep\s*=.*timeout\s*=.*", j)
+                                    if err:
+                                        error_str = ' '.join(err)
+                            if error_str is not None:
+                                error_str = "Timeout - '{}' not found".format(error_str)
+                            report.log("Trace error is {}, full trace is {}".format(error_str, e.get_trace()))
                         if error_str is None:
                             error_str = str(e)
                         if error_str == "":
