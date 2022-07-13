@@ -224,7 +224,7 @@ class Programmer(WorkFlowHandler):
         self._obj("RunProgress").set_value(index)
 
     def _gtk_workflow_exit(self, error):
-        if not error:
+        if error is None:
             self._obj("WorkStack").set_visible_child(self._obj("WorkDone"))
             self.fail_count = 0
         else:

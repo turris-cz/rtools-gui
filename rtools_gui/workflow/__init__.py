@@ -185,8 +185,10 @@ class WorkFlow:
                                 err = re.findall(".*['\"](.*)['\"]\s*,\s*timeout\s*=.*", i)
                                 if err:
                                     error_str = ' '.join(err)
-                        if not error_str:
+                        if error_str is None:
                             error_str = str(e)
+                        if error_str == "":
+                            error_str = "Error in step {}".format(self.steps[i].id())
                         db_step.finish(False, error_str)
                         report.log("Step {} on programmer {} for board {} failed: {}".format(
                             self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), error_str))
