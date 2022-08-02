@@ -7,6 +7,7 @@ from .moxtester import MoxTester
 from .moxtester.exceptions import MoxTesterException
 from .workflow import WorkFlow, WorkFlowHandler
 from .svgimage import SVGImage
+from pexpect import expect as _expect
 
 logger = logging.getLogger(__name__)
 
@@ -215,7 +216,7 @@ class Programmer(WorkFlowHandler):
         self._obj('StepProgress').set_fraction(0)
 
     def _gtk_step_update(self, step_id, state):
-        self.gtk_step_update(step_id, state)
+        _expect(self.gtk_step_update(step_id, state), timeout=10)
 
     def step_update(self, step_id, state):
         GLib.idle_add(self._gtk_step_update, step_id, state)
