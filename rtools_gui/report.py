@@ -5,9 +5,9 @@ import logging.handlers
 from gi.repository import Gtk
 
 
-def log(message):
+def log(message, *args, **kwargs):
     "Report simple message to log"
-    logging.info(str(message))
+    logging.info(str(message), *args, **kwargs)
 
 
 def fail_exit(message, exit_code=1):
@@ -16,14 +16,9 @@ def fail_exit(message, exit_code=1):
     sys.exit(exit_code)
 
 
-def error(message):
-    "Print error message"
-    logging.error(str(message))
-
-
 def ignored_exception():
     "Report ignored exception"
-    logging.warning("Ignored exception: " + str(traceback.format_exc()))
+    logging.warning("Ignored exception", exc_info=True)
 
 
 def setup_logging():
