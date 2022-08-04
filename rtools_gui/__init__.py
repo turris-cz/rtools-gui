@@ -22,8 +22,6 @@ def _common_main(prepare):
     else:
         report.setup_logging()
 
-    sys.excepthook = report.report_uncaught_exception_gtk
-
     with guard.Guard(conf):
         dbconn = db.connect(conf)
         style.load()

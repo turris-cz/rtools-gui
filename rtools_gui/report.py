@@ -26,18 +26,6 @@ def ignored_exception():
     logging.warning("Ignored exception: " + str(traceback.format_exc()))
 
 
-def report_uncaught_exception_gtk(tp, value, tb):
-    "Exception handler for all uncaught exceptions"
-    msg = "Uncaught exception: {}.{}({})\nTraceback:\n{}".format(
-        tp.__module__, tp.__name__, value, "\n".join(traceback.format_tb(tb)))
-    logging.error(msg)
-    message_dialog = Gtk.MessageDialog(
-        None, Gtk.DialogFlags.MODAL, Gtk.MessageType.ERROR,
-        Gtk.ButtonsType.CLOSE, msg)
-    message_dialog.run()
-    sys.exit(9)
-
-
 def setup_logging():
     "Setup logging functions"
     FORMAT = "rtools-gui %(levelname)s %(threadName)s: %(message)s"
