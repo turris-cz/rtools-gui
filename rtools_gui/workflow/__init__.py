@@ -176,28 +176,31 @@ class WorkFlow:
                         retry += 1
                         report.log("Restarting the workflow - {}. retry".format(retry))
                     else:
-                        report.ignored_exception()
-                        self.handler.step_update(self.steps[i].id(), self.STEP_FAILED)
-                        error_str = None
-                        if isinstance(e,TIMEOUT):
-                            for j in e.get_trace().split('\n'):
-                                err = re.findall(".*['\"](.*)['\"]\s*,\s*timeout\s*=.*", j)
-                                if err:
-                                    error_str = ' '.join(err)
-                                else:
-                                    err = re.findall(".*['\"](.*)['\"]\s*,\s*sleep\s*=.*timeout\s*=.*", j)
+                        try:
+                            report.ignored_exception()
+                            self.handler.step_update(self.steps[i].id(), self.STEP_FAILED)
+                            error_str = None
+                            if isinstance(e,TIMEOUT):
+                                for j in e.get_trace().split('\n'):
+                                    err = re.findall(".*['\"](.*)['\"]\s*,\s*timeout\s*=.*", j)
                                     if err:
                                         error_str = ' '.join(err)
-                            if error_str is not None:
-                                error_str = "Timeout - '{}' not found".format(error_str)
-                            report.log("Trace error is {}, full trace is {}".format(error_str, e.get_trace()))
-                        if error_str is None:
-                            error_str = str(e)
-                        if error_str == "":
-                            error_str = "Error in step {}".format(self.steps[i].id())
-                        db_step.finish(False, error_str)
-                        report.log("Step {} on programmer {} for board {} failed: {}".format(
-                            self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), error_str))
+                                    else:
+                                        err = re.findall(".*['\"](.*)['\"]\s*,\s*sleep\s*=.*timeout\s*=.*", j)
+                                        if err:
+                                            error_str = ' '.join(err)
+                                if error_str is not None:
+                                    error_str = "Timeout - '{}' not found".format(error_str)
+                                report.log("Trace error is {}, full trace is {}".format(error_str, e.get_trace()))
+                            if error_str is None:
+                                error_str = str(e)
+                            if error_str == "":
+                                error_str = "Error in step {}".format(self.steps[i].id())
+                            db_step.finish(False, error_str)
+                            report.log("Step {} on programmer {} for board {} failed: {}".format(
+                                self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), error_str))
+                        except Exception as e:
+                            error_str = "Error during handling error O.o {}".format(str(e))
                         break  # Do not continue after exception in workflow
             report.log("Storing result {} to the database".format(error_str is None))
             db_run.finish(error_str is None)
