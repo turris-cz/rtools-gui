@@ -1,6 +1,7 @@
 from .exceptions import FatalWorkflowException
 from ..moxtester.exceptions import MoxTesterImagerNoBootPrompt
 import time
+import logging
 
 class Step:
     "Abstract class for signle step"
@@ -116,6 +117,7 @@ class OTPProgramming(Step):
                 imager.match('All done.')
                 all_done = True
                 self.set_progress(1)
+                logging.info('OTP locked, data loaded {} -> {}'.format(real_first_mac, public_key))
             finally:
                 exit_code = imager.stop()
         except MoxTesterImagerNoBootPrompt:

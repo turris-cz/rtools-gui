@@ -200,7 +200,7 @@ class FlashSystem(UBootMixin, Step):
         if(idx == 1):
             raise RandomErrorException("Nahodna MMC chyba, prosim spustte flashovani znova")
         if(idx == 2):
-            raise WorkflowException("Rozbity eMMC, zkontrolujte desku")
+            raise WorkflowException("Rozbity eMMC, zkuste v jinem programatoru")
         self.set_progress(0.8)
         self.uart.expect('Updating NOR', timeout=600)
         self.set_progress(0.85)

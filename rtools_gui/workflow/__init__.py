@@ -138,7 +138,7 @@ class WorkFlow:
         "Workflow executor"
         core_info = self.db_board.core_info()
         if core_info is not None:
-            error_str = "Board {} on programmer {} already exists.".format(hex(self.serial_number),self.moxtester.tester_id)
+            error_str = "Deska v programatoru {} uz je naflashovana.".format(self.moxtester.tester_id + 1)
             report.log(error_str)
         else:
             report.log("Workflow started on programmer {} for board {}".format(
@@ -150,7 +150,8 @@ class WorkFlow:
             i = 0
             retry = 0
             while i < len(self.steps):
-                self.handler.reset_steps()
+                error_str = None
+                # self.handler.reset_steps()
                 db_step = db.ProgrammerStep(
                     self.db_connection, db_run, self.steps[i].id())
                 try:
@@ -161,6 +162,8 @@ class WorkFlow:
                     if msg is not None:
                         report.log("Step {} on programmer {} for board {} warning: {}".format(
                             self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), msg))
+                    else:
+                        report.log("Step {} on programmer {} is ok".format(self.steps[i].id(), self.moxtester.tester_id))
                     # TODO display warning message in graphics
                     self.handler.workflow_update(i)
                     self.handler.step_update(self.steps[i].id(), self.STEP_OK)
@@ -172,11 +175,6 @@ class WorkFlow:
                         i = 0
                         retry += 1
                         report.log("Restarting the workflow - {}. retry".format(retry))
-                        for step in self.steps:
-                            step.state = self.STEP_UNKNOWN
-                            self.handler.workflow_update(0)
-                            self.handler.step_update(step.id(), self.STEP_UNKNOWN)
-                        error_str = None
                     else:
                         report.ignored_exception()
                         self.handler.step_update(self.steps[i].id(), self.STEP_FAILED)
@@ -201,6 +199,7 @@ class WorkFlow:
                         report.log("Step {} on programmer {} for board {} failed: {}".format(
                             self.steps[i].id(), self.moxtester.tester_id, hex(self.serial_number), error_str))
                         break  # Do not continue after exception in workflow
+            report.log("Storing result {} to the database".format(error_str is None))
             db_run.finish(error_str is None)
         self.moxtester.default()  # Return moxtester to default safe setting
         report.log("Workflow ended on programmer {} for board {}".format(
