@@ -13,6 +13,7 @@ SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/secure-firmware")
 SECURE_FIRMWARE_RIPE = os.path.join(DIR_PREFIX, "firmware/secure-firmware-ripe")
 UNTRUSTED_SECURE_FIRMWARE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-firmware")
 UNTRUSTED_SECURE_FIRMWARE_RIPE = os.path.join(DIR_PREFIX, "firmware/untrusted-secure-firmware-ripe")
+WHOLE_UNTRUSTED_FIRMWARE_RIPE = os.path.join(DIR_PREFIX, "firmware/whole-untrusted-firmware-ripe")
 UBOOT = os.path.join(DIR_PREFIX, "firmware/u-boot")
 UBOOT_RIPE = os.path.join(DIR_PREFIX, "firmware/u-boot-ripe")
 RESCUE = os.path.join(DIR_PREFIX, "firmware/image.fit.lzma")
@@ -61,14 +62,9 @@ class Resources:
         imager_path = pathlib.Path(MOX_IMAGER)
         if not imager_path.exists():
             raise RuntimeError("No mox imager binary found in {}".format(imager_path))
-
         with imager_path.open('rb') as file:
             self.__mox_imager_hash = hashlib.sha256(file.read()).hexdigest()
-        self.__mox_imager_exec = os.path.join(
-            conf.tmp_dir, 'rtools-mox-imager-' + self.mox_imager_hash)
-        copyfile(MOX_IMAGER, self.mox_imager_exec)
-        os.chmod(self.mox_imager_exec,
-                 os.stat(self.mox_imager_exec).st_mode | stat.S_IEXEC)
+        self.__mox_imager_exec = MOX_IMAGER
 
         # Hashes for moximager
         self.__mox_imager_secure_firmware_hash = self._otp_hash(SECURE_FIRMWARE)
@@ -115,6 +111,11 @@ class Resources:
     def untrusted_secure_firmware_ripe(self):
         "Bytes of secure firmware ripe"
         return self.__untrusted_secure_firmware_ripe
+
+    @property
+    def whole_untrusted_firmware_ripe_path(self):
+        "Path of whole firmware for ripe ripe"
+        return WHOLE_UNTRUSTED_FIRMWARE_RIPE
 
     @property
     def untrusted_secure_firmware_ripe_hash(self):

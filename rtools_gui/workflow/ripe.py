@@ -61,28 +61,19 @@ class UARTBoot(Step):
     "Load and run firmware (U-boot) by UART"
 
     def run(self):
-        firmware = NamedTemporaryFile()
-        try:
-            self.set_progress(0)
-            firmware.write(self.resources.untrusted_secure_firmware_ripe)
-            firmware.write(self.resources.uboot_ripe)
-            self.set_progress(0.05)
+        self.set_progress(0)
 
-            imager = self.moxtester.mox_imager(self.resources)
-            imgpe = imager.run(firmware.name, '-b', '3000000')
-            imager.match("Sending image type TIMH", timeout=10)
-            self.set_progress(0.1)
-            imager.match("Sending image type WTMI", timeout=20)
-            self.set_progress(0.2)
-            imager.match("Sending image type OBMI", timeout=30)
-            imgpe.expect_exact('.\n', timeout=20)
-            imager.stop()
+        imager = self.moxtester.mox_imager(self.resources)
+        imgpe = imager.run(self.resources.whole_untrusted_firmware_ripe_path, '-b', '3000000')
+        imager.match("Sending image type TIMH", timeout=10)
+        self.set_progress(0.1)
+        imager.match("Sending image type WTMI", timeout=20)
+        self.set_progress(0.2)
+        imager.match("Sending image type OBMI", timeout=30)
+        imgpe.expect_exact('.\n', timeout=20)
+        imager.stop()
 
-            self.set_progress(1)
-        except Exception as e:
-            raise WorkflowException from e
-        finally:
-            firmware.close()
+        self.set_progress(1)
 
         uart = self.moxtester.uart()
         uart.expect(['Hit any key to stop autoboot'], timeout=10)
@@ -250,5 +241,5 @@ RSTEPS = (
     UARTBoot,
     DownloadFlasher,
     FlashSystem,
-    OTPProgrammingRIPE,
+#    OTPProgrammingRIPE,
 )
