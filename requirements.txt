@@ -1,3 +1,4 @@
 pygobject
 pexpect
 psycopg2-binary
+pyaml

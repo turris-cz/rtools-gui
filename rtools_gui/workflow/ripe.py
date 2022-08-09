@@ -241,5 +241,5 @@ RSTEPS = (
     UARTBoot,
     DownloadFlasher,
     FlashSystem,
-#    OTPProgrammingRIPE,
+    OTPProgrammingRIPE,
 )

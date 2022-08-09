@@ -114,7 +114,7 @@ class Resources:
 
     @property
     def whole_untrusted_firmware_ripe_path(self):
-        "Path of whole firmware for ripe ripe"
+        "Path of the whole firmware for ripe"
         return WHOLE_UNTRUSTED_FIRMWARE_RIPE
 
     @property

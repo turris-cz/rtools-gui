@@ -15,12 +15,30 @@ Requirements
   - `python3-gi`
   - `python3-gi-cairo`
   - `gir1.2-gtk-3.0`
+  - `python3-ftdi1`
+  - `libftdi1`
+  - `librsvg2-dev`
 
 - For MOX Imager
 
   - `build-essential`
   - `libssl1.0-dev`
 
+Virtual environment
+-------------------
+
+Make sure to create `venv` dependent on `--system-site-packages`
+(`python3-ftdi1`, `librsvg2-dev`) won't make the connection
+
+- ``python -m venv [desired path] --system-site-packages``
+
+Preparation
+-----------
+
+To compile neccessary files for ``mox-imager`` make sure you have initialized
+submodule
+
+- ``git submodule update --init --recursive``
 
 Howto run it
 ------------
